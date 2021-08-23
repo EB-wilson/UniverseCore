@@ -1,0 +1,8 @@
+name: "universe-core"
+displayName: "Universe Core"
+author: "EBwilson"
+main: "universeCore.ModCore"
+description: ""
+version: 1.0
+minGameVersion: 127
+
