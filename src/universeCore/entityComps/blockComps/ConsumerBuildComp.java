@@ -3,21 +3,21 @@ package universeCore.entityComps.blockComps;
 import universeCore.world.blockModule.BaseConsumeModule;
 import universeCore.world.consumers.UncConsumeType;
 
-/**ÏûºÄÕß×é¼ş£¬Áî·½¿é¾ßÓĞ½øĞĞ×ÊÔ´ÏûºÄÓë¿ÉÓÃ±ê¼ÇµÄÄÜÁ¦
- * ±ØĞë´´½¨µÄ±äÁ¿£º
+/**æ¶ˆè€—è€…ç»„ä»¶ï¼Œä»¤æ–¹å—å…·æœ‰è¿›è¡Œèµ„æºæ¶ˆè€—ä¸å¯ç”¨æ ‡è®°çš„èƒ½åŠ›
+ * å¿…é¡»åˆ›å»ºçš„å˜é‡ï¼š
  * <pre>{@code
  *   AneConsumeModule [consumer]
  * }<pre/>
- * ÈôÊ¹ÓÃ·ÇÄ¬ÈÏÃüÃûÔòĞèÒªÖØĞ´µ÷ÓÃ·½·¨*/
+ * è‹¥ä½¿ç”¨éé»˜è®¤å‘½ååˆ™éœ€è¦é‡å†™è°ƒç”¨æ–¹æ³•*/
 public interface ConsumerBuildComp extends BuildCompBase, FieldGetter{
   int consumeCurrent();
   
-  /**»ñµÃ¸Ã¿éµÄNuclearEnergyBlock*/
+  /**è·å¾—è¯¥å—çš„NuclearEnergyBlock*/
   default ConsumerBlockComp getConsumerBlock(){
     return getBlock(ConsumerBlockComp.class);
   }
   
-  /**»ñµÃ¸Ã¿éµÄNuclearEnergyBlock*/
+  /**è·å¾—è¯¥å—çš„NuclearEnergyBlock*/
   default ConsumerBuildComp getConsumerBuilding(){
     return getBlock(ConsumerBuildComp.class);
   }
@@ -39,7 +39,7 @@ public interface ConsumerBuildComp extends BuildCompBase, FieldGetter{
   }
   
   default void updateConsume(){
-    /*µ±ÎŞÅä·½ÒªÇó»òÕßÎ´Ñ¡ÔñÅä·½Ê±²»½øĞĞÏûºÄ¸üĞÂ*/
+    /*å½“æ— é…æ–¹è¦æ±‚æˆ–è€…æœªé€‰æ‹©é…æ–¹æ—¶ä¸è¿›è¡Œæ¶ˆè€—æ›´æ–°*/
     if(consumer() != null && (consumer().hasOptional() || consumer().hasConsume()) && consumeCurrent() != -1){
       consumer().update();
     }

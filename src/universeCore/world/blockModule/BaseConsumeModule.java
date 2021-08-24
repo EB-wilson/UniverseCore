@@ -5,7 +5,7 @@ import arc.struct.Seq;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
 import mindustry.world.meta.BlockStatus;
-import mindustry.world.modules.BlockModule;
+import mindustry.world.modules.ConsumeModule;
 import universeCore.entityComps.blockComps.ConsumerBuildComp;
 import universeCore.world.consumers.BaseConsume;
 import universeCore.world.consumers.BaseConsumers;
@@ -13,7 +13,7 @@ import universeCore.world.consumers.UncConsumeType;
 
 import java.util.ArrayList;
 
-public class BaseConsumeModule extends BlockModule {
+public class BaseConsumeModule extends ConsumeModule{
   protected final ConsumerBuildComp entity;
   protected final BaseConsumers[] consumes;
   protected final BaseConsumers[] optionalCons;
@@ -24,6 +24,7 @@ public class BaseConsumeModule extends BlockModule {
   public Seq<Seq<Seq<Object>>> filter = new Seq<>();
 
   public BaseConsumeModule(ConsumerBuildComp entity, ArrayList<BaseConsumers> cons, ArrayList<BaseConsumers> optional){
+    super(entity.getBuilding());
     this.entity = entity;
     this.oneOfOptionCons = entity.getConsumerBlock().oneOfOptionCons();
     consumes = cons.size() > 0? cons.toArray(new BaseConsumers[0]): null;
@@ -94,9 +95,11 @@ public class BaseConsumeModule extends BlockModule {
       }
     }
   }
-
+  
+  @Override
   public void update(){
     current = null;
+    if((!hasOptional() && !hasConsume()) || entity.consumeCurrent() == -1) return;
     boolean docons = entity.shouldConsume() && entity.productionValid();
     valid = true;
     //Log.info("on consume update,data:[recipeCurrent:" + entity.recipeCurrent + ",consume:" + Arrays.toString(consumes) + ",optionalCons:" + Arrays.toString(optionalCons) + "]");

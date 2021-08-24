@@ -11,13 +11,13 @@ import universeCore.world.consumers.UncConsumeType;
 
 import java.util.ArrayList;
 
-/**Consume×é¼ş£¬Îª·½¿éÌí¼Ó¿É±ê¼ÇÏûºÄµÄ¹¦ÄÜ
- * ±ØĞë´´½¨µÄ±äÁ¿£º
+/**Consumeç»„ä»¶ï¼Œä¸ºæ–¹å—æ·»åŠ å¯æ ‡è®°æ¶ˆè€—çš„åŠŸèƒ½
+ * å¿…é¡»åˆ›å»ºçš„å˜é‡ï¼š
  * <pre>{@code
  *   ArrayList<AneConsumers> [consumers]
  *   ArrayList<AneConsumers> [optionalCons]
  * }<pre/>
- * ÈôÊ¹ÓÃ·ÇÄ¬ÈÏÃüÃûÔòĞèÒªÖØĞ´µ÷ÓÃ·½·¨*/
+ * è‹¥ä½¿ç”¨éé»˜è®¤å‘½ååˆ™éœ€è¦é‡å†™è°ƒç”¨æ–¹æ³•*/
 public interface ConsumerBlockComp extends BuildCompBase, FieldGetter{
   @SuppressWarnings("unchecked")
   default ArrayList<BaseConsumers> consumers(){

@@ -4,12 +4,12 @@ package universeCore.entityComps.blockComps;
 import universeCore.world.blockModule.BaseProductModule;
 import universeCore.world.producers.ProduceType;
 
-/**Éú²úÕß×é¼ş£¬Áî·½¿é¾ßÓĞ°´Ğè½øĞĞ×ÊÔ´Éú²úÊä³öµÄÄÜÁ¦
- * ±ØĞë´´½¨µÄ±äÁ¿£º
+/**ç”Ÿäº§è€…ç»„ä»¶ï¼Œä»¤æ–¹å—å…·æœ‰æŒ‰éœ€è¿›è¡Œèµ„æºç”Ÿäº§è¾“å‡ºçš„èƒ½åŠ›
+ * å¿…é¡»åˆ›å»ºçš„å˜é‡ï¼š
  * <pre>{@code
  *   AneProductModule [producer]
  * }<pre/>
- * ÈôÊ¹ÓÃ·ÇÄ¬ÈÏÃüÃûÔòĞèÒªÖØĞ´µ÷ÓÃ·½·¨*/
+ * è‹¥ä½¿ç”¨éé»˜è®¤å‘½ååˆ™éœ€è¦é‡å†™è°ƒç”¨æ–¹æ³•*/
 public interface ProducerBuildComp extends BuildCompBase, FieldGetter{
   int produceCurrent();
   
@@ -17,12 +17,12 @@ public interface ProducerBuildComp extends BuildCompBase, FieldGetter{
     return getField(BaseProductModule.class, "producer");
   }
   
-  /**»ñµÃ¸Ã¿éµÄNuclearEnergyBlock*/
+  /**è·å¾—è¯¥å—çš„NuclearEnergyBlock*/
   default ProducerBuildComp getProducerBlock(){
     return getBlock(ProducerBuildComp.class);
   }
   
-  /**»ñµÃ¸Ã¿éµÄNuclearEnergyBlock*/
+  /**è·å¾—è¯¥å—çš„NuclearEnergyBlock*/
   default ProducerBuildComp getProducerBuilding(){
     return getBlock(ProducerBuildComp.class);
   }

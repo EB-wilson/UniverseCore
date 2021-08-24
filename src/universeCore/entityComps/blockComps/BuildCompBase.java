@@ -17,7 +17,7 @@ public interface BuildCompBase{
     return getBlock(Block.class);
   }
   
-  /**用于获取该方块的Building*/
+  /**鐢ㄤ簬鑾峰彇璇ユ柟鍧楃殑Building*/
   @SuppressWarnings("unchecked")
   default <T> T getBuilding(Class<T> clazz){
     if(clazz.isAssignableFrom(this.getClass())) return (T)this;

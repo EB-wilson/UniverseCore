@@ -1,13 +1,11 @@
 package universeCore;
 
+import universeCore.util.ini.IniTypes;
+
 public class Test{
-  public boolean boo = true;
   public static void main(String[] args){
-  
-    try{
-      System.out.println(Test.class.getField("boo").getType());
-    }catch(NoSuchFieldException e){
-      e.printStackTrace();
-    }
+    IniTypes.IniBoolean bool = new IniTypes.IniBoolean("true");
+    String bo = "true";
+    System.out.println(Boolean.valueOf(bo));
   }
 }

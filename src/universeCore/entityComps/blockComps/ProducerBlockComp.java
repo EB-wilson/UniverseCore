@@ -4,12 +4,12 @@ import universeCore.world.producers.BaseProducers;
 
 import java.util.ArrayList;
 
-/**Éú²úÕß·½¿éµÄ×é¼ş£¬Áî·½¿é¾ßÓĞ¼ÇÂ¼Êä³ö×ÊÔ´Åä·½µÄ¹¦ÄÜ
- * ±ØĞë´´½¨µÄ±äÁ¿£º
+/**ç”Ÿäº§è€…æ–¹å—çš„ç»„ä»¶ï¼Œä»¤æ–¹å—å…·æœ‰è®°å½•è¾“å‡ºèµ„æºé…æ–¹çš„åŠŸèƒ½
+ * å¿…é¡»åˆ›å»ºçš„å˜é‡ï¼š
  * <pre>{@code
  *   Seq<Producers> [producers]
  * }<pre/>
- * ÈôÊ¹ÓÃ·ÇÄ¬ÈÏÃüÃûÔòĞèÒªÖØĞ´µ÷ÓÃ·½·¨*/
+ * è‹¥ä½¿ç”¨éé»˜è®¤å‘½ååˆ™éœ€è¦é‡å†™è°ƒç”¨æ–¹æ³•*/
 public interface ProducerBlockComp extends FieldGetter{
   @SuppressWarnings("unchecked")
   default ArrayList<BaseProducers> producers(){
