@@ -14,12 +14,12 @@ import java.util.regex.Pattern;
 @SuppressWarnings("unchecked")
 public class IniTypes{
   public static IniObject testType(String test){
-    if(IniAnnotation.format.matcher(test).matches()) return new IniAnnotation(test);
-    if(IniNumber.format.matcher(test).matches()) return new IniNumber(test);
-    if(IniBoolean.format.matcher(test).matches()) return new IniBoolean(test);
-    if(IniArray.format.matcher(test).matches()) return new IniArray(test);
-    if(IniMap.format.matcher(test).matches()) return new IniMap(test);
-    if(IniDataStructure.format.matcher(test).matches()) return new IniDataStructure(test);
+    if(IniAnnotation.is(test)) return new IniAnnotation(test);
+    if(IniNumber.is(test)) return new IniNumber(test);
+    if(IniBoolean.is(test)) return new IniBoolean(test);
+    if(IniArray.is(test)) return new IniArray(test);
+    if(IniMap.is(test)) return new IniMap(test);
+    if(IniDataStructure.is(test)) return new IniDataStructure(test);
     return new IniObject(test);
   }
   
@@ -206,6 +206,10 @@ public class IniTypes{
       while(matchResult.find()){
         items.add(testType(matchResult.group()));
       }
+    }
+  
+    public static boolean is(String string){
+      return format.matcher(string).matches();
     }
   
     @Override
