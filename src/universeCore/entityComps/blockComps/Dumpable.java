@@ -5,8 +5,8 @@ import arc.struct.Seq;
 import mindustry.gen.Building;
 
 public interface Dumpable extends FieldGetter{
-  default int getCdump(){
-    return getField(int.class, "cdump");
+  default byte getCdump(){
+    return getField(byte.class, "cdump");
   }
   
   default void cdumpIncrease(){

@@ -17,12 +17,12 @@ import java.util.Arrays;
 import java.util.Locale;
 
 public class ContentHandler{
-  /**ÓÃÓÚ¸²¸ÇÒ»¸öÔ­ÓĞµÄcontent£¬¿ÉÄÜĞèÒªºóĞøÖØĞÂ¼ÓÔØ¿Æ¼¼Ê÷
+  /**ç”¨äºè¦†ç›–ä¸€ä¸ªåŸæœ‰çš„contentï¼Œå¯èƒ½éœ€è¦åç»­é‡æ–°åŠ è½½ç§‘æŠ€æ ‘
    *
-   * @param oldContent ½«Òª±»È¡´úµÄcontent
-   * @param newContent ÖØĞ´ºóµÄcontent
+   * @param oldContent å°†è¦è¢«å–ä»£çš„content
+   * @param newContent é‡å†™åçš„content
    *
-   * @throws RuntimeException µ±oldContentÓënewContentµÄÀàĞÍ£¨ContentType£©²»ÏàÍ¬Ê±Å×³ö*/
+   * @throws RuntimeException å½“oldContentä¸newContentçš„ç±»å‹ï¼ˆContentTypeï¼‰ä¸ç›¸åŒæ—¶æŠ›å‡º*/
   @SuppressWarnings("unchecked")
   public static void overrideContent(MappableContent oldContent, MappableContent newContent){
     Log.info("overriding: " + oldContent + ", " + newContent);

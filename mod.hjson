@@ -1,7 +1,7 @@
 name: "universe-core"
 displayName: "Universe Core"
 author: "EBwilson"
-main: "universeCore.ModCore"
+main: "universeCore.UncCore"
 description: ""
 version: 1.0
 minGameVersion: 127

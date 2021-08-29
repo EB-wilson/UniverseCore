@@ -33,6 +33,7 @@ allprojects{
 }
 
 dependencies{
+    compile files("lib/cglib-3.3.0.jar")
     compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
     compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
 }
