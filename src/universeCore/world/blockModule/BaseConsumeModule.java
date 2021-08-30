@@ -101,13 +101,15 @@ public class BaseConsumeModule extends ConsumeModule{
     current = null;
     if((!hasOptional() && !hasConsume()) || entity.consumeCurrent() == -1) return;
     boolean docons = entity.shouldConsume() && entity.productionValid();
+    boolean preValid = valid();
+    
     valid = true;
     //Log.info("on consume update,data:[recipeCurrent:" + entity.recipeCurrent + ",consume:" + Arrays.toString(consumes) + ",optionalCons:" + Arrays.toString(optionalCons) + "]");
     if(entity.consumeCurrent() >= 0 && consumes != null){
       current = consumes[entity.consumeCurrent()];
       if(current != null) for(BaseConsume cons: current.all()){
         valid &= cons.valid(entity);
-        if(docons && cons.valid(entity)){
+        if(docons && preValid && cons.valid(entity)){
           cons.update(entity);
         }
       }

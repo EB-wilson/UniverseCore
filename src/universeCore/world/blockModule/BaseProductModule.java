@@ -32,10 +32,12 @@ public class BaseProductModule extends BlockModule {
     if(entity.produceCurrent() == -1 || produces == null) return;
     current = produces[entity.produceCurrent()];
     boolean docons = entity.consValid() && entity.shouldConsume() && entity.productionValid();
+    boolean preValid = valid();
+    
     valid = true;
     if(current != null) for(BaseProduce prod: current.all()){
       valid &= prod.valid(entity);
-      if(docons && prod.valid(entity)){
+      if(docons && preValid && prod.valid(entity)){
         prod.update(entity);
         //Log.info("Run update,recipeCurrent:" + prod.id());
       }
