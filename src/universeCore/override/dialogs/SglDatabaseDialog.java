@@ -97,7 +97,7 @@ public class SglDatabaseDialog extends DatabaseDialog{
     return this;
   }
   
-  boolean unlocked(UnlockableContent content){
+  protected boolean unlocked(UnlockableContent content){
     return (!Vars.state.isCampaign() && !Vars.state.isMenu()) || content.unlocked();
   }
 }

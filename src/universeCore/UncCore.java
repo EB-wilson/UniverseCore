@@ -9,13 +9,21 @@ import mindustry.mod.Mod;
 import mindustry.world.Block;
 import universeCore.override.dialogs.SglDatabaseDialog;
 import universeCore.util.handler.CategoryHandler;
+import universeCore.util.animLayout.CellActions;
 
 import static mindustry.Vars.ui;
 
 public class UncCore extends Mod{
+  /**类型处理工具实例*/
   public static CategoryHandler categories = new CategoryHandler();
+  /**单元格动画控制器实例*/
+  public static CellActions cellActions = new CellActions();
   
   public UncCore(){
+    Events.run(EventType.Trigger.update, () -> {
+      cellActions.update();
+    });
+    
     Time.run(0f, () -> {
       Events.on(EventType.UnlockEvent.class, event -> {
         if(event.content instanceof Block){
