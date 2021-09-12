@@ -13,13 +13,13 @@ import java.util.regex.Pattern;
 
 import static universeCore.util.ini.IniTypes.*;
 
-/**¿É±à¼­µÄ.iniÅäÖÃÎÄ¼ş½âÎö¹¤¾ß£¬Ìá¹©ÁËÔöÇ¿µÄiniÊı¾İÀàĞÍÈçMapºÍArray*/
+/**å¯ç¼–è¾‘çš„.inié…ç½®æ–‡ä»¶è§£æå·¥å…·ï¼Œæä¾›äº†å¢å¼ºçš„iniæ•°æ®ç±»å‹å¦‚Mapå’ŒArray*/
 public class Ini{
   private static final Pattern multiLineMark = Pattern.compile("^[^ ;=]+\\s*[=:]\\s*((|\\{[^}]*)|\\[[^]]*)$");
   private static final Pattern sectionMark = Pattern.compile("^\\[\\w+]$");
   private static final Pattern sectionMatching = Pattern.compile("\\w+");
   
-  private static final Pattern k_vPair = Pattern.compile("^[^ ;=]+\\s*[=:]\\s*(\\{.+}|(\\[.+]|([^, =:\\[\\]{}]+)))$");
+  private static final Pattern k_vPair = Pattern.compile("^[^ ;=]+\\s*[=:]\\s*(\\{.+\\}|(\\[.+]|([^, =:\\[\\]{}]+)))$");
   
   protected final ObjectMap<String, IniObject> root = new ObjectMap<>();
   
@@ -27,22 +27,22 @@ public class Ini{
   
   private IniSection currentSection;
   
-  /**ĞÂ½¨Ò»¸öiniÊµÀı×÷ÎªÈİÆ÷*/
+  /**æ–°å»ºä¸€ä¸ªiniå®ä¾‹ä½œä¸ºå®¹å™¨*/
   public Ini(){
     currentSection = new IniSection("default");
     root.put("", currentSection);
   }
   
-  /**·ÖÎöÒ»¶Î×Ö·û´®£¬¶ÁÈ¡ini¸ñÊ½»¯ĞÅÏ¢¡£
-   * ÊäÈëµÄ×Ö·û´®Ó¦¸ÃÓĞÕıÈ·µÄ»»ĞĞ·û
-   * @param string ´ı½âÎöµÄ×Ö·û´®*/
+  /**åˆ†æä¸€æ®µå­—ç¬¦ä¸²ï¼Œè¯»å–iniæ ¼å¼åŒ–ä¿¡æ¯ã€‚
+   * è¾“å…¥çš„å­—ç¬¦ä¸²åº”è¯¥æœ‰æ­£ç¡®çš„æ¢è¡Œç¬¦
+   * @param string å¾…è§£æçš„å­—ç¬¦ä¸²*/
   public void parse(String string){
     parse(string.split("\n"));
   }
   
-  /**·ÖÎö¶à¸ö×Ö·û´®µÄÊı×é£¬Ã¿¸öÔªËØ±»ÈÏÎªÊÇÒ»ĞĞ
-   * »»ĞĞ·û½«±»ºöÂÔ
-   * @param stringLines ÓÉ¶àĞĞĞèÒª½âÎöµÄ×Ö·û´®×é³ÉµÄÊı×é*/
+  /**åˆ†æå¤šä¸ªå­—ç¬¦ä¸²çš„æ•°ç»„ï¼Œæ¯ä¸ªå…ƒç´ è¢«è®¤ä¸ºæ˜¯ä¸€è¡Œ
+   * æ¢è¡Œç¬¦å°†è¢«å¿½ç•¥
+   * @param stringLines ç”±å¤šè¡Œéœ€è¦è§£æçš„å­—ç¬¦ä¸²ç»„æˆçš„æ•°ç»„*/
   public void parse(String[] stringLines){
     StringBuilder multiLineBuffer = new StringBuilder();
     boolean buffering = false;
@@ -86,17 +86,17 @@ public class Ini{
     }
   }
   
-  /**»ñÈ¡Ö¸¶¨µÄ½ÚÖĞ±£´æµÄ¼üÖµ£¬Èô²»´æÔÚÔò·µ»Ønull
-   * @param section »ñÈ¡¼üÖµµÄÄ¿±ê½Ú
-   * @param key Ä¿±ê¼üÃû³Æ*/
+  /**è·å–æŒ‡å®šçš„èŠ‚ä¸­ä¿å­˜çš„é”®å€¼ï¼Œè‹¥ä¸å­˜åœ¨åˆ™è¿”å›null
+   * @param section è·å–é”®å€¼çš„ç›®æ ‡èŠ‚
+   * @param key ç›®æ ‡é”®åç§°*/
   public IniObject get(String section, String key){
     IniSection map = (IniSection) root.get(section);
     if(map != null) return map.get(key);
     return null;
   }
   
-  /**»ñÈ¡Ö¸¶¨µÄ¼üÔÚiniÖĞÊ×´Î³öÏÖµÄÖµ
-   * @param key ĞèÒª²éÕÒµÄ¼ü*/
+  /**è·å–æŒ‡å®šçš„é”®åœ¨iniä¸­é¦–æ¬¡å‡ºç°çš„å€¼
+   * @param key éœ€è¦æŸ¥æ‰¾çš„é”®*/
   public IniObject get(String key){
     IniObject[] first = new IniObject[]{null};
     root.each((section, obj) -> {
@@ -109,9 +109,9 @@ public class Ini{
     return first[0];
   }
   
-  /**»ñµÃËùÓĞ½ÚÖĞµÄÖ¸¶¨¼ü¼üÖµ£¬ºöÂÔ¼üËùÔÚµÄ½Ú
-   * @param key ĞèÒª²éÕÒµÄÄ¿±ê¼ü
-   * @return ËùÓĞÆ¥ÅäµÄ¼üÖµ×é³ÉµÄÊı×é*/
+  /**è·å¾—æ‰€æœ‰èŠ‚ä¸­çš„æŒ‡å®šé”®é”®å€¼ï¼Œå¿½ç•¥é”®æ‰€åœ¨çš„èŠ‚
+   * @param key éœ€è¦æŸ¥æ‰¾çš„ç›®æ ‡é”®
+   * @return æ‰€æœ‰åŒ¹é…çš„é”®å€¼ç»„æˆçš„æ•°ç»„*/
   public IniObject[] gets(String key){
     ArrayList<IniObject> list = new ArrayList<>();
     root.each((section, obj) -> {
@@ -121,10 +121,10 @@ public class Ini{
     return list.toArray(new IniObject[0]);
   }
   
-  /**ÔÚÖ¸¶¨µÄ½ÚÖĞĞ´ÈëÒ»¶Ô¼üÖµ¶Ô£¬Èô½Ú²»´æÔÚÔòĞÂ½¨´Ë½Ú
-   * @param section Ğ´ÈëµÄÄ¿±ê½Ú£¬Ö¸¶¨Îª¡°default¡±»òÕß¿Õ×Ö·û´®Ê±ÎªÄ¬ÈÏ½Ú£¨Î»ÓÚini¿ªÍ·µ½Ê×¸ö×ÖÃæÉùÃ÷µÄ½ÚÎªÖ¹£©
-   * @param key Ğ´ÈëµÄ¼ü
-   * @param value Ğ´ÈëµÄÖµ£¬¸ñÊ½°´ÕÕini¸ñÊ½£¬×Ô¶¯½âÎöÎªiniÊı¾İÀàĞÍ*/
+  /**åœ¨æŒ‡å®šçš„èŠ‚ä¸­å†™å…¥ä¸€å¯¹é”®å€¼å¯¹ï¼Œè‹¥èŠ‚ä¸å­˜åœ¨åˆ™æ–°å»ºæ­¤èŠ‚
+   * @param section å†™å…¥çš„ç›®æ ‡èŠ‚ï¼ŒæŒ‡å®šä¸ºâ€œdefaultâ€æˆ–è€…ç©ºå­—ç¬¦ä¸²æ—¶ä¸ºé»˜è®¤èŠ‚ï¼ˆä½äºiniå¼€å¤´åˆ°é¦–ä¸ªå­—é¢å£°æ˜çš„èŠ‚ä¸ºæ­¢ï¼‰
+   * @param key å†™å…¥çš„é”®
+   * @param value å†™å…¥çš„å€¼ï¼Œæ ¼å¼æŒ‰ç…§iniæ ¼å¼ï¼Œè‡ªåŠ¨è§£æä¸ºiniæ•°æ®ç±»å‹*/
   public IniObject put(String section, String key, String value){
     IniObject sec = root.get(section.equals("default")? "": section);
     IniSection map;
@@ -135,11 +135,11 @@ public class Ini{
     return map.put(key, value);
   }
   
-  /**ÎŞÊÓ½ÚĞ´ÈëÒ»¶Ô¼üÖµ¶Ô£¬¸²¸Ç¸Ã¼üÊ×´Î³öÏÖµÄÎ»ÖÃ£¬Èô²»´æÔÚ£¬¸ù¾İdef²ÎÊı¾ö¶¨ÊÇ·ñĞ´ÈëÄ¬ÈÏ½Ú£¨Î»ÓÚini¿ªÍ·µ½Ê×¸ö×ÖÃæÉùÃ÷µÄ½ÚÎªÖ¹£©
-   * @param key Ğ´ÈëµÄ¼ü
-   * @param value Ğ´ÈëµÄÖµ£¬¸ñÊ½°´ÕÕini¸ñÊ½£¬×Ô¶¯½âÎöÎªiniÊı¾İÀàĞÍ
-   * @param def ¼üÊ¼ÖÕ²»´æÔÚÊ±ÊÇ·ñĞ´Èëµ½Ä¬ÈÏ½Ú
-   * @return Ğ´ÈëµÄÖµ*/
+  /**æ— è§†èŠ‚å†™å…¥ä¸€å¯¹é”®å€¼å¯¹ï¼Œè¦†ç›–è¯¥é”®é¦–æ¬¡å‡ºç°çš„ä½ç½®ï¼Œè‹¥ä¸å­˜åœ¨ï¼Œæ ¹æ®defå‚æ•°å†³å®šæ˜¯å¦å†™å…¥é»˜è®¤èŠ‚ï¼ˆä½äºiniå¼€å¤´åˆ°é¦–ä¸ªå­—é¢å£°æ˜çš„èŠ‚ä¸ºæ­¢ï¼‰
+   * @param key å†™å…¥çš„é”®
+   * @param value å†™å…¥çš„å€¼ï¼Œæ ¼å¼æŒ‰ç…§iniæ ¼å¼ï¼Œè‡ªåŠ¨è§£æä¸ºiniæ•°æ®ç±»å‹
+   * @param def é”®å§‹ç»ˆä¸å­˜åœ¨æ—¶æ˜¯å¦å†™å…¥åˆ°é»˜è®¤èŠ‚
+   * @return å†™å…¥çš„å€¼*/
   public IniObject put(String key, String value, boolean def){
     IniObject[] result = new IniObject[]{null};
     root.each((section, obj) -> {
@@ -151,19 +151,19 @@ public class Ini{
     return result[0] == null && def? ((IniSection) root.get("")).put(key, value): result[0];
   }
   
-  /**ÎŞÊÓ½ÚĞ´ÈëÒ»¶Ô¼üÖµ¶Ô£¬¸²¸Ç¸Ã¼üÊ×´Î³öÏÖµÄÎ»ÖÃ£¬Èô²»´æÔÚ£¬ÔòĞ´ÈëÄ¬ÈÏ½Ú£¨Î»ÓÚini¿ªÍ·µ½Ê×¸ö×ÖÃæÉùÃ÷µÄ½ÚÎªÖ¹£©
-   * @param key Ğ´ÈëµÄ¼ü
-   * @param value Ğ´ÈëµÄÖµ£¬¸ñÊ½°´ÕÕini¸ñÊ½£¬×Ô¶¯½âÎöÎªiniÊı¾İÀàĞÍ
-   * @return Ğ´ÈëµÄÖµ*/
+  /**æ— è§†èŠ‚å†™å…¥ä¸€å¯¹é”®å€¼å¯¹ï¼Œè¦†ç›–è¯¥é”®é¦–æ¬¡å‡ºç°çš„ä½ç½®ï¼Œè‹¥ä¸å­˜åœ¨ï¼Œåˆ™å†™å…¥é»˜è®¤èŠ‚ï¼ˆä½äºiniå¼€å¤´åˆ°é¦–ä¸ªå­—é¢å£°æ˜çš„èŠ‚ä¸ºæ­¢ï¼‰
+   * @param key å†™å…¥çš„é”®
+   * @param value å†™å…¥çš„å€¼ï¼Œæ ¼å¼æŒ‰ç…§iniæ ¼å¼ï¼Œè‡ªåŠ¨è§£æä¸ºiniæ•°æ®ç±»å‹
+   * @return å†™å…¥çš„å€¼*/
   public IniObject put(String key, String value){
     return put(key, value, true);
   }
   
-  /**¶ÔËùÓĞ¾ßÓĞÖ¸¶¨¼üµÄ½ÚĞ´Èë¼üÖµ¶Ô£¬ÈôattendÎªÕæ£¬ÔòÎŞÂÛÊÇ·ñ¾ßÓĞ´Ë¼ü£¬¶¼»áĞ´Èë¼üÖµ
-   * @param key Ğ´ÈëµÄ¼ü
-   * @param value Ğ´ÈëµÄÖµ£¬¸ñÊ½°´ÕÕini¸ñÊ½£¬×Ô¶¯½âÎöÎªiniÊı¾İÀàĞÍ
-   * @param attend ÊÇ·ñÔÚ¼ü²»´æÔÚÊ±×·¼Ó
-   * @return ³É¹¦Ğ´ÈëµÄÊıÁ¿*/
+  /**å¯¹æ‰€æœ‰å…·æœ‰æŒ‡å®šé”®çš„èŠ‚å†™å…¥é”®å€¼å¯¹ï¼Œè‹¥attendä¸ºçœŸï¼Œåˆ™æ— è®ºæ˜¯å¦å…·æœ‰æ­¤é”®ï¼Œéƒ½ä¼šå†™å…¥é”®å€¼
+   * @param key å†™å…¥çš„é”®
+   * @param value å†™å…¥çš„å€¼ï¼Œæ ¼å¼æŒ‰ç…§iniæ ¼å¼ï¼Œè‡ªåŠ¨è§£æä¸ºiniæ•°æ®ç±»å‹
+   * @param attend æ˜¯å¦åœ¨é”®ä¸å­˜åœ¨æ—¶è¿½åŠ 
+   * @return æˆåŠŸå†™å…¥çš„æ•°é‡*/
   public int puts(String key, String value, boolean attend){
     AtomicInteger counter = new AtomicInteger();
     root.each((section, obj) -> {
@@ -180,27 +180,27 @@ public class Ini{
     return counter.get();
   }
   
-  /**¶ÔËùÓĞ¾ßÓĞÖ¸¶¨¼üµÄ½ÚĞ´Èë¼üÖµ¶Ô
-   * @param key Ğ´ÈëµÄ¼ü
-   * @param value Ğ´ÈëµÄÖµ£¬¸ñÊ½°´ÕÕini¸ñÊ½£¬×Ô¶¯½âÎöÎªiniÊı¾İÀàĞÍ
-   * @return ³É¹¦Ğ´ÈëµÄÊıÁ¿*/
+  /**å¯¹æ‰€æœ‰å…·æœ‰æŒ‡å®šé”®çš„èŠ‚å†™å…¥é”®å€¼å¯¹
+   * @param key å†™å…¥çš„é”®
+   * @param value å†™å…¥çš„å€¼ï¼Œæ ¼å¼æŒ‰ç…§iniæ ¼å¼ï¼Œè‡ªåŠ¨è§£æä¸ºiniæ•°æ®ç±»å‹
+   * @return æˆåŠŸå†™å…¥çš„æ•°é‡*/
   public int puts(String key, String value){
     return puts(key, value, false);
   }
   
-  /**´ÓÖ¸¶¨µÄ½ÚÖĞÒÆ³ıÒ»¸ö¼üÖµ¶Ô
-   * @param section Ä¿±ê½Ú
-   * @param key ÒªÒÆ³ıµÄ¼ü
-   * @return ±»ÒÆ³ıµÄ¼üÖµ£¬Èô²»´æÔÚ£¬Ôò·µ»Ønull*/
+  /**ä»æŒ‡å®šçš„èŠ‚ä¸­ç§»é™¤ä¸€ä¸ªé”®å€¼å¯¹
+   * @param section ç›®æ ‡èŠ‚
+   * @param key è¦ç§»é™¤çš„é”®
+   * @return è¢«ç§»é™¤çš„é”®å€¼ï¼Œè‹¥ä¸å­˜åœ¨ï¼Œåˆ™è¿”å›null*/
   public IniObject remove(String section, String key){
     IniSection map = (IniSection) root.get(section);
     if(map != null) return map.remove(key);
     return null;
   }
   
-  /**ÒÆ³ıÊ×¸ö³öÏÖµÄÆ¥Åä¼üÖµ¶Ô
-   * @param key ÒªÒÆ³ıµÄ¼ü
-   * @return ±»ÒÆ³ıµÄ¼üÖµ£¬Èô²»´æÔÚ£¬Ôò·µ»Ønull*/
+  /**ç§»é™¤é¦–ä¸ªå‡ºç°çš„åŒ¹é…é”®å€¼å¯¹
+   * @param key è¦ç§»é™¤çš„é”®
+   * @return è¢«ç§»é™¤çš„é”®å€¼ï¼Œè‹¥ä¸å­˜åœ¨ï¼Œåˆ™è¿”å›null*/
   public IniObject remove(String key){
     IniObject[] first = new IniObject[]{null};
     root.each((section, obj) -> {
@@ -213,9 +213,9 @@ public class Ini{
     return first[0];
   }
   
-  /**ÒÆ³ıËùÓĞÆ¥ÅäµÄ¼üÖµ¶Ô
-   * @param key ÒªÒÆ³ıµÄ¼ü
-   * @return ±»ÒÆ³ıµÄ¼üÖµ×é³ÉµÄÊı×é*/
+  /**ç§»é™¤æ‰€æœ‰åŒ¹é…çš„é”®å€¼å¯¹
+   * @param key è¦ç§»é™¤çš„é”®
+   * @return è¢«ç§»é™¤çš„é”®å€¼ç»„æˆçš„æ•°ç»„*/
   public IniObject[] removes(String key){
     ArrayList<IniObject> list = new ArrayList<>();
     root.each((section, obj) -> {
@@ -225,20 +225,20 @@ public class Ini{
     return list.toArray(new IniObject[0]);
   }
   
-  /**»ñÈ¡Ò»¸ö½Ú
-   * @param section Òª»ñÈ¡µÄ½ÚÃû³Æ£¬²»º¬·½À¨ºÅ¡°[]¡±*/
+  /**è·å–ä¸€ä¸ªèŠ‚
+   * @param section è¦è·å–çš„èŠ‚åç§°ï¼Œä¸å«æ–¹æ‹¬å·â€œ[]â€*/
   public IniSection getSection(String section){
     return (IniSection) root.get(section);
   }
   
-  /**ÓÃÖ¸¶¨µÄlambda±éÀú¸ùÖĞµÄËùÓĞµÄÔªËØ£¬²»Ò»¶¨ÊÇ½Ú£¬Çë×¢Òâ¼ì²éÀàĞÍ
-   * @param cons ÓÃÓÚ±éÀúÖ´ĞĞµÄlambdaº¯Êı*/
+  /**ç”¨æŒ‡å®šçš„lambdaéå†æ ¹ä¸­çš„æ‰€æœ‰çš„å…ƒç´ ï¼Œä¸ä¸€å®šæ˜¯èŠ‚ï¼Œè¯·æ³¨æ„æ£€æŸ¥ç±»å‹
+   * @param cons ç”¨äºéå†æ‰§è¡Œçš„lambdaå‡½æ•°*/
   public void each(Cons2<String, IniObject> cons){
     root.each(cons);
   }
   
-  /**ÓÃÖ¸¶¨µÄlambda±éÀú¸ùÖĞµÄËùÓĞ½ÚµÄÔªËØ
-   * @param cons ÓÃÓÚ±éÀúÖ´ĞĞµÄlambdaº¯Êı*/
+  /**ç”¨æŒ‡å®šçš„lambdaéå†æ ¹ä¸­çš„æ‰€æœ‰èŠ‚çš„å…ƒç´ 
+   * @param cons ç”¨äºéå†æ‰§è¡Œçš„lambdaå‡½æ•°*/
   public void eachAll(Cons2<String, IniObject> cons){
     root.each((k, v) -> {
       if(v instanceof IniSection)((IniSection)v).each(cons);
@@ -247,7 +247,7 @@ public class Ini{
   
   public static class IniSection extends IniObject{
     private static final Pattern format = Pattern.compile("^\\w+$");
-    private static final Pattern element = Pattern.compile("\\{.+}|[^ ,=:\\[\\]{}]+");
+    private static final Pattern element = Pattern.compile("\\{.+\\}|[^ ,=:\\[\\]{}]+");
     
     protected final ObjectMap<String, IniObject> child = new ObjectMap<>();
     

@@ -67,7 +67,7 @@ public class IniTypes{
   }
   
   public static class IniMap extends IniObject implements Iterable<ObjectMap.Entry<String, IniObject>>{
-    private static final Pattern format = Pattern.compile("^\\{[^ ,=:{}]+\\s*[:=]\\s*([^ ,=:{}]*|\\[[^ ,{}]+(\\s*,\\s*?[^ ,{}]+)*\\s*,?\\s*])+(\\s*,\\s*[^ ,=:{}]+\\s*[:=]\\s*([^ ,=:{}]+|\\[[^ ,{}]+(\\s*,\\s*?[^ ,{}]+)*\\s*,?\\s*]))*\\s*,?\\s*}$");
+    private static final Pattern format = Pattern.compile("^\\{[^ ,=:{}]+\\s*[:=]\\s*([^ ,=:{}]*|\\[[^ ,{}]+(\\s*,\\s*?[^ ,{}]+)*\\s*,?\\s*])+(\\s*,\\s*[^ ,=:{}]+\\s*[:=]\\s*([^ ,=:{}]+|\\[[^ ,{}]+(\\s*,\\s*?[^ ,{}]+)*\\s*,?\\s*]))*\\s*,?\\s*\\}$");
     private static final Pattern matcher = Pattern.compile("[^ ,=:{}]+\\s*[:=]\\s*(\\([^ ,{}\\[\\]()]+(\\s*,\\s*?[^ ,{}\\[\\]()]+)*\\s*,?\\s*\\)|(\\[[^ ,{}]+(\\s*,\\s*?[^ ,{}]+)*\\s*,?\\s*]|[^ ,=:{}\\[\\]]+))");
     
     private static final Pattern element = Pattern.compile("\\[.+]|[^ ,=:\\[\\]{}]+");

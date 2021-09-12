@@ -1,0 +1,5 @@
+sourceSets.main.java.srcDirs = ["src"]
+
+dependencies {
+  compile( files("lib/cglib-3.3.0.jar") )
+}

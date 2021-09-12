@@ -760,7 +760,7 @@ public class ObjectDataMonitor{
     public ArrayStructure(Object array, int index){
       this.array = array;
       this.index = index;
-      Class<?> clazz = array.getClass().arrayType();
+      Class<?> clazz = array.getClass();
       isBasicType = isBasicType(clazz);
       
       if(isBasicType){

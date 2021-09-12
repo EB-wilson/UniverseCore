@@ -93,8 +93,8 @@ public class ContentHandler{
       contentNameMapList.add(newType.value.ordinal(), new ObjectMap<>());
       contentMapList.add(newType.value.ordinal(), new Seq<>());
       
-      FieldHandler.setValue(Vars.content.getClass(), "contentNameMap", Vars.content, contentNameMapList.toArray());
-      FieldHandler.setValue(Vars.content.getClass(), "contentMap", Vars.content, contentMapList.toArray());
+      FieldHandler.setValue(Vars.content.getClass(), "contentNameMap", Vars.content, contentNameMapList.toArray(new ObjectMap[0]));
+      FieldHandler.setValue(Vars.content.getClass(), "contentMap", Vars.content, contentMapList.toArray(new Seq[0]));
     }
     catch(Throwable e){
       Log.err(e);

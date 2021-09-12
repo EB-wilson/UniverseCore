@@ -116,14 +116,15 @@ public class BaseConsumeModule extends ConsumeModule{
     }
     if(optionalCons != null){
       for(BaseConsumers cons: optionalCons){
-        optionalCurr = cons;
         boolean optionalValid = true;
         for(BaseConsume c: cons.all()){
           optionalValid &= c.valid(entity);
         }
         if(optionalValid){
+          optionalCurr = cons;
+          
           for(BaseConsume c: cons.all()){
-            if(docons && c.valid(entity)) c.update(entity);
+            if(docons) c.update(entity);
           }
           cons.method.get(entity.getBuilding(), cons);
           if(oneOfOptionCons){

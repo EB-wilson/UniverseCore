@@ -5,7 +5,7 @@ import mindustry.world.meta.Stats;
 import universeCore.entityComps.blockComps.ConsumerBuildComp;
 
 public abstract class BaseConsume{
-  /**消耗的类型*/
+  /**娑堣�楃殑绫诲瀷*/
   public abstract UncConsumeType<?, ?> type();
   
   public abstract void consume(ConsumerBuildComp entity);

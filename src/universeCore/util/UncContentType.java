@@ -2,6 +2,7 @@ package universeCore.util;
 
 import arc.struct.Seq;
 import mindustry.ctype.ContentType;
+import universeCore.util.handler.ContentHandler;
 import universeCore.util.handler.EnumHandler;
 import universeCore.util.handler.FieldHandler;
 
@@ -33,6 +34,8 @@ public class UncContentType{
     }
     
     newContentList = list.toArray(new ContentType[0]);
+  
+    ContentHandler.addNewContentType(this);
   }
   
   public UncContentType(String name){

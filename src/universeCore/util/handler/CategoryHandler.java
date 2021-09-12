@@ -4,12 +4,10 @@ import arc.Core;
 import arc.scene.Element;
 import arc.scene.style.Drawable;
 import arc.scene.style.TextureRegionDrawable;
-import arc.scene.ui.Button;
 import arc.scene.ui.ImageButton;
 import arc.scene.ui.layout.Cell;
 import arc.scene.ui.layout.Table;
 import arc.struct.Seq;
-import arc.util.Log;
 import mindustry.type.Category;
 import mindustry.ui.Styles;
 
