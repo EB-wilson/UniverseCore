@@ -41,11 +41,13 @@ public class UncConsumeItems extends BaseConsume{
   public void display(Stats stats) {
     stats.add(Stat.input, table -> {
       table.row();
-      table.defaults().left();
-      table.add(Core.bundle.get("misc.item") + ":");
-      for(ItemStack stack: items){
-        table.add(new ItemDisplay(stack.item, stack.amount, true)).padRight(8);
-      }
+      table.table(t -> {
+        t.defaults().left().grow().fill().padLeft(6);
+        t.add(Core.bundle.get("misc.item") + ":");
+        for(ItemStack stack: items){
+          t.add(new ItemDisplay(stack.item, stack.amount, true));
+        }
+      }).left().padLeft(5);
     });
   }
 

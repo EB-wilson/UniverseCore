@@ -2,6 +2,7 @@ package universeCore.util.animLayout;
 
 import arc.scene.ui.layout.Cell;
 import arc.scene.ui.layout.Table;
+import arc.util.Log;
 
 public class CellResizeAction extends CellAction{
   public float origWidth, origHeight;
@@ -14,11 +15,11 @@ public class CellResizeAction extends CellAction{
     this.setWidth = setWidth;
     this.setHeight = setHeight;
     currWidth = origWidth = originW;
-    currWidth = origWidth = originH;
+    currHeight = origHeight = originH;
   }
   
   public CellResizeAction(Cell<?> cell, Table table, float setWidth, float setHeight, float time){
-    this(cell, table, cell.minWidth(), cell.minHeight(), setWidth, setHeight, time);
+    this(cell, table, cell.prefWidth(), cell.prefHeight(), setWidth, setHeight, time);
   }
   
   @Override

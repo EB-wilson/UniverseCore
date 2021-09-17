@@ -70,31 +70,32 @@ public class ProduceItems extends BaseProduce{
   @Override
   public void display(Stats stats) {
     stats.add(Stat.output, table -> {
-      table.defaults().left();
-      if(!random){
-        table.row();
-        table.add(Core.bundle.get("misc.item") + ":").left();
-        for(ItemStack stack: items){
-          table.add(new ItemDisplay(stack.item, stack.amount, true)).padRight(5);
+      table.row();
+      table.table(t -> {
+        t.defaults().left().fill().padLeft(6);
+        t.add(Core.bundle.get("misc.item") + ":").left();
+        if(!random){
+          for(ItemStack stack: items){
+            t.add(new ItemDisplay(stack.item, stack.amount, true));
+          }
         }
-      }
-      else{
-        int total = 0;
-        int n = items.length;
-        table.row();
-        table.add(Core.bundle.get("misc.item") + ":").left();
-        table.row();
-        for(ItemStack stack: items){
-          table.add(new ItemDisplay(stack.item, 1, true));
-          total += stack.amount;
-          if(--n > 0) table.add("/");
+        else{
+          int[] total = {0};
+          int[] n = {items.length, items.length};
+          t.table(item -> {
+            for(ItemStack stack: items){
+              item.add(new ItemDisplay(stack.item, 0, true));
+              total[0] += stack.amount;
+              if(--n[0] > 0) item.add("/");
+            }
+            item.row();
+            for(ItemStack stack: items){
+              item.add("[gray]" + (int)(((float)stack.amount)/((float)total[0])*100) + "%");
+              if(--n[1] > 0) item.add();
+            }
+          });
         }
-        table.row();
-        for(ItemStack stack: items){
-          table.add("[gray]" + (int)(((float)stack.amount)/((float)total)*100) + "%");
-          table.add("|");
-        }
-      }
+      }).left().padLeft(5);
     });
   }
   

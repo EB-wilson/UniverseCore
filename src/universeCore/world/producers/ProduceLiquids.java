@@ -51,11 +51,13 @@ public class ProduceLiquids extends BaseProduce{
   public void display(Stats stats) {
     stats.add(Stat.output, table -> {
       table.row();
-      table.defaults().left();
-      table.add(Core.bundle.get("misc.liquid") + ":").left();
-      for(UncLiquidStack stack: liquids){
-        table.add(new LiquidDisplay(stack.liquid, stack.amount*60, true)).padRight(5);
-      }
+      table.table(t -> {
+        t.defaults().left().fill().padLeft(6);
+        t.add(Core.bundle.get("misc.liquid") + ":").left();
+        for(UncLiquidStack stack: liquids){
+          t.add(new LiquidDisplay(stack.liquid, stack.amount*60, true));
+        }
+      }).left().padLeft(5);
     });
   }
   
