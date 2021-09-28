@@ -3,6 +3,7 @@ package universeCore.world.consumers;
 import arc.func.Boolf;
 import arc.func.Cons2;
 import arc.graphics.g2d.TextureRegion;
+import arc.struct.ObjectMap;
 import arc.util.Structs;
 import mindustry.gen.Building;
 import mindustry.type.Item;
@@ -14,10 +15,11 @@ import mindustry.world.meta.Stats;
 import universeCore.util.UncLiquidStack;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 
 public class BaseConsumers{
-  protected final ArrayList<BaseConsume> cons = new ArrayList<>(UncConsumeType.all().length);
+  protected final HashMap<UncConsumeType<?, ?>, BaseConsume> cons = new HashMap<>();
   
   /**在存在物品消耗时，此值为0将在初始化时设置为90
    * 该值控制生产消耗的时间*/
@@ -72,36 +74,30 @@ public class BaseConsumers{
   }
 
   public <T extends BaseConsume> T add(T consume){
-    if(consume.type().id() >= cons.size()){
-      int temp = consume.type().id() - cons.size() + 1;
-      for(int i=0; i<temp; i++){
-        cons.add(null);
-      }
-    }
-    cons.set(consume.type().id(), consume);
+    cons.put(consume.type(), consume);
     return consume;
   }
 
   @SuppressWarnings("unchecked")
   public <T extends BaseConsume> T get(UncConsumeType<T, ?> type){
-    return type.id() >= 0 && type.id() < cons.size()? (T)cons.get(type.id()): null;
+    return (T) cons.get(type);
   }
 
   public BaseConsume[] all(){
-    return Structs.filter(BaseConsume.class, cons.toArray(new BaseConsume[0]), Objects::nonNull);
+    return cons.values().toArray(new BaseConsume[0]);
   }
 
-  public void remove(int id){
-    cons.set(id, null);
+  public void remove(UncConsumeType<?, ?> type){
+    cons.remove(type);
   }
 
   public void display(Stats stats){
     if(cons.size() > 0){
       if(craftTime > 0) stats.add(Stat.productionTime, craftTime / 60f, StatUnit.seconds);
-      for(BaseConsume c: cons){
-        if(c == null) continue;
+      cons.forEach((k, c) -> {
+        if(c == null) return;
         c.display(stats);
-      }
+      });
       display.get(stats, this);
     }
   }

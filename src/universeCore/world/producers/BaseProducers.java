@@ -10,10 +10,11 @@ import mindustry.world.meta.Stats;
 import universeCore.util.UncLiquidStack;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 
 public class BaseProducers{
-  protected final ArrayList<BaseProduce> prod = new ArrayList<>(ProduceType.all().length);
+  protected final HashMap<ProduceType<?, ?>, BaseProduce> prod = new HashMap<>();
 
   /**仅在动态配方生效，用于显示选择配方的图标*/
   public TextureRegion icon;
@@ -51,31 +52,25 @@ public class BaseProducers{
   }
   
   public <T extends BaseProduce> T add(T produce){
-    if(produce.type().id() >= prod.size()){
-      int temp = produce.type().id() - prod.size() + 1;
-      for(int i=0; i<temp; i++){
-        prod.add(null);
-      }
-    }
-    prod.set(produce.type().id(), produce);
+    prod.put(produce.type(), produce);
     return produce;
   }
 
   @SuppressWarnings("unchecked")
   public <T extends BaseProduce> T get(ProduceType<T, ?> type){
-    return type.id() >= 0 && type.id() < prod.size()? (T)prod.get(type.id()): null;
+    return (T) prod.get(type);
   }
 
   public BaseProduce[] all(){
-    return Structs.filter(BaseProduce.class, prod.toArray(new BaseProduce[0]), Objects::nonNull);
+    return prod.values().toArray(new BaseProduce[0]);
   }
 
-  public void remove(int id){
-    prod.set(id, null);
+  public void remove(ProduceType<?, ?> type){
+    prod.remove(type);
   }
 
   public void display(Stats stats){
-    if(prod.size() > 0) for(BaseProduce p: prod){
+    if(prod.size() > 0) for(BaseProduce p: prod.values()){
       p.display(stats);
     }
   }
