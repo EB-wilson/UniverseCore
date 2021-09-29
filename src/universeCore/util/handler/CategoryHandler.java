@@ -40,7 +40,7 @@ public class CategoryHandler{
       Drawable icon = new TextureRegionDrawable(Core.atlas.find(cat.icon));
       button.getStyle().imageUp = icon;
       button.resizeImage(icon.imageSize());
-    }
+    }   
     
     categories.clearChildren();
     categories.pane(t -> {
