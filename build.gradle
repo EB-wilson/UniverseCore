@@ -10,10 +10,10 @@ ext{
   mindustryVersion = 'v131'
   //version of SDK you will be using
   sdkVersion = '30.0.3'
-  sdkRoot = '/home/EBwilson/android-sdk'
+  sdkRoot = System.getenv("ANDROID_HOME")
   
-  libOututDir = '/home/EBwilson/IdeaProjects/Singularity/lib'
-  modOutputDir = '/home/EBwilson/sd/Android/data/io.anuke.mindustry/files/mods'
+  libOututDir = buildDir
+  modOutputDir = buildDir
   
   doExec = { cmd ->
     def proc = cmd.execute(null, new File("$buildDir/libs"))
