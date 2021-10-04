@@ -37,9 +37,8 @@ public class CategoryHandler{
     for(UncCategory cat: newCats){
       ImageButton button = ((ImageButton)catButtons.find(e -> ("category-" + cat.cat.name()).equals(e.name)));
       if(button == null) continue;
-      Drawable icon = new TextureRegionDrawable(Core.atlas.find(cat.icon));
-      button.getStyle().imageUp = icon;
-      button.resizeImage(icon.imageSize());
+      button.getStyle().imageUp = new TextureRegionDrawable(Core.atlas.find(cat.icon));
+      button.resizeImage(32);
     }   
     
     categories.clearChildren();

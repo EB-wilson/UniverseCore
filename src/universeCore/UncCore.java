@@ -7,7 +7,7 @@ import arc.util.Time;
 import mindustry.game.EventType;
 import mindustry.mod.Mod;
 import mindustry.world.Block;
-import universeCore.override.dialogs.SglDatabaseDialog;
+import universeCore.override.dialogs.UncDatabaseDialog;
 import universeCore.util.handler.CategoryHandler;
 import universeCore.util.animLayout.CellActions;
 
@@ -41,6 +41,6 @@ public class UncCore extends Mod{
   
   @Override
   public void init(){
-    ui.database = new SglDatabaseDialog();
+    ui.database = new UncDatabaseDialog();
   }
 }

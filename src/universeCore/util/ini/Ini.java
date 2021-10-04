@@ -239,9 +239,9 @@ public class Ini{
   
   /**用指定的lambda遍历根中的所有节的元素
    * @param cons 用于遍历执行的lambda函数*/
-  public void eachAll(Cons2<String, IniObject> cons){
+  public void eachAll(Cons2<String, IniSection> cons){
     root.each((k, v) -> {
-      if(v instanceof IniSection)((IniSection)v).each(cons);
+      if(v instanceof IniSection)((IniSection)v).each((name, value) -> cons.get(name, (IniSection)value));
     });
   }
   

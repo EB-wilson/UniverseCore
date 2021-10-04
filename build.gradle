@@ -7,7 +7,7 @@ sourceCompatibility = 11
 
 ext{
   //the build number that this mod is made for
-  mindustryVersion = 'v128.1'
+  mindustryVersion = 'v131'
   //version of SDK you will be using
   sdkVersion = '30.0.3'
   sdkRoot = '/home/EBwilson/android-sdk'
