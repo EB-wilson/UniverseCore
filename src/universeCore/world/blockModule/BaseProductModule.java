@@ -9,6 +9,7 @@ import universeCore.world.producers.BaseProducers;
 
 import java.util.List;
 
+@SuppressWarnings("all")
 public class BaseProductModule extends BlockModule {
   protected final ProducerBuildComp entity;
   protected final BaseProducers[] produces;

@@ -1,18 +1,22 @@
 package universeCore.world.consumers;
 
+import arc.func.Boolf;
+import arc.func.Cons;
+import arc.func.Floatf;
+import arc.func.Floatp;
 import arc.scene.ui.layout.Table;
 import mindustry.world.meta.Stats;
 import universeCore.entityComps.blockComps.ConsumerBuildComp;
 
-public abstract class BaseConsume{
+public abstract class BaseConsume<T>{
   /**消耗的类型*/
-  public abstract UncConsumeType<?, ?> type();
+  public abstract UncConsumeType<?> type();
   
-  public abstract void consume(ConsumerBuildComp entity);
-  public abstract void update(ConsumerBuildComp entity);
+  public abstract void consume(T entity);
+  public abstract void update(T entity);
   public abstract void display(Stats stats);
-  public abstract void build(ConsumerBuildComp entity, Table table);
-  public abstract boolean valid(ConsumerBuildComp entity);
+  public abstract void build(T entity, Table table);
+  public abstract boolean valid(T entity);
 
-  public abstract Object[] filter(ConsumerBuildComp entity);
+  public abstract Object[] filter(T entity);
 }

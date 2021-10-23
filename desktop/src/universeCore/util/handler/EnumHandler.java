@@ -20,8 +20,8 @@ public class EnumHandler<T extends Enum<?>>{
       cstr.setAccessible(true);
       temp = cstr.newInstance();
     }catch(InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e){
-      temp = null;
       Log.err(e);
+      throw new RuntimeException(e);
     }
     unsafe = temp;
   }
@@ -43,8 +43,7 @@ public class EnumHandler<T extends Enum<?>>{
       
       return result;
     }catch(InstantiationException | NoSuchFieldException e){
-      Log.err(e);
-      return null;
+      throw new RuntimeException(e);
     }
   }
   
@@ -55,9 +54,7 @@ public class EnumHandler<T extends Enum<?>>{
       return addEnumItem(addition, ((Object[])method.invoke(null)).length, param);
     }
     catch(SecurityException | NoSuchMethodException | InvocationTargetException | IllegalArgumentException | IllegalAccessException e){
-      Log.err(e);
-      System.out.println(e.toString());
-      return null;
+      throw new RuntimeException(e);
     }
   }
   
@@ -100,7 +97,7 @@ public class EnumHandler<T extends Enum<?>>{
       FieldHandler.setValue(valuesField, null, values.toArray((T[]) Array.newInstance(clazz, 0)));
     }
     catch (SecurityException | IllegalArgumentException | NoSuchFieldException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e){
-      Log.err(e);
+      throw new RuntimeException(e);
     }
   }
   

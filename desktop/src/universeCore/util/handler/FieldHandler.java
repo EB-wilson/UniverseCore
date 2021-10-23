@@ -16,8 +16,7 @@ public class FieldHandler{
       cstr.setAccessible(true);
       temp = cstr.newInstance();
     }catch(InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e){
-      temp = null;
-      Log.err(e);
+      throw new RuntimeException(e);
     }
     unsafe = temp;
   }
@@ -33,8 +32,7 @@ public class FieldHandler{
     try{
       return setValue(clazz.getDeclaredField(key), object, value);
     }catch(NoSuchFieldException e){
-      Log.err(e);
-      return null;
+      throw new RuntimeException(e);
     }
   }
   
@@ -131,13 +129,20 @@ public class FieldHandler{
       Field field = target.getClass().getDeclaredField(key);
       return (T) getValue(field, target);
     }catch(NoSuchFieldException e){
-      Log.err(e);
-      return null;
+      throw new RuntimeException(e);
+    }
+  }
+  
+  public static <T> T getValue(Class<?> clazz, String key, Object object){
+    try{
+      return getValue(clazz.getDeclaredField(key), object);
+    }catch(NoSuchFieldException e){
+      throw new RuntimeException(e);
     }
   }
   
   @SuppressWarnings("unchecked")
-  public static <T> T getValue(Field field, Object object){
+  private static <T> T getValue(Field field, Object object){
     boolean isStatic = Modifier.isStatic(field.getModifiers());
      return (T)unsafe.getObject(isStatic? unsafe.staticFieldBase(field): object,
       isStatic? unsafe.staticFieldOffset(field): unsafe.objectFieldOffset(field));

@@ -12,28 +12,26 @@ import mindustry.world.meta.Stat;
 import mindustry.world.meta.Stats;
 import universeCore.entityComps.blockComps.ConsumerBuildComp;
 
-public class UncConsumeItems extends BaseConsume{
+public class UncConsumeItems extends BaseConsume<Building>{
   public ItemStack[] items;
 
   public UncConsumeItems(ItemStack[] items){
     this.items = items;
   }
   
-  public UncConsumeType<UncConsumeItems, Building> type(){
+  public UncConsumeType<UncConsumeItems> type(){
     return UncConsumeType.item;
   }
   
   @Override
-  public void consume(ConsumerBuildComp object){
-    if(object instanceof Building){
-      for(ItemStack stack : items){
-        ((Building)object).items.remove(stack.item, stack.amount);
-      }
+  public void consume(Building object){
+    for(ItemStack stack : items){
+      object.items.remove(stack.item, stack.amount);
     }
   }
 
   @Override
-  public void update(ConsumerBuildComp entity) {
+  public void update(Building entity) {
 
   }
   
@@ -52,24 +50,24 @@ public class UncConsumeItems extends BaseConsume{
   }
 
   @Override
-  public void build(ConsumerBuildComp entity, Table table) {
+  public void build(Building entity, Table table) {
     for(ItemStack stack : items){
       table.add(new ReqImage(new ItemImage(stack.item.uiIcon, stack.amount),
-      () -> entity.getBuilding().items != null && entity.getBuilding().items.has(stack.item, stack.amount))).padRight(8);
+      () -> entity.items != null && entity.items.has(stack.item, stack.amount))).padRight(8);
     }
     table.row();
   }
 
   @Override
-  public boolean valid(ConsumerBuildComp entity){
+  public boolean valid(Building entity){
     for(ItemStack stack: items){
-      if(entity.getBuilding().items == null || entity.getBuilding().items.get(stack.item) < stack.amount) return false;
+      if(entity.items == null || entity.items.get(stack.item) < stack.amount) return false;
     }
     return true;
   }
 
   @Override
-  public Item[] filter(ConsumerBuildComp entity){
+  public Item[] filter(Building entity){
     int i = 0;
     Item[] acceptItems = new Item[items.length];
     for(ItemStack stack: items){

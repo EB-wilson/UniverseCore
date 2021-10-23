@@ -8,7 +8,7 @@ import mindustry.world.meta.Stats;
 import universeCore.entityComps.blockComps.ProducerBuildComp;
 import universeCore.util.UncLiquidStack;
 
-public class ProduceLiquids extends BaseProduce{
+public class ProduceLiquids extends BaseProduce<Building>{
   public boolean portion = false;
   public UncLiquidStack[] liquids;
 
@@ -21,29 +21,29 @@ public class ProduceLiquids extends BaseProduce{
   }
   
   @Override
-  public ProduceType<ProduceLiquids, Building> type(){
+  public ProduceType<ProduceLiquids> type(){
     return ProduceType.liquid;
   }
   
   @Override
-  public void produce(ProducerBuildComp entity) {
+  public void produce(Building entity) {
     if(portion) for(UncLiquidStack stack: liquids){
-      entity.getBuilding().liquids.add(stack.liquid, stack.amount*60);
+      entity.liquids.add(stack.liquid, stack.amount*60);
     }
   }
 
   @Override
-  public void update(ProducerBuildComp entity) {
+  public void update(Building entity) {
     if(!portion) for(UncLiquidStack stack: liquids){
-      entity.getBuilding().liquids.add(stack.liquid, stack.amount*entity.getBuilding().edelta());
+      entity.liquids.add(stack.liquid, stack.amount*entity.edelta());
       //Log.info("Liquid update is running, output:：" + stack.amount*entity.edelta() + ",amount:" + stack.amount + ",efficiency:" + entity.efficiency() + ",delta:" + entity.delta());
     }
   }
   
   @Override
-  public void dump(ProducerBuildComp entity) {
+  public void dump(Building entity) {
     for(UncLiquidStack stack: liquids){
-      entity.getBuilding().dumpLiquid(stack.liquid);
+      entity.dumpLiquid(stack.liquid);
     }
   }
   
@@ -62,9 +62,9 @@ public class ProduceLiquids extends BaseProduce{
   }
   
   @Override
-  public boolean valid(ProducerBuildComp entity){
+  public boolean valid(Building entity){
     for(UncLiquidStack stack: liquids){
-      if(entity.getBuilding().liquids.get(stack.liquid) >= entity.getBlock().liquidCapacity) return false;
+      if(entity.liquids.get(stack.liquid) >= entity.block.liquidCapacity) return false;
     }
     return true;
   }

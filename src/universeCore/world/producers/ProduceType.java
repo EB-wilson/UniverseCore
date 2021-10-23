@@ -1,20 +1,19 @@
 package universeCore.world.producers;
 
 import mindustry.gen.Building;
+import rhino.module.Require;
 
 import java.util.ArrayList;
 
-public class ProduceType<T extends BaseProduce, R>{
-  private static final ArrayList<ProduceType<?, ?>> allType = new ArrayList<>();
+public class ProduceType<T extends BaseProduce<?>>{
+  private static final ArrayList<ProduceType<?>> allType = new ArrayList<>();
   
   private final int id;
   private final Class<T> type;
-  private final Class<R> requireEntityType;
   
-  public ProduceType(Class<T> type, Class<R> requireEntityType){
+  public ProduceType(Class<T> type){
     id = allType.size();
     this.type = type;
-    this.requireEntityType = requireEntityType;
     allType.add(this);
   }
   
@@ -22,23 +21,19 @@ public class ProduceType<T extends BaseProduce, R>{
     return type;
   }
   
-  public Class<R> getRequire(){
-    return requireEntityType;
-  }
-  
   public final int id(){
     return id;
   }
   
-  public static ProduceType<?, ?>[] all(){
+  public static ProduceType<?>[] all(){
     return allType.toArray(new ProduceType[0]);
   }
   
-  public static <Type extends BaseProduce, Require> ProduceType<Type, Require> add(Class<Type> type, Class<Require> requireType){
-    return new ProduceType<>(type, requireType);
+  public static <Type extends BaseProduce<?>> ProduceType<Type> add(Class<Type> type){
+    return new ProduceType<>(type);
   }
   
-  public static final ProduceType<ProduceItems, Building> item = new ProduceType<>(ProduceItems.class, Building.class);
-  public static final ProduceType<ProduceLiquids, Building> liquid = new ProduceType<>(ProduceLiquids.class, Building.class);
-  public static final ProduceType<ProducePower, Building> power = new ProduceType<>(ProducePower.class, Building.class);
+  public static final ProduceType<ProduceItems> item = add(ProduceItems.class);
+  public static final ProduceType<ProduceLiquids> liquid = add(ProduceLiquids.class);
+  public static final ProduceType<ProducePower> power = add(ProducePower.class);
 }

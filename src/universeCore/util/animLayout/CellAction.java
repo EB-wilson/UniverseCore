@@ -1,5 +1,6 @@
 package universeCore.util.animLayout;
 
+import arc.struct.Seq;
 import arc.util.Log;
 import arc.util.Time;
 import arc.func.Floatf;
@@ -7,6 +8,7 @@ import arc.scene.ui.layout.Cell;
 import arc.scene.ui.layout.Table;
 import arc.scene.Element;
 import universeCore.util.Functions;
+import universeCore.util.handler.FieldHandler;
 
 public abstract class CellAction{
   protected static final Element refresher = new Element();
@@ -34,13 +36,17 @@ public abstract class CellAction{
   public CellAction(){}
   
   public void update(){
+    if(cell == null || cell.get() == null || table == null){
+      time = 1;
+      return;
+    }
     time = Math.min(time + Time.delta/duration, 1);
     
     progress = progHandler.get(time);
     action();
     
     //这里是因为需要刷新布局
-    table.add(refresher);
+    table.add(refresher).pad(0).size(0);
     table.removeChild(refresher);
   }
   

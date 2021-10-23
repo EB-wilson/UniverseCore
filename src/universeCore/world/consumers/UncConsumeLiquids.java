@@ -11,7 +11,7 @@ import mindustry.world.meta.Stats;
 import universeCore.entityComps.blockComps.ConsumerBuildComp;
 import universeCore.util.UncLiquidStack;
 
-public class UncConsumeLiquids extends BaseConsume{
+public class UncConsumeLiquids extends BaseConsume<Building>{
   public boolean portion = false;
   public UncLiquidStack[] liquids;
 
@@ -19,7 +19,7 @@ public class UncConsumeLiquids extends BaseConsume{
     this.liquids = liquids;
   }
   
-  public UncConsumeType<UncConsumeLiquids, Building> type(){
+  public UncConsumeType<UncConsumeLiquids> type(){
     return UncConsumeType.liquid;
   }
   
@@ -28,16 +28,16 @@ public class UncConsumeLiquids extends BaseConsume{
   }
   
   @Override
-  public void consume(ConsumerBuildComp entity) {
+  public void consume(Building entity) {
     if(portion) for(UncLiquidStack stack: liquids){
-      entity.getBuilding().liquids.remove(stack.liquid, stack.amount*60);
+      entity.liquids.remove(stack.liquid, stack.amount*60);
     }
   }
 
   @Override
-  public void update(ConsumerBuildComp entity) {
+  public void update(Building entity) {
     if(!portion) for(UncLiquidStack stack: liquids){
-      entity.getBuilding().liquids.remove(stack.liquid, stack.amount*entity.getBuilding().edelta());
+      entity.liquids.remove(stack.liquid, stack.amount*entity.edelta());
     }
   }
 
@@ -56,18 +56,16 @@ public class UncConsumeLiquids extends BaseConsume{
   }
 
   @Override
-  public void build(ConsumerBuildComp entity, Table table) {
+  public void build(Building entity, Table table) {
     for(UncLiquidStack stack : liquids){
       table.add(new ReqImage(stack.liquid.uiIcon,
-      () -> entity.getBuilding().liquids != null && entity.getBuilding().liquids.get(stack.liquid) > stack.amount*entity.getBuilding().edelta() + 0.0001f)).padRight(8);
+      () -> entity.liquids != null && entity.liquids.get(stack.liquid) > stack.amount*entity.edelta() + 0.0001f)).padRight(8);
     }
     table.row();
   }
 
   @Override
-  public boolean valid(ConsumerBuildComp buildComp){
-    Building entity = buildComp.getBuilding();
-    
+  public boolean valid(Building entity){
     for(UncLiquidStack stack: liquids){
       if(entity.liquids == null || entity.liquids.get(stack.liquid) < stack.amount*(entity.block.hasPower && entity.power.status != 0? entity.edelta(): entity.delta())) return false;
     }
@@ -75,7 +73,7 @@ public class UncConsumeLiquids extends BaseConsume{
   }
   
   @Override
-  public Liquid[] filter(ConsumerBuildComp entity){
+  public Liquid[] filter(Building entity){
     int i = 0;
     Liquid[] acceptLiquids = new Liquid[liquids.length];
     for(UncLiquidStack stack: liquids){

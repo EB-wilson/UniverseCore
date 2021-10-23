@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class BaseProducers{
-  protected final HashMap<ProduceType<?, ?>, BaseProduce> prod = new HashMap<>();
+  protected final HashMap<ProduceType<?>, BaseProduce<?>> prod = new HashMap<>();
 
   /**仅在动态配方生效，用于显示选择配方的图标*/
   public TextureRegion icon;
@@ -51,26 +51,26 @@ public class BaseProducers{
     return add(new ProducePower(prod));
   }
   
-  public <T extends BaseProduce> T add(T produce){
+  public <T extends BaseProduce<?>> T add(T produce){
     prod.put(produce.type(), produce);
     return produce;
   }
 
   @SuppressWarnings("unchecked")
-  public <T extends BaseProduce> T get(ProduceType<T, ?> type){
+  public <T extends BaseProduce<?>> T get(ProduceType<T> type){
     return (T) prod.get(type);
   }
 
-  public BaseProduce[] all(){
+  public BaseProduce<?>[] all(){
     return prod.values().toArray(new BaseProduce[0]);
   }
 
-  public void remove(ProduceType<?, ?> type){
+  public void remove(ProduceType<?> type){
     prod.remove(type);
   }
 
   public void display(Stats stats){
-    if(prod.size() > 0) for(BaseProduce p: prod.values()){
+    if(prod.size() > 0) for(BaseProduce<?> p: prod.values()){
       p.display(stats);
     }
   }

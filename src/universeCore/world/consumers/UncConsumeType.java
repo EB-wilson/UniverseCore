@@ -1,24 +1,19 @@
 package universeCore.world.consumers;
 
 import mindustry.gen.Building;
+import rhino.module.Require;
 
 import java.util.ArrayList;
 
-public class UncConsumeType<T extends BaseConsume, R>{
-  private static final ArrayList<UncConsumeType<?, ?>> allType = new ArrayList<>();
+public class UncConsumeType<T extends BaseConsume<?>>{
+  private static final ArrayList<UncConsumeType<?>> allType = new ArrayList<>();
   private final int id;
   private final Class<T> type;
-  private final Class<R> requireEntityType;
   
-  public UncConsumeType(Class<T> type, Class<R> requireEntityType){
+  public UncConsumeType(Class<T> type){
     id = allType.size();
     this.type = type;
-    this.requireEntityType = requireEntityType;
     allType.add(this);
-  }
-  
-  public Class<R> getRequire(){
-    return requireEntityType;
   }
   
   public Class<T> getType(){
@@ -29,15 +24,15 @@ public class UncConsumeType<T extends BaseConsume, R>{
     return id;
   }
   
-  public static UncConsumeType<?, ?>[] all(){
+  public static UncConsumeType<?>[] all(){
     return allType.toArray(new UncConsumeType[0]);
   }
   
-  public static <Type extends BaseConsume, Require> UncConsumeType<Type, Require> add(Class<Type> type, Class<Require> requireEntityType){
-    return new UncConsumeType<>(type, requireEntityType);
+  public static <Type extends BaseConsume<?>> UncConsumeType<Type> add(Class<Type> type){
+    return new UncConsumeType<>(type);
   }
   
-  public static final UncConsumeType<UncConsumeItems, Building> item = new UncConsumeType<>(UncConsumeItems.class, Building.class);
-  public static final UncConsumeType<UncConsumeLiquids, Building> liquid = new UncConsumeType<>(UncConsumeLiquids.class, Building.class);
-  public static final UncConsumeType<UncConsumePower, Building> power = new UncConsumeType<>(UncConsumePower.class, Building.class);
+  public static final UncConsumeType<UncConsumeItems> item = add(UncConsumeItems.class);
+  public static final UncConsumeType<UncConsumeLiquids> liquid = add(UncConsumeLiquids.class);
+  public static final UncConsumeType<UncConsumePower> power = add(UncConsumePower.class);
 }

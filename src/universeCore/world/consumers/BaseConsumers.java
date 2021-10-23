@@ -1,10 +1,9 @@
 package universeCore.world.consumers;
 
 import arc.func.Boolf;
+import arc.func.Cons;
 import arc.func.Cons2;
 import arc.graphics.g2d.TextureRegion;
-import arc.struct.ObjectMap;
-import arc.util.Structs;
 import mindustry.gen.Building;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
@@ -12,14 +11,13 @@ import mindustry.type.Liquid;
 import mindustry.world.meta.Stat;
 import mindustry.world.meta.StatUnit;
 import mindustry.world.meta.Stats;
+import universeCore.entityComps.blockComps.ConsumerBuildComp;
 import universeCore.util.UncLiquidStack;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Objects;
 
 public class BaseConsumers{
-  protected final HashMap<UncConsumeType<?, ?>, BaseConsume> cons = new HashMap<>();
+  protected final HashMap<UncConsumeType<?>, BaseConsume<?>> cons = new HashMap<>();
   
   /**在存在物品消耗时，此值为0将在初始化时设置为90
    * 该值控制生产消耗的时间*/
@@ -28,8 +26,11 @@ public class BaseConsumers{
   public final boolean optional;
   
   public TextureRegion icon;
-  public Cons2<Building, BaseConsumers> method = (entity, cons) -> {};
+  public Cons2<ConsumerBuildComp, BaseConsumers> optionalDef = (entity, cons) -> {};
   public Cons2<Stats, BaseConsumers> display = (stats, cons) -> {};
+  
+  public Boolf<ConsumerBuildComp> valid = e -> true;
+  public Cons<ConsumerBuildComp> trigger = e -> {};
   
   public BaseConsumers(boolean optional){
     this.optional = optional;
@@ -73,21 +74,21 @@ public class BaseConsumers{
     });
   }
 
-  public <T extends BaseConsume> T add(T consume){
+  public <T extends BaseConsume<?>> T add(T consume){
     cons.put(consume.type(), consume);
     return consume;
   }
 
   @SuppressWarnings("unchecked")
-  public <T extends BaseConsume> T get(UncConsumeType<T, ?> type){
+  public <T extends BaseConsume<?>> T get(UncConsumeType<T> type){
     return (T) cons.get(type);
   }
 
-  public BaseConsume[] all(){
+  public BaseConsume<?>[] all(){
     return cons.values().toArray(new BaseConsume[0]);
   }
 
-  public void remove(UncConsumeType<?, ?> type){
+  public void remove(UncConsumeType<?> type){
     cons.remove(type);
   }
 

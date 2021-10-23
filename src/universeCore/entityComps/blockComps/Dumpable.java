@@ -9,10 +9,14 @@ public interface Dumpable extends FieldGetter{
     return getField(byte.class, "cdump");
   }
   
-  default void cdumpIncrease(){
+  default void cdumpIncrease(Seq<Building> seq){
     if(this instanceof Building){
-      ((Building)this).incrementDump(getDumps().size);
+      ((Building)this).incrementDump(seq.size);
     }
+  }
+  
+  default void cdumpIncrease(){
+    cdumpIncrease(getDumps());
   }
   
   @SuppressWarnings("unchecked")
@@ -45,7 +49,7 @@ public interface Dumpable extends FieldGetter{
   default Building getDump(Boolf<Building> valid, Seq<Building> seq){
     int dump = getCdump();
     for(int i=0; i<seq.size; i++){
-      cdumpIncrease();
+      cdumpIncrease(seq);
       if(!valid.get(seq.get((i + dump) % seq.size))) continue;
       return seq.get((i + dump) % seq.size);
     }

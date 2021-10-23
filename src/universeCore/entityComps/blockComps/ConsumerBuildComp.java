@@ -22,10 +22,6 @@ public interface ConsumerBuildComp extends BuildCompBase, FieldGetter{
     return getBlock(ConsumerBuildComp.class);
   }
   
-  default <T> T getBuilding(UncConsumeType<?, T> type){
-    return getBuilding(type.getRequire());
-  }
-  
   default BaseConsumeModule consumer(){
     return getField(BaseConsumeModule.class, "consumer");
   }

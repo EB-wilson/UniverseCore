@@ -17,7 +17,7 @@ public class CellChangeColorAction extends CellAction{
   }
   
   public CellChangeColorAction(Cell<?> cell, Table table, Color setColor, float time){
-    this(cell, table, cell.get().color, setColor, time);
+    this(cell, table, cell.get().color.cpy(), setColor, time);
   }
   
   @Override

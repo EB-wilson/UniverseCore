@@ -4,6 +4,8 @@ import arc.scene.ui.layout.Table;
 import arc.struct.Seq;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
+import mindustry.world.consumers.Consume;
+import mindustry.world.consumers.Consumers;
 import mindustry.world.meta.BlockStatus;
 import mindustry.world.modules.ConsumeModule;
 import universeCore.entityComps.blockComps.ConsumerBuildComp;
@@ -13,11 +15,13 @@ import universeCore.world.consumers.UncConsumeType;
 
 import java.util.ArrayList;
 
+@SuppressWarnings("all")
 public class BaseConsumeModule extends ConsumeModule{
   protected final ConsumerBuildComp entity;
   protected final BaseConsumers[] consumes;
   protected final BaseConsumers[] optionalCons;
   public final boolean oneOfOptionCons;
+  
   public BaseConsumers current;
   public BaseConsumers optionalCurr;
   public boolean valid;
@@ -107,16 +111,19 @@ public class BaseConsumeModule extends ConsumeModule{
     //Log.info("on consume update,data:[recipeCurrent:" + entity.recipeCurrent + ",consume:" + Arrays.toString(consumes) + ",optionalCons:" + Arrays.toString(optionalCons) + "]");
     if(entity.consumeCurrent() >= 0 && consumes != null){
       current = consumes[entity.consumeCurrent()];
-      if(current != null) for(BaseConsume cons: current.all()){
-        valid &= cons.valid(entity);
-        if(docons && preValid && cons.valid(entity)){
-          cons.update(entity);
+      if(current != null){
+        valid &= current.valid.get(entity);
+        for(BaseConsume cons: current.all()){
+          valid &= cons.valid(entity);
+          if(docons && preValid && cons.valid(entity)){
+            cons.update(entity);
+          }
         }
       }
     }
     if(optionalCons != null){
       for(BaseConsumers cons: optionalCons){
-        boolean optionalValid = true;
+        boolean optionalValid = cons.valid.get(entity);
         for(BaseConsume c: cons.all()){
           optionalValid &= c.valid(entity);
         }
@@ -126,7 +133,7 @@ public class BaseConsumeModule extends ConsumeModule{
           for(BaseConsume c: cons.all()){
             if(docons) c.update(entity);
           }
-          cons.method.get(entity.getBuilding(), cons);
+          cons.optionalDef.get(entity, cons);
           if(oneOfOptionCons){
             break;
           }
@@ -136,8 +143,11 @@ public class BaseConsumeModule extends ConsumeModule{
   }
 
   public void trigger(){
-    if(current != null) for(BaseConsume cons: current.all()){
-      cons.consume(entity);
+    if(current != null){
+      for(BaseConsume cons: current.all()){
+        cons.consume(entity);
+      }
+      current.trigger.get(entity);
     }
     if(optionalCons != null){
       for(BaseConsumers cons: optionalCons){
@@ -150,7 +160,7 @@ public class BaseConsumeModule extends ConsumeModule{
           if(oneOfOptionCons) break;
         }
       }
-    }
+    };
   }
   
   public boolean excludeValid(int id){
@@ -167,8 +177,19 @@ public class BaseConsumeModule extends ConsumeModule{
     return valid && entity.shouldConsume() && entity.getBuilding().enabled;
   }
   
-  public boolean valid(UncConsumeType<?, ?> type){
+  public boolean valid(UncConsumeType type){
     return current.get(type) != null && current.get(type).valid(entity);
+  }
+  
+  public boolean valid(int index){
+    if(index >= consumes.length) return false;
+    
+    BaseConsumers cons = consumes[index];
+    for(BaseConsume c: cons.all()){
+      if(!c.valid(entity)) return false;
+    }
+    
+    return true;
   }
 
   /**过滤器，将判断对当前选中的区域指定type下对输入的对象是否接受
@@ -177,7 +198,7 @@ public class BaseConsumeModule extends ConsumeModule{
   * @param target 通过过滤器的目标对象
   * @return 布尔值，是否接受此对象
   * */
-  public boolean filter(UncConsumeType<?, ?> type, Object target){
+  public boolean filter(UncConsumeType<?> type, Object target){
     return (entity.consumeCurrent() >= 0 && filter.size > 1 && filter.get(entity.consumeCurrent() + 1).size > type.id() &&
       filter.get(entity.consumeCurrent() + 1).get(type.id()) != null && filter.get(entity.consumeCurrent() + 1).get(type.id()).contains(target)) ||
       filter.size > 0 && filter.get(0).size > type.id() && filter.get(0).get(type.id()) != null && filter.get(0).get(type.id()).contains(target)/*可选输入*/;

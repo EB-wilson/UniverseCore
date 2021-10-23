@@ -1,18 +1,19 @@
 package universeCore.world.producers;
 
+import mindustry.gen.Building;
 import mindustry.world.meta.Stats;
 import universeCore.entityComps.blockComps.ProducerBuildComp;
 
-public abstract class BaseProduce{
+public abstract class BaseProduce<T>{
   /**产出资源类型*/
-  public abstract ProduceType<?, ?> type();
+  public abstract ProduceType<?> type();
   
-  public abstract void produce(ProducerBuildComp entity);
-  public abstract void update(ProducerBuildComp entity);
+  public abstract void produce(T entity);
+  public abstract void update(T entity);
   public abstract void display(Stats stats);
-  public boolean valid(ProducerBuildComp entity){
+  public boolean valid(T entity){
     return true;
   }
   
-  public void dump(ProducerBuildComp entity){}
+  public void dump(T entity){}
 }

@@ -18,8 +18,7 @@ public class FieldHandler{
     try{
       return setValue(clazz.getDeclaredField(key), object, value);
     }catch(NoSuchFieldException e){
-      Log.err(e);
-      return null;
+      throw new RuntimeException(e);
     }
   }
   
@@ -31,13 +30,14 @@ public class FieldHandler{
   * @return 被更改的值
   * */
   public static Object setValue(Field field, Object object, Object value){
+    Log.debug("doing" + object);
     Object least = getValue(field, object);
     
     field.setAccessible(true);
     try{
       field.set(object, value);
     }catch(IllegalAccessException e){
-      Log.err(e);
+      throw new RuntimeException(e);
     }
   
     return least;
@@ -49,19 +49,25 @@ public class FieldHandler{
       Field field = target.getClass().getDeclaredField(key);
       return (T) getValue(field, target);
     }catch(NoSuchFieldException e){
-      Log.err(e);
-      return null;
+      throw new RuntimeException(e);
+    }
+  }
+  
+  public static <T> T getValue(Class<?> clazz, String key, Object object){
+    try{
+      return getValue(clazz.getDeclaredField(key), object);
+    }catch(NoSuchFieldException e){
+      throw new RuntimeException(e);
     }
   }
   
   @SuppressWarnings("unchecked")
-  public static <T> T getValue(Field field, Object object){
+  private static <T> T getValue(Field field, Object object){
     field.setAccessible(true);
     try{
       return (T) field.get(object);
     }catch(IllegalAccessException e){
-      Log.err(e);
-      return null;
+      throw new RuntimeException(e);
     }
   }
   

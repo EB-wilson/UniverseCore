@@ -19,6 +19,10 @@ import java.util.ArrayList;
  * }<pre/>
  * 若使用非默认命名则需要重写调用方法*/
 public interface ConsumerBlockComp extends BuildCompBase, FieldGetter{
+  default boolean autoSelect(){
+    return getField(boolean.class, "autoSelect");
+  }
+  
   @SuppressWarnings("unchecked")
   default ArrayList<BaseConsumers> consumers(){
     return getField(ArrayList.class, "consumers");
@@ -33,17 +37,16 @@ public interface ConsumerBlockComp extends BuildCompBase, FieldGetter{
     return getField(boolean.class, "oneOfOptionCons");
   }
   
-  @SuppressWarnings("UnusedReturnValue")
   default BaseConsumers newConsume(){
     BaseConsumers consume = new BaseConsumers(false);
     consumers().add(consume);
     return consume;
   }
   
-  default BaseConsumers newOptionalConsume(Cons2<Building, BaseConsumers> validDef, Cons2<Stats, BaseConsumers> displayDef){
+  default BaseConsumers newOptionalConsume(Cons2<ConsumerBuildComp, BaseConsumers> validDef, Cons2<Stats, BaseConsumers> displayDef){
     BaseConsumers consume = new BaseConsumers(true){
       {
-        method = validDef;
+        optionalDef = validDef;
         display = displayDef;
       }
     };

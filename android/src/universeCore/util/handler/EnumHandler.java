@@ -27,7 +27,7 @@ public class EnumHandler<T extends Enum<?>>{
       params.add(ordinal);
       
       for(Object obj: param){
-        paramType.add(obj.getClass());
+        paramType.add(asBasic(obj.getClass()));
         params.add(obj);
       }
   
@@ -35,9 +35,19 @@ public class EnumHandler<T extends Enum<?>>{
       cstr.setAccessible(true);
       return cstr.newInstance(params.toArray(new Object[0]));
     }catch(InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e){
-      Log.err(e);
-      return null;
+      throw new RuntimeException(e);
     }
+  }
+  
+  private static Class<?> asBasic(Class<?> clazz){
+    if(clazz == Integer.class) return int.class;
+    if(clazz == Float.class) return float.class;
+    if(clazz == Double.class) return double.class;
+    if(clazz == Long.class) return long.class;
+    if(clazz == Boolean.class) return boolean.class;
+    if(clazz == Short.class) return short.class;
+    if(clazz == Byte.class) return byte.class;
+    return clazz;
   }
   
   public T addEnumItemTail(String addition, Object... param){
@@ -47,9 +57,7 @@ public class EnumHandler<T extends Enum<?>>{
       return addEnumItem(addition, ((Object[])method.invoke(null)).length, param);
     }
     catch(SecurityException | NoSuchMethodException | InvocationTargetException | IllegalArgumentException | IllegalAccessException e){
-      Log.err(e);
-      System.out.println(e.toString());
-      return null;
+      throw new RuntimeException(e);
     }
   }
   
@@ -92,7 +100,7 @@ public class EnumHandler<T extends Enum<?>>{
       FieldHandler.setValue(valuesField, null, values.toArray((T[]) Array.newInstance(clazz, 0)));
     }
     catch (SecurityException | IllegalArgumentException | NoSuchFieldException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e){
-      Log.err(e);
+      throw new RuntimeException(e);
     }
   }
   

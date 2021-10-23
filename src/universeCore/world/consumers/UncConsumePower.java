@@ -2,13 +2,14 @@ package universeCore.world.consumers;
 
 import arc.scene.ui.layout.Table;
 import mindustry.gen.Building;
+import mindustry.world.Build;
 import mindustry.world.meta.Stat;
 import mindustry.world.meta.StatUnit;
 import mindustry.world.meta.Stats;
 import universeCore.entityComps.blockComps.ConsumerBuildComp;
 
 /*仅仅保存消耗参数，能量消耗本身实际应用仍为默认consumes*/
-public class UncConsumePower extends BaseConsume{
+public class UncConsumePower extends BaseConsume<Building>{
   /** The maximum amount of power which can be processed per tick. This might influence efficiency or load a buffer. */
   public final float usage;
   /** True if the module can store power. */
@@ -19,27 +20,27 @@ public class UncConsumePower extends BaseConsume{
     this.buffered = buffered;
   }
   
-  public UncConsumeType<UncConsumePower, Building> type(){
+  public UncConsumeType<UncConsumePower> type(){
     return UncConsumeType.power;
   }
   
   @Override
-  public void build(ConsumerBuildComp tile, Table table){
+  public void build(Building tile, Table table){
     //No tooltip for power, for now
   }
 
   @Override
-  public void update(ConsumerBuildComp entity){
+  public void update(Building entity){
 
   }
 
   @Override
-  public boolean valid(ConsumerBuildComp entity){
+  public boolean valid(Building entity){
     if(buffered){
       return true;
     }
     else{
-      return entity.getBuilding().power.status > 0f;
+      return entity.power.status > 0f;
     }
   }
 
@@ -49,12 +50,12 @@ public class UncConsumePower extends BaseConsume{
   }
 
   @Override
-  public void consume(ConsumerBuildComp entity) {
+  public void consume(Building entity) {
 
   }
 
   @Override
-  public Object[] filter(ConsumerBuildComp entity) {
+  public Object[] filter(Building entity) {
     return null;
   }
 }

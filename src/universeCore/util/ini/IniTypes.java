@@ -1,12 +1,13 @@
 package universeCore.util.ini;
 
 import arc.func.Cons2;
-import arc.struct.ObjectMap;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,13 +67,13 @@ public class IniTypes{
     }
   }
   
-  public static class IniMap extends IniObject implements Iterable<ObjectMap.Entry<String, IniObject>>{
+  public static class IniMap extends IniObject{
     private static final Pattern format = Pattern.compile("^\\{[^ ,=:{}]+\\s*[:=]\\s*([^ ,=:{}]*|\\[[^ ,{}]+(\\s*,\\s*?[^ ,{}]+)*\\s*,?\\s*])+(\\s*,\\s*[^ ,=:{}]+\\s*[:=]\\s*([^ ,=:{}]+|\\[[^ ,{}]+(\\s*,\\s*?[^ ,{}]+)*\\s*,?\\s*]))*\\s*,?\\s*\\}$");
     private static final Pattern matcher = Pattern.compile("[^ ,=:{}]+\\s*[:=]\\s*(\\([^ ,{}\\[\\]()]+(\\s*,\\s*?[^ ,{}\\[\\]()]+)*\\s*,?\\s*\\)|(\\[[^ ,{}]+(\\s*,\\s*?[^ ,{}]+)*\\s*,?\\s*]|[^ ,=:{}\\[\\]]+))");
     
     private static final Pattern element = Pattern.compile("\\[.+]|[^ ,=:\\[\\]{}]+");
     
-    protected ObjectMap<String, IniObject> map = new ObjectMap<>();
+    protected HashMap<String, IniObject> map = new HashMap<>();
     
     public IniMap(String string){
       super(string);
@@ -91,17 +92,17 @@ public class IniTypes{
     }
     
     public void each(Cons2<String, IniObject> cons){
-      map.each(cons);
+      map.forEach(cons::get);
     }
   
     @Override
-    public ObjectMap<String, IniObject> get(){
+    public HashMap<String, IniObject> get(){
       return map;
     }
     
     @Override
     public Class<?> type(){
-      return ObjectMap.class;
+      return HashMap.class;
     }
   
     @Override
@@ -117,20 +118,19 @@ public class IniTypes{
     @Override
     public void write(BufferedWriter writer) throws IOException{
       writer.write("{");
-      boolean first = true;
-      for(ObjectMap.Entry<String, IniObject> entry: map){
-        if(!first) writer.write(", ");
-        writer.write(entry.key);
-        writer.write(" = ");
-        entry.value.write(writer);
-        first = false;
-      }
+      AtomicBoolean first = new AtomicBoolean(true);
+      map.forEach((k, v) -> {
+        try{
+          if(! first.get()) writer.write(", ");
+          writer.write(k);
+          writer.write(" = ");
+          v.write(writer);
+        }catch(IOException e){
+          e.printStackTrace();
+        }
+        first.set(false);
+      });
       writer.write("}");
-    }
-  
-    @Override
-    public Iterator<ObjectMap.Entry<String, IniObject>> iterator(){
-      return map.iterator();
     }
   }
   

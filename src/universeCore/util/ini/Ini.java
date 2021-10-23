@@ -1,12 +1,13 @@
 package universeCore.util.ini;
 
 import arc.func.Cons2;
-import arc.struct.ObjectMap;
 import arc.util.Log;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,7 +22,7 @@ public class Ini{
   
   private static final Pattern k_vPair = Pattern.compile("^[^ ;=]+\\s*[=:]\\s*(\\{.+\\}|(\\[.+]|([^, =:\\[\\]{}]+)))$");
   
-  protected final ObjectMap<String, IniObject> root = new ObjectMap<>();
+  protected final HashMap<String, IniObject> root = new HashMap<>();
   
   protected int AnnotationCount = 0;
   
@@ -99,7 +100,7 @@ public class Ini{
    * @param key 需要查找的键*/
   public IniObject get(String key){
     IniObject[] first = new IniObject[]{null};
-    root.each((section, obj) -> {
+    root.forEach((section, obj) -> {
       if(first[0] != null || !(obj instanceof IniSection)) return;
       IniSection sec = (IniSection) obj;
       if(sec.containsKey(key)){
@@ -114,7 +115,7 @@ public class Ini{
    * @return 所有匹配的键值组成的数组*/
   public IniObject[] gets(String key){
     ArrayList<IniObject> list = new ArrayList<>();
-    root.each((section, obj) -> {
+    root.forEach((section, obj) -> {
       IniSection sec = (IniSection) obj;
       if(sec.containsKey(key)) list.add(sec.get(key));
     });
@@ -142,7 +143,7 @@ public class Ini{
    * @return 写入的值*/
   public IniObject put(String key, String value, boolean def){
     IniObject[] result = new IniObject[]{null};
-    root.each((section, obj) -> {
+    root.forEach((section, obj) -> {
       if(result[0] != null) return;
       IniSection map = (IniSection) obj;
       if(map.containsKey(key)) result[0] = map.put(key, value);
@@ -166,7 +167,7 @@ public class Ini{
    * @return 成功写入的数量*/
   public int puts(String key, String value, boolean attend){
     AtomicInteger counter = new AtomicInteger();
-    root.each((section, obj) -> {
+    root.forEach((section, obj) -> {
       IniSection map = (IniSection)obj;
       if(attend){
         map.put(key, value);
@@ -203,7 +204,7 @@ public class Ini{
    * @return 被移除的键值，若不存在，则返回null*/
   public IniObject remove(String key){
     IniObject[] first = new IniObject[]{null};
-    root.each((section, obj) -> {
+    root.forEach((section, obj) -> {
       if(first[0] != null || !(obj instanceof IniSection)) return;
       IniSection sec = (IniSection) obj;
       if(sec.containsKey(key)){
@@ -218,7 +219,7 @@ public class Ini{
    * @return 被移除的键值组成的数组*/
   public IniObject[] removes(String key){
     ArrayList<IniObject> list = new ArrayList<>();
-    root.each((section, obj) -> {
+    root.forEach((section, obj) -> {
       IniSection sec = (IniSection) obj;
       if(sec.containsKey(key)) list.add(sec.remove(key));
     });
@@ -234,22 +235,28 @@ public class Ini{
   /**用指定的lambda遍历根中的所有的元素，不一定是节，请注意检查类型
    * @param cons 用于遍历执行的lambda函数*/
   public void each(Cons2<String, IniObject> cons){
-    root.each(cons);
+    root.forEach(cons::get);
   }
   
   /**用指定的lambda遍历根中的所有节的元素
    * @param cons 用于遍历执行的lambda函数*/
-  public void eachAll(Cons2<String, IniSection> cons){
-    root.each((k, v) -> {
-      if(v instanceof IniSection)((IniSection)v).each((name, value) -> cons.get(name, (IniSection)value));
+  public void eachAll(Cons2<String, IniObject> cons){
+    root.forEach((k, v) -> {
+      if(v instanceof IniSection)((IniSection)v).each(cons::get);
+    });
+  }
+  
+  public void eachSection(Cons2<String, IniSection> cons){
+    root.forEach((k, v) -> {
+      if(v instanceof IniSection) cons.get(k, (IniSection)v);
     });
   }
   
   public static class IniSection extends IniObject{
     private static final Pattern format = Pattern.compile("^\\w+$");
-    private static final Pattern element = Pattern.compile("\\{.+\\}|[^ ,=:\\[\\]{}]+");
+    private static final Pattern element = Pattern.compile("\\[.+\\]|(\\{.+\\}|[^ ,=:\\[\\]{}]+)");
     
-    protected final ObjectMap<String, IniObject> child = new ObjectMap<>();
+    protected final HashMap<String, IniObject> child = new HashMap<>();
     
     public final String name;
     
@@ -299,29 +306,33 @@ public class Ini{
     }
   
     public void each(Cons2<String, IniObject> cons){
-      child.each(cons);
+      child.forEach(cons::get);
     }
   
     @Override
-    public ObjectMap<String, IniObject> get(){
+    public HashMap<String, IniObject> get(){
       return child;
     }
   
     @Override
     public Class<?> type(){
-      return ObjectMap.class;
+      return HashMap.class;
     }
   
     @Override
     public void write(BufferedWriter writer) throws IOException{
       writer.write("[" + name + "]");
       writer.newLine();
-      for(ObjectMap.Entry<String, IniObject> entry : child){
-        writer.write(entry.key);
-        writer.write(" = ");
-        entry.value.write(writer);
-        writer.newLine();
-      }
+      child.forEach((k, v) -> {
+        try{
+          writer.write(k);
+          writer.write(" = ");
+          v.write(writer);
+          writer.newLine();
+        }catch(IOException e){
+          e.printStackTrace();
+        }
+      });
     }
   }
   

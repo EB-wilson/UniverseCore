@@ -38,8 +38,4 @@ public interface ProducerBuildComp extends BuildCompBase, FieldGetter{
   default boolean productionValid(){
     return getBuilding().productionValid();
   }
-  
-  default <T> T getBuilding(ProduceType<?, T> type){
-    return getBuilding(type.getRequire());
-  }
 }
