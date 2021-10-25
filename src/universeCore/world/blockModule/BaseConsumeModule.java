@@ -11,6 +11,7 @@ import mindustry.world.modules.ConsumeModule;
 import universeCore.entityComps.blockComps.ConsumerBuildComp;
 import universeCore.world.consumers.BaseConsume;
 import universeCore.world.consumers.BaseConsumers;
+import universeCore.world.consumers.UncConsumePower;
 import universeCore.world.consumers.UncConsumeType;
 
 import java.util.ArrayList;
@@ -20,12 +21,15 @@ public class BaseConsumeModule extends ConsumeModule{
   protected final ConsumerBuildComp entity;
   protected final BaseConsumers[] consumes;
   protected final BaseConsumers[] optionalCons;
+  protected final float[] optProgress;
   public final boolean oneOfOptionCons;
   
   public BaseConsumers current;
   public BaseConsumers optionalCurr;
   public boolean valid;
   public Seq<Seq<Seq<Object>>> filter = new Seq<>();
+  
+  private float powerCons;
 
   public BaseConsumeModule(ConsumerBuildComp entity, ArrayList<BaseConsumers> cons, ArrayList<BaseConsumers> optional){
     super(entity.getBuilding());
@@ -33,6 +37,7 @@ public class BaseConsumeModule extends ConsumeModule{
     this.oneOfOptionCons = entity.getConsumerBlock().oneOfOptionCons();
     consumes = cons.size() > 0? cons.toArray(new BaseConsumers[0]): null;
     optionalCons = optional.size() > 0? optional.toArray(new BaseConsumers[0]): null;
+    optProgress = new float[optionalCons == null? 0: optionalCons.length];
     current = consumes != null && entity.consumeCurrent() != -1 ? consumes[entity.consumeCurrent()] : null;
     appliedFilter();
   }
@@ -100,9 +105,14 @@ public class BaseConsumeModule extends ConsumeModule{
     }
   }
   
+  public float getPowerUsage(){
+    return powerCons;
+  }
+  
   @Override
   public void update(){
     current = null;
+    powerCons = 0;
     if((!hasOptional() && !hasConsume()) || entity.consumeCurrent() == -1) return;
     boolean docons = entity.shouldConsume() && entity.productionValid();
     boolean preValid = valid();
@@ -114,6 +124,7 @@ public class BaseConsumeModule extends ConsumeModule{
       if(current != null){
         valid &= current.valid.get(entity);
         for(BaseConsume cons: current.all()){
+          if(cons instanceof UncConsumePower) powerCons += ((UncConsumePower) cons).usage;
           valid &= cons.valid(entity);
           if(docons && preValid && cons.valid(entity)){
             cons.update(entity);
@@ -122,7 +133,9 @@ public class BaseConsumeModule extends ConsumeModule{
       }
     }
     if(optionalCons != null){
-      for(BaseConsumers cons: optionalCons){
+      for(int id=0; id<optionalCons.length; id++){
+        BaseConsumers cons = optionalCons[id];
+        
         boolean optionalValid = cons.valid.get(entity);
         for(BaseConsume c: cons.all()){
           optionalValid &= c.valid(entity);
@@ -131,7 +144,15 @@ public class BaseConsumeModule extends ConsumeModule{
           optionalCurr = cons;
           
           for(BaseConsume c: cons.all()){
-            if(docons) c.update(entity);
+            if(docons){
+              c.update(entity);
+              if(c instanceof UncConsumePower) powerCons += ((UncConsumePower) c).usage;
+            }
+          }
+          optProgress[id] += 1/cons.craftTime*entity.getBuilding().edelta();
+          if(optProgress[id] >= 1){
+            optProgress[id] %= 1;
+            triggerOpt(id);
           }
           cons.optionalDef.get(entity, cons);
           if(oneOfOptionCons){
@@ -149,15 +170,16 @@ public class BaseConsumeModule extends ConsumeModule{
       }
       current.trigger.get(entity);
     }
-    if(optionalCons != null){
-      for(BaseConsumers cons: optionalCons){
-        boolean optionalValid = true;
-        for(BaseConsume c: cons.all()) optionalValid &= c.valid(entity);
-        if(optionalValid){
-          for(BaseConsume c: cons.all()){
-            c.consume(entity);
-          }
-          if(oneOfOptionCons) break;
+  }
+  
+  public void triggerOpt(int id){
+    if(optionalCons != null && optionalCons.length > id){
+      BaseConsumers cons = optionalCons[id];
+      boolean optionalValid = true;
+      for(BaseConsume c: cons.all()) optionalValid &= c.valid(entity);
+      if(optionalValid){
+        for(BaseConsume c: cons.all()){
+          c.consume(entity);
         }
       }
     };

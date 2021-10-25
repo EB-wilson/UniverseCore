@@ -1,5 +1,7 @@
 package universeCore.entityComps.blockComps;
 
+import arc.struct.ObjectMap;
+import universeCore.util.handler.FieldHandler;
 import universeCore.world.blockModule.BaseConsumeModule;
 import universeCore.world.consumers.UncConsumeType;
 
@@ -15,6 +17,25 @@ public interface ConsumerBuildComp extends BuildCompBase, FieldGetter{
   /**获得该块的NuclearEnergyBlock*/
   default ConsumerBlockComp getConsumerBlock(){
     return getBlock(ConsumerBlockComp.class);
+  }
+  
+  @SuppressWarnings("unchecked")
+  default <T> ObjectMap<Class<?>, Object> consData(){
+    return getField(ObjectMap.class, "consData");
+  }
+  
+  @SuppressWarnings("unchecked")
+  default <T> T consData(Class<T> clazz){
+    return (T)consData().get(clazz);
+  }
+  
+  @SuppressWarnings("unchecked")
+  default <T> T consData(Class<T> clazz, T def){
+    return (T)consData().get(clazz, def);
+  }
+  
+  default <T> void consData(T object){
+    consData().put(object.getClass(), object);
   }
   
   /**获得该块的NuclearEnergyBlock*/

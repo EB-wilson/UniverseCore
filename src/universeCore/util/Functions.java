@@ -20,4 +20,10 @@ public class Functions{
     
     return diff/Math.pow(2, xValue - rate*x) + dy + left;
   }
+  
+  public static double lerpIncrease(double lerpLeft, double lerpRight, double max, double optimal, double x){
+    if(x < 0) return 0;
+    return x >= 0 && x < optimal? -max*Math.pow(1-x/optimal, lerpLeft) + max:
+        -max*Math.pow(1-optimal/x, lerpRight) + max;
+  }
 }

@@ -66,7 +66,7 @@ public interface ConsumerBlockComp extends BuildCompBase, FieldGetter{
           return (1f-entity.getBuilding().power.status)*capacity;
         }
         else{
-          return entity.consumer().current.get(UncConsumeType.power).usage * Mathf.num(entity.shouldConsume());
+          return entity.consumer().getPowerUsage() * Mathf.num(entity.shouldConsume());
         }
       }
     });
