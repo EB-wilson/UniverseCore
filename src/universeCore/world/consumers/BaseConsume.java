@@ -5,10 +5,13 @@ import arc.func.Cons;
 import arc.func.Floatf;
 import arc.func.Floatp;
 import arc.scene.ui.layout.Table;
+import mindustry.gen.Building;
 import mindustry.world.meta.Stats;
-import universeCore.entityComps.blockComps.ConsumerBuildComp;
+import universeCore.entityComps.blockComps.*;
 
-public abstract class BaseConsume<T>{
+public abstract class BaseConsume<T extends Building & ConsumerBuildComp>{
+  public BaseConsumers parent;
+  
   /**消耗的类型*/
   public abstract UncConsumeType<?> type();
   

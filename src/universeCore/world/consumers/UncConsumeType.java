@@ -1,10 +1,10 @@
 package universeCore.world.consumers;
 
 import mindustry.gen.Building;
-import rhino.module.Require;
 
 import java.util.ArrayList;
 
+@SuppressWarnings("unchecked")
 public class UncConsumeType<T extends BaseConsume<?>>{
   private static final ArrayList<UncConsumeType<?>> allType = new ArrayList<>();
   private final int id;
@@ -28,11 +28,11 @@ public class UncConsumeType<T extends BaseConsume<?>>{
     return allType.toArray(new UncConsumeType[0]);
   }
   
-  public static <Type extends BaseConsume<?>> UncConsumeType<Type> add(Class<Type> type){
+  public static <Type extends BaseConsume<?>> UncConsumeType<? extends Type> add(Class<Type> type){
     return new UncConsumeType<>(type);
   }
   
-  public static final UncConsumeType<UncConsumeItems> item = add(UncConsumeItems.class);
-  public static final UncConsumeType<UncConsumeLiquids> liquid = add(UncConsumeLiquids.class);
-  public static final UncConsumeType<UncConsumePower> power = add(UncConsumePower.class);
+  public static final UncConsumeType<UncConsumeItems<?>> item = (UncConsumeType<UncConsumeItems<?>>) add(UncConsumeItems.class);
+  public static final UncConsumeType<UncConsumeLiquids<?>> liquid = (UncConsumeType<UncConsumeLiquids<?>>) add(UncConsumeLiquids.class);
+  public static final UncConsumeType<UncConsumePower<?>> power = (UncConsumeType<UncConsumePower<?>>) add(UncConsumePower.class);
 }

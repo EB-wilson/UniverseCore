@@ -7,9 +7,11 @@ import mindustry.type.Item;
 import mindustry.type.ItemStack;
 import mindustry.type.Liquid;
 import mindustry.world.meta.Stats;
-import universeCore.util.UncLiquidStack;
+import universeCore.util.*;
+import universeCore.world.consumers.BaseConsumers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -20,6 +22,8 @@ public class BaseProducers{
   public TextureRegion icon;
   /**仅在动态配方生效，用于显示选择配方的顶部颜色*/
   public Color color;
+  
+  public BaseConsumers cons;
 
   public BaseProducers setIcon(TextureRegion icon){
     this.icon = icon;
@@ -31,28 +35,29 @@ public class BaseProducers{
     return this;
   }
   
-  public ProduceItems item(Item item, int amount){
+  public ProduceItems<?> item(Item item, int amount){
     return items(new ItemStack[]{new ItemStack(item, amount)});
   }
   
-  public ProduceItems items(ItemStack[] items){
-    return add(new ProduceItems(items));
+  public ProduceItems<?> items(ItemStack[] items){
+    return add(new ProduceItems<>(items));
   }
   
-  public ProduceLiquids liquid(Liquid liquid, float amount){
+  public ProduceLiquids<?> liquid(Liquid liquid, float amount){
     return liquids(new UncLiquidStack[]{new UncLiquidStack(liquid, amount)});
   }
   
-  public ProduceLiquids liquids(UncLiquidStack[] liquids){
-    return add(new ProduceLiquids(liquids));
+  public ProduceLiquids<?> liquids(UncLiquidStack[] liquids){
+    return add(new ProduceLiquids<>(liquids));
   }
   
-  public ProducePower power(float prod){
-    return add(new ProducePower(prod));
+  public ProducePower<?> power(float prod){
+    return add(new ProducePower<>(prod));
   }
   
   public <T extends BaseProduce<?>> T add(T produce){
     prod.put(produce.type(), produce);
+    produce.parent = this;
     return produce;
   }
 
@@ -70,8 +75,13 @@ public class BaseProducers{
   }
 
   public void display(Stats stats){
-    if(prod.size() > 0) for(BaseProduce<?> p: prod.values()){
-      p.display(stats);
+    if(prod.size() > 0){
+      BaseProduce<?>[] arr = prod.values().toArray(new BaseProduce<?>[0]);
+      Arrays.sort(arr, (a, b) -> a.type().id() - b.type().id());
+      
+      for(BaseProduce<?> p : arr){
+        p.display(stats);
+      }
     }
   }
 }

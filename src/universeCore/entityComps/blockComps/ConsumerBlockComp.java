@@ -2,12 +2,16 @@ package universeCore.entityComps.blockComps;
 
 import arc.func.Cons2;
 import arc.math.Mathf;
+import arc.scene.ui.layout.Table;
 import mindustry.gen.Building;
 import mindustry.world.Block;
 import mindustry.world.consumers.ConsumePower;
 import mindustry.world.meta.Stats;
+import universeCore.ui.table.RecipeTable;
+import universeCore.util.handler.FieldHandler;
 import universeCore.world.consumers.BaseConsumers;
 import universeCore.world.consumers.UncConsumeType;
+import universeCore.world.meta.UncStat;
 
 import java.util.ArrayList;
 
@@ -28,9 +32,25 @@ public interface ConsumerBlockComp extends BuildCompBase, FieldGetter{
     return getField(ArrayList.class, "consumers");
   }
   
+  default RecipeTable recipeTable(){
+    return getField(RecipeTable.class, "recipeTable");
+  }
+  
+  default void recipeTable(RecipeTable table){
+    FieldHandler.setValue(getClass(), "recipeTable", this, table);
+  }
+  
   @SuppressWarnings("unchecked")
   default ArrayList<BaseConsumers> optionalCons(){
     return getField(ArrayList.class, "optionalCons");
+  }
+  
+  default RecipeTable optionalRecipeTable(){
+    return getField(RecipeTable.class, "optionalRecipeTable");
+  }
+  
+  default void optionalRecipeTable(RecipeTable table){
+    FieldHandler.setValue(getClass(), "optionalRecipeTable", this, table);
   }
   
   default boolean oneOfOptionCons(){
@@ -70,5 +90,38 @@ public interface ConsumerBlockComp extends BuildCompBase, FieldGetter{
         }
       }
     });
+  }
+  
+  default void setConsumeStats(Stats stats){
+    if(consumers().size() > 1){
+      recipeTable(new RecipeTable(consumers().size()));
+      for(int i=0; i<consumers().size(); i++){
+        recipeTable().stats[i] = new Stats();
+        consumers().get(i).display(recipeTable().stats[i]);
+      }
+      recipeTable().build();
+    
+      stats.add(UncStat.inputs, table -> {
+        table.row();
+        table.add(recipeTable()).grow();
+      });
+    }
+    else if(consumers().size() == 1){
+      consumers().get(0).display(stats);
+    }
+  
+    if(optionalCons().size() > 0){
+      optionalRecipeTable(new RecipeTable(optionalCons().size()));
+      for(int i=0; i<optionalCons().size(); i++){
+        optionalRecipeTable().stats[i] = new Stats();
+        optionalCons().get(i).display(optionalRecipeTable().stats[i]);
+      }
+      optionalRecipeTable().build();
+    
+      stats.add(UncStat.optionalInputs, table -> {
+        table.row();
+        table.add(optionalRecipeTable()).grow();
+      });
+    }
   }
 }

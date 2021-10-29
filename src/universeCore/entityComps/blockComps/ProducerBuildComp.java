@@ -1,8 +1,12 @@
 package universeCore.entityComps.blockComps;
 
 
+import arc.util.Time;
+import mindustry.world.consumers.Consumers;
 import universeCore.world.blockModule.BaseProductModule;
-import universeCore.world.producers.ProduceType;
+import universeCore.world.consumers.BaseConsumers;
+import universeCore.world.producers.BaseProduce;
+import universeCore.world.producers.BaseProducers;
 
 /**生产者组件，令方块具有按需进行资源生产输出的能力
  * 必须创建的变量：
@@ -10,8 +14,10 @@ import universeCore.world.producers.ProduceType;
  *   AneProductModule [producer]
  * }<pre/>
  * 若使用非默认命名则需要重写调用方法*/
-public interface ProducerBuildComp extends BuildCompBase, FieldGetter{
-  int produceCurrent();
+public interface ProducerBuildComp extends BuildCompBase, FieldGetter, ConsumerBuildComp{
+  default int produceCurrent(){
+    return consumeCurrent();
+  }
   
   default BaseProductModule producer(){
     return getField(BaseProductModule.class, "producer");
@@ -25,6 +31,14 @@ public interface ProducerBuildComp extends BuildCompBase, FieldGetter{
   /**获得该块的NuclearEnergyBlock*/
   default ProducerBuildComp getProducerBuilding(){
     return getBlock(ProducerBuildComp.class);
+  }
+  
+  default float consDelta(BaseProducers prod){
+    return consDelta(prod.cons);
+  }
+  
+  default float productMultiplier(BaseProduce<?> prod){
+    return 1;
   }
   
   default boolean consValid(){

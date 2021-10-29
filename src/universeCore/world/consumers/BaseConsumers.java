@@ -14,16 +14,18 @@ import mindustry.world.meta.Stats;
 import universeCore.entityComps.blockComps.ConsumerBuildComp;
 import universeCore.util.UncLiquidStack;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class BaseConsumers{
   protected final HashMap<UncConsumeType<?>, BaseConsume<?>> cons = new HashMap<>();
   
-  /**在存在物品消耗时，此值为0将在初始化时设置为90
-   * 该值控制生产消耗的时间*/
-  public float craftTime = 0;
+  /**该值控制生产消耗的时间*/
+  public float craftTime = 60;
+  public boolean showTime = true;
   
   public final boolean optional;
+  public boolean acceptOverdrive = true;
   
   public TextureRegion icon;
   public Cons2<ConsumerBuildComp, BaseConsumers> optionalDef = (entity, cons) -> {};
@@ -45,27 +47,28 @@ public class BaseConsumers{
     this.craftTime = time;
   }
   
-  public UncConsumeItems item(Item item, int amount){
+  public UncConsumeItems<?> item(Item item, int amount){
     return items(new ItemStack[]{new ItemStack(item, amount)});
   }
   
-  public UncConsumeItems items(ItemStack[] items){
-    return add(new UncConsumeItems(items));
+  public UncConsumeItems<?> items(ItemStack[] items){
+    return add(new UncConsumeItems<>(items));
   }
   
-  public UncConsumeLiquids liquid(Liquid liquid, float amount){
+  public UncConsumeLiquids<?> liquid(Liquid liquid, float amount){
     return liquids(new UncLiquidStack[]{new UncLiquidStack(liquid, amount)});
   }
   
-  public UncConsumeLiquids liquids(UncLiquidStack[] liquids){
-    return add(new UncConsumeLiquids(liquids));
+  public UncConsumeLiquids<?> liquids(UncLiquidStack[] liquids){
+    return add(new UncConsumeLiquids<>(liquids));
   }
   
-  public UncConsumePower power(float usage){
-    return add(new UncConsumePower(usage, false));
+  public UncConsumePower<?> power(float usage){
+    return add(new UncConsumePower<>(usage, false));
   }
   
-  public UncConsumePower powerCond(float usage, Boolf<Building> cons){
+  @SuppressWarnings("rawtypes")
+  public UncConsumePower<?> powerCond(float usage, Boolf<Building> cons){
     return add(new UncConsumePower(usage, false){
       private final Boolf<Building> consume = cons;
       public float requestedPower(Building entity){
@@ -76,6 +79,7 @@ public class BaseConsumers{
 
   public <T extends BaseConsume<?>> T add(T consume){
     cons.put(consume.type(), consume);
+    consume.parent = this;
     return consume;
   }
 
@@ -94,11 +98,13 @@ public class BaseConsumers{
 
   public void display(Stats stats){
     if(cons.size() > 0){
-      if(craftTime > 0) stats.add(Stat.productionTime, craftTime / 60f, StatUnit.seconds);
-      cons.forEach((k, c) -> {
+      if(showTime) stats.add(Stat.productionTime, craftTime / 60f, StatUnit.seconds);
+      BaseConsume<?>[] arr = cons.values().toArray(new BaseConsume<?>[0]);
+      Arrays.sort(arr, (a, b) -> a.type().id() - b.type().id());
+      for(BaseConsume<?> c: arr){
         if(c == null) return;
         c.display(stats);
-      });
+      }
       display.get(stats, this);
     }
   }

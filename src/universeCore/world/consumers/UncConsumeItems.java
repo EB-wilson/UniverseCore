@@ -1,6 +1,7 @@
 package universeCore.world.consumers;
 
 import arc.Core;
+import arc.math.Mathf;
 import arc.scene.ui.layout.Table;
 import mindustry.gen.Building;
 import mindustry.type.Item;
@@ -12,26 +13,28 @@ import mindustry.world.meta.Stat;
 import mindustry.world.meta.Stats;
 import universeCore.entityComps.blockComps.ConsumerBuildComp;
 
-public class UncConsumeItems extends BaseConsume<Building>{
+public class UncConsumeItems<T extends Building & ConsumerBuildComp> extends BaseConsume<T>{
   public ItemStack[] items;
 
   public UncConsumeItems(ItemStack[] items){
     this.items = items;
   }
   
-  public UncConsumeType<UncConsumeItems> type(){
+  public UncConsumeType<UncConsumeItems<?>> type(){
     return UncConsumeType.item;
   }
   
   @Override
-  public void consume(Building object){
+  public void consume(T object){
+    float f = object.consumeMultiplier(this);
     for(ItemStack stack : items){
-      object.items.remove(stack.item, stack.amount);
+      int amount = stack.amount*((int)Math.floor(f)) + Mathf.num(Math.random()<f%1);
+      object.items.remove(stack.item, amount);
     }
   }
 
   @Override
-  public void update(Building entity) {
+  public void update(T entity) {
 
   }
   
@@ -43,14 +46,14 @@ public class UncConsumeItems extends BaseConsume<Building>{
         t.defaults().left().grow().fill().padLeft(6);
         t.add(Core.bundle.get("misc.item") + ":");
         for(ItemStack stack: items){
-          t.add(new ItemDisplay(stack.item, stack.amount, true));
+          t.add(new ItemDisplay(stack.item, stack.amount, parent.craftTime, true));
         }
       }).left().padLeft(5);
     });
   }
 
   @Override
-  public void build(Building entity, Table table) {
+  public void build(T entity, Table table) {
     for(ItemStack stack : items){
       table.add(new ReqImage(new ItemImage(stack.item.uiIcon, stack.amount),
       () -> entity.items != null && entity.items.has(stack.item, stack.amount))).padRight(8);
@@ -59,7 +62,7 @@ public class UncConsumeItems extends BaseConsume<Building>{
   }
 
   @Override
-  public boolean valid(Building entity){
+  public boolean valid(T entity){
     for(ItemStack stack: items){
       if(entity.items == null || entity.items.get(stack.item) < stack.amount) return false;
     }
@@ -67,7 +70,7 @@ public class UncConsumeItems extends BaseConsume<Building>{
   }
 
   @Override
-  public Item[] filter(Building entity){
+  public Item[] filter(T entity){
     int i = 0;
     Item[] acceptItems = new Item[items.length];
     for(ItemStack stack: items){

@@ -10,7 +10,7 @@ import mindustry.world.meta.Stat;
 import mindustry.world.meta.Stats;
 import universeCore.entityComps.blockComps.ProducerBuildComp;
 
-public class ProduceItems extends BaseProduce<Building>{
+public class ProduceItems<T extends Building & ProducerBuildComp> extends BaseProduce<T>{
   /*控制是否随机产出产物(也就是是否为分离机)*/
   public boolean random = false;
   public ItemStack[] items;
@@ -24,15 +24,17 @@ public class ProduceItems extends BaseProduce<Building>{
   }
   
   @Override
-  public ProduceType<ProduceItems> type() {
+  public ProduceType<ProduceItems<?>> type() {
     return ProduceType.item;
   }
   
   @Override
-  public void produce(Building entity){
+  public void produce(T entity){
+    float f = entity.productMultiplier(this);
     if(!random){
       for(ItemStack stack: items){
-        entity.items.add(stack.item, stack.amount);
+        int amount = stack.amount*((int)Math.floor(f)) + Mathf.num(Math.random()<f%1);
+        entity.items.add(stack.item, amount);
       }
     }
     /*随机产出一种产物，amount参数变更为权*/
@@ -51,7 +53,10 @@ public class ProduceItems extends BaseProduce<Building>{
         }
         count += stack.amount;
       }
-      if(item != null) entity.items.add(item, 1);
+      if(item != null){
+        int amount = (int)(Math.floor(f) + Mathf.num(Math.random()<f%1));
+        entity.items.add(item, amount);
+      }
     }
   }
 
@@ -76,7 +81,7 @@ public class ProduceItems extends BaseProduce<Building>{
         t.add(Core.bundle.get("misc.item") + ":").left();
         if(!random){
           for(ItemStack stack: items){
-            t.add(new ItemDisplay(stack.item, stack.amount, true));
+            t.add(new ItemDisplay(stack.item, stack.amount, parent.cons.craftTime, true));
           }
         }
         else{

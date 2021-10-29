@@ -6,7 +6,7 @@ import mindustry.world.meta.StatUnit;
 import mindustry.world.meta.Stats;
 import universeCore.entityComps.blockComps.ProducerBuildComp;
 
-public class ProducePower extends BaseProduce<Building>{
+public class ProducePower<T extends Building & ProducerBuildComp> extends BaseProduce<T>{
   public float powerProduction;
   public final Stat generationType;
   
@@ -21,7 +21,7 @@ public class ProducePower extends BaseProduce<Building>{
   }
   
   @Override
-  public ProduceType<ProducePower> type(){
+  public ProduceType<ProducePower<?>> type(){
     return ProduceType.power;
   }
   

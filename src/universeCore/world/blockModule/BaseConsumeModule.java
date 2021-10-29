@@ -1,18 +1,15 @@
 package universeCore.world.blockModule;
 
 import arc.scene.ui.layout.Table;
+import arc.struct.ObjectMap;
+import arc.struct.ObjectSet;
 import arc.struct.Seq;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
-import mindustry.world.consumers.Consume;
-import mindustry.world.consumers.Consumers;
 import mindustry.world.meta.BlockStatus;
 import mindustry.world.modules.ConsumeModule;
-import universeCore.entityComps.blockComps.ConsumerBuildComp;
-import universeCore.world.consumers.BaseConsume;
-import universeCore.world.consumers.BaseConsumers;
-import universeCore.world.consumers.UncConsumePower;
-import universeCore.world.consumers.UncConsumeType;
+import universeCore.entityComps.blockComps.*;
+import universeCore.world.consumers.*;
 
 import java.util.ArrayList;
 
@@ -24,10 +21,14 @@ public class BaseConsumeModule extends ConsumeModule{
   protected final float[] optProgress;
   public final boolean oneOfOptionCons;
   
+  public boolean acceptAll;
+  
   public BaseConsumers current;
   public BaseConsumers optionalCurr;
   public boolean valid;
-  public Seq<Seq<Seq<Object>>> filter = new Seq<>();
+  public Seq<ObjectMap<UncConsumeType<?>, ObjectSet<Object>>> filter = new Seq<>();
+  public ObjectMap<UncConsumeType<?>, ObjectSet<Object>> optionalFilter = new ObjectMap<>();
+  public ObjectMap<UncConsumeType<?>, ObjectSet<Object>> allFilter = new ObjectMap<>();
   
   private float powerCons;
 
@@ -39,13 +40,21 @@ public class BaseConsumeModule extends ConsumeModule{
     optionalCons = optional.size() > 0? optional.toArray(new BaseConsumers[0]): null;
     optProgress = new float[optionalCons == null? 0: optionalCons.length];
     current = consumes != null && entity.consumeCurrent() != -1 ? consumes[entity.consumeCurrent()] : null;
-    appliedFilter();
+    applyFilter();
   }
 
   public void build(Table table){
     if(current != null) for(BaseConsume cons: current.all()){
-      cons.build(entity, table);
+      cons.build(entity.getBuilding(), table);
     }
+  }
+  
+  public BaseConsumers[] get(){
+    return consumes;
+  }
+  
+  public BaseConsumers[] getOptional(){
+    return optionalCons;
   }
   
   public BlockStatus status(){
@@ -68,45 +77,44 @@ public class BaseConsumeModule extends ConsumeModule{
     return optionalCons != null;
   }
   
-  public void appliedFilter(){
-    /*数组向后移位，长度最少为1，[0]用于存储可选的消耗输入*/
-    filter.add(new Seq<>());
-    
-    /*可选输入占用[0]*/
+  public void applyFilter(){
     if(optionalCons != null){
       for(BaseConsumers cons: optionalCons){
         for(BaseConsume c: cons.all()){
-          if(c.filter(entity) != null){
-            if(c.type().id() >= filter.get(0).size){
-              filter.get(0).setSize(c.type().id()+1);
+          if(c.filter(entity.getBuilding()) != null){
+            if(optionalFilter.get(c.type()) == null){
+              optionalFilter.put(c.type(), new ObjectSet<>());
             }
-            if(filter.get(0).get(c.type().id()) == null){
-              filter.get(0).set(c.type().id(), new Seq<>());
-            }
-            filter.get(0).get(c.type().id()).addAll(c.filter(entity));
+            optionalFilter.get(c.type()).addAll(c.filter(entity.getBuilding()));
           }
         }
       }
     }
     
-    /*从[1]开始*/
-    int l = 1;
     if(consumes != null){
-      for(BaseConsumers cons: consumes){
-        filter.add(new Seq<>());
+      for(int l=0; l<consumes.length; l++){
+        BaseConsumers cons = consumes[l];
+        ObjectMap<UncConsumeType<?>, ObjectSet<Object>> map = new ObjectMap<>();
+        filter.add(map);
         for(BaseConsume c: cons.all()){
-          if(c.filter(entity) != null){
-            if(c.type().id() >= filter.get(l).size) filter.get(l).setSize(c.type().id() + 1);
-            filter.get(l).set(c.type().id(), new Seq<>(c.filter(entity)));
+          if(c.filter(entity.getBuilding()) != null){
+            map.put(c.type(), ObjectSet.with(c.filter(entity.getBuilding())));
+            if(allFilter.get(c.type()) == null){
+              allFilter.put(c.type(), new ObjectSet<>());
+            }
+            allFilter.get(c.type()).addAll(c.filter(entity.getBuilding()));
           }
         }
-        l++;
       }
     }
   }
   
   public float getPowerUsage(){
-    return powerCons;
+    return powerCons*entity.consumeMultiplier(current.get(UncConsumeType.power));
+  }
+  
+  public void setCurrent(){
+    current = consumes[entity.consumeCurrent()];
   }
   
   @Override
@@ -120,14 +128,14 @@ public class BaseConsumeModule extends ConsumeModule{
     valid = true;
     //Log.info("on consume update,data:[recipeCurrent:" + entity.recipeCurrent + ",consume:" + Arrays.toString(consumes) + ",optionalCons:" + Arrays.toString(optionalCons) + "]");
     if(entity.consumeCurrent() >= 0 && consumes != null){
-      current = consumes[entity.consumeCurrent()];
+      setCurrent();
       if(current != null){
         valid &= current.valid.get(entity);
         for(BaseConsume cons: current.all()){
           if(cons instanceof UncConsumePower) powerCons += ((UncConsumePower) cons).usage;
-          valid &= cons.valid(entity);
-          if(docons && preValid && cons.valid(entity)){
-            cons.update(entity);
+          valid &= cons.valid(entity.getBuilding());
+          if(docons && preValid && cons.valid(entity.getBuilding())){
+            cons.update(entity.getBuilding());
           }
         }
       }
@@ -138,35 +146,41 @@ public class BaseConsumeModule extends ConsumeModule{
         
         boolean optionalValid = cons.valid.get(entity);
         for(BaseConsume c: cons.all()){
-          optionalValid &= c.valid(entity);
+          optionalValid &= c.valid(entity.getBuilding());
         }
         if(optionalValid){
           optionalCurr = cons;
           
           for(BaseConsume c: cons.all()){
             if(docons){
-              c.update(entity);
+              c.update(entity.getBuilding());
               if(c instanceof UncConsumePower) powerCons += ((UncConsumePower) c).usage;
             }
           }
-          optProgress[id] += 1/cons.craftTime*entity.getBuilding().edelta();
+          optProgress[id] += 1/cons.craftTime*entity.consDelta(optionalCurr);
           if(optProgress[id] >= 1){
             optProgress[id] %= 1;
             triggerOpt(id);
           }
           cons.optionalDef.get(entity, cons);
-          if(oneOfOptionCons){
-            break;
-          }
+          if(oneOfOptionCons) break;
         }
       }
     }
   }
-
+  
+  public BaseConsumers get(int index){
+    return consumes[index];
+  }
+  
+  public BaseConsumers getOptional(int index){
+    return index < optionalCons.length? optionalCons[index]: null;
+  }
+  
   public void trigger(){
     if(current != null){
       for(BaseConsume cons: current.all()){
-        cons.consume(entity);
+        cons.consume(entity.getBuilding());
       }
       current.trigger.get(entity);
     }
@@ -176,12 +190,10 @@ public class BaseConsumeModule extends ConsumeModule{
     if(optionalCons != null && optionalCons.length > id){
       BaseConsumers cons = optionalCons[id];
       boolean optionalValid = true;
-      for(BaseConsume c: cons.all()) optionalValid &= c.valid(entity);
-      if(optionalValid){
-        for(BaseConsume c: cons.all()){
-          c.consume(entity);
-        }
+      for(BaseConsume c: cons.all()){
+        c.consume(entity.getBuilding());
       }
+      cons.trigger.get(entity);
     };
   }
   
@@ -189,7 +201,7 @@ public class BaseConsumeModule extends ConsumeModule{
     boolean temp = true;
     for(BaseConsume cons: current.all()){
       if(cons.type().id() == id) continue;
-      temp &= cons.valid(entity);
+      temp &= cons.valid(entity.getBuilding());
     }
     return temp;
   }
@@ -200,7 +212,7 @@ public class BaseConsumeModule extends ConsumeModule{
   }
   
   public boolean valid(UncConsumeType type){
-    return current.get(type) != null && current.get(type).valid(entity);
+    return current.get(type) != null && current.get(type).valid(entity.getBuilding());
   }
   
   public boolean valid(int index){
@@ -208,7 +220,7 @@ public class BaseConsumeModule extends ConsumeModule{
     
     BaseConsumers cons = consumes[index];
     for(BaseConsume c: cons.all()){
-      if(!c.valid(entity)) return false;
+      if(!c.valid(entity.getBuilding())) return false;
     }
     
     return true;
@@ -221,9 +233,10 @@ public class BaseConsumeModule extends ConsumeModule{
   * @return 布尔值，是否接受此对象
   * */
   public boolean filter(UncConsumeType<?> type, Object target){
-    return (entity.consumeCurrent() >= 0 && filter.size > 1 && filter.get(entity.consumeCurrent() + 1).size > type.id() &&
-      filter.get(entity.consumeCurrent() + 1).get(type.id()) != null && filter.get(entity.consumeCurrent() + 1).get(type.id()).contains(target)) ||
-      filter.size > 0 && filter.get(0).size > type.id() && filter.get(0).get(type.id()) != null && filter.get(0).get(type.id()).contains(target)/*可选输入*/;
+    return optionalFilter.containsKey(type) && optionalFilter.get(type).contains(target) || //可选的
+        (acceptAll && allFilter.containsKey(type) && allFilter.get(type).contains(target)) ||
+        (entity.consumeCurrent() >= 0 && filter.get(entity.consumeCurrent()).containsKey(type)
+            && filter.get(entity.consumeCurrent()).get(type).contains(target));
   }
 
   @Override

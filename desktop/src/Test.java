@@ -2,27 +2,18 @@
 import universeCore.util.handler.EnumHandler;
 import universeCore.util.handler.FieldHandler;
 
+import java.lang.reflect.Field;
+
 public class Test{
   public static void main(String[] args){
-    Object i = 2;
-    System.out.println(i.getClass());
+    Test1 test1 = new Test1();
+    FieldHandler.setValue(Test1.class, "a", test1, 10);
+    System.out.println(test1.a);
   }
   
   static class Stick{
-    Stick previous;
-    String self;
-    boolean first;
-  
-    Stick(Stick pre, String self){
-      previous = pre;
-      this.self = self;
-      first = false;
-    }
-  
-    Stick(String self){
-      previous = null;
-      this.self = self;
-      first = true;
-    }
+    public int a;
   }
+  
+  static class Test1 extends Stick{}
 }

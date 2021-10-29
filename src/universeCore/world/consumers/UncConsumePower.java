@@ -9,10 +9,8 @@ import mindustry.world.meta.Stats;
 import universeCore.entityComps.blockComps.ConsumerBuildComp;
 
 /*仅仅保存消耗参数，能量消耗本身实际应用仍为默认consumes*/
-public class UncConsumePower extends BaseConsume<Building>{
-  /** The maximum amount of power which can be processed per tick. This might influence efficiency or load a buffer. */
+public class UncConsumePower<T extends Building & ConsumerBuildComp> extends BaseConsume<T>{
   public final float usage;
-  /** True if the module can store power. */
   public final boolean buffered;
 
   public UncConsumePower(float usage, boolean buffered){
@@ -20,22 +18,22 @@ public class UncConsumePower extends BaseConsume<Building>{
     this.buffered = buffered;
   }
   
-  public UncConsumeType<UncConsumePower> type(){
+  public UncConsumeType<?> type(){
     return UncConsumeType.power;
   }
   
   @Override
-  public void build(Building tile, Table table){
+  public void build(T tile, Table table){
     //No tooltip for power, for now
   }
 
   @Override
-  public void update(Building entity){
+  public void update(T entity){
 
   }
 
   @Override
-  public boolean valid(Building entity){
+  public boolean valid(T entity){
     if(buffered){
       return true;
     }
@@ -50,12 +48,12 @@ public class UncConsumePower extends BaseConsume<Building>{
   }
 
   @Override
-  public void consume(Building entity) {
+  public void consume(T entity) {
 
   }
 
   @Override
-  public Object[] filter(Building entity) {
+  public Object[] filter(T entity) {
     return null;
   }
 }

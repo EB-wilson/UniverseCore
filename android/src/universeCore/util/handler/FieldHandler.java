@@ -1,12 +1,30 @@
 package universeCore.util.handler;
 
+import arc.struct.Seq;
 import arc.util.Log;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.*;
+import java.util.Arrays;
 
 /**通过反射更改属性值的工具类*/
 public class FieldHandler{
+  public static Field getDeclaredFieldSuper(Class<?> clazz, String name) throws NoSuchFieldException{
+    Class<?> current = clazz;
+    Seq<Field> checking = new Seq<>();
+    
+    while(current != Object.class){
+      checking.addAll(current.getDeclaredFields());
+      
+      Field result = checking.find(f -> f.getName().equals(name));
+      if(result != null) return result;
+      
+      current = current.getSuperclass();
+    }
+    
+    throw new NoSuchFieldException("no such field \"" + name + "\" found in " + clazz + " and super class!");
+  }
+  
   /**改变指定对象的选中属性的值，
   * 将无视该属性的访问修饰符和final修饰符
   * @param key 要进行更改的属性名称
@@ -16,7 +34,7 @@ public class FieldHandler{
   * */
   public static Object setValue(Class<?> clazz, String key, Object object, Object value){
     try{
-      return setValue(clazz.getDeclaredField(key), object, value);
+      return setValue(getDeclaredFieldSuper(clazz, key), object, value);
     }catch(NoSuchFieldException e){
       throw new RuntimeException(e);
     }
@@ -30,7 +48,6 @@ public class FieldHandler{
   * @return 被更改的值
   * */
   public static Object setValue(Field field, Object object, Object value){
-    Log.debug("doing" + object);
     Object least = getValue(field, object);
     
     field.setAccessible(true);
@@ -46,7 +63,7 @@ public class FieldHandler{
   @SuppressWarnings("unchecked")
   public static <T> T getValue(Object target, String key){
     try{
-      Field field = target.getClass().getDeclaredField(key);
+      Field field = getDeclaredFieldSuper(target.getClass(), key);
       return (T) getValue(field, target);
     }catch(NoSuchFieldException e){
       throw new RuntimeException(e);

@@ -8,7 +8,7 @@ import mindustry.world.meta.Stats;
 import universeCore.entityComps.blockComps.ProducerBuildComp;
 import universeCore.util.UncLiquidStack;
 
-public class ProduceLiquids extends BaseProduce<Building>{
+public class ProduceLiquids<T extends Building & ProducerBuildComp> extends BaseProduce<T>{
   public boolean portion = false;
   public UncLiquidStack[] liquids;
 
@@ -21,27 +21,27 @@ public class ProduceLiquids extends BaseProduce<Building>{
   }
   
   @Override
-  public ProduceType<ProduceLiquids> type(){
+  public ProduceType<ProduceLiquids<?>> type(){
     return ProduceType.liquid;
   }
   
   @Override
-  public void produce(Building entity) {
+  public void produce(T entity) {
     if(portion) for(UncLiquidStack stack: liquids){
       entity.liquids.add(stack.liquid, stack.amount*60);
     }
   }
 
   @Override
-  public void update(Building entity) {
+  public void update(T entity) {
     if(!portion) for(UncLiquidStack stack: liquids){
-      entity.liquids.add(stack.liquid, stack.amount*entity.edelta());
+      entity.liquids.add(stack.liquid, stack.amount*entity.consDelta(parent)*entity.productMultiplier(this));
       //Log.info("Liquid update is running, output:：" + stack.amount*entity.edelta() + ",amount:" + stack.amount + ",efficiency:" + entity.efficiency() + ",delta:" + entity.delta());
     }
   }
   
   @Override
-  public void dump(Building entity) {
+  public void dump(T entity) {
     for(UncLiquidStack stack: liquids){
       entity.dumpLiquid(stack.liquid);
     }
@@ -62,7 +62,7 @@ public class ProduceLiquids extends BaseProduce<Building>{
   }
   
   @Override
-  public boolean valid(Building entity){
+  public boolean valid(T entity){
     for(UncLiquidStack stack: liquids){
       if(entity.liquids.get(stack.liquid) >= entity.block.liquidCapacity) return false;
     }

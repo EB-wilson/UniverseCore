@@ -1,9 +1,14 @@
 package universeCore.entityComps.blockComps;
 
+import arc.math.Mathf;
 import arc.struct.ObjectMap;
+import arc.util.Time;
+import mindustry.world.blocks.power.PowerGraph;
+import mindustry.world.consumers.Consumers;
 import universeCore.util.handler.FieldHandler;
 import universeCore.world.blockModule.BaseConsumeModule;
-import universeCore.world.consumers.UncConsumeType;
+import universeCore.world.consumers.BaseConsume;
+import universeCore.world.consumers.BaseConsumers;
 
 /**消耗者组件，令方块具有进行资源消耗与可用标记的能力
  * 必须创建的变量：
@@ -32,6 +37,14 @@ public interface ConsumerBuildComp extends BuildCompBase, FieldGetter{
   @SuppressWarnings("unchecked")
   default <T> T consData(Class<T> clazz, T def){
     return (T)consData().get(clazz, def);
+  }
+  
+  default float consumeMultiplier(BaseConsume<?> cons){
+    return 1;
+  }
+  
+  default float consDelta(BaseConsumers cons){
+    return cons.acceptOverdrive? getBuilding().edelta(): getBuilding().efficiency()*Time.delta;
   }
   
   default <T> void consData(T object){
