@@ -13,13 +13,14 @@ import universeCore.world.consumers.*;
 
 import java.util.ArrayList;
 
+/**生产者的消耗器模块，用于集中处理方块的材料需求等，提供了可选需求以及其特殊的触发器
+ * @author EBwilson 😀*/
 @SuppressWarnings("all")
 public class BaseConsumeModule extends ConsumeModule{
   protected final ConsumerBuildComp entity;
   protected final BaseConsumers[] consumes;
   protected final BaseConsumers[] optionalCons;
   protected final float[] optProgress;
-  public final boolean oneOfOptionCons;
   
   public boolean acceptAll;
   
@@ -35,7 +36,6 @@ public class BaseConsumeModule extends ConsumeModule{
   public BaseConsumeModule(ConsumerBuildComp entity, ArrayList<BaseConsumers> cons, ArrayList<BaseConsumers> optional){
     super(entity.getBuilding());
     this.entity = entity;
-    this.oneOfOptionCons = entity.getConsumerBlock().oneOfOptionCons();
     consumes = cons.size() > 0? cons.toArray(new BaseConsumers[0]): null;
     optionalCons = optional.size() > 0? optional.toArray(new BaseConsumers[0]): null;
     optProgress = new float[optionalCons == null? 0: optionalCons.length];
@@ -121,13 +121,14 @@ public class BaseConsumeModule extends ConsumeModule{
   public void update(){
     current = null;
     powerCons = 0;
-    if((!hasOptional() && !hasConsume()) || entity.consumeCurrent() == -1) return;
+    if((!hasOptional() && !hasConsume())) return;
     boolean docons = entity.shouldConsume() && entity.productionValid();
-    boolean preValid = valid();
     
-    valid = true;
-    //Log.info("on consume update,data:[recipeCurrent:" + entity.recipeCurrent + ",consume:" + Arrays.toString(consumes) + ",optionalCons:" + Arrays.toString(optionalCons) + "]");
+    //只在选中消耗列表时才进行消耗更新
     if(entity.consumeCurrent() >= 0 && consumes != null){
+      boolean preValid = valid();
+      valid = true;
+      
       setCurrent();
       if(current != null){
         valid &= current.valid.get(entity);
@@ -140,6 +141,8 @@ public class BaseConsumeModule extends ConsumeModule{
         }
       }
     }
+    
+    //更新可选消耗列表
     if(optionalCons != null){
       for(int id=0; id<optionalCons.length; id++){
         BaseConsumers cons = optionalCons[id];
@@ -163,20 +166,23 @@ public class BaseConsumeModule extends ConsumeModule{
             triggerOpt(id);
           }
           cons.optionalDef.get(entity, cons);
-          if(oneOfOptionCons) break;
+          if(entity.getConsumerBlock().oneOfOptionCons()) break;
         }
       }
     }
   }
   
+  /**获取指定索引的消耗列表*/
   public BaseConsumers get(int index){
     return consumes[index];
   }
   
+  /**获取指定索引处的可选消耗列表*/
   public BaseConsumers getOptional(int index){
     return index < optionalCons.length? optionalCons[index]: null;
   }
   
+  /**触发一次所有主要消耗项的trigger方法*/
   public void trigger(){
     if(current != null){
       for(BaseConsume cons: current.all()){
@@ -186,10 +192,10 @@ public class BaseConsumeModule extends ConsumeModule{
     }
   }
   
+  /**触发一次所有可选消耗项的trigger方法*/
   public void triggerOpt(int id){
     if(optionalCons != null && optionalCons.length > id){
       BaseConsumers cons = optionalCons[id];
-      boolean optionalValid = true;
       for(BaseConsume c: cons.all()){
         c.consume(entity.getBuilding());
       }
@@ -197,24 +203,27 @@ public class BaseConsumeModule extends ConsumeModule{
     };
   }
   
-  public boolean excludeValid(int id){
+  /**当前消耗列表除指定消耗项以外是否其他全部可用*/
+  public boolean excludeValid(UncConsumeType type){
     boolean temp = true;
     for(BaseConsume cons: current.all()){
-      if(cons.type().id() == id) continue;
+      if(cons.type() == type) continue;
       temp &= cons.valid(entity.getBuilding());
     }
     return temp;
   }
   
+  /**当前消耗列表是否可用*/
   public boolean valid(){
-    //Log.info("getField cons valid, data:[valid:" + valid + ",shouldConsume:" + entity.shouldConsume() + "enable:" + entity.enabled + "]");
     return valid && entity.shouldConsume() && entity.getBuilding().enabled;
   }
   
+  /**当前消耗列表指定消耗项是否可用*/
   public boolean valid(UncConsumeType type){
     return current.get(type) != null && current.get(type).valid(entity.getBuilding());
   }
   
+  /**制定的消耗列表是否可用*/
   public boolean valid(int index){
     if(index >= consumes.length) return false;
     

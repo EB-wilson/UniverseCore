@@ -5,6 +5,7 @@ import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import arc.util.Log;
 import mindustry.Vars;
+import mindustry.content.TechTree;
 import mindustry.ctype.Content;
 import mindustry.ctype.ContentType;
 import mindustry.ctype.MappableContent;
@@ -16,8 +17,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
 
+/**操作content的静态方法集合
+ * @author EBwilson */
 public class ContentHandler{
-  /**用于覆盖一个原有的content，可能需要后续重新加载科技树
+  /**用于覆盖一个原有的content
    *
    * @param oldContent 将要被取代的content
    * @param newContent 重写后的content
@@ -72,6 +75,10 @@ public class ContentHandler{
       if(contentNameMap != null){
         contentNameMap[type.ordinal()].put(oldName, newContent);
         contentNameMap[type.ordinal()].remove(newName);
+      }
+      
+      if(oldContent instanceof UnlockableContent && newContent instanceof UnlockableContent){
+        TechTree.get((UnlockableContent) oldContent).content = (UnlockableContent)newContent;
       }
     }
     catch(Throwable e){

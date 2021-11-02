@@ -8,6 +8,8 @@ import universeCore.world.producers.*;
 
 import java.util.List;
 
+/**生产者的产出模块，用于集中处理方块的生产工作
+ * @author EBwilson*/
 @SuppressWarnings("all")
 public class BaseProductModule extends BlockModule {
   public BaseConsumeModule consumer;
@@ -39,30 +41,27 @@ public class BaseProductModule extends BlockModule {
   
   public void update(){
     current = null;
-    if(entity.produceCurrent() == -1 || produces == null) return;
-    setCurrent();
-    boolean docons = entity.consValid() && entity.shouldConsume() && entity.productionValid();
-    boolean preValid = valid();
+    if(produces == null) return;
     
-    valid = true;
-    if(current != null) for(BaseProduce prod: current.all()){
-      valid &= prod.valid(entity.getBuilding());
-      if(docons && preValid && prod.valid(entity.getBuilding())){
-        prod.update(entity.getBuilding());
-        //Log.info("Run update,recipeCurrent:" + prod.id());
+    //只在选择了生产列表时才进行产出更新
+    if(entity.produceCurrent() >= 0){
+      setCurrent();
+      boolean docons = entity.consValid() && entity.shouldConsume() && entity.productionValid();
+      boolean preValid = valid();
+  
+      valid = true;
+      if(current != null) for(BaseProduce prod : current.all()){
+        valid &= prod.valid(entity.getBuilding());
+        if(docons && preValid && prod.valid(entity.getBuilding())){
+          prod.update(entity.getBuilding());
+        }
       }
     }
-    //Log.info("update is run，docons:" + docons + ",valid:" + valid);
+    
+    //无论何时都向外导出产品
     for(BaseProducers p: produces){
       for(BaseProduce prod: p.all()) prod.dump(entity.getBuilding());
     }
-  }
-  
-  public int indexOf(BaseProducers prod){
-    for(int i=0; i<produces.length; i++){
-      if(produces[i] == prod) return i;
-    }
-    return -1;
   }
   
   public boolean valid(){

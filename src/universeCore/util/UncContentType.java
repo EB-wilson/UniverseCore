@@ -9,6 +9,8 @@ import universeCore.util.handler.FieldHandler;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/**contentType处理对象，用于创建新的内容类型，以及处理类型的显示排序
+ * @author EBwilson */
 public class UncContentType{
   private final static EnumHandler<ContentType> handler = new EnumHandler<>(ContentType.class);
   

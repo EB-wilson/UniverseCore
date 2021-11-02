@@ -10,9 +10,12 @@ import mindustry.world.meta.StatCat;
 import mindustry.world.meta.StatValue;
 import mindustry.world.meta.Stats;
 
+/**生产消耗的统计信息显示器，用于显示几组生产列表的信息
+ * @author EBwilson */
 public class RecipeTable extends Table{
   public Stats[] stats;
   
+  /**构造一个对象后进行stats信息编辑，完成后调用build()方法才能完成列表构建*/
   public RecipeTable(int length){
     stats = new Stats[length];
   }

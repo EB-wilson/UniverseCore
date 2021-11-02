@@ -13,7 +13,8 @@ import universeCore.world.producers.BaseProducers;
  * <pre>{@code
  *   AneProductModule [producer]
  * }<pre/>
- * 若使用非默认命名则需要重写调用方法*/
+ * 若使用非默认命名则需要重写调用方法
+ * @author EBwilson*/
 public interface ProducerBuildComp extends BuildCompBase, FieldGetter, ConsumerBuildComp{
   default int produceCurrent(){
     return consumeCurrent();

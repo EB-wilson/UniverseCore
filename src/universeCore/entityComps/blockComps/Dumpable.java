@@ -4,6 +4,7 @@ import arc.func.Boolf;
 import arc.struct.Seq;
 import mindustry.gen.Building;
 
+//TODO： 这个请优化一下
 public interface Dumpable extends FieldGetter{
   default byte getCdump(){
     return getField(byte.class, "cdump");

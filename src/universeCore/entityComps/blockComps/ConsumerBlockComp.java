@@ -15,18 +15,15 @@ import universeCore.world.meta.UncStat;
 
 import java.util.ArrayList;
 
-/**Consume组件，为方块添加可标记消耗的功能
+/**Consume组件，为方块添加可标记消耗项的功能
  * 必须创建的变量：
  * <pre>{@code
  *   ArrayList<AneConsumers> [consumers]
  *   ArrayList<AneConsumers> [optionalCons]
  * }<pre/>
- * 若使用非默认命名则需要重写调用方法*/
+ * 若使用非默认命名则需要重写调用方法
+ * @author EBwilson */
 public interface ConsumerBlockComp extends BuildCompBase, FieldGetter{
-  default boolean autoSelect(){
-    return getField(boolean.class, "autoSelect");
-  }
-  
   @SuppressWarnings("unchecked")
   default ArrayList<BaseConsumers> consumers(){
     return getField(ArrayList.class, "consumers");
@@ -74,6 +71,7 @@ public interface ConsumerBlockComp extends BuildCompBase, FieldGetter{
     return consume;
   }
   
+  /**为将方块加入到能量网络中，需要初始化一个原有的能量消耗器进行代理，在此进行，int之前调用*/
   default void initPower(float powerCapacity){
     Block block = (Block)this;
     block.consumes.add(new ConsumePower(0 ,powerCapacity, powerCapacity > 0){
@@ -81,7 +79,7 @@ public interface ConsumerBlockComp extends BuildCompBase, FieldGetter{
       public float requestedPower(Building e){
         ConsumerBuildComp entity = (ConsumerBuildComp)e;
         if(entity.consumer().current == null) return 0f;
-        if(entity.getBuilding().tile().build == null || entity.consumeCurrent() == -1 || !entity.consumer().excludeValid(2)) return 0f;
+        if(entity.getBuilding().tile().build == null || entity.consumeCurrent() == -1 || !entity.consumer().excludeValid(UncConsumeType.power)) return 0f;
         if(buffered){
           return (1f-entity.getBuilding().power.status)*capacity;
         }

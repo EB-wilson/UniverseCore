@@ -17,21 +17,31 @@ import universeCore.util.UncLiquidStack;
 import java.util.Arrays;
 import java.util.HashMap;
 
+/**消耗列表，记录一个消耗的包含生产时间，可选性等在内的所有信息
+ * @author EBwilson */
 public class BaseConsumers{
   protected final HashMap<UncConsumeType<?>, BaseConsume<?>> cons = new HashMap<>();
   
   /**该值控制生产消耗的时间*/
   public float craftTime = 60;
-  public boolean showTime = true;
+  /**是否在统计栏显示消耗所需时间*/
+  public boolean showTime = false;
   
+  /**是否为可选*/
   public final boolean optional;
+  /**是否接受超速加成*/
   public boolean acceptOverdrive = true;
   
+  /**自定义图标，在选择消耗列表时显示*/
   public TextureRegion icon;
+  /**可选列表可用时将随更新执行的目标函数*/
   public Cons2<ConsumerBuildComp, BaseConsumers> optionalDef = (entity, cons) -> {};
+  /**在统计信息显示自定义内容的函数*/
   public Cons2<Stats, BaseConsumers> display = (stats, cons) -> {};
   
+  /**本消耗的可用控制器*/
   public Boolf<ConsumerBuildComp> valid = e -> true;
+  /**消耗触发器，在消耗的trigger()方法执行时触发*/
   public Cons<ConsumerBuildComp> trigger = e -> {};
   
   public BaseConsumers(boolean optional){
@@ -45,6 +55,7 @@ public class BaseConsumers{
   
   public void time(float time){
     this.craftTime = time;
+    showTime = true;
   }
   
   public UncConsumeItems<?> item(Item item, int amount){

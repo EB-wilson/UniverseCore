@@ -10,16 +10,17 @@ import universeCore.world.blockModule.BaseConsumeModule;
 import universeCore.world.consumers.BaseConsume;
 import universeCore.world.consumers.BaseConsumers;
 
-/**消耗者组件，令方块具有进行资源消耗与可用标记的能力
+/**消耗者组件，令方块具有进行资源消耗与资源检查的能力
  * 必须创建的变量：
  * <pre>{@code
  *   AneConsumeModule [consumer]
  * }<pre/>
- * 若使用非默认命名则需要重写调用方法*/
+ * 若使用非默认命名则需要重写调用方法
+ * @author EBwilson */
 public interface ConsumerBuildComp extends BuildCompBase, FieldGetter{
   int consumeCurrent();
   
-  /**获得该块的NuclearEnergyBlock*/
+  /**获得该块的ConsumerBlock*/
   default ConsumerBlockComp getConsumerBlock(){
     return getBlock(ConsumerBlockComp.class);
   }

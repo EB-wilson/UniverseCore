@@ -2,8 +2,11 @@ package universeCore.util;
 
 import mindustry.content.Liquids;
 import mindustry.type.Liquid;
+import mindustry.type.LiquidStack;
 
-public class UncLiquidStack implements Comparable<UncLiquidStack>{
+/**提供更多操作的流体堆
+ * @author EBwilson */
+public class UncLiquidStack extends LiquidStack{
   public static final UncLiquidStack[] empty = {};
 
   public Liquid liquid;
@@ -36,18 +39,13 @@ public class UncLiquidStack implements Comparable<UncLiquidStack>{
     }
     return copy;
   }
-
+  
   public static UncLiquidStack[] with(Object... liquids){
     UncLiquidStack[] stacks = new UncLiquidStack[liquids.length / 2];
     for(int i = 0; i < liquids.length; i += 2){
       stacks[i / 2] = new UncLiquidStack((Liquid)liquids[i], ((Number)liquids[i + 1]).floatValue());
     }
     return stacks;
-  }
-
-  @Override
-  public int compareTo(UncLiquidStack liquidStack){
-    return liquid.compareTo(liquidStack.liquid);
   }
   
   @Override

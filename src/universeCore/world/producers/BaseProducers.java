@@ -15,12 +15,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 
+/**产出列表，绑定一个消耗列表，在执行消耗的同时对应执行此生产列表，以实现工厂生产
+ * @author EBwilson */
 public class BaseProducers{
   protected final HashMap<ProduceType<?>, BaseProduce<?>> prod = new HashMap<>();
 
-  /**仅在动态配方生效，用于显示选择配方的图标*/
+  /**用于显示选择配方的图标*/
   public TextureRegion icon;
-  /**仅在动态配方生效，用于显示选择配方的顶部颜色*/
+  /**用于显示选择配方的顶部颜色*/
   public Color color;
   
   public BaseConsumers cons;

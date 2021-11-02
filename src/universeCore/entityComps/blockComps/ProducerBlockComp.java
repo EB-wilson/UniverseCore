@@ -12,7 +12,8 @@ import java.util.ArrayList;
  * <pre>{@code
  *   Seq<Producers> [producers]
  * }<pre/>
- * 若使用非默认命名则需要重写调用方法*/
+ * 若使用非默认命名则需要重写调用方法
+ * @author EBwilson */
 public interface ProducerBlockComp extends FieldGetter, ConsumerBlockComp{
   @SuppressWarnings("unchecked")
   default ArrayList<BaseProducers> producers(){
@@ -41,6 +42,7 @@ public interface ProducerBlockComp extends FieldGetter, ConsumerBlockComp{
     }
   }
   
+  /**初始化匹配消耗生产列表，在init()最后调用*/
   default void initProduct(){
     int b = producers().size();
     int a = consumers().size();
