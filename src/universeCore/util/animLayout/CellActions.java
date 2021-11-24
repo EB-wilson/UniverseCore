@@ -1,16 +1,24 @@
 package universeCore.util.animLayout;
 
+import arc.scene.ui.Label;
 import arc.struct.IntMap;
-import arc.util.Log;
+
+import java.awt.*;
 
 public class CellActions{
   protected int idCounter = 0;
   protected CellAction currentAction;
+  protected boolean wait = true;
   protected final IntMap<CellAction> actions = new IntMap<>();
   
   public void update(){
     if(actions.size == 0) return;
+    if(wait){
+      wait = false;
+      return;
+    }
     for(IntMap.Entry<CellAction> action: actions){
+      if(wait) continue;
       action.value.update();
       currentAction = action.value;
       if(action.value.isFinally()){
@@ -19,6 +27,10 @@ public class CellActions{
         currentAction = null;
       }
     }
+  }
+  
+  public void waitAction(){
+    wait = true;
   }
   
   public boolean acting(CellAction act){
@@ -37,5 +49,10 @@ public class CellActions{
   
   public void remove(int id){
     actions.remove(id);
+  }
+  
+  public void clear(){
+    actions.clear();
+    wait = true;
   }
 }

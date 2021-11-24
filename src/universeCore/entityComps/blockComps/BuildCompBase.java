@@ -7,7 +7,7 @@ import mindustry.world.modules.LiquidModule;
 
 /**建筑组件的基本接口，其实应该使用一个组建管理器构建建筑等，但anuken的做法使得这很困难
  * @author EBwilson */
-public interface BuildCompBase extends FieldGetter{
+public interface BuildCompBase{
   @SuppressWarnings("unchecked")
   default <T> T getBlock(Class<T> clazz){
     Block block = getBuilding().block;
@@ -33,11 +33,7 @@ public interface BuildCompBase extends FieldGetter{
     return null;
   }
   
-  default ItemModule items(){
-    return getField(ItemModule.class, "items");
-  }
+  ItemModule items();
   
-  default LiquidModule liquids(){
-    return getField(LiquidModule.class, "liquids");
-  }
+  LiquidModule liquids();
 }

@@ -2,8 +2,12 @@ package universeCore.world.consumers;
 
 import arc.Core;
 import arc.scene.ui.layout.Table;
+import arc.struct.Bits;
+import mindustry.Vars;
 import mindustry.gen.Building;
+import mindustry.type.ItemStack;
 import mindustry.type.Liquid;
+import mindustry.type.LiquidStack;
 import mindustry.ui.LiquidDisplay;
 import mindustry.ui.ReqImage;
 import mindustry.world.meta.Stat;
@@ -73,12 +77,11 @@ public class UncConsumeLiquids<T extends Building & ConsumerBuildComp> extends B
   }
   
   @Override
-  public Liquid[] filter(T entity){
-    int i = 0;
-    Liquid[] acceptLiquids = new Liquid[liquids.length];
+  public Bits filter(T entity){
+    Bits result = new Bits(Vars.content.liquids().size);
     for(UncLiquidStack stack: liquids){
-      acceptLiquids[i++] = stack.liquid;
+      result.set(stack.liquid.id);
     }
-    return acceptLiquids;
+    return result;
   }
 }

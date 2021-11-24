@@ -1,6 +1,7 @@
 package universeCore.world.consumers;
 
 import arc.scene.ui.layout.Table;
+import arc.struct.Bits;
 import mindustry.gen.Building;
 import mindustry.world.Build;
 import mindustry.world.meta.Stat;
@@ -51,9 +52,9 @@ public class UncConsumePower<T extends Building & ConsumerBuildComp> extends Bas
   public void consume(T entity) {
 
   }
-
+  
   @Override
-  public Object[] filter(T entity) {
+  public Bits filter(T entity){
     return null;
   }
 }

@@ -68,7 +68,7 @@ public class ProduceItems<T extends Building & ProducerBuildComp> extends BasePr
   @Override
   public void dump(Building entity) {
     for(ItemStack stack : items){
-      entity.dump(stack.item);
+      if(entity.items.get(stack.item) > 0) entity.dump(stack.item);
     }
   }
   

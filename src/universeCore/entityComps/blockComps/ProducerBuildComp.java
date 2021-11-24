@@ -15,14 +15,12 @@ import universeCore.world.producers.BaseProducers;
  * }<pre/>
  * 若使用非默认命名则需要重写调用方法
  * @author EBwilson*/
-public interface ProducerBuildComp extends BuildCompBase, FieldGetter, ConsumerBuildComp{
+public interface ProducerBuildComp extends BuildCompBase, ConsumerBuildComp{
   default int produceCurrent(){
     return consumeCurrent();
   }
   
-  default BaseProductModule producer(){
-    return getField(BaseProductModule.class, "producer");
-  }
+  BaseProductModule producer();
   
   /**获得该块的NuclearEnergyBlock*/
   default ProducerBuildComp getProducerBlock(){

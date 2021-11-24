@@ -1,4 +1,4 @@
 rootProject.name = "UniverseCore"
 
-include 'desktop', 'android'
+include 'desktop', 'android', 'tools'
 

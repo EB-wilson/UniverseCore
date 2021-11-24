@@ -4,9 +4,6 @@ import arc.struct.Seq;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**通过反射更改属性值的工具类*/
 public class FieldHandler{
@@ -142,11 +139,10 @@ public class FieldHandler{
       value);
   }
   
-  @SuppressWarnings("unchecked")
   public static <T> T getValue(Object target, String key){
     try{
       Field field = getDeclaredFieldSuper(target.getClass(), key);
-      return (T) getValue(field, target);
+      return getValue(field, target);
     }catch(NoSuchFieldException e){
       throw new RuntimeException(e);
     }
@@ -163,8 +159,10 @@ public class FieldHandler{
   @SuppressWarnings("unchecked")
   private static <T> T getValue(Field field, Object object){
     boolean isStatic = Modifier.isStatic(field.getModifiers());
-     return (T)unsafe.getObject(isStatic? unsafe.staticFieldBase(field): object,
+    T result = (T)unsafe.getObject(isStatic? unsafe.staticFieldBase(field): object,
       isStatic? unsafe.staticFieldOffset(field): unsafe.objectFieldOffset(field));
+    
+    return (T)getBasicNull(result, field.getType());
   }
   
   @SuppressWarnings("unchecked")
@@ -179,6 +177,20 @@ public class FieldHandler{
       
       return newArr;
     }
+    return null;
+  }
+  
+  private static Object getBasicNull(Object nil, Class<?> clazz){
+    if(nil != null) return nil;
+    
+    if(clazz == Float.class || clazz == float.class) return 0f;
+    if(clazz == Double.class || clazz == double.class) return 0d;
+    if(clazz == Integer.class || clazz == int.class) return 0;
+    if(clazz == Short.class || clazz == short.class) return (short)0;
+    if(clazz == Byte.class || clazz == byte.class) return (byte)0;
+    if(clazz == Long.class || clazz == long.class) return 0L;
+    if(clazz == Boolean.class) return false;
+    
     return null;
   }
 }

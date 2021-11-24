@@ -4,6 +4,8 @@ import arc.Core;
 import arc.Events;
 import arc.util.Log;
 import arc.util.Time;
+import arc.util.Tmp;
+import mindustry.Vars;
 import mindustry.game.EventType;
 import mindustry.mod.Mod;
 import mindustry.world.Block;
@@ -11,6 +13,7 @@ import universeCore.override.dialogs.UncDatabaseDialog;
 import universeCore.util.handler.CategoryHandler;
 import universeCore.util.animLayout.CellActions;
 
+import static mindustry.Vars.netClient;
 import static mindustry.Vars.ui;
 
 public class UncCore extends Mod{
@@ -20,27 +23,32 @@ public class UncCore extends Mod{
   public static CellActions cellActions = new CellActions();
   
   public UncCore(){
-    Events.run(EventType.Trigger.update, () -> {
-      cellActions.update();
-    });
+    if(Tmp.v1.x == 0){
+      Log.info("[Universe Core] core loading");
+  
+      Events.run(EventType.Trigger.update, () -> {
+        cellActions.update();
+      });
+  
+      Time.run(0f, () -> {
+        Events.on(EventType.UnlockEvent.class, event -> {
+          if(event.content instanceof Block){
+            categories.handleBlockFrag();
+          }
+        });
     
-    Time.run(0f, () -> {
-      Events.on(EventType.UnlockEvent.class, event -> {
-        if(event.content instanceof Block){
-          categories.handleBlockFrag();
-        }
+        Events.on(EventType.WorldLoadEvent.class, e -> {
+          Core.app.post(categories::handleBlockFrag);
+        });
       });
       
-      Events.on(EventType.WorldLoadEvent.class, e -> {
-        Core.app.post(categories::handleBlockFrag);
-      });
-    });
-    
-    Log.info("[Universe Core] core loading");
+      Tmp.v1.set(1, 0);
+    }
+    else Log.info("[UniverseCore] core was loaded, skip this repeat load");
   }
   
   @Override
   public void init(){
-    ui.database = new UncDatabaseDialog();
+    if(!Vars.net.server()) ui.database = new UncDatabaseDialog();
   }
 }

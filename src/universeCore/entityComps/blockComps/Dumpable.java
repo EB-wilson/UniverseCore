@@ -5,10 +5,10 @@ import arc.struct.Seq;
 import mindustry.gen.Building;
 
 //TODO： 这个请优化一下
-public interface Dumpable extends FieldGetter{
-  default byte getCdump(){
-    return getField(byte.class, "cdump");
-  }
+public interface Dumpable{
+  byte getCdump();
+  
+  Seq<Building> getDumps();
   
   default void cdumpIncrease(Seq<Building> seq){
     if(this instanceof Building){
@@ -18,11 +18,6 @@ public interface Dumpable extends FieldGetter{
   
   default void cdumpIncrease(){
     cdumpIncrease(getDumps());
-  }
-  
-  @SuppressWarnings("unchecked")
-  default Seq<Building> getDumps(){
-    return getField(Seq.class, "proximity");
   }
   
   /**用相应判据预测下一次执行dump操作(item, liquid, energy等)的被传输对象

@@ -3,6 +3,8 @@ package universeCore.world.consumers;
 import arc.Core;
 import arc.math.Mathf;
 import arc.scene.ui.layout.Table;
+import arc.struct.Bits;
+import mindustry.Vars;
 import mindustry.gen.Building;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
@@ -70,12 +72,11 @@ public class UncConsumeItems<T extends Building & ConsumerBuildComp> extends Bas
   }
 
   @Override
-  public Item[] filter(T entity){
-    int i = 0;
-    Item[] acceptItems = new Item[items.length];
+  public Bits filter(T entity){
+    Bits result = new Bits(Vars.content.items().size);
     for(ItemStack stack: items){
-      acceptItems[i++] = stack.item;
+      result.set(stack.item.id);
     }
-    return acceptItems;
+    return result;
   }
 }

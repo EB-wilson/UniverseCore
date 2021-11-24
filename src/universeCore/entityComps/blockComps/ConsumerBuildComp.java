@@ -11,23 +11,17 @@ import universeCore.world.consumers.BaseConsume;
 import universeCore.world.consumers.BaseConsumers;
 
 /**消耗者组件，令方块具有进行资源消耗与资源检查的能力
- * 必须创建的变量：
- * <pre>{@code
- *   AneConsumeModule [consumer]
- * }<pre/>
- * 若使用非默认命名则需要重写调用方法
  * @author EBwilson */
-public interface ConsumerBuildComp extends BuildCompBase, FieldGetter{
+public interface ConsumerBuildComp extends BuildCompBase{
   int consumeCurrent();
+  
+  BaseConsumeModule consumer();
+  
+  ObjectMap<Class<?>, Object> consData();
   
   /**获得该块的ConsumerBlock*/
   default ConsumerBlockComp getConsumerBlock(){
     return getBlock(ConsumerBlockComp.class);
-  }
-  
-  @SuppressWarnings("unchecked")
-  default <T> ObjectMap<Class<?>, Object> consData(){
-    return getField(ObjectMap.class, "consData");
   }
   
   @SuppressWarnings("unchecked")
@@ -55,10 +49,6 @@ public interface ConsumerBuildComp extends BuildCompBase, FieldGetter{
   /**获得该块的NuclearEnergyBlock*/
   default ConsumerBuildComp getConsumerBuilding(){
     return getBlock(ConsumerBuildComp.class);
-  }
-  
-  default BaseConsumeModule consumer(){
-    return getField(BaseConsumeModule.class, "consumer");
   }
   
   default boolean productionValid(){

@@ -14,8 +14,8 @@ import java.util.List;
 public class BaseProductModule extends BlockModule {
   public BaseConsumeModule consumer;
   
-  protected final ProducerBuildComp entity;
-  protected final BaseProducers[] produces;
+  public final ProducerBuildComp entity;
+  public final BaseProducers[] produces;
   public BaseProducers current;
   public boolean valid;
   
@@ -59,6 +59,10 @@ public class BaseProductModule extends BlockModule {
     }
     
     //无论何时都向外导出产品
+    doDump(entity);
+  }
+  
+  public void doDump(ProducerBuildComp entity){
     for(BaseProducers p: produces){
       for(BaseProduce prod: p.all()) prod.dump(entity.getBuilding());
     }

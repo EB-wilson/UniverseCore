@@ -16,43 +16,21 @@ import universeCore.world.meta.UncStat;
 import java.util.ArrayList;
 
 /**Consume组件，为方块添加可标记消耗项的功能
- * 必须创建的变量：
- * <pre>{@code
- *   ArrayList<AneConsumers> [consumers]
- *   ArrayList<AneConsumers> [optionalCons]
- * }<pre/>
- * 若使用非默认命名则需要重写调用方法
  * @author EBwilson */
-public interface ConsumerBlockComp extends BuildCompBase, FieldGetter{
-  @SuppressWarnings("unchecked")
-  default ArrayList<BaseConsumers> consumers(){
-    return getField(ArrayList.class, "consumers");
-  }
+public interface ConsumerBlockComp{
+  ArrayList<BaseConsumers> consumers();
   
-  default RecipeTable recipeTable(){
-    return getField(RecipeTable.class, "recipeTable");
-  }
+  RecipeTable recipeTable();
   
-  default void recipeTable(RecipeTable table){
-    FieldHandler.setValue(getClass(), "recipeTable", this, table);
-  }
+  void recipeTable(RecipeTable table);
   
-  @SuppressWarnings("unchecked")
-  default ArrayList<BaseConsumers> optionalCons(){
-    return getField(ArrayList.class, "optionalCons");
-  }
+  ArrayList<BaseConsumers> optionalCons();
   
-  default RecipeTable optionalRecipeTable(){
-    return getField(RecipeTable.class, "optionalRecipeTable");
-  }
+  RecipeTable optionalRecipeTable();
   
-  default void optionalRecipeTable(RecipeTable table){
-    FieldHandler.setValue(getClass(), "optionalRecipeTable", this, table);
-  }
+  void optionalRecipeTable(RecipeTable table);
   
-  default boolean oneOfOptionCons(){
-    return getField(boolean.class, "oneOfOptionCons");
-  }
+  boolean oneOfOptionCons();
   
   default BaseConsumers newConsume(){
     BaseConsumers consume = new BaseConsumers(false);

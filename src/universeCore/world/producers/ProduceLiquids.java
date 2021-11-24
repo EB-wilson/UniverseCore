@@ -43,7 +43,7 @@ public class ProduceLiquids<T extends Building & ProducerBuildComp> extends Base
   @Override
   public void dump(T entity) {
     for(UncLiquidStack stack: liquids){
-      entity.dumpLiquid(stack.liquid);
+      if(entity.liquids.get(stack.liquid) > 0.01f) entity.dumpLiquid(stack.liquid);
     }
   }
   

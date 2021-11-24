@@ -1,11 +1,13 @@
 package universeCore.world.blockModule;
 
 import arc.scene.ui.layout.Table;
+import arc.struct.Bits;
 import arc.struct.ObjectMap;
 import arc.struct.ObjectSet;
 import arc.struct.Seq;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
+import mindustry.ctype.Content;
 import mindustry.world.meta.BlockStatus;
 import mindustry.world.modules.ConsumeModule;
 import universeCore.entityComps.blockComps.*;
@@ -27,9 +29,9 @@ public class BaseConsumeModule extends ConsumeModule{
   public BaseConsumers current;
   public BaseConsumers optionalCurr;
   public boolean valid;
-  public Seq<ObjectMap<UncConsumeType<?>, ObjectSet<Object>>> filter = new Seq<>();
-  public ObjectMap<UncConsumeType<?>, ObjectSet<Object>> optionalFilter = new ObjectMap<>();
-  public ObjectMap<UncConsumeType<?>, ObjectSet<Object>> allFilter = new ObjectMap<>();
+  public Seq<ObjectMap<UncConsumeType<?>, Bits>> filter = new Seq<>();
+  public ObjectMap<UncConsumeType<?>, Bits> optionalFilter = new ObjectMap<>();
+  public ObjectMap<UncConsumeType<?>, Bits> allFilter = new ObjectMap<>();
   
   private float powerCons;
 
@@ -79,30 +81,35 @@ public class BaseConsumeModule extends ConsumeModule{
   
   public void applyFilter(){
     if(optionalCons != null){
+      Bits f, t;
+      
       for(BaseConsumers cons: optionalCons){
         for(BaseConsume c: cons.all()){
-          if(c.filter(entity.getBuilding()) != null){
-            if(optionalFilter.get(c.type()) == null){
-              optionalFilter.put(c.type(), new ObjectSet<>());
+          if((f = c.filter(entity.getBuilding())) != null){
+            if((t = optionalFilter.get(c.type())) == null){
+              optionalFilter.put(c.type(), f);
             }
-            optionalFilter.get(c.type()).addAll(c.filter(entity.getBuilding()));
+            else t.or(f);
           }
         }
       }
     }
     
     if(consumes != null){
+      ObjectMap<UncConsumeType<?>, Bits> map;
+      BaseConsumers cons;
+      Bits f, t;
       for(int l=0; l<consumes.length; l++){
-        BaseConsumers cons = consumes[l];
-        ObjectMap<UncConsumeType<?>, ObjectSet<Object>> map = new ObjectMap<>();
+        cons = consumes[l];
+        map = new ObjectMap<>();
         filter.add(map);
         for(BaseConsume c: cons.all()){
-          if(c.filter(entity.getBuilding()) != null){
-            map.put(c.type(), ObjectSet.with(c.filter(entity.getBuilding())));
-            if(allFilter.get(c.type()) == null){
-              allFilter.put(c.type(), new ObjectSet<>());
+          if((f = c.filter(entity.getBuilding())) != null){
+            map.put(c.type(), f);
+            if((t = allFilter.get(c.type())) == null){
+              allFilter.put(c.type(), f);
             }
-            allFilter.get(c.type()).addAll(c.filter(entity.getBuilding()));
+            else t.or(f);
           }
         }
       }
@@ -144,8 +151,10 @@ public class BaseConsumeModule extends ConsumeModule{
     
     //更新可选消耗列表
     if(optionalCons != null){
+      BaseConsumers cons;
+      boolean onlyOne = entity.getConsumerBlock().oneOfOptionCons();
       for(int id=0; id<optionalCons.length; id++){
-        BaseConsumers cons = optionalCons[id];
+        cons = optionalCons[id];
         
         boolean optionalValid = cons.valid.get(entity);
         for(BaseConsume c: cons.all()){
@@ -166,7 +175,7 @@ public class BaseConsumeModule extends ConsumeModule{
             triggerOpt(id);
           }
           cons.optionalDef.get(entity, cons);
-          if(entity.getConsumerBlock().oneOfOptionCons()) break;
+          if(onlyOne) break;
         }
       }
     }
@@ -227,8 +236,7 @@ public class BaseConsumeModule extends ConsumeModule{
   public boolean valid(int index){
     if(index >= consumes.length) return false;
     
-    BaseConsumers cons = consumes[index];
-    for(BaseConsume c: cons.all()){
+    for(BaseConsume c: consumes[index].all()){
       if(!c.valid(entity.getBuilding())) return false;
     }
     
@@ -241,11 +249,11 @@ public class BaseConsumeModule extends ConsumeModule{
   * @param target 通过过滤器的目标对象
   * @return 布尔值，是否接受此对象
   * */
-  public boolean filter(UncConsumeType<?> type, Object target){
-    return optionalFilter.containsKey(type) && optionalFilter.get(type).contains(target) || //可选的
-        (acceptAll && allFilter.containsKey(type) && allFilter.get(type).contains(target)) ||
+  public boolean filter(UncConsumeType<?> type, Content target){
+    return optionalFilter.containsKey(type) && optionalFilter.get(type).get(target.id) || //可选的
+        (acceptAll && allFilter.containsKey(type) && allFilter.get(type).get(target.id)) ||
         (entity.consumeCurrent() >= 0 && filter.get(entity.consumeCurrent()).containsKey(type)
-            && filter.get(entity.consumeCurrent()).get(type).contains(target));
+            && filter.get(entity.consumeCurrent()).get(type).get(target.id));
   }
 
   @Override

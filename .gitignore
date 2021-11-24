@@ -13,8 +13,8 @@ logs/
 /ios/assets/
 /core/assets-raw/sprites/generated/
 /core/assets-raw/sprites_out/
-/annotations/build/
-/annotations/out/
+/tools/annotations/build/
+/tools/annotations/out/
 /net/build/
 /tools/build/
 /tests/build/

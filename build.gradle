@@ -4,6 +4,7 @@ version '1.0'
 sourceSets.main.java.srcDirs = ["src"]
 
 sourceCompatibility = 11
+targetCompatibility = 11
 
 ext{
   //the build number that this mod is made for
@@ -12,7 +13,7 @@ ext{
   sdkVersion = '30.0.3'
   sdkRoot = '/home/EBwilson/android-sdk/'
   
-  libOututDir = '/home/EBwilson/IdeaProjects/Singularity/lib/'
+  libOutputDir = '/home/EBwilson/IdeaProjects/Singularity/lib/'
   modOutputDir = '/home/EBwilson/sd/Android/data/io.anuke.mindustry/files/mods'
   
   doExec = { cmd ->
@@ -29,6 +30,7 @@ repositories{
 dependencies{
   compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
   compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+  implementation "com.google.auto.service:auto-service:1.0-rc4"
   
   compileOnly project(":desktop")
   compileOnly project(":android")
@@ -84,9 +86,10 @@ task toLib(type: Jar){
       zipTree("$buildDir/libs/${rootProject.name}-androidLib.jar")
   ]}
   
-  if(libOututDir != null){
+  if(libOutputDir != null){
+    delete("$libOutputDir/${rootProject.name}-lib.jar")
     copy {
-      into("$libOututDir/")
+      into("$libOutputDir/")
       from("$buildDir/libs/${rootProject.name}-lib.jar")
     }
   }
@@ -168,4 +171,8 @@ project(":android"){
   jar{
     archiveFileName = "${rootProject.name}-partAndroid.jar"
   }
+}
+
+project(":tools"){
+  apply plugin: 'java'
 }
