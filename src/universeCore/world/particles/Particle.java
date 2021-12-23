@@ -1,4 +1,4 @@
-package universeCore.world;
+package universeCore.world.particles;
 
 import arc.func.Boolf;
 import arc.func.Cons;
@@ -55,9 +55,10 @@ public class Particle implements Pool.Poolable, Drawc{
   public boolean added = false;
   public float x, y;
   
-  public Cons<Particle> deflect;
-  public Cons<Particle> headRegion = e -> {
-    Fill.circle(e.x, e.y, e.size);
+  public Cons<Particle> regionDraw = e -> {
+    Draw.color(color);
+    Fill.circle(e.x, e.y, e.size/2);
+    Draw.reset();
   };
   public Cons<Cloud> cloudUpdater = e -> {
      e.size = Mathf.lerpDelta(e.size, 0, 0.05f);
@@ -65,6 +66,7 @@ public class Particle implements Pool.Poolable, Drawc{
   
   protected Vec2 startPos = new Vec2();
   protected Vec2 tempPos = new Vec2();
+  protected Deflect deflect = new Deflect();
   
   public static Particle create(float x, float y, float sx, float sy){
     return create(x, y, sx, sy, 5);
@@ -90,9 +92,15 @@ public class Particle implements Pool.Poolable, Drawc{
     return temp;
   }
   
+  public Deflect deflect(){
+    return deflect;
+  }
+  
   @Override
   public void draw(){
     Draw.z(Layer.effect);
+    regionDraw.get(this);
+    
     for(Cloud c: tailing){
       c.draw();
     }
@@ -135,26 +143,6 @@ public class Particle implements Pool.Poolable, Drawc{
     return added;
   }
   
-  public Particle setDest(float x, float y){
-    return setDest(x, y, 0.035f, false);
-  }
-  
-  @SuppressWarnings("all")
-  public Particle setDest(float x, float y, float deflection, boolean linkLast){
-    Vec2 dest = new Vec2(x, y);
-    Cons<Particle>[] last = new Cons[1];
-    if(linkLast && deflect != null) last[0] = deflect;
-    deflect = e -> {
-      if(last[0] != null) last[0].get(e);
-      float from = e.speed.angle();
-      float to = Tmp.v1.set(dest.x, dest.y).sub(e.x, e.y).angle();
-      float r = to - from;
-      r = r > 180? r-360: r < -180? r+360: r;
-      e.speed.rotate(r*deflection*Time.delta);
-    };
-    return this;
-  }
-  
   public Particle setAttenuate(float att){
     attenuate = att;
     return this;
@@ -165,7 +153,7 @@ public class Particle implements Pool.Poolable, Drawc{
     Tmp.v2.set(speed).setAngle(angle + Mathf.random(-deflectAngle, deflectAngle)).scl(speed.len()/defSpeed*attenuate*Time.delta);
     speed.add(Tmp.v2);
     
-    if(deflect != null) deflect.get(this);
+    deflect.doDeflect(this);
   }
   
   @Override
