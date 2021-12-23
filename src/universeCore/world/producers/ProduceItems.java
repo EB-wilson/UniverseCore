@@ -1,6 +1,7 @@
 package universeCore.world.producers;
 
 import arc.Core;
+import arc.graphics.g2d.TextureRegion;
 import arc.math.Mathf;
 import mindustry.gen.Building;
 import mindustry.type.Item;
@@ -26,6 +27,11 @@ public class ProduceItems<T extends Building & ProducerBuildComp> extends BasePr
   @Override
   public ProduceType<ProduceItems<?>> type() {
     return ProduceType.item;
+  }
+  
+  @Override
+  public TextureRegion icon(){
+    return items[0].item.uiIcon;
   }
   
   @Override

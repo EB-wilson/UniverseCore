@@ -1,7 +1,9 @@
 package universeCore.world.producers;
 
+import arc.func.Prov;
 import arc.graphics.Color;
 import arc.graphics.g2d.TextureRegion;
+import arc.util.Log;
 import arc.util.Structs;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
@@ -21,14 +23,14 @@ public class BaseProducers{
   protected final HashMap<ProduceType<?>, BaseProduce<?>> prod = new HashMap<>();
 
   /**用于显示选择配方的图标*/
-  public TextureRegion icon;
+  public Prov<TextureRegion> icon;
   /**用于显示选择配方的顶部颜色*/
   public Color color;
   
   public BaseConsumers cons;
 
   public BaseProducers setIcon(TextureRegion icon){
-    this.icon = icon;
+    this.icon = () -> icon;
     return this;
   }
 
@@ -60,6 +62,9 @@ public class BaseProducers{
   public <T extends BaseProduce<?>> T add(T produce){
     prod.put(produce.type(), produce);
     produce.parent = this;
+    if(icon == null && produce.icon() != BaseProduce.EMPTY_TEX){
+      icon = produce::icon;
+    }
     return produce;
   }
 

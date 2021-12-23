@@ -1,6 +1,7 @@
 package universeCore.world.consumers;
 
 import arc.Core;
+import arc.graphics.g2d.TextureRegion;
 import arc.math.Mathf;
 import arc.scene.ui.layout.Table;
 import arc.struct.Bits;
@@ -24,6 +25,11 @@ public class UncConsumeItems<T extends Building & ConsumerBuildComp> extends Bas
   
   public UncConsumeType<UncConsumeItems<?>> type(){
     return UncConsumeType.item;
+  }
+  
+  @Override
+  public TextureRegion icon(){
+    return items[0].item.uiIcon;
   }
   
   @Override
@@ -66,7 +72,7 @@ public class UncConsumeItems<T extends Building & ConsumerBuildComp> extends Bas
   @Override
   public boolean valid(T entity){
     for(ItemStack stack: items){
-      if(entity.items == null || entity.items.get(stack.item) < stack.amount) return false;
+      if(entity.items == null || entity.items.get(stack.item) < stack.amount*entity.consumeMultiplier(this)) return false;
     }
     return true;
   }

@@ -2,13 +2,11 @@ package universeCore.entityComps.blockComps;
 
 import arc.func.Cons2;
 import arc.math.Mathf;
-import arc.scene.ui.layout.Table;
 import mindustry.gen.Building;
 import mindustry.world.Block;
 import mindustry.world.consumers.ConsumePower;
 import mindustry.world.meta.Stats;
 import universeCore.ui.table.RecipeTable;
-import universeCore.util.handler.FieldHandler;
 import universeCore.world.consumers.BaseConsumers;
 import universeCore.world.consumers.UncConsumeType;
 import universeCore.world.meta.UncStat;
@@ -99,5 +97,8 @@ public interface ConsumerBlockComp{
         table.add(optionalRecipeTable()).grow();
       });
     }
+  }
+  
+  default void initConsume(){
   }
 }

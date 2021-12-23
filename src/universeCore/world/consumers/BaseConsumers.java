@@ -3,7 +3,9 @@ package universeCore.world.consumers;
 import arc.func.Boolf;
 import arc.func.Cons;
 import arc.func.Cons2;
+import arc.func.Prov;
 import arc.graphics.g2d.TextureRegion;
+import arc.util.Log;
 import mindustry.gen.Building;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
@@ -13,6 +15,7 @@ import mindustry.world.meta.StatUnit;
 import mindustry.world.meta.Stats;
 import universeCore.entityComps.blockComps.ConsumerBuildComp;
 import universeCore.util.UncLiquidStack;
+import universeCore.world.producers.BaseProduce;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -32,8 +35,8 @@ public class BaseConsumers{
   /**是否接受超速加成*/
   public boolean acceptOverdrive = true;
   
-  /**自定义图标，在选择消耗列表时显示*/
-  public TextureRegion icon;
+  /**图标，在选择消耗列表时显示，默认为首个消耗项*/
+  public Prov<TextureRegion> icon;
   /**可选列表可用时将随更新执行的目标函数*/
   public Cons2<ConsumerBuildComp, BaseConsumers> optionalDef = (entity, cons) -> {};
   /**在统计信息显示自定义内容的函数*/
@@ -47,9 +50,9 @@ public class BaseConsumers{
   public BaseConsumers(boolean optional){
     this.optional = optional;
   }
-
+  
   public BaseConsumers setIcon(TextureRegion icon){
-    this.icon = icon;
+    this.icon = () -> icon;
     return this;
   }
   
@@ -91,6 +94,9 @@ public class BaseConsumers{
   public <T extends BaseConsume<?>> T add(T consume){
     cons.put(consume.type(), consume);
     consume.parent = this;
+    if(icon == null && consume.icon() != BaseConsume.EMPTY_TEX){
+      icon = consume::icon;
+    }
     return consume;
   }
 

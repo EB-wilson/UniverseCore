@@ -1,6 +1,9 @@
 package universeCore.world.producers;
 
+import arc.Core;
+import arc.graphics.g2d.TextureRegion;
 import mindustry.gen.Building;
+import mindustry.gen.Icon;
 import mindustry.world.meta.Stat;
 import mindustry.world.meta.StatUnit;
 import mindustry.world.meta.Stats;

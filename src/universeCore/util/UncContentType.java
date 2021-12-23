@@ -15,7 +15,7 @@ public class UncContentType{
   private final static EnumHandler<ContentType> handler = new EnumHandler<>(ContentType.class);
   
   public static final Seq<UncContentType> allUncContentType = new Seq<>();
-  public static ContentType[] newContentList;
+  public static ContentType[] newContentList = new ContentType[0];
   
   public final ContentType value;
   public final int ordinal;

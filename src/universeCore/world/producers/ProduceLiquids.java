@@ -1,6 +1,7 @@
 package universeCore.world.producers;
 
 import arc.Core;
+import arc.graphics.g2d.TextureRegion;
 import mindustry.gen.Building;
 import mindustry.ui.LiquidDisplay;
 import mindustry.world.meta.Stat;
@@ -23,6 +24,11 @@ public class ProduceLiquids<T extends Building & ProducerBuildComp> extends Base
   @Override
   public ProduceType<ProduceLiquids<?>> type(){
     return ProduceType.liquid;
+  }
+  
+  @Override
+  public TextureRegion icon(){
+    return liquids[0].liquid.uiIcon;
   }
   
   @Override

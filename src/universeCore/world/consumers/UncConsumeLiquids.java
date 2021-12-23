@@ -1,6 +1,7 @@
 package universeCore.world.consumers;
 
 import arc.Core;
+import arc.graphics.g2d.TextureRegion;
 import arc.scene.ui.layout.Table;
 import arc.struct.Bits;
 import mindustry.Vars;
@@ -25,6 +26,11 @@ public class UncConsumeLiquids<T extends Building & ConsumerBuildComp> extends B
   
   public UncConsumeType<?> type(){
     return UncConsumeType.liquid;
+  }
+  
+  @Override
+  public TextureRegion icon(){
+    return liquids[0].liquid.uiIcon;
   }
   
   public void portion(){
@@ -71,7 +77,7 @@ public class UncConsumeLiquids<T extends Building & ConsumerBuildComp> extends B
   @Override
   public boolean valid(T entity){
     for(UncLiquidStack stack: liquids){
-      if(entity.liquids == null || entity.liquids.get(stack.liquid) < stack.amount*(entity.block.hasPower && entity.power.status != 0? entity.consDelta(parent): entity.delta())) return false;
+      if(entity.liquids == null || entity.liquids.get(stack.liquid) < stack.amount*(entity.block.hasPower && entity.power.status > 0? entity.delta()*entity.power.status: entity.delta())*entity.consumeMultiplier(this)) return false;
     }
     return true;
   }

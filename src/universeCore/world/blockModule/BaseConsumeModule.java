@@ -3,10 +3,11 @@ package universeCore.world.blockModule;
 import arc.scene.ui.layout.Table;
 import arc.struct.Bits;
 import arc.struct.ObjectMap;
-import arc.struct.ObjectSet;
 import arc.struct.Seq;
+import arc.util.Log;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
+import mindustry.Vars;
 import mindustry.ctype.Content;
 import mindustry.world.meta.BlockStatus;
 import mindustry.world.modules.ConsumeModule;
@@ -23,8 +24,6 @@ public class BaseConsumeModule extends ConsumeModule{
   protected final BaseConsumers[] consumes;
   protected final BaseConsumers[] optionalCons;
   protected final float[] optProgress;
-  
-  public boolean acceptAll;
   
   public BaseConsumers current;
   public BaseConsumers optionalCurr;
@@ -96,18 +95,17 @@ public class BaseConsumeModule extends ConsumeModule{
     }
     
     if(consumes != null){
-      ObjectMap<UncConsumeType<?>, Bits> map;
-      BaseConsumers cons;
       Bits f, t;
-      for(int l=0; l<consumes.length; l++){
-        cons = consumes[l];
-        map = new ObjectMap<>();
+      for(BaseConsumers cons: consumes){
+        ObjectMap<UncConsumeType<?>, Bits> map = new ObjectMap<>();
         filter.add(map);
         for(BaseConsume c: cons.all()){
           if((f = c.filter(entity.getBuilding())) != null){
             map.put(c.type(), f);
             if((t = allFilter.get(c.type())) == null){
-              allFilter.put(c.type(), f);
+              Bits n = new Bits(f.length());
+              n.set(f);
+              allFilter.put(c.type(), n);
             }
             else t.or(f);
           }
@@ -127,6 +125,7 @@ public class BaseConsumeModule extends ConsumeModule{
   @Override
   public void update(){
     current = null;
+    
     powerCons = 0;
     if((!hasOptional() && !hasConsume())) return;
     boolean docons = entity.shouldConsume() && entity.productionValid();
@@ -247,13 +246,16 @@ public class BaseConsumeModule extends ConsumeModule{
   * 若可选过滤器已添加目标对象同样返回true
   * @param type 过滤器种类
   * @param target 通过过滤器的目标对象
-  * @return 布尔值，是否接受此对象
+  * @param acceptAll 是否接受所有清单的需求
+   * @return 布尔值，是否接受此对象
   * */
-  public boolean filter(UncConsumeType<?> type, Content target){
-    return optionalFilter.containsKey(type) && optionalFilter.get(type).get(target.id) || //可选的
-        (acceptAll && allFilter.containsKey(type) && allFilter.get(type).get(target.id)) ||
-        (entity.consumeCurrent() >= 0 && filter.get(entity.consumeCurrent()).containsKey(type)
-            && filter.get(entity.consumeCurrent()).get(type).get(target.id));
+  public boolean filter(UncConsumeType<?> type, Content target, boolean acceptAll){
+    if(optionalFilter.containsKey(type) && optionalFilter.get(type).get(target.id)) return true;
+    
+    if(acceptAll) return allFilter.containsKey(type) && allFilter.get(type).get(target.id);
+    
+    return (entity.consumeCurrent() >= 0 && filter.get(entity.consumeCurrent()).containsKey(type)
+        && filter.get(entity.consumeCurrent()).get(type).get(target.id));
   }
 
   @Override

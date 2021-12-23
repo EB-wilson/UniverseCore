@@ -1,8 +1,11 @@
 package universeCore.world.consumers;
 
+import arc.Core;
+import arc.graphics.g2d.TextureRegion;
 import arc.scene.ui.layout.Table;
 import arc.struct.Bits;
 import mindustry.gen.Building;
+import mindustry.gen.Icon;
 import mindustry.world.Build;
 import mindustry.world.meta.Stat;
 import mindustry.world.meta.StatUnit;

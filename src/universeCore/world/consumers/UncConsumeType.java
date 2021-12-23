@@ -1,6 +1,6 @@
 package universeCore.world.consumers;
 
-import mindustry.gen.Building;
+import mindustry.ctype.ContentType;
 
 import java.util.ArrayList;
 
@@ -9,15 +9,21 @@ public class UncConsumeType<T extends BaseConsume<?>>{
   private static final ArrayList<UncConsumeType<?>> allType = new ArrayList<>();
   private final int id;
   private final Class<T> type;
+  private final ContentType contType;
   
-  public UncConsumeType(Class<T> type){
+  public UncConsumeType(Class<T> type, ContentType cType){
     id = allType.size();
     this.type = type;
+    contType = cType;
     allType.add(this);
   }
   
   public Class<T> getType(){
     return type;
+  }
+  
+  public final ContentType cType(){
+    return contType;
   }
   
   public final int id(){
@@ -28,11 +34,11 @@ public class UncConsumeType<T extends BaseConsume<?>>{
     return allType.toArray(new UncConsumeType[0]);
   }
   
-  public static <Type extends BaseConsume<?>> UncConsumeType<? extends Type> add(Class<Type> type){
-    return new UncConsumeType<>(type);
+  public static <Type extends BaseConsume<?>> UncConsumeType<? extends Type> add(Class<Type> type, ContentType cType){
+    return new UncConsumeType<>(type, cType);
   }
   
-  public static final UncConsumeType<UncConsumeItems<?>> item = (UncConsumeType<UncConsumeItems<?>>) add(UncConsumeItems.class);
-  public static final UncConsumeType<UncConsumeLiquids<?>> liquid = (UncConsumeType<UncConsumeLiquids<?>>) add(UncConsumeLiquids.class);
-  public static final UncConsumeType<UncConsumePower<?>> power = (UncConsumeType<UncConsumePower<?>>) add(UncConsumePower.class);
+  public static final UncConsumeType<UncConsumeItems<?>> item = (UncConsumeType<UncConsumeItems<?>>) add(UncConsumeItems.class, ContentType.item);
+  public static final UncConsumeType<UncConsumeLiquids<?>> liquid = (UncConsumeType<UncConsumeLiquids<?>>) add(UncConsumeLiquids.class, ContentType.liquid);
+  public static final UncConsumeType<UncConsumePower<?>> power = (UncConsumeType<UncConsumePower<?>>) add(UncConsumePower.class, null);
 }
