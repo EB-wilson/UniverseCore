@@ -31,6 +31,10 @@ import mindustry.world.blocks.environment.Floor;
 
 import java.util.LinkedList;
 
+/**粒子的实体类，定义了可绘制的，可更新的实体对象
+ * 可通过设置速度，位置，以及偏转方法改变粒子的运动轨迹，通常这个粒子具有数量上限，在正常情况下应当是性能安全的
+ * 附带可控制拖尾
+ * @author EBwilson */
 public class Particle implements Pool.Poolable, Drawc{
   protected static final LinkedList<Particle> all = new LinkedList<>();
   protected static final Seq<Particle> temp = new Seq<>();
@@ -40,15 +44,22 @@ public class Particle implements Pool.Poolable, Drawc{
   
   public Tile tile;
   
+  /**粒子的速度，矢量*/
   public Vec2 speed = new Vec2();
+  /**例子的初始速度大小，通常由计算生成，用于计算随速度的粒子尺寸，最好不要修改*/
   public float defSpeed;
+  /**粒子的最大尺寸，随速度减小而逐渐衰减*/
   public float maxSize;
+  /**粒子当前的尺寸，由计算获得，不要手动更改*/
   public float size;
   
+  /**粒子运动时所受阻力大小，这会影响粒子在平移时的随机偏转强度，为0时粒子不会自己停下来*/
   public float attenuate = 0.2f;
-  public float angleThreshold = 1f;
+  /**粒子轨迹拖尾的转折阈值，当前一道拖尾与当前拖尾的角度偏移达到这个数值时才会产生下一条轨迹，数值越小，轨迹越平滑，但性能开销越大*/
+  public float angleThreshold = 5f;
+  /**粒子随机偏转的随机向量角度范围，取此数值的正负构成区间，以例子速度的反方向为零角*/
   public float deflectAngle = 90f;
-  
+  /**粒子的颜色*/
   public Color color = Pal.reactorPurple;
   
   public transient int id = EntityGroup.nextId();
@@ -62,6 +73,7 @@ public class Particle implements Pool.Poolable, Drawc{
   };
   public Cons<Cloud> cloudUpdater = e -> {
      e.size = Mathf.lerpDelta(e.size, 0, 0.05f);
+     e.color.lerp(Color.white, 0.02f);
   };
   
   protected Vec2 startPos = new Vec2();
@@ -166,7 +178,7 @@ public class Particle implements Pool.Poolable, Drawc{
     float rate = speedRate/defSpeed;
     
     if(currentCloud == null){
-      currentCloud = new Cloud(x, y, size, color);
+      currentCloud = new Cloud(x, y, size, color.cpy());
       tailing.add(currentCloud);
     }
     
@@ -174,10 +186,8 @@ public class Particle implements Pool.Poolable, Drawc{
       currentCloud.x = x;
       currentCloud.y = y;
     
-      Vec2 currVec = currentCloud.vector();
-      Vec2 lastVec = currentCloud.lastCloud.vector().setLength(currVec.len());
-      if((Math.abs(currVec.x - lastVec.y) > angleThreshold || Math.abs(currVec.y - lastVec.y) > angleThreshold)){
-        Cloud cloud = new Cloud(x, y, size, color);
+      if(Math.abs(currentCloud.vector().angle() - currentCloud.lastCloud.vector().angle()) > angleThreshold){
+        Cloud cloud = new Cloud(x, y, size, color.cpy());
         cloud.lastCloud = currentCloud;
         tailing.add(cloud);
         currentCloud = cloud;
