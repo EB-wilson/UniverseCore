@@ -2,6 +2,8 @@ package universeCore.world.particles;
 
 import arc.func.Boolf;
 import arc.func.Cons;
+import arc.func.Floatf;
+import arc.func.Func;
 import arc.graphics.Color;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Fill;
@@ -36,6 +38,10 @@ import java.util.LinkedList;
  * 附带可控制拖尾
  * @author EBwilson */
 public class Particle implements Pool.Poolable, Drawc{
+  private static int counter = 0;
+  /**粒子的最大共存数量，总量大于此数目时，创建新的粒子会清除最先产生的粒子*/
+  public static int maxAmount = 512;
+  
   protected static final LinkedList<Particle> all = new LinkedList<>();
   protected static final Seq<Particle> temp = new Seq<>();
   
@@ -44,47 +50,49 @@ public class Particle implements Pool.Poolable, Drawc{
   
   public Tile tile;
   
+  protected Vec2 startPos = new Vec2();
+  protected Vec2 tempPos = new Vec2();
+  protected Deflect deflect = new Deflect();
+  
   /**粒子的速度，矢量*/
   public Vec2 speed = new Vec2();
-  /**例子的初始速度大小，通常由计算生成，用于计算随速度的粒子尺寸，最好不要修改*/
+  /**例子的初始速度大小，通常由计算生成，最好不要修改*/
   public float defSpeed;
-  /**粒子的最大尺寸，随速度减小而逐渐衰减*/
+  /**粒子的最大尺寸*/
   public float maxSize;
   /**粒子当前的尺寸，由计算获得，不要手动更改*/
   public float size;
   
-  /**粒子运动时所受阻力大小，这会影响粒子在平移时的随机偏转强度，为0时粒子不会自己停下来*/
   public float attenuate = 0.2f;
-  /**粒子轨迹拖尾的转折阈值，当前一道拖尾与当前拖尾的角度偏移达到这个数值时才会产生下一条轨迹，数值越小，轨迹越平滑，但性能开销越大*/
-  public float angleThreshold = 5f;
-  /**粒子随机偏转的随机向量角度范围，取此数值的正负构成区间，以例子速度的反方向为零角*/
+  public float angleThreshold = 3f;
   public float deflectAngle = 90f;
-  /**粒子的颜色*/
-  public Color color = Pal.reactorPurple;
   
   public transient int id = EntityGroup.nextId();
   public boolean added = false;
   public float x, y;
   
+  public Func<Particle, Color> color = e -> Color.white;
+  public Func<Particle, Color> tailColor = e -> Color.white;
+  public Boolf<Particle> isFinal = e -> e.speed.len() <= 0.005f;
+  public Floatf<Particle> sizeF = e -> e.maxSize*(e.speed.len()/e.defSpeed);
+  public Cons<Particle> update;
   public Cons<Particle> regionDraw = e -> {
-    Draw.color(color);
+    Draw.color(color.get(e));
     Fill.circle(e.x, e.y, e.size/2);
     Draw.reset();
   };
   public Cons<Cloud> cloudUpdater = e -> {
-     e.size = Mathf.lerpDelta(e.size, 0, 0.05f);
-     e.color.lerp(Color.white, 0.02f);
+    e.size -= 0.005f;
   };
-  
-  protected Vec2 startPos = new Vec2();
-  protected Vec2 tempPos = new Vec2();
-  protected Deflect deflect = new Deflect();
   
   public static Particle create(float x, float y, float sx, float sy){
     return create(x, y, sx, sy, 5);
   }
   
   public static Particle create(float x, float y, float sx, float sy, float size){
+    if(counter >= maxAmount){
+      all.getLast().remove();
+    }
     Particle ent = new Particle();
     ent.x = x;
     ent.y = y;
@@ -102,10 +110,6 @@ public class Particle implements Pool.Poolable, Drawc{
       if(valid.get(particle)) temp.add(particle);
     }
     return temp;
-  }
-  
-  public Deflect deflect(){
-    return deflect;
   }
   
   @Override
@@ -178,16 +182,16 @@ public class Particle implements Pool.Poolable, Drawc{
     float rate = speedRate/defSpeed;
     
     if(currentCloud == null){
-      currentCloud = new Cloud(x, y, size, color.cpy());
+      currentCloud = new Cloud(x, y, size, tailColor.get(this).cpy());
       tailing.add(currentCloud);
     }
     
-    if(speedRate/defSpeed > 0.05f){
+    if(rate > 0.05f){
       currentCloud.x = x;
       currentCloud.y = y;
     
       if(Math.abs(currentCloud.vector().angle() - currentCloud.lastCloud.vector().angle()) > angleThreshold){
-        Cloud cloud = new Cloud(x, y, size, color.cpy());
+        Cloud cloud = new Cloud(x, y, size, tailColor.get(this).cpy());
         cloud.lastCloud = currentCloud;
         tailing.add(cloud);
         currentCloud = cloud;
@@ -200,8 +204,10 @@ public class Particle implements Pool.Poolable, Drawc{
       if(c.size <= 0.05f) tailing.remove(c);
     }
     
-    size = rate*maxSize;
-    if(rate <= 0.05f && tailing.size == 0) remove();
+    if(update != null) update.get(this);
+    
+    size = sizeF.get(this);
+    if(isFinal.get(this) && tailing.size == 0) remove();
   }
   
   @Override
@@ -213,16 +219,18 @@ public class Particle implements Pool.Poolable, Drawc{
       this.added = false;
       tailing = null;
       speed = new Vec2();
+      counter--;
     }
   }
   
   @Override
   public void add(){
     if (!added) {
-      all.add(this);
+      all.addFirst(this);
       Groups.all.add(this);
       Groups.draw.add(this);
       added = true;
+      counter++;
     }
   }
   

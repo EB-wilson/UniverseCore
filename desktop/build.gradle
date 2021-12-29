@@ -1,5 +1,6 @@
 sourceSets.main.java.srcDirs = ["src"]
 
 dependencies {
-  compile( files("lib/cglib-3.3.0.jar") )
+  implementation "org.javassist:javassist:3.25.0-GA"
+  implementation project(":classes")
 }

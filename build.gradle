@@ -30,7 +30,6 @@ repositories{
 dependencies{
   compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
   compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
-  implementation "com.google.auto.service:auto-service:1.0-rc4"
   
   compileOnly project(":desktop")
   compileOnly project(":android")
@@ -173,6 +172,19 @@ project(":android"){
   }
 }
 
-project(":tools"){
+project(":classes"){
   apply plugin: 'java'
+  
+  repositories{
+    mavenCentral()
+    maven{ url 'https://www.jitpack.io' }
+  }
+  
+  dependencies{
+    compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+    compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+  }
+  
+  compileJava.options.fork = true
 }
+

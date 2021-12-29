@@ -12,6 +12,7 @@ import mindustry.world.Block;
 import universeCore.override.dialogs.UncDatabaseDialog;
 import universeCore.util.handler.CategoryHandler;
 import universeCore.util.animLayout.CellActions;
+import universeCore.util.handler.ClassHandler;
 
 import static mindustry.Vars.netClient;
 import static mindustry.Vars.ui;
@@ -21,6 +22,8 @@ public class UncCore extends Mod{
   public static CategoryHandler categories = new CategoryHandler();
   /**单元格动画控制器实例*/
   public static CellActions cellActions = new CellActions();
+  /**类处理程序*/
+  public static ClassHandler classes = new ClassHandler();
   
   public UncCore(){
     if(Tmp.v1.x == 0){

@@ -855,6 +855,6 @@ public class ObjectDataMonitor{
         return null;
       }
     }
-    else throw new RuntimeException("Try to cast non-internal type to default class");
+    else throw new RuntimeException("Try to cast non-universeCore.internal type to default class");
   }
 }
