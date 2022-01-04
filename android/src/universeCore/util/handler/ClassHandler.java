@@ -1,27 +1,19 @@
 package universeCore.util.handler;
 
-import universeCore.util.classMakers.IClassHandler;
+
+import universeCore.util.DexLoaderFactory;
 import universeCore.util.classMakers.UncClass;
-import universeCore.util.classMakers.UncField;
-import universeCore.util.classMakers.UncMethod;
+import universeCore.util.proxy.AndroidProxy;
+import universeCore.util.proxy.BaseProxy;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.StringReader;
-
-public class ClassHandler implements IClassHandler{
-  @Override
-  public Class<?> toClass(UncClass<?> clazz){
-    return null;
+public class ClassHandler{
+  private static final DexLoaderFactory.AsClassDexLoader dexLoader = DexLoaderFactory.generateClassLoader();
+  
+  public static Class<?> load(UncClass clazz){
+    return dexLoader.defineClass(clazz.name, clazz.getByteCode());
   }
   
-  @Override
-  public void handleMethod(UncMethod<?> method){
-  
-  }
-  
-  @Override
-  public void handleField(UncField<?> field){
-  
+  public static <T> BaseProxy<T> getProxy(Class<T> clazz){
+    return new AndroidProxy<>(clazz);
   }
 }

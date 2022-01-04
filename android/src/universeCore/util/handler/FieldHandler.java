@@ -1,11 +1,9 @@
 package universeCore.util.handler;
 
 import arc.struct.Seq;
-import arc.util.Log;
-import sun.misc.Unsafe;
 
-import java.lang.reflect.*;
-import java.util.Arrays;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 
 /**通过反射更改属性值的工具类*/
 public class FieldHandler{
@@ -100,6 +98,6 @@ public class FieldHandler{
       
       return newArr;
     }
-    return null;
+    throw new RuntimeException("field isn't an array type");
   }
 }

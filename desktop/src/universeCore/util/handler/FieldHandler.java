@@ -177,7 +177,7 @@ public class FieldHandler{
       
       return newArr;
     }
-    return null;
+    throw new RuntimeException("field isn't an array type");
   }
   
   private static Object getBasicNull(Object nil, Class<?> clazz){

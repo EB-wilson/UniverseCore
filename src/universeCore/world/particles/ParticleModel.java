@@ -32,6 +32,8 @@ public class ParticleModel{
   /**粒子随机偏转的随机向量角度范围，取此数值的正负构成区间，以例子速度的反方向为零角*/
   public float deflectAngle = 90f;
   
+  public Deflect deflect;
+  
   public Particle create(float x, float y, float sx, float sy, float size){
     Particle inst = Particle.create(x, y, sx, sy, size);
     inst.attenuate = attenuate;
@@ -45,6 +47,8 @@ public class ParticleModel{
     if(update != null) inst.update = update;
     if(regionDraw != null) inst.regionDraw = regionDraw;
     if(cloudUpdater != null) inst.cloudUpdater = cloudUpdater;
+    
+    if(deflect != null) inst.deflect = deflect;
     
     return inst;
   }

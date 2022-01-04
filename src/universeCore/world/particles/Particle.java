@@ -71,8 +71,8 @@ public class Particle implements Pool.Poolable, Drawc{
   public boolean added = false;
   public float x, y;
   
-  public Func<Particle, Color> color = e -> Color.white;
-  public Func<Particle, Color> tailColor = e -> Color.white;
+  public Func<Particle, Color> color = e -> Pal.reactorPurple;
+  public Func<Particle, Color> tailColor = e -> Color.lightGray;
   public Boolf<Particle> isFinal = e -> e.speed.len() <= 0.005f;
   public Floatf<Particle> sizeF = e -> e.maxSize*(e.speed.len()/e.defSpeed);
   public Cons<Particle> update;
@@ -81,8 +81,9 @@ public class Particle implements Pool.Poolable, Drawc{
     Fill.circle(e.x, e.y, e.size/2);
     Draw.reset();
   };
+  
   public Cons<Cloud> cloudUpdater = e -> {
-    e.size -= 0.005f;
+    e.size = Mathf.lerpDelta(e.size, 0, 0.04f);
   };
   
   public static Particle create(float x, float y, float sx, float sy){
@@ -110,6 +111,10 @@ public class Particle implements Pool.Poolable, Drawc{
       if(valid.get(particle)) temp.add(particle);
     }
     return temp;
+  }
+  
+  public Deflect deflect(){
+    return deflect;
   }
   
   @Override

@@ -33,6 +33,7 @@ dependencies{
   
   compileOnly project(":desktop")
   compileOnly project(":android")
+  compile project(":abstractCore")
 }
 
 allprojects{
@@ -52,7 +53,12 @@ task buildAndroid(type: Jar){
   
   archiveFileName = "${rootProject.name}-androidLib.jar"
   
-  from{ [zipTree("$buildDir/libs/${rootProject.name}-core.jar"), zipTree("${project(":android").buildDir}/libs/${rootProject.name}-partAndroid.jar")] }
+  from{[
+      zipTree("$buildDir/libs/${rootProject.name}-core.jar"),
+      zipTree("${project(":classes").buildDir}/libs/${project(":classes").name}.jar"),
+      zipTree("${project(":abstractCore").buildDir}/libs/${project(":abstractCore").name}.jar"),
+      zipTree("${project(":android").buildDir}/libs/${rootProject.name}-partAndroid.jar")
+  ]}
   
   doLast {
     def platformRoot = new File("$sdkRoot/platforms/").listFiles().sort().reverse().find{ f -> new File(f, "android.jar").exists()}
@@ -71,7 +77,12 @@ task buildDesktop(type: Jar){
   
   archiveFileName = "${rootProject.name}-desktopLib.jar"
   
-  from{ [zipTree("$buildDir/libs/${rootProject.name}-core.jar"), zipTree("${project(":desktop").buildDir}/libs/${rootProject.name}-partDesktop.jar")] }
+  from{[
+      zipTree("$buildDir/libs/${rootProject.name}-core.jar"),
+      zipTree("${project(":classes").buildDir}/libs/${project(":classes").name}.jar"),
+      zipTree("${project(":abstractCore").buildDir}/libs/${project(":abstractCore").name}.jar"),
+      zipTree("${project(":desktop").buildDir}/libs/${rootProject.name}-partDesktop.jar")
+  ]}
 }
 
 task toLib(type: Jar){
@@ -94,6 +105,8 @@ task toLib(type: Jar){
   }
   
   doLast {
+    delete("${project(":classes").buildDir}/libs/${project(":classes").name}.jar")
+    delete("${project(":abstractCore").buildDir}/libs/${project(":abstractCore").name}.jar")
     delete("$buildDir/libs/${rootProject.name}-desktopLib.jar")
     delete("$buildDir/libs/${rootProject.name}-androidLib.jar")
     delete("$buildDir/libs/${rootProject.name}-core.jar")
@@ -140,9 +153,8 @@ project(":desktop"){
     maven{ url 'https://www.jitpack.io' }
   }
   
-  dependencies{
-    compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
-    compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+  dependencies {
+    compile project(":abstractCore")
   }
   
   compileJava.options.fork = true
@@ -160,12 +172,9 @@ project(":android"){
     maven{ url 'https://www.jitpack.io' }
   }
   
-  dependencies{
-    compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
-    compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+  dependencies {
+    compile project(":abstractCore")
   }
-  
-  compileJava.options.fork = true
   
   jar{
     archiveFileName = "${rootProject.name}-partAndroid.jar"
@@ -180,11 +189,17 @@ project(":classes"){
     maven{ url 'https://www.jitpack.io' }
   }
   
-  dependencies{
-    compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
-    compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+  dependencies {
+    compile project(":abstractCore")
   }
+}
+
+project(":abstractCore"){
+  apply plugin: 'java'
   
-  compileJava.options.fork = true
+  repositories{
+    mavenCentral()
+    maven{ url 'https://www.jitpack.io' }
+  }
 }
 

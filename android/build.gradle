@@ -1,6 +1,9 @@
+
 sourceSets.main.java.srcDirs = ["src"]
 
-dependencies {
-  implementation "com.linkedin.dexmaker:dexmaker:2.28.1"
+dependencies{
+  compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+  compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+  compileOnly "com.jakewharton.android.repackaged:dalvik-dx:9.0.0_r3"
   implementation project(":classes")
 }
