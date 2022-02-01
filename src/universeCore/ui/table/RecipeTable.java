@@ -11,7 +11,8 @@ import mindustry.world.meta.StatValue;
 import mindustry.world.meta.Stats;
 
 /**生产消耗的统计信息显示器，用于显示几组生产列表的信息
- * @author EBwilson */
+ * @author EBwilson
+ * @since 1.0*/
 public class RecipeTable extends Table{
   public Stats[] stats;
   

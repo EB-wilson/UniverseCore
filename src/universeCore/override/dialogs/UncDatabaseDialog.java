@@ -28,7 +28,9 @@ import universeCore.util.UncContentType;
 import static mindustry.Vars.mobile;
 import static mindustry.Vars.ui;
 
-/**重写database对话框以重新排序类型（鬼知道臭猫什么时候才能把读写机制改一改）*/
+/**重写database对话框以重新排序类型（鬼知道臭猫什么时候才能把读写机制改一改）
+ * @author EBwilson
+ * @since 1.0*/
 public class UncDatabaseDialog extends DatabaseDialog{
   public UncDatabaseDialog(){
     clearListeners();

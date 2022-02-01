@@ -102,6 +102,7 @@ public class FactoryHelper {
      * @see #toClass(ClassFile,Class,ClassLoader,ProtectionDomain)
      * @deprecated
      */
+    @Deprecated
     public static Class<?> toClass(ClassFile cf, ClassLoader loader)
         throws CannotCompileException
     {
@@ -120,6 +121,7 @@ public class FactoryHelper {
      * @see #toClass(ClassFile,Class,ClassLoader,ProtectionDomain)
      * @deprecated
      */
+    @Deprecated
     public static Class<?> toClass(ClassFile cf, ClassLoader loader, ProtectionDomain domain)
         throws CannotCompileException
     {

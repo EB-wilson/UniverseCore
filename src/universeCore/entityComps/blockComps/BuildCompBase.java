@@ -6,7 +6,8 @@ import mindustry.world.modules.ItemModule;
 import mindustry.world.modules.LiquidModule;
 
 /**建筑组件的基本接口，其实应该使用一个组建管理器构建建筑等，但anuken的做法使得这很困难
- * @author EBwilson */
+ * @author EBwilson
+ * @since 1.0*/
 public interface BuildCompBase{
   @SuppressWarnings("unchecked")
   default <T> T getBlock(Class<T> clazz){

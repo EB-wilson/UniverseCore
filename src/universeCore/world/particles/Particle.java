@@ -40,7 +40,7 @@ import java.util.LinkedList;
 public class Particle implements Pool.Poolable, Drawc{
   private static int counter = 0;
   /**粒子的最大共存数量，总量大于此数目时，创建新的粒子会清除最先产生的粒子*/
-  public static int maxAmount = 512;
+  public static int maxAmount = 1024;
   
   protected static final LinkedList<Particle> all = new LinkedList<>();
   protected static final Seq<Particle> temp = new Seq<>();
@@ -64,7 +64,7 @@ public class Particle implements Pool.Poolable, Drawc{
   public float size;
   
   public float attenuate = 0.2f;
-  public float angleThreshold = 3f;
+  public float angleThreshold = 1.5f;
   public float deflectAngle = 90f;
   
   public transient int id = EntityGroup.nextId();
@@ -72,8 +72,8 @@ public class Particle implements Pool.Poolable, Drawc{
   public float x, y;
   
   public Func<Particle, Color> color = e -> Pal.reactorPurple;
-  public Func<Particle, Color> tailColor = e -> Color.lightGray;
-  public Boolf<Particle> isFinal = e -> e.speed.len() <= 0.005f;
+  public Func<Particle, Color> tailColor = e -> Pal.reactorPurple;
+  public Boolf<Particle> isFinal = e -> e.speed.len() <= 0.1f;
   public Floatf<Particle> sizeF = e -> e.maxSize*(e.speed.len()/e.defSpeed);
   public Cons<Particle> update;
   public Cons<Particle> regionDraw = e -> {
@@ -84,6 +84,7 @@ public class Particle implements Pool.Poolable, Drawc{
   
   public Cons<Cloud> cloudUpdater = e -> {
     e.size = Mathf.lerpDelta(e.size, 0, 0.04f);
+    e.color.lerp(Color.lightGray, 0.02f*Time.delta);
   };
   
   public static Particle create(float x, float y, float sx, float sy){

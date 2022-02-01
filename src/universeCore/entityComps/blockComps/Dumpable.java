@@ -1,54 +1,160 @@
 package universeCore.entityComps.blockComps;
 
 import arc.func.Boolf;
+import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import mindustry.gen.Building;
 
-//TODO： 这个请优化一下
-public interface Dumpable{
-  byte getCdump();
+public interface Dumpable extends BuildCompBase{
+  ObjectMap<String, Dumps<?>> dumps();
   
-  Seq<Building> getDumps();
+  default void addDumps(String name){
+    dumps().put(name, new Dumps<>());
+  }
   
-  default void cdumpIncrease(Seq<Building> seq){
-    if(this instanceof Building){
-      ((Building)this).incrementDump(seq.size);
+  default void addDumps(String name, Seq<?> targets){
+    dumps().put(name, new Dumps<>(targets));
+  }
+  
+  default <T> void addDumps(String name, Seq<T> targets, Boolf<T> valid){
+    dumps().put(name, new Dumps<>(targets, valid));
+  }
+  
+  @SuppressWarnings("unchecked")
+  default <T> Dumps<T> getDumps(String name){
+    return (Dumps<T>)dumps().get(name);
+  }
+  
+  default Building getNext(String name){
+    return getNext(name, true);
+  }
+  
+  default <T> T getNext(String name, Seq<T> targets){
+    return getNext(name, targets, true);
+  }
+  
+  default Building getNext(String name, Boolf<Building> valid){
+    return getNext(name, valid, true);
+  }
+  
+  default <T> T getNext(String name, Seq<T> targets, Boolf<T> valid){
+    return getNext(name, targets, valid, true);
+  }
+  
+  @SuppressWarnings("unchecked")
+  default Building getNext(String name, boolean increase){
+    Dumps<Building> dumps;
+    if((dumps = (Dumps<Building>)dumps().get(name)) == null){
+      dumps = new Dumps<>(getBuilding().proximity);
+      dumps().put(name, dumps);
     }
+    return increase? dumps.next(): dumps.nextOnly();
   }
   
-  default void cdumpIncrease(){
-    cdumpIncrease(getDumps());
-  }
-  
-  /**用相应判据预测下一次执行dump操作(item, liquid, energy等)的被传输对象
-   * 该操作仅预测，不改变任何变量
-   * @param valid 要求判据，和dump中同一判定操作，即检查遍历到的目标是否接受这次dump*/
-  default Building getDumpNext(Boolf<Building> valid){
-    return getDumpNext(valid, getDumps());
-  }
-  
-  default Building getDumpNext(Boolf<Building> valid, Seq<Building> seq){
-    int dump = getCdump();
-    for(int i = 0; i < seq.size; i++){
-      if(!valid.get(seq.get((i + dump) % seq.size))) continue;
-      return seq.get((i + dump) % seq.size);
+  @SuppressWarnings("unchecked")
+  default Building getNext(String name, Boolf<Building> valid, boolean increase){
+    Dumps<Building> dumps;
+    if((dumps = (Dumps<Building>)dumps().get(name)) == null){
+      dumps = new Dumps<>(getBuilding().proximity, valid);
+      dumps().put(name, dumps);
     }
-    return null;
+    return increase? dumps.next(valid): dumps.nextOnly(valid);
   }
   
-  /**用相应判据预测下一次执行dump操作(item, liquid, energy等)的被传输对象，并跳转下一次dump目标
-   * @param valid 要求判据，和dump中同一判定操作，即检查遍历到的目标是否接受这次dump*/
-  default Building getDump(Boolf<Building> valid){
-    return getDump(valid, getDumps());
-  }
-  
-  default Building getDump(Boolf<Building> valid, Seq<Building> seq){
-    int dump = getCdump();
-    for(int i=0; i<seq.size; i++){
-      cdumpIncrease(seq);
-      if(!valid.get(seq.get((i + dump) % seq.size))) continue;
-      return seq.get((i + dump) % seq.size);
+  @SuppressWarnings("unchecked")
+  default <T> T getNext(String name, Seq<T> targets, boolean increase){
+    Dumps<T> dumps;
+    if((dumps = (Dumps<T>)dumps().get(name)) == null){
+      dumps = new Dumps<>(targets);
+      dumps().put(name, dumps);
     }
-    return null;
+    return increase? dumps.next(targets): dumps.nextOnly(targets);
+  }
+  
+  @SuppressWarnings("unchecked")
+  default <T> T getNext(String name, Seq<T> targets, Boolf<T> valid, boolean increase){
+    Dumps<T> dumps;
+    if((dumps = (Dumps<T>)dumps().get(name)) == null){
+      dumps = new Dumps<>(targets, valid);
+      dumps().put(name, dumps);
+    }
+    return increase? dumps.next(targets, valid): dumps.nextOnly(targets, valid);
+  }
+  
+  class Dumps<Type>{
+    public Seq<Type> targets = new Seq<>();
+    public Boolf<Type> valid = e -> true;
+    public int countDumps;
+    
+    public Dumps(){}
+    
+    public Dumps(Seq<Type> defaultAll){
+      this.targets = defaultAll;
+    }
+  
+    public Dumps(Seq<Type> targets, Boolf<Type> valid){
+      this.targets = targets;
+      this.valid = valid;
+    }
+  
+    public int increaseDumps(int size){
+      countDumps = (countDumps + 1)%size;
+      return countDumps;
+    }
+    
+    public void setTargets(Seq<Type> other){
+      targets = other;
+    }
+    
+    public void setValid(Boolf<Type> other){
+      valid = other;
+    }
+    
+    public Type next(){
+      return next(targets, valid);
+    }
+    
+    public Type nextOnly(){
+      return nextOnly(targets, valid);
+    }
+    
+    public Type next(Boolf<Type> valid){
+      return next(targets, valid);
+    }
+    
+    public Type nextOnly(Boolf<Type> valid){
+      return nextOnly(targets, valid);
+    }
+    
+    public Type next(Seq<Type> targets){
+      return next(targets, valid);
+    }
+    
+    public Type nextOnly(Seq<Type> targets){
+      return nextOnly(targets, valid);
+    }
+    
+    public Type next(Seq<Type> targets, Boolf<Type> valid){
+      int size = targets.size;
+      if(size == 0) return null;
+      Type result;
+      for(Type ignored : targets){
+        result = targets.get(increaseDumps(size));
+        if(valid.get(result)) return result;
+      }
+      return null;
+    }
+    
+    public Type nextOnly(Seq<Type> targets, Boolf<Type> valid){
+      int size = targets.size, curr = countDumps;
+      if(size == 0) return null;
+      Type result;
+      for(Type ignored : targets){
+        curr = (curr + 1)%size;
+        result = targets.get(curr);
+        if(valid.get(result)) return result;
+      }
+      return null;
+    }
   }
 }

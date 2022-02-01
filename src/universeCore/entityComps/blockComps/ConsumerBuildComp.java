@@ -1,17 +1,14 @@
 package universeCore.entityComps.blockComps;
 
-import arc.math.Mathf;
 import arc.struct.ObjectMap;
 import arc.util.Time;
-import mindustry.world.blocks.power.PowerGraph;
-import mindustry.world.consumers.Consumers;
-import universeCore.util.handler.FieldHandler;
 import universeCore.world.blockModule.BaseConsumeModule;
 import universeCore.world.consumers.BaseConsume;
 import universeCore.world.consumers.BaseConsumers;
 
 /**消耗者组件，令方块具有进行资源消耗与资源检查的能力
- * @author EBwilson */
+ * @author EBwilson
+ * @since 1.0*/
 public interface ConsumerBuildComp extends BuildCompBase{
   int consumeCurrent();
   

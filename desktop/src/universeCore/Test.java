@@ -1,30 +1,37 @@
 package universeCore;
 
-import universeCore.util.proxy.BaseProxy;
-import universeCore.util.proxy.DesktopProxy;
+import javassist.*;
 
-import java.util.Arrays;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class Test{
   public static void main(String[] args){
-    BaseProxy<Test1> proxy = new DesktopProxy<>(Test1.class);
+    ClassPool pool = ClassPool.getDefault();
+  
     try{
-      proxy.addMethodProxy(Test1.class.getMethod("run", boolean.class, String.class), (s, su, p) -> {
-        su.callSuper(s, p);
-        System.out.println("im running" + Arrays.toString(p));
-        return false;
-      });
-      Test1 t = proxy.create(null);
-      System.out.println(t.run(true, "run"));
-    }catch(NoSuchMethodException e){
+      CtClass clazz = pool.makeClass("Testing");
+      clazz.setModifiers(Modifier.PUBLIC);
+  
+      CtField f = new CtField(pool.get(Test.class.getName()), "field", clazz);
+      f.setModifiers(Modifier.PUBLIC | Modifier.STATIC);
+      clazz.addField(f, "new universeCore.Test()");
+      
+      CtMethod m = new CtMethod(CtClass.voidType, "test", new CtClass[]{}, clazz);
+      m.setModifiers(Modifier.PUBLIC);
+      m.setBody("{field.run();}");
+      clazz.addMethod(m);
+      
+      Class<?> c = clazz.toClass();
+      Method met = c.getMethod("test");
+      
+      met.invoke(c.getConstructor().newInstance());
+    }catch(NotFoundException | CannotCompileException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e){
       e.printStackTrace();
     }
   }
   
-  public static class Test1{
-    public boolean run(boolean b, String str){
-      System.out.println(str);
-      return true;
-    }
+  public void run(){
+    System.out.println("hello world");
   }
 }

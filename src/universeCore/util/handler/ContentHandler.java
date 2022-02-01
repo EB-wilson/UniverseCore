@@ -10,21 +10,17 @@ import mindustry.ctype.Content;
 import mindustry.ctype.ContentType;
 import mindustry.ctype.MappableContent;
 import mindustry.ctype.UnlockableContent;
-import universeCore.util.UncContentType;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Locale;
 
-/**操作content的静态方法集合
- * @author EBwilson */
+/**用于操作content的静态方法集合
+ * @author EBwilson
+ * @since 1.0*/
 public class ContentHandler{
-  /**用于覆盖一个原有的content
-   *
+  /**用新的content去覆盖一个原有的content
    * @param oldContent 将要被取代的content
    * @param newContent 重写后的content
-   *
    * @throws RuntimeException 当oldContent与newContent的类型（ContentType）不相同时抛出*/
   @SuppressWarnings("unchecked")
   public static void overrideContent(MappableContent oldContent, MappableContent newContent){
@@ -80,28 +76,6 @@ public class ContentHandler{
       if(oldContent instanceof UnlockableContent && newContent instanceof UnlockableContent){
         TechTree.get((UnlockableContent) oldContent).content = (UnlockableContent)newContent;
       }
-    }
-    catch(Throwable e){
-      Log.err(e);
-    }
-  }
-  
-  @SuppressWarnings("unchecked")
-  public static void addNewContentType(UncContentType newType){
-    try{
-      ObjectMap<String, MappableContent>[] contentNameMap = FieldHandler.getArray(Vars.content.getClass().getDeclaredField("contentNameMap"), Vars.content, ObjectMap.class);
-      Seq<Content>[] contentMap = FieldHandler.getArray(Vars.content.getClass().getDeclaredField("contentMap"), Vars.content, Seq.class);
-  
-      assert contentNameMap != null;
-      ArrayList<ObjectMap<String, MappableContent>> contentNameMapList = new ArrayList<>(Arrays.asList(contentNameMap));
-      assert contentMap != null;
-      ArrayList<Seq<Content>> contentMapList = new ArrayList<>(Arrays.asList(contentMap));
-      
-      contentNameMapList.add(newType.value.ordinal(), new ObjectMap<>());
-      contentMapList.add(newType.value.ordinal(), new Seq<>());
-      
-      FieldHandler.setValue(Vars.content.getClass(), "contentNameMap", Vars.content, contentNameMapList.toArray(new ObjectMap[0]));
-      FieldHandler.setValue(Vars.content.getClass(), "contentMap", Vars.content, contentMapList.toArray(new Seq[0]));
     }
     catch(Throwable e){
       Log.err(e);

@@ -2,24 +2,25 @@ package universeCore.util.proxy;
 
 import com.android.dx.*;
 import javassist.Modifier;
-import mindustry.Vars;
+import universeCore.util.classes.AbstractFileClassLoader;
+import universeCore.util.handler.ClassHandler;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import static java.lang.reflect.Modifier.PUBLIC;
-import static universeCore.util.DexLoaderFactory.dexFileCache;
 
+/**Proxy的安卓实现，除非你确定自己的mod只用于安卓，否则不要直接引用这个类型
+ * @author EBwilson
+ * @since 1.2*/
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class AndroidProxy<Target> extends BaseProxy<Target>{
-  private static final ClassLoader modLoader = Vars.mods.mainLoader();
-  private static final DexMaker proxyMaker = new DexMaker();
   private static int proxyCounter;
   
+  private static final TypeId<BaseProxy> containerType = TypeId.get(BaseProxy.class);
   private static final TypeId<ProxyMethod> proxyType = TypeId.get(ProxyMethod.class);
-  private static final TypeId<InvokeChains> invokeType = TypeId.get(InvokeChains.class);
+  private static final TypeId<ProxyMethod.InvokeChains> invokeType = TypeId.get(ProxyMethod.InvokeChains.class);
   private static final TypeId<ProxyHandler> handleType = TypeId.get(ProxyHandler.class);
   
   private static final TypeId<Boolean> booleanType = TypeId.get(Boolean.class);
@@ -49,107 +50,131 @@ public class AndroidProxy<Target> extends BaseProxy<Target>{
   private static final MethodId<Double, Double> valueOfD = doubleType.getMethod(doubleType, "valueOf", TypeId.DOUBLE);
   private static final MethodId<Character, Character> valueOfC = characterType.getMethod(characterType, "valueOf", TypeId.CHAR);
   
-  private final ArrayList<String> lambdaClassName = new ArrayList<>();
-  private final HashMap<String, Class<?>> lambdaClasses = new HashMap<>();
+  private final DexMaker proxyMaker = new DexMaker();
+  private final File file;
   
-  public AndroidProxy(Class<Target> clazz){
-    super(clazz);
+  public AndroidProxy(Class<Target> clazz, AbstractFileClassLoader loader, ClassHandler handler){
+    super(clazz, loader, handler);
+    file = loader.getFile();
   }
   
   @Override
-  protected <T extends Target> Class<T> getProxyClass(){
+  protected <T extends Target> Class<T> generateProxyClass(){
     //public class className$Proxy$# extends className
     String className = clazz.getName() + "$Proxy$" + proxyCounter++;
-    TypeId<Target> superType = asType(clazz);
-    TypeId<T> type = TypeId.get("L" + className.replace(".", "/") + ";");
-    proxyMaker.declare(type, className + ".gen", Modifier.PUBLIC, superType, transfer(IProxied.class));
-    makeConstructor(type, superType);
-    for(java.lang.reflect.Constructor<? extends Target> value: constructors){
-      makeConstructor(type, superType, value.getParameterTypes());
-    }
-    
-    MethodId<T, Void> afterInvoker = type.getMethod(TypeId.VOID, "afterHandle");
-    Code code = proxyMaker.declare(afterInvoker, Modifier.PUBLIC);
-    Local<ProxyMethod> proxyLocal = code.newLocal(proxyType);
-    Local<ProxyHandler> handler = code.newLocal(handleType);
-    MethodId<ProxyMethod, Object> invokeMethod = proxyType.getMethod(TypeId.OBJECT, "invoke", TypeId.OBJECT, TypeId.get(Object[].class));
-    for(ProxyMethod<?, Target> proxyMethod: proxies.values()){
-      FieldId<T, ProxyMethod> proxyMethodF = type.getField(proxyType, PROXY_METHOD + proxyMethod.id());
-      proxyMaker.declare(proxyMethodF, Modifier.PRIVATE | Modifier.FINAL, null);
-  
-      Method m = proxyMethod.targetMethod();
-      TypeId<?> returnType = asType(m.getReturnType());
-      TypeId<?>[] ats = transfer(m.getParameterTypes());
-      MethodId<T, ?> proxiedMethod = type.getMethod(returnType, m.getName(), ats);
-      MethodId<Target, ?> proxiedMethodSuper = asType(clazz).getMethod(returnType, m.getName(), ats);
-      MethodId<T, ?> superInvoker = type.getMethod(TypeId.OBJECT, LAMBDA_SUPER + proxyMethod.id(), transfer(Object.class, InvokeChains.class, Object[].class));
-      
-      //模拟生成lambda方法引用
-      //public Object $lambdaSuper$#(Object self, InvokeChains callSuper, Object... args){
-      //  return super.*proxiedMethod*(args[0], args[1],...);
-      //}
-      Code callSuperBody = proxyMaker.declare(superInvoker, Modifier.PUBLIC);
-      Local<Object> nullR = callSuperBody.newLocal(TypeId.OBJECT);
-      Local tmp = callSuperBody.newLocal(TypeId.get(m.getReturnType()));
-      Local<Object> result = callSuperBody.newLocal(TypeId.OBJECT);
-      Local<Object[]> argArr = callSuperBody.getParameter(2, TypeId.get(Object[].class));
-      Local<?>[] parameter = expandArrParam(callSuperBody, argArr, ats);
-      
-      if(returnType == TypeId.VOID){
-        callSuperBody.invokeSuper(proxiedMethodSuper, null, callSuperBody.getThis(type), parameter);
-        callSuperBody.loadConstant(nullR, null);
-        callSuperBody.move(result, nullR);
-        callSuperBody.returnValue(result);
-      }
-      else{
-        callSuperBody.invokeSuper(proxiedMethodSuper, tmp, callSuperBody.getThis(type), parameter);
-        returnValue(callSuperBody, result, TypeId.OBJECT, tmp, TypeId.get(m.getReturnType()));
-      }
-      
-      //@Override
-      //public *returnType* methodName(args){
-      //  return $proxy$.invoke(this, args);
-      //}
-      Code proxiedBody = proxyMaker.declare(proxiedMethod, Modifier.PUBLIC);
-      Local<T> self = proxiedBody.getThis(type);
-      Local<ProxyMethod> pm = proxiedBody.newLocal(proxyType);
-      Local temp = returnType == TypeId.VOID? null: proxiedBody.newLocal(toPacked(returnType));
-      Local ret = returnType == TypeId.VOID? null: proxiedBody.newLocal(TypeId.OBJECT);
-      Local returnValue = returnType == TypeId.VOID? null: proxiedBody.newLocal(returnType);
-      Local<Object[]> args = getArgsArr(proxiedBody, ats);
-      proxiedBody.iget(proxyMethodF, pm, self);
-      proxiedBody.invokeVirtual(invokeMethod, ret, pm, self, args);
-      if(returnType == TypeId.VOID){
-        proxiedBody.returnVoid();
-      }
-      else{
-        proxiedBody.cast(temp, ret);
-        returnValue(proxiedBody, returnValue, returnType, temp, temp.getType());
-      }
-  
-      //@Override
-      //public void afterHand(){
-      //  ......
-      //  this.$proxy$.superMethod((self, superMethod, args) -> super(args));
-      //}
-      TypeId<ProxyHandler> lambdaType = declareLambda(className, proxyMethod.id(), type, superInvoker);
-      MethodId<ProxyHandler, Void> lambdaCstr = lambdaType.getConstructor(type);
-      MethodId<ProxyMethod, Void> setSuperMethod = proxyType.getMethod(TypeId.VOID, "superMethod", transfer(ProxyHandler.class));
-      self = code.getThis(type);
-      code.iget(proxyMethodF, proxyLocal, self);
-      code.newInstance(handler, lambdaCstr, self);
-      code.invokeVirtual(setSuperMethod, null, proxyLocal, handler);
-    }
-    code.returnVoid();
     try{
-      if(!dexFileCache.exists())dexFileCache.mkdirs();
-      ClassLoader dexLoader = proxyMaker.generateAndLoad(modLoader, dexFileCache.file());
-      for(String name : lambdaClassName){
-        lambdaClasses.put(name, dexLoader.loadClass(name));
+      return loadClass(className, clazz);
+    }catch(ClassNotFoundException ignored){
+      TypeId<Target> superType = asType(clazz);
+      TypeId<T> type = TypeId.get("L" + className.replace(".", "/") + ";");
+      proxyMaker.declare(type, className + ".gen", Modifier.PUBLIC, superType, transfer(IProxied.class));
+      
+      FieldId<T, BaseProxy> proxyContainer = type.getField(containerType, "proxyContainer");
+      proxyMaker.declare(proxyContainer, Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL, null);
+      
+      makeConstructor(type, superType);
+      for(java.lang.reflect.Constructor<? extends Target> value : constructors){
+        makeConstructor(type, superType, value.getParameterTypes());
       }
-      return (Class<T>)dexLoader.loadClass(className);
-    }catch(IOException | ClassNotFoundException e){
-      throw new RuntimeException(e);
+  
+      MethodId<T, Void> afterInvoker = type.getMethod(TypeId.VOID, "afterHandle");
+      Code code = proxyMaker.declare(afterInvoker, Modifier.PUBLIC);
+      Local<ProxyMethod> proxyLocal = code.newLocal(proxyType);
+      Local<ProxyHandler> handler = code.newLocal(handleType);
+      if(superProxy != null){
+        MethodId superHandle = TypeId.get(superProxy.proxyClass).getMethod(TypeId.VOID, "afterHandle");
+        code.invokeSuper(superHandle, null, code.getThis(type));
+      }
+      
+      MethodId<T, BaseProxy> getProxyContainer = type.getMethod(containerType, "getProxyContainer");
+      Code getC = proxyMaker.declare(getProxyContainer, Modifier.PUBLIC);
+      Local<BaseProxy> res = getC.newLocal(containerType);
+      getC.sget(proxyContainer, res);
+      getC.returnValue(res);
+      
+      MethodId<ProxyMethod, Object> invokeMethod = proxyType.getMethod(TypeId.OBJECT, "invoke", TypeId.OBJECT, TypeId.get(Object[].class));
+      for(ProxyMethod<?, Target> proxyMethod : proxies.values()){
+        FieldId<T, ProxyMethod> proxyMethodF = type.getField(proxyType, PROXY_METHOD + proxyMethod.id());
+        proxyMaker.declare(proxyMethodF, Modifier.PRIVATE | Modifier.FINAL, null);
+    
+        Method m = proxyMethod.targetMethod();
+        TypeId<?> returnType = asType(m.getReturnType());
+        TypeId<?>[] ats = transfer(m.getParameterTypes());
+        MethodId<T, ?> proxiedMethod = type.getMethod(returnType, m.getName(), ats);
+        MethodId<Target, ?> proxiedMethodSuper = asType(clazz).getMethod(returnType, m.getName(), ats);
+        MethodId<T, ?> superInvoker = type.getMethod(TypeId.OBJECT, LAMBDA_SUPER + randomHexCode(), transfer(Object.class, ProxyMethod.InvokeChains.class, Object[].class));
+    
+        //模拟生成lambda方法引用
+        //public Object $lambdaSuper$#(Object self, InvokeChains callSuper, Object... args){
+        //  return super.*proxiedMethod*(args[0], args[1],...);
+        //}
+        Code callSuperBody = proxyMaker.declare(superInvoker, Modifier.PUBLIC);
+        Local<Object> nullR = callSuperBody.newLocal(TypeId.OBJECT);
+        Local tmp = callSuperBody.newLocal(TypeId.get(m.getReturnType()));
+        Local<Object> result = callSuperBody.newLocal(TypeId.OBJECT);
+        Local<Object[]> argArr = callSuperBody.getParameter(2, TypeId.get(Object[].class));
+        Local<?>[] parameter = expandArrParam(callSuperBody, argArr, ats);
+    
+        if(returnType == TypeId.VOID){
+          callSuperBody.invokeSuper(proxiedMethodSuper, null, callSuperBody.getThis(type), parameter);
+          callSuperBody.loadConstant(nullR, null);
+          callSuperBody.move(result, nullR);
+          callSuperBody.returnValue(result);
+        }else{
+          callSuperBody.invokeSuper(proxiedMethodSuper, tmp, callSuperBody.getThis(type), parameter);
+          returnValue(callSuperBody, result, TypeId.OBJECT, tmp, TypeId.get(m.getReturnType()));
+        }
+    
+        //@Override
+        //public *returnType* methodName(args){
+        //  return $proxy$.invoke(this, args);
+        //}
+        Code proxiedBody = proxyMaker.declare(proxiedMethod, Modifier.PUBLIC);
+        Local<T> self = proxiedBody.getThis(type);
+        Local<ProxyMethod> pm = proxiedBody.newLocal(proxyType);
+        Local temp = returnType == TypeId.VOID ? null : proxiedBody.newLocal(toPacked(returnType));
+        Local ret = returnType == TypeId.VOID ? null : proxiedBody.newLocal(TypeId.OBJECT);
+        Local returnValue = returnType == TypeId.VOID ? null : proxiedBody.newLocal(returnType);
+        Local<Object[]> args = getArgsArr(proxiedBody, ats);
+        proxiedBody.iget(proxyMethodF, pm, self);
+        proxiedBody.invokeVirtual(invokeMethod, ret, pm, self, args);
+        if(returnType == TypeId.VOID){
+          proxiedBody.returnVoid();
+        }else{
+          proxiedBody.cast(temp, ret);
+          returnValue(proxiedBody, returnValue, returnType, temp, temp.getType());
+        }
+    
+        //@Override
+        //public void afterHand(){
+        //  ......
+        //  this.$proxy$.superMethod((self, superMethod, args) -> super(args));
+        //}
+        TypeId<ProxyHandler> lambdaType = declareLambda(className, proxyMethod.id(), type, superInvoker);
+        MethodId<ProxyHandler, Void> lambdaCstr = lambdaType.getConstructor(type);
+        MethodId<ProxyMethod, Void> setSuperMethod = proxyType.getMethod(TypeId.VOID, "superMethod", transfer(ProxyHandler.class));
+        self = code.getThis(type);
+        code.iget(proxyMethodF, proxyLocal, self);
+        code.newInstance(handler, lambdaCstr, self);
+        code.invokeVirtual(setSuperMethod, null, proxyLocal, handler);
+      }
+      code.returnVoid();
+      try{
+        byte[] dex = proxyMaker.generate();
+        
+        if(genLoader.fileExist()){
+          genLoader.writeFile(genLoader.merge(dex));
+        }
+        else{
+          file.createNewFile();
+          genLoader.writeFile(dex);
+        }
+        genLoader.loadJar();
+        
+        return loadClass(className, clazz);
+      }catch(ClassNotFoundException | IOException e){
+        throw new RuntimeException(e);
+      }
     }
   }
   
@@ -161,7 +186,6 @@ public class AndroidProxy<Target> extends BaseProxy<Target>{
       packageName.append(i==0? "": ".").append(str[i]);
     }
     String lambdaName = packageName + ".$$Lambda$" + str[str.length - 1] + "$" + id;
-    lambdaClassName.add(lambdaName);
     
     TypeId<D> superInvokerType = TypeId.get("L" + lambdaName.replace(".", "/")  + ";");
     proxyMaker.declare(superInvokerType, lambdaName + ".gen", Modifier.PUBLIC, TypeId.OBJECT, handleType);
@@ -180,7 +204,7 @@ public class AndroidProxy<Target> extends BaseProxy<Target>{
     Code invokeBody = proxyMaker.declare(invoke, Modifier.PUBLIC);
     Local<Object> returnValue = invokeBody.newLocal(TypeId.OBJECT);
     Local<V> inst = invokeBody.newLocal(argType);
-    Local<?>[] param = getParamLocals(invokeBody, transfer(Object.class, InvokeChains.class, Object[].class));
+    Local<?>[] param = getParamLocals(invokeBody, transfer(Object.class, ProxyMethod.InvokeChains.class, Object[].class));
     
     invokeBody.iget(obj, inst, invokeBody.getThis(superInvokerType));
     invokeBody.invokeVirtual(lambdaInvoke, returnValue, inst, param);
@@ -189,7 +213,7 @@ public class AndroidProxy<Target> extends BaseProxy<Target>{
     return superInvokerType;
   }
   
-  private static <T extends Target, Target> void makeConstructor(TypeId<T> type, TypeId<Target> superType, Class<?>...paramTypes){
+  private <T extends Target> void makeConstructor(TypeId<T> type, TypeId<Target> superType, Class<?>...paramTypes){
     TypeId<?>[] argTypes = transfer(paramTypes);
     MethodId<T,?> constructor = type.getConstructor(argTypes);
     Code constructorCode = proxyMaker.declare(constructor, PUBLIC);

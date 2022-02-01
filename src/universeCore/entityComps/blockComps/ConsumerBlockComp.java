@@ -14,7 +14,8 @@ import universeCore.world.meta.UncStat;
 import java.util.ArrayList;
 
 /**Consume组件，为方块添加可标记消耗项的功能
- * @author EBwilson */
+ * @author EBwilson
+ * @since 1.0*/
 public interface ConsumerBlockComp{
   ArrayList<BaseConsumers> consumers();
   

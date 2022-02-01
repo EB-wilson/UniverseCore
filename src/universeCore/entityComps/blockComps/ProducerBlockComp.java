@@ -8,7 +8,8 @@ import universeCore.world.producers.BaseProducers;
 import java.util.ArrayList;
 
 /**生产者方块的组件，令方块具有记录输出资源配方的功能
- * @author EBwilson */
+ * @author EBwilson
+ * @since 1.0*/
 public interface ProducerBlockComp extends ConsumerBlockComp{
   ArrayList<BaseProducers> producers();
   
