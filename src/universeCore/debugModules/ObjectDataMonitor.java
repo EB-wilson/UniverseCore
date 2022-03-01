@@ -309,7 +309,6 @@ public class ObjectDataMonitor{
   }
   
   private class ArrayPreviewTable extends Table{
-  
     public ArrayPreviewTable(Object array){
       TextButton unfold = new TextButton(Core.bundle.get("misc.unfold"));
       TextButton fold = new TextButton(Core.bundle.get("misc.fold"));
@@ -679,7 +678,7 @@ public class ObjectDataMonitor{
               table1.add(unfold).right().height(50).expand();
             });
             
-            t.add(table1).right();
+            t.pane(table1).grow().right();
           }
         }
         else{

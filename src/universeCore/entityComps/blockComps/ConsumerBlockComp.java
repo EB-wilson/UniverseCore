@@ -6,6 +6,7 @@ import mindustry.gen.Building;
 import mindustry.world.Block;
 import mindustry.world.consumers.ConsumePower;
 import mindustry.world.meta.Stats;
+import universeCore.annotations.Annotations.BindField;
 import universeCore.ui.table.RecipeTable;
 import universeCore.world.consumers.BaseConsumers;
 import universeCore.world.consumers.UncConsumeType;
@@ -17,19 +18,36 @@ import java.util.ArrayList;
  * @author EBwilson
  * @since 1.0*/
 public interface ConsumerBlockComp{
-  ArrayList<BaseConsumers> consumers();
+  @BindField("consumers")
+  default ArrayList<BaseConsumers> consumers(){
+    return null;
+  }
   
-  RecipeTable recipeTable();
+  @BindField("recipeTable")
+  default RecipeTable recipeTable(){
+    return null;
+  }
   
-  void recipeTable(RecipeTable table);
+  @BindField("recipeTable")
+  default void recipeTable(RecipeTable table){}
   
-  ArrayList<BaseConsumers> optionalCons();
+  @BindField("optionalCons")
+  default ArrayList<BaseConsumers> optionalCons(){
+    return null;
+  }
   
-  RecipeTable optionalRecipeTable();
+  @BindField("optionalRecipeTable")
+  default RecipeTable optionalRecipeTable(){
+    return null;
+  }
   
-  void optionalRecipeTable(RecipeTable table);
+  @BindField("optionalRecipeTable")
+  default void optionalRecipeTable(RecipeTable table){}
   
-  boolean oneOfOptionCons();
+  @BindField("oneOfOptionCons")
+  default boolean oneOfOptionCons(){
+    return false;
+  }
   
   default BaseConsumers newConsume(){
     BaseConsumers consume = new BaseConsumers(false);

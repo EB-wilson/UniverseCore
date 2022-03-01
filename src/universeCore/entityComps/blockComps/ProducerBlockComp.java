@@ -2,6 +2,7 @@ package universeCore.entityComps.blockComps;
 
 import mindustry.content.Items;
 import mindustry.world.meta.Stats;
+import universeCore.annotations.Annotations;
 import universeCore.world.producers.BaseProduce;
 import universeCore.world.producers.BaseProducers;
 
@@ -11,7 +12,10 @@ import java.util.ArrayList;
  * @author EBwilson
  * @since 1.0*/
 public interface ProducerBlockComp extends ConsumerBlockComp{
-  ArrayList<BaseProducers> producers();
+  @Annotations.BindField("producers")
+  default ArrayList<BaseProducers> producers(){
+    return null;
+  }
   
   default BaseProducers newProduce(){
     BaseProducers produce = new BaseProducers();

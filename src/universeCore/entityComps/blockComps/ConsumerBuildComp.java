@@ -2,6 +2,7 @@ package universeCore.entityComps.blockComps;
 
 import arc.struct.ObjectMap;
 import arc.util.Time;
+import universeCore.annotations.Annotations.BindField;
 import universeCore.world.blockModule.BaseConsumeModule;
 import universeCore.world.consumers.BaseConsume;
 import universeCore.world.consumers.BaseConsumers;
@@ -10,11 +11,20 @@ import universeCore.world.consumers.BaseConsumers;
  * @author EBwilson
  * @since 1.0*/
 public interface ConsumerBuildComp extends BuildCompBase{
-  int consumeCurrent();
+  @BindField("consumeCurrent")
+  default int consumeCurrent(){
+    return 0;
+  }
   
-  BaseConsumeModule consumer();
+  @BindField("consumer")
+  default BaseConsumeModule consumer(){
+    return null;
+  }
   
-  ObjectMap<Class<?>, Object> consData();
+  @BindField("consData")
+  default ObjectMap<Class<?>, Object> consData(){
+    return null;
+  }
   
   /**获得该块的ConsumerBlock*/
   default ConsumerBlockComp getConsumerBlock(){
@@ -54,12 +64,5 @@ public interface ConsumerBuildComp extends BuildCompBase{
   
   default boolean shouldConsume(){
     return consumer() != null && consumer().hasOptional() || consumeCurrent() != -1;
-  }
-  
-  default void updateConsume(){
-    /*当无配方要求或者未选择配方时不进行消耗更新*/
-    if(consumer() != null && (consumer().hasOptional() || consumer().hasConsume()) && consumeCurrent() != -1){
-      consumer().update();
-    }
   }
 }

@@ -32,10 +32,10 @@ public class UncLiquidStack extends LiquidStack{
     return other != null && other.liquid == liquid && other.amount == amount;
   }
 
-  public static UncLiquidStack[] mult(UncLiquidStack[] stacks, float amount){
+  public static UncLiquidStack[] mult(UncLiquidStack[] stacks, float multiple){
     UncLiquidStack[] copy = new UncLiquidStack[stacks.length];
     for(int i = 0; i < copy.length; i++){
-      copy[i] = new UncLiquidStack(stacks[i].liquid, stacks[i].amount * amount);
+      copy[i] = new UncLiquidStack(stacks[i].liquid, stacks[i].amount * multiple);
     }
     return copy;
   }

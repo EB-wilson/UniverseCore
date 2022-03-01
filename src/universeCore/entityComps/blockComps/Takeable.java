@@ -4,25 +4,35 @@ import arc.func.Boolf;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import mindustry.gen.Building;
+import universeCore.annotations.Annotations;
 
-public interface Dumpable extends BuildCompBase{
-  ObjectMap<String, Dumps<?>> dumps();
-  
-  default void addDumps(String name){
-    dumps().put(name, new Dumps<>());
+/**此接口给予实现者从一堆元素中依次取出（或者预测取出）元素的功能
+ * @author EBwilson
+ * @since 1.2*/
+public interface Takeable extends BuildCompBase{
+  @Annotations.BindField("heaps")
+  default ObjectMap<String, Heaps<?>> heaps(){
+    return null;
   }
   
-  default void addDumps(String name, Seq<?> targets){
-    dumps().put(name, new Dumps<>(targets));
+  /**添加一个输出元素堆，用一个字符串作为名字和一个Seq容器初始化，这个操作不是绝对必要的
+   * @param name 堆命名，用于索引
+   * @param targets 所有堆元素，选取操作在这当中进行*/
+  default void addHeap(String name, Seq<?> targets){
+    heaps().put(name, new Heaps<>(targets));
   }
   
-  default <T> void addDumps(String name, Seq<T> targets, Boolf<T> valid){
-    dumps().put(name, new Dumps<>(targets, valid));
+  /**添加一个输出元素堆，用一个字符串作为名字和一个Seq容器，以及一个返回布尔值的过滤器函数初始化，这个操作不是绝对必要的
+   * @param name 堆命名，用于索引
+   * @param targets 所有堆元素，选取操作在这当中进行
+   * @param valid 选择过滤器*/
+  default <T> void addHeap(String name, Seq<T> targets, Boolf<T> valid){
+    heaps().put(name, new Heaps<>(targets, valid));
   }
   
   @SuppressWarnings("unchecked")
-  default <T> Dumps<T> getDumps(String name){
-    return (Dumps<T>)dumps().get(name);
+  default <T> Heaps<T> getHeaps(String name){
+    return (Heaps<T>) heaps().get(name);
   }
   
   default Building getNext(String name){
@@ -43,63 +53,63 @@ public interface Dumpable extends BuildCompBase{
   
   @SuppressWarnings("unchecked")
   default Building getNext(String name, boolean increase){
-    Dumps<Building> dumps;
-    if((dumps = (Dumps<Building>)dumps().get(name)) == null){
-      dumps = new Dumps<>(getBuilding().proximity);
-      dumps().put(name, dumps);
+    Heaps<Building> heaps;
+    if((heaps = (Heaps<Building>) heaps().get(name)) == null){
+      heaps = new Heaps<>(getBuilding().proximity);
+      heaps().put(name, heaps);
     }
-    return increase? dumps.next(): dumps.nextOnly();
+    return increase? heaps.next(): heaps.nextOnly();
   }
   
   @SuppressWarnings("unchecked")
   default Building getNext(String name, Boolf<Building> valid, boolean increase){
-    Dumps<Building> dumps;
-    if((dumps = (Dumps<Building>)dumps().get(name)) == null){
-      dumps = new Dumps<>(getBuilding().proximity, valid);
-      dumps().put(name, dumps);
+    Heaps<Building> heaps;
+    if((heaps = (Heaps<Building>) heaps().get(name)) == null){
+      heaps = new Heaps<>(getBuilding().proximity, valid);
+      heaps().put(name, heaps);
     }
-    return increase? dumps.next(valid): dumps.nextOnly(valid);
+    return increase? heaps.next(valid): heaps.nextOnly(valid);
   }
   
   @SuppressWarnings("unchecked")
   default <T> T getNext(String name, Seq<T> targets, boolean increase){
-    Dumps<T> dumps;
-    if((dumps = (Dumps<T>)dumps().get(name)) == null){
-      dumps = new Dumps<>(targets);
-      dumps().put(name, dumps);
+    Heaps<T> heaps;
+    if((heaps = (Heaps<T>) heaps().get(name)) == null){
+      heaps = new Heaps<>(targets);
+      heaps().put(name, heaps);
     }
-    return increase? dumps.next(targets): dumps.nextOnly(targets);
+    return increase? heaps.next(targets): heaps.nextOnly(targets);
   }
   
   @SuppressWarnings("unchecked")
   default <T> T getNext(String name, Seq<T> targets, Boolf<T> valid, boolean increase){
-    Dumps<T> dumps;
-    if((dumps = (Dumps<T>)dumps().get(name)) == null){
-      dumps = new Dumps<>(targets, valid);
-      dumps().put(name, dumps);
+    Heaps<T> heaps;
+    if((heaps = (Heaps<T>) heaps().get(name)) == null){
+      heaps = new Heaps<>(targets, valid);
+      heaps().put(name, heaps);
     }
-    return increase? dumps.next(targets, valid): dumps.nextOnly(targets, valid);
+    return increase? heaps.next(targets, valid): heaps.nextOnly(targets, valid);
   }
   
-  class Dumps<Type>{
+  class Heaps<Type>{
     public Seq<Type> targets = new Seq<>();
     public Boolf<Type> valid = e -> true;
-    public int countDumps;
+    public int heapCounter;
     
-    public Dumps(){}
+    public Heaps(){}
     
-    public Dumps(Seq<Type> defaultAll){
+    public Heaps(Seq<Type> defaultAll){
       this.targets = defaultAll;
     }
   
-    public Dumps(Seq<Type> targets, Boolf<Type> valid){
+    public Heaps(Seq<Type> targets, Boolf<Type> valid){
       this.targets = targets;
       this.valid = valid;
     }
   
-    public int increaseDumps(int size){
-      countDumps = (countDumps + 1)%size;
-      return countDumps;
+    public int increaseCount(int size){
+      heapCounter = (heapCounter + 1)%size;
+      return heapCounter;
     }
     
     public void setTargets(Seq<Type> other){
@@ -139,14 +149,14 @@ public interface Dumpable extends BuildCompBase{
       if(size == 0) return null;
       Type result;
       for(Type ignored : targets){
-        result = targets.get(increaseDumps(size));
+        result = targets.get(increaseCount(size));
         if(valid.get(result)) return result;
       }
       return null;
     }
     
     public Type nextOnly(Seq<Type> targets, Boolf<Type> valid){
-      int size = targets.size, curr = countDumps;
+      int size = targets.size, curr = heapCounter;
       if(size == 0) return null;
       Type result;
       for(Type ignored : targets){

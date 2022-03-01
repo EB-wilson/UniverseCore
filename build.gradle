@@ -94,7 +94,7 @@ task pack(type: Jar){
   dependsOn("buildDesktop")
   dependsOn("buildAndroid")
   
-  archiveFileName = "${rootProject.name}-lib.jar"
+  archiveFileName = "${rootProject.name}-packed.jar"
   
   from{[
       zipTree("$buildDir/libs/${rootProject.name}-desktopLib.jar"),
@@ -116,7 +116,7 @@ task build(type: Jar, overwrite: true){
   
   archiveFileName = "${rootProject.name}.jar"
   
-  from{ zipTree("$buildDir/libs/${rootProject.name}-lib.jar") }
+  from{ zipTree("$buildDir/libs/${rootProject.name}-packed.jar") }
   
   from(rootDir){
     include "mod.hjson"
@@ -134,21 +134,43 @@ task build(type: Jar, overwrite: true){
         from("$buildDir/libs/${rootProject.name}.jar")
       }
     }
-  
-    if(libOutputDir != null){
-      delete("$libOutputDir/${rootProject.name}.jar")
-      copy {
-        into("$libOutputDir/")
-        from("$buildDir/libs/${rootProject.name}.jar")
-      }
-    }
   }
 }
 
 task toMod{
   dependsOn("build")
   
-  doLast { delete("$buildDir/libs/${rootProject.name}-lib.jar") }
+  doLast { delete("$buildDir/libs/${rootProject.name}-packed.jar") }
+}
+
+task toLib(type: Jar){
+  dependsOn("buildDesktop")
+  
+  archiveFileName = "${rootProject.name}-lib.jar"
+  
+  from{[
+      zipTree("$buildDir/libs/${rootProject.name}-desktopLib.jar")
+  ]}
+  
+  from("assets/"){
+    include "**"
+  }
+  
+  doLast {
+    delete("${project(":classes").buildDir}/libs/${project(":classes").name}.jar")
+    delete("${project(":abstractCore").buildDir}/libs/${project(":abstractCore").name}.jar")
+    delete("${project(":annotations").buildDir}/libs/${project(":annotations").name}.jar")
+    delete("$buildDir/libs/${rootProject.name}-desktopLib.jar")
+    delete("$buildDir/libs/${rootProject.name}-core.jar")
+  
+    if(libOutputDir != null){
+      delete("$libOutputDir/${rootProject.name}-lib.jar")
+      copy {
+        into("$libOutputDir/")
+        from("$buildDir/libs/${rootProject.name}-lib.jar")
+      }
+    }
+  }
 }
 
 project(":desktop"){

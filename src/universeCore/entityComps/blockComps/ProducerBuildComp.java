@@ -1,6 +1,7 @@
 package universeCore.entityComps.blockComps;
 
 
+import universeCore.annotations.Annotations;
 import universeCore.world.blockModule.BaseProductModule;
 import universeCore.world.producers.BaseProduce;
 import universeCore.world.producers.BaseProducers;
@@ -12,8 +13,11 @@ public interface ProducerBuildComp extends BuildCompBase, ConsumerBuildComp{
   default int produceCurrent(){
     return consumeCurrent();
   }
-  
-  BaseProductModule producer();
+ 
+  @Annotations.BindField("producer")
+  default BaseProductModule producer(){
+    return null;
+  }
   
   /**获得该块的NuclearEnergyBlock*/
   default ProducerBuildComp getProducerBlock(){

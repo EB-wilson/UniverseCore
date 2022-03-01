@@ -40,7 +40,7 @@ public class ZoomableTable extends Table{
       public boolean mouseMoved(InputEvent event, float x, float y){
         if(movable){
           elementChild.requestScroll();
-          if(! defSeted){
+          if(!defSeted){
             defX = elementChild.x;
             defY = elementChild.y;
             defSeted = true;
