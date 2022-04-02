@@ -8,7 +8,7 @@ ext{
   mindustryVersion = 'v131'
   //version of SDK you will be using
   sdkVersion = '30.0.3'
-  sdkRoot = '/home/EBwilson/android-sdk/'
+  sdkRoot = '/home/EBwilson/android_sdk'
   
   libOutputDir = '/home/EBwilson/IdeaProjects/Singularity/lib/'
   modOutputDir = '/home/EBwilson/sd/Android/data/io.anuke.mindustry/files/mods'
@@ -31,6 +31,7 @@ dependencies{
   compileOnly project(":desktop")
   compileOnly project(":android")
   compile project(":abstractCore")
+  compile project(":natives")
   compileOnly project(":annotations")
   annotationProcessor project(":annotations")
 }
@@ -61,7 +62,8 @@ task buildAndroid(type: Jar){
       zipTree("$buildDir/libs/${rootProject.name}-core.jar"),
       zipTree("${project(":classes").buildDir}/libs/${project(":classes").name}.jar"),
       zipTree("${project(":abstractCore").buildDir}/libs/${project(":abstractCore").name}.jar"),
-      zipTree("${project(":android").buildDir}/libs/${rootProject.name}-partAndroid.jar")
+      zipTree("${project(":android").buildDir}/libs/${rootProject.name}-partAndroid.jar"),
+      zipTree("${project(":natives").buildDir}/libs/${project(":natives").name}.jar")
   ]}
   
   doLast {
@@ -86,6 +88,7 @@ task buildDesktop(type: Jar){
       zipTree("${project(":classes").buildDir}/libs/${project(":classes").name}.jar"),
       zipTree("${project(":abstractCore").buildDir}/libs/${project(":abstractCore").name}.jar"),
       zipTree("${project(":desktop").buildDir}/libs/${rootProject.name}-partDesktop.jar"),
+      zipTree("${project(":natives").buildDir}/libs/${project(":natives").name}.jar"),
       zipTree("${project(":annotations").buildDir}/libs/${project(":annotations").name}.jar")
   ]}
 }
@@ -104,6 +107,7 @@ task pack(type: Jar){
   doLast {
     delete("${project(":classes").buildDir}/libs/${project(":classes").name}.jar")
     delete("${project(":abstractCore").buildDir}/libs/${project(":abstractCore").name}.jar")
+    delete("${project(":natives").buildDir}/libs/${project(":natives").name}.jar")
     delete("${project(":annotations").buildDir}/libs/${project(":annotations").name}.jar")
     delete("$buildDir/libs/${rootProject.name}-desktopLib.jar")
     delete("$buildDir/libs/${rootProject.name}-androidLib.jar")
@@ -160,6 +164,7 @@ task toLib(type: Jar){
     delete("${project(":classes").buildDir}/libs/${project(":classes").name}.jar")
     delete("${project(":abstractCore").buildDir}/libs/${project(":abstractCore").name}.jar")
     delete("${project(":annotations").buildDir}/libs/${project(":annotations").name}.jar")
+    delete("${project(":natives").buildDir}/libs/${project(":natives").name}.jar")
     delete("$buildDir/libs/${rootProject.name}-desktopLib.jar")
     delete("$buildDir/libs/${rootProject.name}-core.jar")
   
@@ -267,6 +272,25 @@ project(":abstractCore"){
     annotationProcessor project(":annotations")
   }
   
+  compileJava{
+    project.sourceCompatibility = 11
+    project.targetCompatibility = 11
+  }
+}
+
+project(":natives"){
+  apply plugin: 'java'
+
+  repositories{
+    mavenCentral()
+    maven{ url 'https://www.jitpack.io' }
+  }
+
+  dependencies {
+    compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+    compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+  }
+
   compileJava{
     project.sourceCompatibility = 11
     project.targetCompatibility = 11

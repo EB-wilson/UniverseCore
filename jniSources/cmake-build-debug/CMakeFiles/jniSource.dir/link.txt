@@ -1,0 +1,1 @@
+/bin/g++ -fPIC -g -shared -Wl,-soname,libjniSource.so -o ../libjniSource.so CMakeFiles/jniSource.dir/universeCore_nativeImpl_FieldHandlerImpl.cpp.o 

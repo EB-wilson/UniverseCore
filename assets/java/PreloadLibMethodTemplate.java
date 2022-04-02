@@ -152,7 +152,7 @@
       }
     }
   }
-  universeCore.UncCore.signup($className.class);
+  universecore.UncCore.signup($className.class);
 }
 
 > Task :abstractCore:processResources NO-SOURCE
@@ -314,5 +314,5 @@
       }
     }
   }
-  universeCore.UncCore.signup($className.class);
+  universecore.UncCore.signup($className.class);
 }

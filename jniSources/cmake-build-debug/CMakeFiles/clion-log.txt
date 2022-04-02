@@ -1,0 +1,4 @@
+/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/bin/make -DCMAKE_C_COMPILER=/bin/gcc -DCMAKE_CXX_COMPILER=/bin/g++ -G "Unix Makefiles" /home/EBwilson/IdeaProjects/UniverseCore/jniSources
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/EBwilson/IdeaProjects/UniverseCore/jniSources/cmake-build-debug
