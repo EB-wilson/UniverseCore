@@ -1,16 +1,18 @@
 package universecore.world.consumers;
 
+import arc.func.Floatf;
 import arc.graphics.g2d.TextureRegion;
 import arc.scene.ui.layout.Table;
 import arc.struct.Bits;
-import mindustry.gen.Building;
 import mindustry.world.meta.Stats;
-import universecore.components.blockcomp.*;
+import universecore.components.blockcomp.ConsumerBuildComp;
 
-public abstract class BaseConsume<T extends Building & ConsumerBuildComp>{
+public abstract class BaseConsume<T extends ConsumerBuildComp>{
+  public Floatf<T> consMultiple;
+
   public static final TextureRegion EMPTY_TEX = new TextureRegion();
   public BaseConsumers parent;
-  
+
   /**消耗的类型*/
   public abstract UncConsumeType<?> type();
   
@@ -25,4 +27,13 @@ public abstract class BaseConsume<T extends Building & ConsumerBuildComp>{
   public abstract boolean valid(T entity);
 
   public abstract Bits filter(T entity);
+
+  public float multiple(T entity){
+    return consMultiple == null? 1: consMultiple.get(entity);
+  }
+
+  public <N extends ConsumerBuildComp> BaseConsume<T> setMultiple(Floatf<N> multiple){
+    consMultiple = (Floatf<T>) multiple;
+    return this;
+  }
 }

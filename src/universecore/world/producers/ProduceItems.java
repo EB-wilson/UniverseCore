@@ -36,7 +36,7 @@ public class ProduceItems<T extends Building & ProducerBuildComp> extends BasePr
   
   @Override
   public void produce(T entity){
-    float f = entity.productMultiplier(this);
+    float f = multiple(entity);
     if(!random){
       for(ItemStack stack: items){
         int amount = stack.amount*((int)Math.floor(f)) + Mathf.num(Math.random()<f%1);
@@ -111,9 +111,9 @@ public class ProduceItems<T extends Building & ProducerBuildComp> extends BasePr
   }
   
   @Override
-  public boolean valid(Building entity){
+  public boolean valid(T entity){
     for(ItemStack stack : items){
-      if(entity.items.get(stack.item) > entity.block.itemCapacity - stack.amount) return false;
+      if(entity.items.get(stack.item) > entity.block.itemCapacity - stack.amount*multiple(entity)) return false;
     }
     return true;
   }

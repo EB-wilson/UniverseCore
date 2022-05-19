@@ -2,6 +2,8 @@ package universecore;
 
 import universecore.annotations.Annotations;
 
+import java.util.ArrayList;
+
 public class Test{
   public static void main(String[] args){
 
@@ -10,18 +12,20 @@ public class Test{
   interface T{
     @Annotations.MethodEntry(entryMethod = "doit", context = "data -> i", insert = Annotations.InsertPosition.HEAD)
     default void run(float i){}
+
+    @Annotations.BindField(value = "t", initialize = "new  java.util.ArrayList<>()")
+    default ArrayList<?> get(){
+      return null;
+    }
   }
 
   @Annotations.ImplEntries
-  static class N implements T{
-    float data;
+  static interface N extends T{
+  }
 
-    public N(String name){
-      System.out.println();
-    }
-
-    public String doit(){
-      return String.valueOf(898);
+  static class Test1 implements N{
+    public void run(){
+      N.super.run(19);
     }
   }
 }

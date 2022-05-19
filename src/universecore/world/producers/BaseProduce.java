@@ -1,11 +1,13 @@
 package universecore.world.producers;
 
+import arc.func.Floatf;
 import arc.graphics.g2d.TextureRegion;
-import mindustry.gen.Building;
 import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ProducerBuildComp;
 
-public abstract class BaseProduce<T extends Building & ProducerBuildComp>{
+public abstract class BaseProduce<T extends ProducerBuildComp>{
+  public Floatf<T> prodMultiple;
+
   public static final TextureRegion EMPTY_TEX = new TextureRegion();
   
   public BaseProducers parent;
@@ -25,4 +27,13 @@ public abstract class BaseProduce<T extends Building & ProducerBuildComp>{
   }
   
   public void dump(T entity){}
+
+  public float multiple(T entity){
+    return prodMultiple == null? 1: prodMultiple.get(entity);
+  }
+
+  public BaseProduce<T> setMultiple(Floatf<T> multiple){
+    prodMultiple = multiple;
+    return this;
+  }
 }

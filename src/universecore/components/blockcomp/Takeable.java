@@ -10,7 +10,7 @@ import universecore.annotations.Annotations;
  * @author EBwilson
  * @since 1.2*/
 public interface Takeable extends BuildCompBase{
-  @Annotations.BindField("heaps")
+  @Annotations.BindField(value = "heaps", initialize = "new arc.struct.ObjectMap()")
   default ObjectMap<String, Heaps<?>> heaps(){
     return null;
   }

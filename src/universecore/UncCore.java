@@ -19,6 +19,7 @@ import universecore.util.aspect.AspectManager;
 import universecore.util.classes.JarList;
 import universecore.util.handler.CategoryHandler;
 import universecore.util.handler.ClassHandler;
+import universecore.ui.styles.UncStyles;
 
 import static arc.Core.settings;
 import static mindustry.Vars.ui;
@@ -75,6 +76,8 @@ public class UncCore extends Mod{
           Core.app.post(categories::handleBlockFrag);
         });
       });
+
+      UncStyles.load();
       
       Tmp.v1.set(1, 0);
     }

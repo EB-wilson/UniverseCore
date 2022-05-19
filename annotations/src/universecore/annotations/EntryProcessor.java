@@ -329,8 +329,7 @@ public class EntryProcessor extends BaseProcessor{
 
         tree.defs = tree.defs.append(methodEntry);
 
-        methods.computeIfAbsent(method.name.toString(), k -> new HashSet<>()).add(method);
-        absMethods.computeIfAbsent(method.name.toString(), k -> new HashSet<>()).add(method);
+        addMethod(methods, method);
       }
       else{
         methodEntry = trees.getTree(method);
@@ -393,18 +392,26 @@ public class EntryProcessor extends BaseProcessor{
     GenMethod method = new GenMethod();
     method.key = bind.value();
     method.sym = symbol;
-  
+
+    String init = bind.initialize();
+
+    maker.at(tree);
     if(!fields.containsKey(method.key) && defaultDeclare){
       FieldEntry genField = absFields.get(method.key);
       Type returnType = method.sym.getReturnType();
       if(genField == null){
+        JCTree.JCExpression expr = null;
+        if(!init.isEmpty()){
+          expr = parsers.newParser(init, false, false, false).parseExpression();
+        }
+
         Type rType = returnType.getKind() == TypeKind.VOID? method.sym.params().get(0).asType(): returnType;
         genField = new FieldEntry();
         JCTree.JCVariableDecl var = maker.VarDef(
             maker.Modifiers(Modifier.PUBLIC),
             names.fromString(method.key),
             maker.Type(rType),
-            null
+            expr
         );
         tree.defs = tree.defs.prepend(var);
         genField.var = new Symbol.VarSymbol(

@@ -1,5 +1,6 @@
 package universecore.world.producers;
 
+import arc.func.Floatf;
 import arc.func.Prov;
 import arc.graphics.Color;
 import arc.graphics.g2d.TextureRegion;
@@ -8,6 +9,7 @@ import mindustry.type.Item;
 import mindustry.type.ItemStack;
 import mindustry.type.Liquid;
 import mindustry.world.meta.Stats;
+import universecore.components.blockcomp.ProducerBuildComp;
 import universecore.util.UncLiquidStack;
 import universecore.world.consumers.BaseConsumers;
 
@@ -15,6 +17,8 @@ import universecore.world.consumers.BaseConsumers;
  * @author EBwilson */
 public class BaseProducers{
   protected final ObjectMap<ProduceType<?>, BaseProduce<?>> prod = new ObjectMap<>();
+
+  public Floatf<ProducerBuildComp> prodDelta;
 
   /**用于显示选择配方的图标*/
   public Prov<TextureRegion> icon;
@@ -31,6 +35,14 @@ public class BaseProducers{
   public BaseProducers setColor(Color color){
     this.color = color;
     return this;
+  }
+
+  public <N extends ProducerBuildComp> void setDelta(Floatf<N> delta){
+    this.prodDelta = (Floatf<ProducerBuildComp>) delta;
+  }
+
+  public float delta(ProducerBuildComp entity){
+    return cons.delta(entity)*(prodDelta == null? 1: prodDelta.get(entity));
   }
   
   public ProduceItems<?> item(Item item, int amount){

@@ -1,6 +1,5 @@
 package universecore.components.blockcomp;
 
-import mindustry.content.Items;
 import mindustry.world.meta.Stats;
 import universecore.annotations.Annotations;
 import universecore.world.producers.BaseProduce;
@@ -22,7 +21,8 @@ public interface ProducerBlockComp extends ConsumerBlockComp{
     producers().add(produce);
     return produce;
   }
-  
+
+  @Annotations.MethodEntry(entryMethod = "setStats", context = "stats -> stats")
   default void setProducerStats(Stats stats){
     if(producers().size() > 1){
       for(int i=0; i<consumers().size(); i++){
@@ -40,6 +40,7 @@ public interface ProducerBlockComp extends ConsumerBlockComp{
   }
   
   /**初始化匹配消耗生产列表，在init()最后调用*/
+  @Annotations.MethodEntry(entryMethod = "init")
   default void initProduct(){
     int b = producers().size();
     int a = consumers().size();

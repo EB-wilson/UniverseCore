@@ -1,11 +1,13 @@
 package universecore.world.blocks.modules;
 
+import arc.math.Mathf;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
 import mindustry.world.modules.BlockModule;
 import universecore.components.blockcomp.ProducerBuildComp;
 import universecore.world.producers.BaseProduce;
 import universecore.world.producers.BaseProducers;
+import universecore.world.producers.ProduceType;
 
 import java.util.ArrayList;
 
@@ -31,8 +33,13 @@ public class BaseProductModule extends BlockModule {
   
   public void trigger(){
     if(current != null) for(BaseProduce prod: current.all()){
-      prod.produce(entity.getBuilding());
+      prod.produce(entity.getBuilding(ProducerBuildComp.class));
     }
+  }
+
+  public float getPowerProduct(){
+    if(current == null) return 0;
+    return current.get(ProduceType.power).powerProduction*(Mathf.num(entity.shouldConsume() && entity.consValid())*((BaseProduce<ProducerBuildComp>)current.get(ProduceType.power)).multiple(entity));
   }
   
   public void setCurrent(){
@@ -51,9 +58,9 @@ public class BaseProductModule extends BlockModule {
   
       valid = true;
       if(current != null) for(BaseProduce prod : current.all()){
-        valid &= prod.valid(entity.getBuilding());
-        if(docons && preValid && prod.valid(entity.getBuilding())){
-          prod.update(entity.getBuilding());
+        valid &= prod.valid(entity.getBuilding(ProducerBuildComp.class));
+        if(docons && preValid && prod.valid(entity.getBuilding(ProducerBuildComp.class))){
+          prod.update(entity.getBuilding(ProducerBuildComp.class));
         }
       }
     }
@@ -64,7 +71,7 @@ public class BaseProductModule extends BlockModule {
   
   public void doDump(ProducerBuildComp entity){
     for(BaseProducers p: get()){
-      for(BaseProduce prod: p.all()) prod.dump(entity.getBuilding());
+      for(BaseProduce prod: p.all()) prod.dump(entity.getBuilding(ProducerBuildComp.class));
     }
   }
   

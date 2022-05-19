@@ -1,11 +1,8 @@
 package universecore.components.blockcomp;
 
 import arc.struct.ObjectMap;
-import arc.util.Time;
 import universecore.annotations.Annotations.BindField;
 import universecore.world.blocks.modules.BaseConsumeModule;
-import universecore.world.consumers.BaseConsume;
-import universecore.world.consumers.BaseConsumers;
 
 /**消耗者组件，令方块具有进行资源消耗与资源检查的能力
  * @author EBwilson
@@ -39,14 +36,6 @@ public interface ConsumerBuildComp extends BuildCompBase{
   @SuppressWarnings("unchecked")
   default <T> T consData(Class<T> clazz, T def){
     return (T)consData().get(clazz, def);
-  }
-  
-  default float consumeMultiplier(BaseConsume<?> cons){
-    return 1;
-  }
-  
-  default float consDelta(BaseConsumers cons){
-    return cons.acceptOverdrive? getBuilding().edelta(): getBuilding().efficiency()*Time.delta;
   }
   
   default <T> void consData(T object){

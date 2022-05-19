@@ -41,7 +41,7 @@ public class ProduceLiquids<T extends Building & ProducerBuildComp> extends Base
   @Override
   public void update(T entity) {
     if(!portion) for(UncLiquidStack stack: liquids){
-      entity.liquids.add(stack.liquid, stack.amount*entity.consDelta(parent)*entity.productMultiplier(this));
+      entity.liquids.add(stack.liquid, stack.amount*parent.delta(entity)*multiple(entity));
       //Log.info("Liquid update is running, output:：" + stack.amount*entity.edelta() + ",amount:" + stack.amount + ",efficiency:" + entity.efficiency() + ",delta:" + entity.delta());
     }
   }

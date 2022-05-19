@@ -27,8 +27,8 @@ public class BaseConsumers{
   /**是否为可选*/
   public final boolean optional;
   public boolean optionalAlwayValid = true;
-  /**是否接受超速加成*/
-  public boolean acceptOverdrive = true;
+
+  public Floatf<ConsumerBuildComp> consDelta;
   
   /**图标，在选择消耗列表时显示，默认为首个消耗项*/
   public Prov<TextureRegion> icon;
@@ -42,7 +42,7 @@ public class BaseConsumers{
   public Boolf<ConsumerBuildComp> valid = e -> true;
   /**消耗触发器，在消耗的trigger()方法执行时触发*/
   public Cons<ConsumerBuildComp> trigger = e -> {};
-  
+
   public BaseConsumers(boolean optional){
     this.optional = optional;
   }
@@ -56,29 +56,37 @@ public class BaseConsumers{
     this.craftTime = time;
     showTime = true;
   }
+
+  public <N extends ConsumerBuildComp> void setDelta(Floatf<N> delta){
+    this.consDelta = (Floatf<ConsumerBuildComp>) delta;
+  }
+
+  public float delta(ConsumerBuildComp entity){
+    return consDelta == null? entity.getBuilding().edelta(): consDelta.get(entity);
+  }
   
-  public UncConsumeItems<?> item(Item item, int amount){
+  public UncConsumeItems<? extends ConsumerBuildComp> item(Item item, int amount){
     return items(new ItemStack[]{new ItemStack(item, amount)});
   }
   
-  public UncConsumeItems<?> items(ItemStack[] items){
+  public UncConsumeItems<? extends ConsumerBuildComp> items(ItemStack[] items){
     return add(new UncConsumeItems<>(items));
   }
   
-  public UncConsumeLiquids<?> liquid(Liquid liquid, float amount){
+  public UncConsumeLiquids<? extends ConsumerBuildComp> liquid(Liquid liquid, float amount){
     return liquids(new UncLiquidStack[]{new UncLiquidStack(liquid, amount)});
   }
   
-  public UncConsumeLiquids<?> liquids(UncLiquidStack[] liquids){
+  public UncConsumeLiquids<? extends ConsumerBuildComp> liquids(UncLiquidStack[] liquids){
     return add(new UncConsumeLiquids<>(liquids));
   }
   
-  public UncConsumePower<?> power(float usage){
+  public UncConsumePower<? extends ConsumerBuildComp> power(float usage){
     return add(new UncConsumePower<>(usage, false));
   }
   
   @SuppressWarnings("rawtypes")
-  public UncConsumePower<?> powerCond(float usage, Boolf<Building> cons){
+  public UncConsumePower<? extends ConsumerBuildComp> powerCond(float usage, Boolf<Building> cons){
     return add(new UncConsumePower(usage, false){
       private final Boolf<Building> consume = cons;
       public float requestedPower(Building entity){
@@ -87,7 +95,7 @@ public class BaseConsumers{
     });
   }
 
-  public <T extends BaseConsume<?>> T add(T consume){
+  public <T extends BaseConsume<? extends ConsumerBuildComp>> T add(T consume){
     cons.put(consume.type(), consume);
     consume.parent = this;
     if(icon == null && consume.icon() != BaseConsume.EMPTY_TEX){
@@ -97,11 +105,11 @@ public class BaseConsumers{
   }
 
   @SuppressWarnings("unchecked")
-  public <T extends BaseConsume<?>> T get(UncConsumeType<T> type){
+  public <T extends BaseConsume<? extends ConsumerBuildComp>> T get(UncConsumeType<T> type){
     return (T) cons.get(type);
   }
 
-  public Iterable<BaseConsume<?>> all(){
+  public Iterable<BaseConsume<? extends ConsumerBuildComp>> all(){
     return cons.values();
   }
 

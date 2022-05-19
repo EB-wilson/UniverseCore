@@ -38,9 +38,11 @@ public class TreeSeq<Type> implements Iterable<Type>{
 
   public boolean remove(Type item){
     tmp.clear();
-    tmp.addFirst(item);LinkedList<Type> t = set.ceiling(tmp);
+    tmp.addFirst(item);
+
+    LinkedList<Type> t = set.ceiling(tmp);
     if(t != null && set.floor(tmp) == t){
-      if(t.size() == 1) set.remove(t);
+      if(t.size() == 1 && t.getFirst().equals(item)) set.remove(t);
       t.remove(item);
       size--;
       return true;

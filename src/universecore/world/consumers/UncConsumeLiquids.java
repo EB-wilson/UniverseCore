@@ -37,14 +37,14 @@ public class UncConsumeLiquids<T extends Building & ConsumerBuildComp> extends B
   @Override
   public void consume(T entity) {
     if(portion) for(UncLiquidStack stack: liquids){
-      entity.liquids.remove(stack.liquid, stack.amount*60*entity.consumeMultiplier(this));
+      entity.liquids.remove(stack.liquid, stack.amount*60*multiple(entity));
     }
   }
 
   @Override
   public void update(T entity) {
     if(!portion) for(UncLiquidStack stack: liquids){
-      entity.liquids.remove(stack.liquid, stack.amount*entity.edelta()*entity.consumeMultiplier(this));
+      entity.liquids.remove(stack.liquid, stack.amount*parent.delta(entity)*multiple(entity));
     }
   }
 
@@ -66,7 +66,7 @@ public class UncConsumeLiquids<T extends Building & ConsumerBuildComp> extends B
   public void build(T entity, Table table) {
     for(UncLiquidStack stack : liquids){
       table.add(new ReqImage(stack.liquid.uiIcon,
-      () -> entity.liquids != null && entity.liquids.get(stack.liquid) > stack.amount*entity.consDelta(parent) + 0.0001f)).padRight(8);
+      () -> entity.liquids != null && entity.liquids.get(stack.liquid) > stack.amount*parent.delta(entity)*multiple(entity) + 0.0001f)).padRight(8);
     }
     table.row();
   }
@@ -74,7 +74,7 @@ public class UncConsumeLiquids<T extends Building & ConsumerBuildComp> extends B
   @Override
   public boolean valid(T entity){
     for(UncLiquidStack stack: liquids){
-      if(entity.liquids == null || entity.liquids.get(stack.liquid) < stack.amount*(entity.block.hasPower && entity.power.status > 0? entity.delta()*entity.power.status: entity.delta())*entity.consumeMultiplier(this)) return false;
+      if(entity.liquids == null || entity.liquids.get(stack.liquid) < stack.amount*(entity.block.hasPower && entity.power.status > 0? entity.delta()*entity.power.status: entity.delta())*multiple(entity)) return false;
     }
     return true;
   }

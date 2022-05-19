@@ -33,7 +33,7 @@ public class UncConsumeItems<T extends Building & ConsumerBuildComp> extends Bas
   
   @Override
   public void consume(T object){
-    float f = object.consumeMultiplier(this);
+    float f = multiple(object);
     for(ItemStack stack : items){
       int amount = stack.amount*((int)Math.floor(f)) + Mathf.num(Math.random()<f%1);
       object.items.remove(stack.item, amount);
@@ -71,7 +71,7 @@ public class UncConsumeItems<T extends Building & ConsumerBuildComp> extends Bas
   @Override
   public boolean valid(T entity){
     for(ItemStack stack: items){
-      if(entity.items == null || entity.items.get(stack.item) < stack.amount*entity.consumeMultiplier(this)) return false;
+      if(entity.items == null || entity.items.get(stack.item) < stack.amount*multiple(entity)) return false;
     }
     return true;
   }

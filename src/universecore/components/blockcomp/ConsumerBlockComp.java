@@ -67,7 +67,8 @@ public interface ConsumerBlockComp{
     return consume;
   }
   
-  /**为将方块加入到能量网络中，需要初始化一个原有的能量消耗器进行代理，在此进行，int之前调用*/
+  /**为将方块加入到能量网络中，需要初始化一个原有的能量消耗器进行代理，在此进行init之前调用*/
+  @Annotations.MethodEntry(entryMethod = "init", context = "powerCapacity -> powerCapacity")
   default void initPower(float powerCapacity){
     Block block = (Block)this;
     block.consumes.add(new ConsumePower(0 ,powerCapacity, powerCapacity > 0){
@@ -118,8 +119,5 @@ public interface ConsumerBlockComp{
         table.add(optionalRecipeTable()).grow();
       });
     }
-  }
-  
-  default void initConsume(){
   }
 }

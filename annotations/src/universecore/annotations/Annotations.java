@@ -83,6 +83,8 @@ public class Annotations{
   public @interface BindField{
     /**绑定到的字段，默认入口实现模式下，允许直接绑定到具有该名称的字段，严格模式下只会绑定到由{@link FieldKey}分配了相同键标识的字段*/
     String value();
+
+    String initialize() default "";
   }
   
   //method
