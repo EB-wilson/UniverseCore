@@ -1,7 +1,22 @@
-sourceSets.main.java.srcDirs = ["src"]
 
-dependencies{
+apply plugin: 'java'
+
+repositories{
+  mavenCentral()
+  maven{ url 'https://www.jitpack.io' }
+}
+
+dependencies {
   compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
   compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
-  implementation project(":classes")
+  compileOnly 'org.javassist:javassist:3.29.0-GA'
+  compileOnly project(":core")
+  compileOnly project(":abstract")
+  compileOnly project(":abstract2")
+}
+
+jar{
+  from(
+      zipTree(configurations.compileClasspath.find{it.name.contains("javassist")})
+  )
 }

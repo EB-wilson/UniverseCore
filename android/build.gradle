@@ -1,9 +1,23 @@
 
-sourceSets.main.java.srcDirs = ["src"]
+apply plugin: 'java'
 
-dependencies{
+repositories{
+  mavenCentral()
+  maven{ url 'https://www.jitpack.io' }
+}
+
+dependencies {
   compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
   compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
-  compileOnly 'com.jakewharton.android.repackaged:dalvik-dx:11.0.0_r3'
-  implementation project(":classes")
+  compileOnly "com.jakewharton.android.repackaged:dalvik-dx:11.0.0_r3"
+  compileOnly "com.linkedin.dexmaker:dexmaker:2.28.1"
+  compileOnly project(":core")
+  compileOnly project(":abstract")
+  compileOnly project(":abstract2")
+}
+
+jar{
+  from(
+      zipTree(configurations.compileClasspath.find{it.name.contains("dexmaker")})
+  )
 }
