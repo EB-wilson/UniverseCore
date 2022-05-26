@@ -225,7 +225,7 @@ task deploy{
   }
 }
 
-task build(overwrite: true){
+task buildProject{
   deleteBase = false
 
   dependsOn "buildLib"

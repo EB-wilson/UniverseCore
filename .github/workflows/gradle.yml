@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Set up PATH
       run: |
         echo "${ANDROID_HOME}/build-tools/30.0.1" >> $GITHUB_PATH
@@ -19,7 +19,7 @@ jobs:
       run: |
         cat /proc/version
         sudo chmod 777 *
-        ./gradlew build
+        ./gradlew buildProject
     - name: Upload built jar file
       uses: actions/upload-artifact@v2
       with:
