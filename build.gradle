@@ -83,17 +83,23 @@ task buildAndroid(type: Jar){
       //collect dependencies needed for desugaring
       def dependencies = (configurations.compileClasspath.asList() + configurations.runtimeClasspath.asList() + [new File(platformRoot, "android.jar")]).collect { "--classpath $it.path" }.join(" ")
 
-      def d8 = new File("$sdkRoot/build-tools/").listFiles().find {
-        it.listFiles().any {
-          it.name.contains("d8")
-        } && Integer.valueOf(it.name.substring(0, 2)) >= minSdkAPI
-      }.listFiles().find { it.name.contains("d8") }
+      try{
+        System.out.println("build android dex,,,")
 
-      System.out.println("build android dex,,,")
+        //dex and desugar files - this requires d8 in your PATH
+        "d8 $dependencies --min-api $minSdkAPI --output ${rootProject.name}-android.jar ${project.archivesBaseName}-android.jar"
+            .execute(null, new File("$buildDir/libs")).waitForProcessOutput(System.out, System.err)
+      }
+      catch(Throwable ignored) {
+        def d8 = new File("$sdkRoot/build-tools/").listFiles().find {
+          it.listFiles().any {
+            it.name.contains("d8")
+          } && Integer.valueOf(it.name.substring(0, 2)) >= minSdkAPI
+        }.listFiles().find { it.name.contains("d8") }
 
-      //dex and desugar files - this requires d8 in your PATH
-      "$d8 $dependencies --min-api 30 --output ${rootProject.name}-android.jar ${project.archivesBaseName}-android.jar"
-          .execute(null, new File("$buildDir/libs")).waitForProcessOutput(System.out, System.err)
+        "$d8 $dependencies --min-api $minSdkAPI --output ${rootProject.name}-android.jar ${project.archivesBaseName}-android.jar"
+            .execute(null, new File("$buildDir/libs")).waitForProcessOutput(System.out, System.err)
+      }
     } catch (Throwable ignored) {
       System.out.println("[WARNING] d8 tool or platform tools was not found, if you was installed android SDK, please check your environment variable")
 
