@@ -53,9 +53,9 @@ dependencies {
   implementation project(":abstract2")
   implementation project(":utilities")
   implementation project(":mindustry")
-  compileOnly project(":android")
-  compileOnly project(":desktop")
-  compileOnly project(":annotations")
+  implementation project(":android")
+  implementation project(":desktop")
+  implementation project(":annotations")
 }
 
 jar{
