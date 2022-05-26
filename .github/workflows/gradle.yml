@@ -19,6 +19,7 @@ jobs:
       run: |
         cat /proc/version
         sudo chmod 777 *
+        java -version
         ./gradlew buildProject
     - name: Upload built jar file
       uses: actions/upload-artifact@v2
