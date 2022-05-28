@@ -1,6 +1,8 @@
 package universecore.util.ini;
 
 import arc.func.Cons2;
+import universecore.util.ini.IniTypes.IniAnnotation;
+import universecore.util.ini.IniTypes.IniObject;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -10,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static universecore.util.ini.IniTypes.*;
+import static universecore.util.ini.IniTypes.testType;
 
 /**可编辑的.ini配置文件解析工具，提供了增强的ini数据类型如Map和Array*/
 public class Ini{

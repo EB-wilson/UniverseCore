@@ -1,11 +1,11 @@
-package universecore.desktopcore;
+package universecore;
 
-import universecore.ImpCore;
+import universecore.desktopcore.DesktopAccessAndModifyHelper;
 import universecore.desktopcore.classes.DesktopClassHandlerFactory;
 
 public class SetPlatformImpl{
   public static void setImplements(){
     ImpCore.classes = new DesktopClassHandlerFactory();
-    ImpCore.finalSetter = new DesktopFinalSetter();
+    ImpCore.accessAndModifyHelper = new DesktopAccessAndModifyHelper();
   }
 }

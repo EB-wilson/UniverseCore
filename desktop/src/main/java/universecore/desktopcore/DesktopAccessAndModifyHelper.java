@@ -1,17 +1,14 @@
 package universecore.desktopcore;
 
 import sun.misc.Unsafe;
-import universecore.util.FinalSetter;
+import universecore.util.AccessAndModifyHelper;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings({"unchecked"})
-public class DesktopFinalSetter implements FinalSetter{
+public class DesktopAccessAndModifyHelper implements AccessAndModifyHelper{
   private static final long fieldFilterOffset = 112L;
 
   private static final Unsafe unsafe;
@@ -52,15 +49,36 @@ public class DesktopFinalSetter implements FinalSetter{
     }
   }
 
+  @Override
+  public void setAccessible(Field field){
+    Class<?> clazz = field.getDeclaringClass();
+    Demodulator.checkAndMakeModuleOpen(clazz.getModule(), clazz.getPackage(), getClass().getModule());
+    field.setAccessible(true);
+  }
+
+  @Override
+  public void setAccessible(Method method){
+    Class<?> clazz = method.getDeclaringClass();
+    Demodulator.checkAndMakeModuleOpen(clazz.getModule(), clazz.getPackage(), getClass().getModule());
+    method.setAccessible(true);
+  }
+
+  @Override
+  public <T> void setAccessible(Constructor<T> cstr){
+    Class<?> clazz = cstr.getDeclaringClass();
+    Demodulator.checkAndMakeModuleOpen(clazz.getModule(), clazz.getPackage(), getClass().getModule());
+    cstr.setAccessible(true);
+  }
+
   private void setFieldNonFinal(Field field){
     try{
-      if((field.getModifiers()&Modifier.FINAL) != 0){
+      if(Modifier.isFinal(field.getModifiers())){
         if(fieldModifiers == null){
           fieldModifiers = Field.class.getDeclaredField("modifiers");
           Demodulator.checkAndMakeModuleOpen(Field.class.getModule(), Field.class.getPackage(), getClass().getModule());
           fieldModifiers.setAccessible(true);
         }
-        fieldModifiers.set(field, fieldModifiers.getModifiers() & ~Modifier.FINAL);
+        fieldModifiers.set(field, field.getModifiers() & ~Modifier.FINAL);
       }
       field.setAccessible(true);
     }catch(NoSuchFieldException|IllegalAccessException e){

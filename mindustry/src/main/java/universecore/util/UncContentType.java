@@ -40,7 +40,7 @@ public class UncContentType{
   
     allUncContentType.add(this);
     
-    fieldHandler.setValue(null, "all", ContentType.values());
+    FieldHandler.setValueDefault(ContentType.class, "all", ContentType.values());
     
     ArrayList<ContentType> list = new ArrayList<>(Arrays.asList(ContentType.values()));
     

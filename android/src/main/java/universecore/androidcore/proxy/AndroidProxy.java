@@ -1,8 +1,14 @@
 package universecore.androidcore.proxy;
 
 import com.android.dx.*;
+import com.android.dx.rop.code.RegisterSpec;
+import com.android.dx.rop.code.RegisterSpecList;
+import com.android.dx.rop.code.Rops;
+import com.android.dx.rop.code.ThrowingInsn;
 import universecore.androidcore.handler.AndroidClassHandler;
 import universecore.util.classes.AbstractFileClassLoader;
+import universecore.util.handler.FieldHandler;
+import universecore.util.handler.MethodHandler;
 import universecore.util.proxy.BaseProxy;
 import universecore.util.proxy.IProxied;
 import universecore.util.proxy.InvokeChains;
@@ -242,11 +248,35 @@ public class AndroidProxy<Target> extends BaseProxy<Target>{
       param = code.getParameter(i, paramType[i]);
       castPack(code, args[i], args[i].getType(), param, param.getType(), false);
       code.loadConstant(temp, i);
-      code.aput(result, temp, args[i]);
+      //code.aput(result, temp, args[i]); TODO:臭猫的游戏本身携带的dx版本过旧没有此方法，用替代方案进行
+      aput(code, result, temp, args[i]);
     }
     return result;
   }
-  
+
+  private static void aput(Code code, Local<?> array, Local<Integer> index, Local<?> source) {
+    MethodHandler.invokeDefault(code, "addInstruction", Void.class,
+        new ThrowingInsn(
+            Rops.opAput(
+                FieldHandler.getValueDefault(source.getType(), "ropType")
+            ),
+            FieldHandler.getValueDefault(code, "sourcePosition"), make(
+                MethodHandler.invokeDefault(source, "spec", RegisterSpec.class),
+                MethodHandler.invokeDefault(array, "spec", RegisterSpec.class),
+                MethodHandler.invokeDefault(index, "spec", RegisterSpec.class)
+            ), FieldHandler.getValueDefault(code, "catches")
+        )
+    );
+  }
+
+  private static RegisterSpecList make(RegisterSpec spec0, RegisterSpec spec1, RegisterSpec spec2) {
+    RegisterSpecList result = new RegisterSpecList(3);
+    result.set(0, spec0);
+    result.set(1, spec1);
+    result.set(2, spec2);
+    return result;
+  }
+
   private static Local<?>[] getParamLocals(Code code, TypeId<?>... types){
     Local<?>[] r = new Local[types.length];
     Local<?>[] result = new Local[types.length];

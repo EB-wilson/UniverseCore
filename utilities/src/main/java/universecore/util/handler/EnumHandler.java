@@ -28,7 +28,8 @@ public class EnumHandler<T extends Enum<?>>{
     fieldHandler = new FieldHandler<>(clazz);
     try{
       MethodHandles.Lookup lookup = MethodHandles.lookup();
-      for(Constructor<?> constructor: clazz.getConstructors()){
+      for(Constructor<?> constructor: clazz.getDeclaredConstructors()){
+        constructor.setAccessible(true);
         MethodHandle handle = lookup.unreflectConstructor(constructor);
         handleMap.put(handle.type(), handle);
       }
@@ -53,17 +54,17 @@ public class EnumHandler<T extends Enum<?>>{
       paramType[0] = String.class;
       paramType[1] = int.class;
 
-      for(int i = 2; i < param.length; i++){
-        params[i] = param[i-2];
-        paramType[i] = param[i-2].getClass();
+      for(int i = 0; i < param.length; i++){
+        params[i + 2] = param[i];
+        paramType[i + 2] = param[i].getClass();
       }
 
       T result = (T) handleMap.computeIfAbsent(
-          MethodType.methodType(void.class, paramType),
+          MethodType.methodType(clazz, paramType).unwrap(),
           e -> {
             throw new NoSuchMethodError("can not find constructor in " + clazz + " with parameter " + Arrays.toString(paramType));
           }
-      ).invoke(params);
+      ).invokeWithArguments(params);;
   
       fieldHandler.setValue(result, "name", name);
       fieldHandler.setValue(result, "ordinal", ordinal);

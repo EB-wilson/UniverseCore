@@ -3,9 +3,8 @@ package universecore.util.classes;
 
 import arc.Core;
 import arc.files.Fi;
-import arc.files.ZipFi;
 import arc.util.Log;
-import arc.util.serialization.Jval;
+import universecore.util.mods.ModInfo;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -79,24 +78,7 @@ public class JarList{
       throw new RuntimeException(e);
     }
   }
-  
-  public static class ModInfo{
-    public final String name;
-    public final String version;
-    public final Fi file;
-    
-    public ModInfo(Fi modFile){
-      if(modFile instanceof ZipFi) throw new RuntimeException("need a zip file with non-zip file object");
-      file = modFile;
-      modFile = new ZipFi(modFile);
-      Fi modMeta = modFile.child("mod.json").exists()? modFile.child("mod.json"): modFile.child("mod.hjson");
-      if(!modMeta.exists()) throw new RuntimeException("file: " + modFile + " is not a mod file");
-      Jval info = Jval.read(modMeta.reader());
-      name = info.get("name").asString();
-      version = info.get("version").asString();
-    }
-  }
-  
+
   public static class InfoEntry{
     private String name;
     private String version;

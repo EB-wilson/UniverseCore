@@ -6,7 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
-import static universecore.ImpCore.finalSetter;
+import static universecore.ImpCore.accessAndModifyHelper;
 
 /**字段操作的静态方法集合，包含了读取，写入等操作，所有引用抛出异常都被catch并封装到{@link RuntimeException}，无需手动try或抛出
  * @author EBwilson
@@ -37,9 +37,7 @@ public class FieldHandler<T>{
       
       Optional<Field> opt = checking.stream().filter(f -> f.getName().equals(name)).findFirst();
       if(opt.isPresent()){
-        Field result = opt.get();
-        result.setAccessible(true);
-        return result;
+        return opt.get();
       }
 
       current = current.getSuperclass();
@@ -58,7 +56,10 @@ public class FieldHandler<T>{
    * @param value 要写入的值  */
   public void setValue(T object, String key, Object value){
     if(finalFields.containsKey(key)){
-      if(object == null) setFinalValueStatic(key, value);
+      if(object == null){
+        if(!Modifier.isStatic(finalFields.get(key).getModifiers())) throw new NullPointerException("field " + key + " is not static, but target object is null");
+        setFinalValueStatic(key, value);
+      }
       else setFinalValue(object, key, value);
       return;
     }
@@ -66,6 +67,7 @@ public class FieldHandler<T>{
     MethodHandle setter = setters.computeIfAbsent(key, e -> {
       try{
         Field field = getDeclaredFieldSuper(clazz, key);
+        accessAndModifyHelper.setAccessible(field);
         if(Modifier.isFinal(field.getModifiers())){
           finalFields.put(key, field);
           setValue(object, key, value);
@@ -100,6 +102,14 @@ public class FieldHandler<T>{
   public static void setValueDefault(Class<?> clazz, String key, Object value){
     defaultHandlers.computeIfAbsent(clazz, e -> new FieldHandler(clazz)).setValue(null, key, value);
   }
+
+  public static void setValueTemp(Object obj, String key, Object value){
+    new FieldHandler(obj.getClass()).setValue(obj, key, value);
+  }
+
+  public static void setValueTemp(Class<?> clazz, String key, Object value){
+    new FieldHandler(clazz).setValue(null, key, value);
+  }
   
   /**获取指定的字段值，并返回它，如果字段不存在则会以抛出异常结束
    * 除非字段是静态的，否则不允许传入空目标对象
@@ -110,7 +120,9 @@ public class FieldHandler<T>{
   public <R> R getValue(T object, String key){
     MethodHandle getter = getters.computeIfAbsent(key, e -> {
       try{
-        return lookup.unreflectGetter(getDeclaredFieldSuper(clazz, key));
+        Field field = getDeclaredFieldSuper(clazz, key);
+        accessAndModifyHelper.setAccessible(field);
+        return lookup.unreflectGetter(field);
       }catch(IllegalAccessException|NoSuchFieldException ex){
         throw new RuntimeException(ex);
       }
@@ -138,6 +150,14 @@ public class FieldHandler<T>{
     return (T) defaultHandlers.computeIfAbsent(clazz, e -> new FieldHandler(clazz)).getValue(null, key);
   }
 
+  public static <T> T getValueTemp(Object obj, String key){
+    return (T) new FieldHandler(obj.getClass()).getValue(obj, key);
+  }
+
+  public static <T> T getValueTemp(Class<?> clazz, String key){
+    return (T) new FieldHandler(clazz).getValue(null, key);
+  }
+
   public static void clearDefault(){
     defaultHandlers.clear();
   }
@@ -151,7 +171,7 @@ public class FieldHandler<T>{
       }
     });
 
-    finalSetter.setStatic(clazz, field, value);
+    accessAndModifyHelper.setStatic(clazz, field, value);
   }
 
   private void setFinalValue(T target, String key, Object value){
@@ -163,6 +183,6 @@ public class FieldHandler<T>{
       }
     });
 
-    finalSetter.set(target, field, value);
+    accessAndModifyHelper.set(target, field, value);
   }
 }

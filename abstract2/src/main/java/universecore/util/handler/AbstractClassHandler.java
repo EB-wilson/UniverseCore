@@ -1,5 +1,6 @@
 package universecore.util.handler;
 
+import universecore.util.mods.ModInfo;
 import universecore.util.classes.AbstractFileClassLoader;
 import universecore.util.classes.AbstractGeneratedClassLoader;
 import universecore.util.classes.JarList;
@@ -21,13 +22,13 @@ public abstract class AbstractClassHandler implements ClassHandler{
   protected final static JarList jarList = new JarList();
   protected final static HashMap<Class<?>, HashMap<String, IProxy<?>>> proxies = new HashMap<>();
 
-  protected final JarList.ModInfo mod;
+  protected final ModInfo mod;
   protected final ClassLoader loader;
 
   private final AbstractGeneratedClassLoader generatedLoader;
   private boolean generateComplete = false;
   
-  protected AbstractClassHandler(JarList.ModInfo mod, AbstractGeneratedClassLoader generatedLoader, ClassLoader loader){
+  protected AbstractClassHandler(ModInfo mod, AbstractGeneratedClassLoader generatedLoader, ClassLoader loader){
     this.mod = mod;
     this.generatedLoader = generatedLoader;
     this.loader = loader;

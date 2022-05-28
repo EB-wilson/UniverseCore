@@ -4,8 +4,8 @@ import mindustry.Vars;
 import universecore.desktopcore.classes.DesktopDynamicClassLoader;
 import universecore.desktopcore.classes.DesktopGeneratedClassLoader;
 import universecore.desktopcore.proxy.DesktopProxy;
+import universecore.util.mods.ModInfo;
 import universecore.util.classes.BaseDynamicClassLoader;
-import universecore.util.classes.JarList;
 import universecore.util.handler.AbstractClassHandler;
 import universecore.util.proxy.BaseProxy;
 import universecore.util.proxy.BaseProxy.IllegalProxyHandlingException;
@@ -19,7 +19,7 @@ import java.util.HashMap;
 public class DesktopClassHandler extends AbstractClassHandler{
   private final static BaseDynamicClassLoader dynamicLoader = new DesktopDynamicClassLoader(Vars.mods.mainLoader());
   
-  public DesktopClassHandler(JarList.ModInfo callerMod, ClassLoader modLoader){
+  public DesktopClassHandler(ModInfo callerMod, ClassLoader modLoader){
     super(callerMod, new DesktopGeneratedClassLoader(callerMod, jarList.getCacheFile(callerMod).file(), Vars.mods.mainLoader()), modLoader);
   }
 

@@ -12,6 +12,7 @@ import mindustry.ctype.ContentType;
 import mindustry.ctype.MappableContent;
 import mindustry.ctype.UnlockableContent;
 
+import java.lang.reflect.Field;
 import java.util.Locale;
 
 /**用于操作content的静态方法集合
@@ -57,6 +58,37 @@ public class ContentHandler{
   }
   
   public static void overrideContent(MappableContent oldContent, Class<?> declarer, MappableContent newContent){
+    String oldName = oldContent.name;
+
+    ContentType type = oldContent.getContentType();
+
+    Class<?> contentsClazz;
+    try{
+      contentsClazz = declarer == null ?
+          Class.forName("mindustry.content." + type.name().substring(0, 1).toUpperCase(Locale.ROOT) + type.name().substring(1) + "s")
+          : declarer;
+    }catch(ClassNotFoundException e){
+      Log.info("no such type with declared class: " + type);
+      overrideContent(oldContent, (Field) null, newContent);
+      return;
+    }
+
+    StringBuilder fieldName = new StringBuilder();
+    String[] nameParts = oldName.split("-");
+    for(int i=0; i<nameParts.length; i++){
+      fieldName.append(i > 0? nameParts[i].substring(0, 1).toUpperCase(Locale.ROOT) + nameParts[i].substring(1): nameParts[i]);
+    }
+
+    try{
+      Field field = contentsClazz.getDeclaredField(fieldName.toString());
+      overrideContent(oldContent, field, newContent);
+    }catch(NoSuchFieldException e){
+      Log.info("[WARNING] override field was not found: " + newContent);
+      overrideContent(oldContent, (Field) null, newContent);
+    }
+  }
+
+  public static void overrideContent(MappableContent oldContent, Field declarer, MappableContent newContent){
     updateContainer();
     ContentType type = oldContent.getContentType();
   
@@ -73,36 +105,22 @@ public class ContentHandler{
       newC.localizedName = Core.bundle.get(type + "." + oldName + ".name", oldName);
       newC.description = Core.bundle.getOrNull(type + "." + oldName + ".description");
       newC.details = Core.bundle.getOrNull(type + "." + oldName + ".details");
-      contHandler.setValue(newC, "unlocked", Core.settings != null && Core.settings.getBool(oldName + "-unlocked", false));
+      FieldHandler.setValueDefault(newC, "unlocked", Core.settings != null && Core.settings.getBool(oldName + "-unlocked", false));
     }
-  
-    try{
-      Class<?> contentsClazz = declarer == null ?
-          Class.forName("mindustry.content." + type.name().substring(0, 1).toUpperCase(Locale.ROOT) + type.name().substring(1) + "s")
-          : declarer;
-  
-      StringBuilder fieldName = new StringBuilder();
-      String[] nameParts = oldName.split("-");
-      for(int i=0; i<nameParts.length; i++){
-        fieldName.append(i > 0? nameParts[i].substring(0, 1).toUpperCase(Locale.ROOT) + nameParts[i].substring(1): nameParts[i]);
-      }
-     
-      if(contentNameMap != null){
-        contentNameMap[type.ordinal()].put(oldName, newContent);
-        contentNameMap[type.ordinal()].remove(newName);
-      }
-      
-      overrideContent(oldContent, fieldName.toString(), newContent);
-  
-      if(oldContent instanceof UnlockableContent && newContent instanceof UnlockableContent){
-        TechTree.get((UnlockableContent) oldContent).content = (UnlockableContent)newContent;
-      }
-    }catch(ClassNotFoundException e){
-      throw new RuntimeException(e);
+
+    if(contentNameMap != null){
+      contentNameMap[type.ordinal()].put(oldName, newContent);
+      contentNameMap[type.ordinal()].remove(newName);
+    }
+
+    if(declarer != null) overrideContent(oldContent, declarer, (Content) newContent);
+
+    if(oldContent instanceof UnlockableContent && newContent instanceof UnlockableContent){
+      TechTree.get((UnlockableContent) oldContent).content = (UnlockableContent)newContent;
     }
   }
   
-  public static void overrideContent(Content oldContent, String srcField, Content newContent){
+  public static void overrideContent(Content oldContent, Field srcField, Content newContent){
     updateContainer();
     short oldId = oldContent.id;
     short newId = newContent.id;
@@ -110,7 +128,7 @@ public class ContentHandler{
     if(oldContent.getContentType() != newContent.getContentType())
       throw new RuntimeException("The old content cannot override by new content, because the content type are different");
     
-    contHandler.setValue(null, srcField, newContent);
+    FieldHandler.setValueDefault(srcField.getDeclaringClass(), srcField.getName(), newContent);
     
     ContentType type = oldContent.getContentType();
     try{

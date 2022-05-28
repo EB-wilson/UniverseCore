@@ -2,8 +2,8 @@ package universecore.desktopcore.classes;
 
 import arc.Core;
 import arc.files.Fi;
+import universecore.util.mods.ModInfo;
 import universecore.util.classes.BaseGeneratedClassLoader;
-import universecore.util.classes.JarList;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -29,7 +29,7 @@ public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
     }
   }
 
-  public DesktopGeneratedClassLoader(JarList.ModInfo mod, File cacheFile, ClassLoader parent){
+  public DesktopGeneratedClassLoader(ModInfo mod, File cacheFile, ClassLoader parent){
     super(mod, cacheFile, parent);
   }
 

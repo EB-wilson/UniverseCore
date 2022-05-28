@@ -1,6 +1,6 @@
 package universecore;
 
-import universecore.util.FinalSetter;
+import universecore.util.AccessAndModifyHelper;
 import universecore.util.classes.ClassHandlerFactory;
 
 import java.lang.reflect.InvocationTargetException;
@@ -19,5 +19,5 @@ public class ImpCore{
   }
 
   public static ClassHandlerFactory classes;
-  public static FinalSetter finalSetter;
+  public static AccessAndModifyHelper accessAndModifyHelper;
 }

@@ -145,18 +145,31 @@ public abstract class BaseProxy<Target> implements IProxy<Target>{
       paramType[i] = asBasic(param[i].getClass());
     }
     try{
-      MethodHandle cstr = constructors.get(MethodType.methodType(void.class, paramType));
+      MethodHandle cstr = null;
+
+      tag: for(Map.Entry<MethodType, MethodHandle> entry: constructors.entrySet()){
+        Class<?>[] methodArgs = entry.getKey().parameterArray();
+        if(methodArgs.length != paramType.length) continue;
+
+        for(int i = 0; i < methodArgs.length; i++){
+          if(!methodArgs[i].isAssignableFrom(paramType[i]))continue tag;
+        }
+
+        cstr = entry.getValue();
+        break;
+      }
+
       if(cstr == null) throw new NoSuchMethodException();
 
-      T result = (T) cstr.invoke(param);
+      T result = (T) cstr.invokeWithArguments(param);
       if(target != null) cloneData(target, result);
       setProxyField(result);
       ((IProxied)result).afterHandle();
       return result;
-    }catch(InstantiationException | IllegalAccessException | InvocationTargetException e){
-      throw new RuntimeException(e);
-    }catch(Throwable e){
+    }catch(NoSuchMethodException e){
       throw new IllegalProxyHandlingException(paramType);
+    }catch(Throwable e){
+      throw new RuntimeException(e);
     }
   }
   
@@ -173,11 +186,11 @@ public abstract class BaseProxy<Target> implements IProxy<Target>{
 
     try{
       MethodHandles.Lookup lookup = MethodHandles.lookup();
-      MethodType type = MethodType.methodType(void.class);
+      MethodType type = MethodType.methodType(proxyClass);
       constructors.put(type, lookup.findConstructor(proxyClass, type));
 
       for(Constructor<? extends Target> cstr: assignedCstr){
-        type = MethodType.methodType(void.class, cstr.getParameterTypes());
+        type = MethodType.methodType(proxyClass, cstr.getParameterTypes());
         constructors.put(type, lookup.findConstructor(proxyClass, type));
       }
     }catch(NoSuchMethodException|IllegalAccessException e){
@@ -237,15 +250,6 @@ public abstract class BaseProxy<Target> implements IProxy<Target>{
       if((modifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) == 0)
         throw new IllegalProxyHandlingException("when classes generate finished, dynamic generate class can not create a proxy on a package private method");
       throw new IllegalProxyHandlingException(modifiers);
-    }
-  }
-  
-  private static Object getValue(Field field, Object target){
-    field.setAccessible(true);
-    try{
-      return field.get(target);
-    }catch(IllegalAccessException e){
-      throw new RuntimeException(e);
     }
   }
   

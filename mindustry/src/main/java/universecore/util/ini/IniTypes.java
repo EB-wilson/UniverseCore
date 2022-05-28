@@ -27,7 +27,7 @@ public class IniTypes{
   public static class IniObject{
     private static final Pattern format = Pattern.compile(".+");
     
-    protected Matcher matchResult;
+    public Matcher matchResult;
     
     protected String data;
     

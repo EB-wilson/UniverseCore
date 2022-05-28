@@ -1,11 +1,13 @@
 package universecore.util.classes;
 
+import universecore.util.mods.ModInfo;
+
 import java.io.File;
 
 public abstract class BaseGeneratedClassLoader extends AbstractGeneratedClassLoader{
-  protected final JarList.ModInfo mod;
+  protected final ModInfo mod;
   
-  public BaseGeneratedClassLoader(JarList.ModInfo mod, File cacheFile, ClassLoader parent){
+  public BaseGeneratedClassLoader(ModInfo mod, File cacheFile, ClassLoader parent){
     super(cacheFile, parent);
     this.mod = mod;
   }

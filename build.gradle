@@ -22,6 +22,7 @@ allprojects{
   tasks.withType(JavaCompile){
     options.encoding = "UTF-8"
 
+    options.fork = true
     options.forkOptions.jvmArgs.addAll([
         "--add-opens", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
         "--add-opens", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
@@ -30,20 +31,12 @@ allprojects{
         "--add-opens", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
         "--add-opens", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
     ])
-  }
 
-  tasks.withType(JavaCompile){
     options.compilerArgs.addAll(['--release', '11'])
   }
 
   tasks.withType(Jar){
     archiveFileName = "${project.name}.jar"
-  }
-}
-
-configure(project(":annotations")) {
-  tasks.withType(JavaCompile){
-    options.fork = true
   }
 }
 
@@ -174,6 +167,10 @@ task buildLib(type: Jar){
       zipTree("${rootProject.buildDir}/libs/${rootProject.name}-desktop.jar"),
       zipTree("${project(":annotations").buildDir}/libs/annotations.jar")
   ]}
+
+  from("assets/"){
+    include "**"
+  }
 
   doLast {
     if (deleteBase) {

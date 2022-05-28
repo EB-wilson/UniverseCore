@@ -3,9 +3,9 @@ package universecore.androidcore.handler;
 
 import mindustry.Vars;
 import universecore.androidcore.classes.AndroidGeneratedClassLoader;
+import universecore.util.mods.ModInfo;
 import universecore.util.classes.BaseDynamicClassLoader;
 import universecore.androidcore.classes.DexLoaderFactory;
-import universecore.util.classes.JarList;
 import universecore.util.handler.AbstractClassHandler;
 import universecore.androidcore.proxy.AndroidProxy;
 import universecore.util.proxy.IProxy;
@@ -18,7 +18,7 @@ import java.util.HashMap;
 public class AndroidClassHandler extends AbstractClassHandler{
   static final BaseDynamicClassLoader dynamicLoader = DexLoaderFactory.generateClassLoader(Vars.mods.mainLoader());
   
-  public AndroidClassHandler(JarList.ModInfo callerMod, ClassLoader modLoader) throws ClassNotFoundException, NoSuchMethodException{
+  public AndroidClassHandler(ModInfo callerMod, ClassLoader modLoader) throws ClassNotFoundException, NoSuchMethodException{
     super(callerMod, new AndroidGeneratedClassLoader(callerMod, jarList.getCacheFile(callerMod).file(), Vars.mods.mainLoader()), modLoader);
   }
   

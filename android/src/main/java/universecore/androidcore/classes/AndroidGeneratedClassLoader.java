@@ -5,6 +5,7 @@ import com.android.dex.DexFormat;
 import com.android.dx.command.dexer.DxContext;
 import com.android.dx.merge.CollisionPolicy;
 import com.android.dx.merge.DexMerger;
+import universecore.util.mods.ModInfo;
 import universecore.util.classes.BaseGeneratedClassLoader;
 import universecore.util.classes.JarList;
 
@@ -37,7 +38,7 @@ public class AndroidGeneratedClassLoader extends BaseGeneratedClassLoader{
     }
   }
 
-  public AndroidGeneratedClassLoader(JarList.ModInfo mod, File cacheFile, ClassLoader parent){
+  public AndroidGeneratedClassLoader(ModInfo mod, File cacheFile, ClassLoader parent){
     super(mod, cacheFile, parent);
   }
   
