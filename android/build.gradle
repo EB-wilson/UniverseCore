@@ -19,6 +19,6 @@ dependencies {
 
 jar{
   from(
-      zipTree(configurations.compileClasspath.find{it.name.contains("dexmaker")})
+      zipTree(configurations.getByName("compileClasspath").find{it.name.contains("dexmaker")})
   )
 }
