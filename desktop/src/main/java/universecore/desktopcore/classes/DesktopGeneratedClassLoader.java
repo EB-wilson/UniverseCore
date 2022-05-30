@@ -2,8 +2,9 @@ package universecore.desktopcore.classes;
 
 import arc.Core;
 import arc.files.Fi;
-import universecore.util.mods.ModInfo;
+import universecore.ImpCore;
 import universecore.util.classes.BaseGeneratedClassLoader;
+import universecore.util.mods.ModInfo;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -19,11 +20,11 @@ import java.util.jar.JarOutputStream;
 public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
   private static final Method addURL;
   private static final Fi jarFileCache = Core.settings.getDataDirectory().child("universecore").child("cache");
-  
+
   static{
     try{
       addURL = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-      addURL.setAccessible(true);
+      ImpCore.accessAndModifyHelper.setAccessible(addURL);
     }catch(NoSuchMethodException e){
       throw new RuntimeException(e);
     }

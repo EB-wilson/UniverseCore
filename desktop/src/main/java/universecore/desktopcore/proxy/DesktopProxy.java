@@ -81,7 +81,6 @@ public class DesktopProxy<Target> extends BaseProxy<Target>{
   
         CtConstructor c = new CtConstructor(transfer(), proxyClass);
         c.setModifiers(Modifier.PUBLIC);
-        c.setBody("super();");
         proxyClass.addConstructor(c);
         for(Constructor<? extends Target> constructor : assignedCstr){
           CtConstructor cstr = new CtConstructor(transfer(constructor.getParameterTypes()), proxyClass);

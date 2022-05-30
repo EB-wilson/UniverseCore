@@ -87,5 +87,7 @@ public class UncCore extends Mod{
   @Override
   public void init(){
     if(! Vars.net.server()) Vars.ui.database = new UncDatabaseDialog();
+
+    classHandler.generateFinish();
   }
 }
