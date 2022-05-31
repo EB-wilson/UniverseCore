@@ -2,6 +2,7 @@ package universecore.annotations;
 
 import com.google.auto.service.AutoService;
 import com.sun.tools.javac.code.Flags;
+import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.List;
@@ -20,6 +21,10 @@ import java.util.regex.Pattern;
 
 @AutoService(Processor.class)
 public class ImportUNCProcessor extends BaseProcessor{
+  private static final String checkStatus =
+      "if($status$ == -1) throw new RuntimeException(\"universeCore mod file was not found\");\n" +
+      "else if($status$ == 1) throw new RuntimeException(\"universeCore version was deprecated, version: \" + $status$ + \", require: \" + $requireVersion);";
+
   private static final String sourceFile = "java/PreloadLibMethodTemplate.java";
   private static String code;
   
@@ -95,10 +100,20 @@ public class ImportUNCProcessor extends BaseProcessor{
            throw new IllegalArgumentException("import universe core require the class extend mindustry.mod.Mod");
         
         maker.at(tree);
+
+        Symbol.VarSymbol status = new Symbol.VarSymbol(
+            Modifier.PRIVATE | Modifier.STATIC,
+            names.fromString("$status$"),
+            symtab.longType,
+            tree.sym
+        );
+        tree.defs = tree.defs.prepend(maker.VarDef(status, null));
         
         String genCode = genLoadCode(tree.sym.getQualifiedName().toString(), annotation.requireVersion());
         JCTree.JCBlock preLoadBody = parsers.newParser(genCode, false, false, false).block(), cinit = null;
-        
+
+        JCTree.JCStatement thrStat = parsers.newParser(checkStatus.replace("$requireVersion", String.valueOf(annotation.requireVersion())), false, false, false).parseStatement();
+
         for(JCTree child: tree.defs){
           if(child instanceof JCTree.JCBlock){
             if(((JCTree.JCBlock) child).isStatic()){
@@ -125,7 +140,8 @@ public class ImportUNCProcessor extends BaseProcessor{
                   ))
               );
               tree.defs = tree.defs.append(internalClass);
-              ((JCTree.JCMethodDecl) child).body = parsers.newParser("{new INIT_INTERNAL();}", false, false, false).block();
+              JCTree.JCBlock block = ((JCTree.JCMethodDecl) child).body = parsers.newParser("{new INIT_INTERNAL();}", false, false, false).block();
+              block.stats = block.stats.prepend(thrStat);
             }
           }
         }
@@ -142,8 +158,8 @@ public class ImportUNCProcessor extends BaseProcessor{
         genLog(anno, tree);
       }
     }
-    
-    return false;
+
+    return super.process(annotations, roundEnv);
   }
   
   @Override

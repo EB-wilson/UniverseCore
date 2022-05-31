@@ -1,5 +1,6 @@
 package universecore.util.proxy;
 
+import arc.util.Time;
 import universecore.util.handler.AbstractClassHandler;
 import universecore.util.handler.ClassHandler;
 import universecore.util.handler.FieldHandler;
@@ -187,8 +188,8 @@ public abstract class BaseProxy<Target> implements IProxy<Target>{
       MethodHandles.Lookup lookup = MethodHandles.lookup();
 
       for(Constructor<Target> cstr: assignedCstr){
-        proxyClass.getDeclaredConstructor(cstr.getParameterTypes());
-        MethodHandle handle = lookup.unreflectConstructor(cstr);
+        Constructor<? extends Target> constructor = proxyClass.getDeclaredConstructor(cstr.getParameterTypes());
+        MethodHandle handle = lookup.unreflectConstructor(constructor);
         constructors.put(handle.type(), handle);
       }
     }catch(NoSuchMethodException|IllegalAccessException e){

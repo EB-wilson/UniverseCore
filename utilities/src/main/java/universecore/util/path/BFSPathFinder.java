@@ -9,11 +9,18 @@ public interface BFSPathFinder<Vert extends PathVertices<Vert>> extends PathFind
   /**重置搜索状态,包括复位已经遍历过的顶点和边等，你不应该在这个方法实现中清空缓存的路径，这个方法会因为每一个起点搜索路径或者其他情况被多次调用*/
   void reset();
 
-  /**判断一个顶点是否已被遍历过，若尚未遍历，此方法应当返回true并将顶点标记为已遍历；若已遍历，则返回false不进行任何操作
+  /**获取一个顶点对应的的回溯指针，若顶点尚未关联到一个指针，则使之按之关联到一个新的回溯指针并返回true，若已关联则返回false不进行操作
    *
    * @param vert 进行遍历检查的顶点
-   * @return 若顶点未遍历则返回true,否则返回false*/
-  boolean flowed(Vert vert);
+   * @param previous 该指针的前一个回溯指针，可以为空
+   * @return 若尚未关联，则返回true,否则返回false*/
+  boolean relateToPointer(Vert vert, PathPointer<Vert> previous);
+
+  /**获取顶点关联的回溯指针，若顶点尚未关联，则应当返回null
+   *
+   * @param vert 获取指针的顶点
+   * @return 一个与顶点关联的指针，若未关联则为null*/
+  PathPointer<Vert> getPointer(Vert vert);
 
   /**从搜索队列中读取下一个顶点，并将其从队列中弹出，若队列为空则返回null。
    * <p>此方法通与{@link BFSPathFinder#queueAdd(PathVertices)}应当满足堆栈实现，<strong>更晚加入的顶点应当更优先被取出</strong>。
@@ -34,15 +41,6 @@ public interface BFSPathFinder<Vert extends PathVertices<Vert>> extends PathFind
    * @see GenericPath*/
   IPath<Vert> createPath();
 
-  /**创建一个回溯指针对象，默认实现直接创建实例，如果搜索量很大，请将此方法重写使用池存放回溯指针以复用对象，避免创建过多对象造成不必要的回收开销
-   *
-   * @param self 此指针保存的顶点
-   * @param previous 此指针所回溯的前一个指针
-   * @return 一个保存了参数信息的指针对象*/
-  default PathPointer<Vert> createPointer(Vert self, PathPointer<Vert> previous){
-    return new PathPointer<>(self, previous);
-  }
-
   /**一个标准的BFS寻路实现，通常搜寻到的路径是在无权值的图中最短的或最短之一
    *
    * @see PathFinder#findPath(PathVertices, PathFindFunc.PathAcceptor) */
@@ -50,19 +48,17 @@ public interface BFSPathFinder<Vert extends PathVertices<Vert>> extends PathFind
   default void findPath(Vert origin, PathFindFunc.PathAcceptor<Vert> pathConsumer){
     reset();
     queueAdd(origin);
-    flowed(origin);
-
-    PathPointer<Vert> pointer = createPointer(origin, null);
+    relateToPointer(origin, null);
 
     Vert next;
     while((next = queueNext()) != null){
-      for(Vert entry: next.getLinkVertices()){
-        if(flowed(entry)){
-          queueAdd(next);
+      PathPointer<Vert> pointer = getPointer(next);
+      for(Vert vert: next.getLinkVertices()){
+        if(relateToPointer(vert, pointer)){
+          queueAdd(vert);
         }
       }
 
-      pointer = createPointer(next, pointer);
       if(isDestination(origin, next)){
         PathPointer<Vert> tracePointer = pointer;
         IPath<Vert> path = createPath();
@@ -84,12 +80,12 @@ public interface BFSPathFinder<Vert extends PathVertices<Vert>> extends PathFind
   default void eachVertices(Vert origin, PathFindFunc.VerticesAcceptor<Vert> vertConsumer){
     reset();
     queueAdd(origin);
-    flowed(origin);
+    relateToPointer(origin, null);
 
     Vert v;
     while((v = queueNext()) != null){
       for(Vert vert: v.getLinkVertices()){
-        if(flowed(vert)){
+        if(relateToPointer(vert, null)){
           queueAdd(vert);
         }
       }

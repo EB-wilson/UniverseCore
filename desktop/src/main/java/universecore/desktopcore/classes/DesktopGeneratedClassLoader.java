@@ -13,6 +13,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
@@ -48,6 +49,8 @@ public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
     try{
       ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
       JarOutputStream jarOut = new JarOutputStream(byteOut);
+
+      HashSet<String> added = new HashSet<>();
       
       String tempName = String.valueOf(System.nanoTime());
       String s = tempName.substring(tempName.length() - 6);
@@ -61,15 +64,17 @@ public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
         Enumeration<? extends JarEntry> enumeration = jf.entries();
         while(enumeration.hasMoreElements()){
           entry = enumeration.nextElement();
+
           if(!entry.isDirectory()){
+            if(!added.add(entry.getName())) continue;
             JarEntry outEntry = new JarEntry(entry.getName());
             jarOut.putNextEntry(outEntry);
             if(entry.getSize() > 0){
               DataInputStream input = new DataInputStream(jf.getInputStream(entry));
-              byte[] cache = new byte[1024];
               int length;
-              while((length = input.read(cache)) != -1){
-                jarOut.write(cache, 0, length);
+              while((length = input.read()) != -1){
+                jarOut.write(length);
+                jarOut.flush();
               }
               input.close();
             }
