@@ -78,10 +78,13 @@ public class DesktopProxy<Target> extends BaseProxy<Target>{
         CtField proxyContainer = new CtField(containerType, "proxyContainer", proxyClass);
         proxyContainer.setModifiers(Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL);
         proxyClass.addField(proxyContainer, "null");
-  
-        CtConstructor c = new CtConstructor(transfer(), proxyClass);
-        c.setModifiers(Modifier.PUBLIC);
-        proxyClass.addConstructor(c);
+
+        if(assignedCstr.isEmpty()){
+          CtConstructor c = new CtConstructor(transfer(), proxyClass);
+          c.setModifiers(Modifier.PUBLIC);
+          proxyClass.addConstructor(c);
+        }
+
         for(Constructor<? extends Target> constructor : assignedCstr){
           CtConstructor cstr = new CtConstructor(transfer(constructor.getParameterTypes()), proxyClass);
           cstr.setModifiers(Modifier.PUBLIC);

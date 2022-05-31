@@ -87,8 +87,9 @@ public class EntityAspect<EntityType extends Entityc> extends AbstractAspect<Ent
       proxy = UncCore.classHandler.getProxy(source.getClass(), "aspect_" + name());
 
       if(proxy.isInitialized()) return;
-  
+
       try{
+        proxy.assignConstruct(EntityGroup.class.getDeclaredConstructor(Class.class, boolean.class, boolean.class));
         proxy.addMethodProxy(EntityGroup.class.getMethod("add", Entityc.class), (self, superHandler, args) -> {
           superHandler.callSuper(self, args);
           for(EntityAspect<Entityc> aspect : aspects){
@@ -112,7 +113,7 @@ public class EntityAspect<EntityType extends Entityc> extends AbstractAspect<Ent
       try{
         EntityGroup<? extends Entityc> group = (EntityGroup<?>)field.get(null);
         setSource(group);
-        proxiedGroup = (EntityGroup) proxy.create(group);
+        proxiedGroup = (EntityGroup) proxy.create(group, group.getClass(), false, false);
         field.set(null, proxiedGroup);
         for(Entityc e : group){
           for(EntityAspect<Entityc> aspect : aspects){

@@ -37,7 +37,7 @@ public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
   @Override
   public ClassLoader getVMLoader(){
     try{
-      return new URLClassLoader(new URL[]{file.toURI().toURL()});
+      return new URLClassLoader(new URL[]{file.toURI().toURL()}, getParent());
     }catch(MalformedURLException e){
       throw new RuntimeException(e);
     }
@@ -101,6 +101,7 @@ public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
             }
           }
         };
+
         addURL.invoke(l, file.toURI().toURL());
         return lo.loadClass(name);
       }catch(IllegalAccessException | InvocationTargetException | MalformedURLException e){

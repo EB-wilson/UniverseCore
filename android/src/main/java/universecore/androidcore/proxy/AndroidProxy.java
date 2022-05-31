@@ -14,8 +14,6 @@ import universecore.util.proxy.IProxied;
 import universecore.util.proxy.InvokeChains;
 import universecore.util.proxy.ProxyHandler;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -61,11 +59,9 @@ public class AndroidProxy<Target> extends BaseProxy<Target>{
   private static final MethodId<Character, Character> valueOfC = characterType.getMethod(characterType, "valueOf", TypeId.CHAR);
   
   private final DexMaker proxyMaker = new DexMaker();
-  private final File file;
   
   public AndroidProxy(Class<Target> clazz, AbstractFileClassLoader loader, AndroidClassHandler handler){
     super(clazz, loader, handler);
-    file = loader.getFile();
   }
   
   @Override
@@ -82,7 +78,7 @@ public class AndroidProxy<Target> extends BaseProxy<Target>{
       FieldId<T, BaseProxy> proxyContainer = type.getField(containerType, "proxyContainer");
       proxyMaker.declare(proxyContainer, Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL, null);
       
-      makeConstructor(type, superType);
+      if(assignedCstr.isEmpty())makeConstructor(type, superType);
       for(java.lang.reflect.Constructor<? extends Target> value : assignedCstr){
         makeConstructor(type, superType, value.getParameterTypes());
       }
@@ -176,13 +172,12 @@ public class AndroidProxy<Target> extends BaseProxy<Target>{
           genLoader.writeFile(genLoader.merge(dex));
         }
         else{
-          file.createNewFile();
           genLoader.writeFile(dex);
         }
         genLoader.loadJar();
         
         return loadClass(className, clazz);
-      }catch(ClassNotFoundException | IOException e){
+      }catch(ClassNotFoundException e){
         throw new RuntimeException(e);
       }
     }
@@ -278,17 +273,9 @@ public class AndroidProxy<Target> extends BaseProxy<Target>{
   }
 
   private static Local<?>[] getParamLocals(Code code, TypeId<?>... types){
-    Local<?>[] r = new Local[types.length];
     Local<?>[] result = new Local[types.length];
     for(int i = 0; i < result.length; i++){
-      r[i] = code.newLocal(toPacked(types[i]));
-      result[i] = code.newLocal(types[i]);
-    }
-    Local param;
-    for(int i = 0; i < result.length; i++){
-      param = code.getParameter(i, types[i]);
-      code.cast(r[i], param);
-      cast(code, result[i], types[i], r[i], r[i].getType(), false);
+      result[i] = code.getParameter(i, types[i]);
     }
     return result;
   }

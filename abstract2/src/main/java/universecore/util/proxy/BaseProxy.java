@@ -62,7 +62,7 @@ public abstract class BaseProxy<Target> implements IProxy<Target>{
   public Class<? extends Target> proxyClass;
   
   protected final HashMap<MethodType, MethodHandle> constructors = new HashMap<>();
-  protected final ArrayList<Constructor<? extends Target>> assignedCstr = new ArrayList<>();
+  protected final ArrayList<Constructor<Target>> assignedCstr = new ArrayList<>();
   protected final AbstractFileClassLoader genLoader;
   
   private boolean initialized = false;
@@ -129,7 +129,6 @@ public abstract class BaseProxy<Target> implements IProxy<Target>{
   public <R> void removeMethodProxy(Method method, ProxyHandler<R, Target> handler){
     int modifiers = method.getModifiers();
     checkProxible(modifiers);
-    if((modifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) == 0) proxyPackagePrivate = true;
   
     ProxyMethod<R, Target> proxy = (ProxyMethod<R, Target>) proxies.get(method);
     if(proxy == null) throw new IllegalProxyHandlingException("can not remove a proxy method because this method was not proxied");
@@ -186,12 +185,11 @@ public abstract class BaseProxy<Target> implements IProxy<Target>{
 
     try{
       MethodHandles.Lookup lookup = MethodHandles.lookup();
-      MethodType type = MethodType.methodType(proxyClass);
-      constructors.put(type, lookup.findConstructor(proxyClass, type));
 
-      for(Constructor<? extends Target> cstr: assignedCstr){
-        type = MethodType.methodType(proxyClass, cstr.getParameterTypes());
-        constructors.put(type, lookup.findConstructor(proxyClass, type));
+      for(Constructor<Target> cstr: assignedCstr){
+        proxyClass.getDeclaredConstructor(cstr.getParameterTypes());
+        MethodHandle handle = lookup.unreflectConstructor(cstr);
+        constructors.put(handle.type(), handle);
       }
     }catch(NoSuchMethodException|IllegalAccessException e){
       throw new RuntimeException(e);
@@ -202,6 +200,17 @@ public abstract class BaseProxy<Target> implements IProxy<Target>{
   public void initial(){
     if(superProxy != null && !superProxy.isInitialized()) superProxy.initial();
     if(initialized) throw new IllegalProxyHandlingException("can not initial a proxy after it was initialized");
+
+    if(assignedCstr.isEmpty()){
+      try{
+        Constructor<Target> superDefCstr = clazz.getDeclaredConstructor();
+        int mod = superDefCstr.getModifiers();
+        if((mod & Modifier.PUBLIC) != 0 | (mod & Modifier.PROTECTED) != 0)
+        assignConstruct(superDefCstr);
+      }catch(NoSuchMethodException ignored){
+      }
+    }
+
     proxyClass = generateProxyClass();
     setProxyData();
     initialized = true;
