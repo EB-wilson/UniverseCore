@@ -2,126 +2,95 @@ package universecore.desktopcore.classes;
 
 import arc.Core;
 import arc.files.Fi;
-import universecore.ImpCore;
+import arc.files.ZipFi;
+import arc.struct.ObjectSet;
 import universecore.util.classes.BaseGeneratedClassLoader;
 import universecore.util.mods.ModInfo;
 
-import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.jar.JarOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
-  private static final Method addURL;
   private static final Fi jarFileCache = Core.settings.getDataDirectory().child("universecore").child("cache");
 
-  static{
-    try{
-      addURL = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-      ImpCore.accessAndModifyHelper.setAccessible(addURL);
-    }catch(NoSuchMethodException e){
-      throw new RuntimeException(e);
-    }
-  }
+  private final URLClassLoader fileLoader;
 
-  public DesktopGeneratedClassLoader(ModInfo mod, File cacheFile, ClassLoader parent){
-    super(mod, cacheFile, parent);
-  }
+  private ZipFi zip;
 
-  @Override
-  public ClassLoader getVMLoader(){
+  public DesktopGeneratedClassLoader(ModInfo mod, ClassLoader parent){
+    super(mod, parent);
+    zip = new ZipFi(new Fi(getFile()));
     try{
-      return new URLClassLoader(new URL[]{file.toURI().toURL()}, getParent());
+      fileLoader = new URLClassLoader(new URL[]{getFile().toURI().toURL()}, parent);
     }catch(MalformedURLException e){
       throw new RuntimeException(e);
     }
   }
-  
+
   @Override
-  public byte[] merge(byte[] other){
-    try{
-      ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-      JarOutputStream jarOut = new JarOutputStream(byteOut);
+  public void declareClass(String name, byte[] byteCode){
+    Fi select = null;
 
-      HashSet<String> added = new HashSet<>();
-      
-      String tempName = String.valueOf(System.nanoTime());
-      String s = tempName.substring(tempName.length() - 6);
-      File temp = jarFileCache.child("temp" + s).file();
-      FileOutputStream out = new FileOutputStream(temp);
-      out.write(other);
-      out.close();
-      for(File f : new File[]{file, temp}){
-        JarFile jf = new JarFile(f);
-        JarEntry entry;
-        Enumeration<? extends JarEntry> enumeration = jf.entries();
-        while(enumeration.hasMoreElements()){
-          entry = enumeration.nextElement();
+    String[] paths = name.split("\\.");
+    for(int i = 0; i < paths.length; i++){
+      select = zip.child(paths[i] + (i == paths.length - 1? ".class": ""));
+    }
 
-          if(!entry.isDirectory()){
-            if(!added.add(entry.getName())) continue;
-            JarEntry outEntry = new JarEntry(entry.getName());
-            jarOut.putNextEntry(outEntry);
-            if(entry.getSize() > 0){
-              DataInputStream input = new DataInputStream(jf.getInputStream(entry));
-              int length;
-              while((length = input.read()) != -1){
-                jarOut.write(length);
-                jarOut.flush();
-              }
-              input.close();
-            }
-          }
+    assert select != null;
+    if(select.exists()) return;
+
+    try(ZipOutputStream outputStream = new ZipOutputStream(new FileOutputStream(getFile()))){
+      String entryName = name.replace(".", "/") + ".class";
+
+      ObjectSet<String> added = new ObjectSet<>();
+
+      ZipFile tempZipped = null;
+      if(getFile().exists()){
+        new Fi(getFile()).copyTo(jarFileCache);
+        tempZipped = new ZipFile(jarFileCache.file());
+      }
+
+      ZipEntry entry = new ZipEntry(entryName);
+      added.add(entry.getName());
+      outputStream.putNextEntry(entry);
+      outputStream.write(byteCode);
+      outputStream.closeEntry();
+      outputStream.flush();
+
+      if(tempZipped == null){
+        zip = new ZipFi(new Fi(getFile()));
+        return;
+      }
+      Enumeration<? extends ZipEntry> entries = tempZipped.entries();
+      while((entry = entries.nextElement()) != null){
+        if(entry.isDirectory() || !added.add(entry.getName())) continue;
+
+        outputStream.putNextEntry(new ZipEntry(entry));
+        try(InputStream inputStream = tempZipped.getInputStream(entry)){
+          outputStream.write(inputStream.readAllBytes());
+          outputStream.closeEntry();
+          outputStream.flush();
         }
       }
-      byte[] result = byteOut.toByteArray();
-      jarOut.close();
-      byteOut.close();
-      temp.delete();
-      return result;
+      zip = new ZipFi(new Fi(getFile()));
     }catch(IOException e){
       throw new RuntimeException(e);
     }
   }
-  
-  @Override
-  public Class<?> loadClass(String name, Class<?> neighbor) throws ClassNotFoundException{
-    ClassLoader l = neighbor.getClassLoader();
-    if(l instanceof URLClassLoader){
-      try{
-        ClassLoader lo = new ClassLoader(){
-          @Override
-          protected Class<?> findClass(String name) throws ClassNotFoundException{
-            try{
-              return l.loadClass(name);
-            }catch(ClassNotFoundException e){
-              return DesktopGeneratedClassLoader.this.loadClass(name);
-            }
-          }
-        };
 
-        addURL.invoke(l, file.toURI().toURL());
-        return lo.loadClass(name);
-      }catch(IllegalAccessException | InvocationTargetException | MalformedURLException e){
-        throw new RuntimeException(e);
-      }
-    }
-    throw new RuntimeException();
-  }
-  
   @Override
-  public void writeFile(byte[] data){
-    try{
-      new FileOutputStream(file, false).write(data);
-    }catch(IOException e){
-      throw new RuntimeException(e);
-    }
+  public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException{
+    Class<?> c = fileLoader.loadClass(name);
+    if(resolve) resolveClass(c);
+
+    return c;
   }
 }

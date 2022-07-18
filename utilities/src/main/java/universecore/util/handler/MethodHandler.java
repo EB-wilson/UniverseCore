@@ -63,7 +63,7 @@ public class MethodHandler<T>{
     throw new NoSuchMethodException("no such constructor in class: " + clazz + " with assignable parameter: " + Arrays.toString(argTypes));
   }
 
-  public <R> R invoke(T object, String name, Class<R> returnType, Object... args){
+  public <R> R invoke(T object, String name, Object... args){
     Class<?>[] argTypes = new Class[args.length];
 
     for(int i = 0; i < args.length; i++){
@@ -125,20 +125,20 @@ public class MethodHandler<T>{
     }
   }
 
-  public static <Obj, Return> Return invokeDefault(Obj object, String name, Class<Return> returnType, Object... args){
-    return ((MethodHandler<Obj>)defaultMap.computeIfAbsent(object.getClass(), e -> new MethodHandler<>(object.getClass()))).invoke(object, name, returnType, args);
+  public static <Obj, Return> Return invokeDefault(Obj object, String name, Object... args){
+    return ((MethodHandler<Obj>)defaultMap.computeIfAbsent(object.getClass(), e -> new MethodHandler<>(object.getClass()))).invoke(object, name, args);
   }
 
-  public static <Type, Return> Return invokeDefault(Class<Type> clazz, String name, Class<Return> returnType, Object... args){
-    return defaultMap.computeIfAbsent(clazz, e -> new MethodHandler<>(clazz)).invoke(null, name, returnType, args);
+  public static <Type, Return> Return invokeDefault(Class<Type> clazz, String name, Object... args){
+    return defaultMap.computeIfAbsent(clazz, e -> new MethodHandler<>(clazz)).invoke(null, name, args);
   }
 
-  public static <Obj, Return> Return invokeTemp(Obj object, String name, Class<Return> returnType, Object... args){
-    return ((MethodHandler<Obj>) new MethodHandler<>(object.getClass())).invoke(object, name, returnType, args);
+  public static <Obj, Return> Return invokeTemp(Obj object, String name, Object... args){
+    return ((MethodHandler<Obj>) new MethodHandler<>(object.getClass())).invoke(object, name, args);
   }
 
-  public static <Type, Return> Return invokeTemp(Class<Type> clazz, String name, Class<Return> returnType, Object... args){
-    return new MethodHandler<>(clazz).invoke(null, name, returnType, args);
+  public static <Type, Return> Return invokeTemp(Class<Type> clazz, String name, Object... args){
+    return new MethodHandler<>(clazz).invoke(null, name, args);
   }
 
   public static <Type> Type newInstanceDefault(Class<Type> clazz, Object... args){

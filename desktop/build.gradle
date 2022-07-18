@@ -1,5 +1,7 @@
-
-apply plugin: 'java'
+plugins {
+  id 'java'
+  id 'com.github.johnrengelman.shadow'
+}
 
 repositories{
   mavenCentral()
@@ -7,16 +9,28 @@ repositories{
 }
 
 dependencies {
+  implementation 'com.github.EB-wilson:JavaDynamilizer:V1.0-A4'
+
   compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
   compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
-  compileOnly 'org.javassist:javassist:3.29.0-GA'
+
   compileOnly project(":core")
   compileOnly project(":abstract")
-  compileOnly project(":abstract2")
+  compileOnly project(":implabstract")
+  compileOnly project(":utilities")
+
+  annotationProcessor "com.github.Anuken:jabel:0.7.0"
 }
 
-jar{
-  from(
-      zipTree(configurations.getByName("compileClasspath").find{it.name.contains("javassist")})
-  )
+shadowJar {
+  dependencies {
+    exclude dependency("com.github.Anuken.Arc:arc-core:$mindustryVersion")
+    exclude dependency("com.github.Anuken.Mindustry:core:$mindustryVersion")
+    exclude dependency("com.jakewharton.android.repackaged:dalvik-dx:11.0.0_r3")
+
+    exclude project(":core")
+    exclude project(":abstract")
+    exclude project(":implabstract")
+    exclude project(":utilities")
+  }
 }

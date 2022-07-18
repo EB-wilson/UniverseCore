@@ -6,14 +6,17 @@ package universecore.util.path;
  * @author EBwilson
  * @since 1.3*/
 public interface BFSPathFinder<Vert extends PathVertices<Vert>> extends PathFinder<Vert>{
-  /**重置搜索状态,包括复位已经遍历过的顶点和边等，你不应该在这个方法实现中清空缓存的路径，这个方法会因为每一个起点搜索路径或者其他情况被多次调用*/
+  /**重置搜索状态或者（和）临时缓存,包括复位已经遍历过的顶点和边等*/
   void reset();
 
-  /**获取一个顶点对应的的回溯指针，若顶点尚未关联到一个指针，则使之按之关联到一个新的回溯指针并返回true，若已关联则返回false不进行操作
+  /**将一个顶点关联到一个保存了参数信息的新的回溯指针，这个方法应当完成下述行为：
+   * <p>1.若此顶点未与回溯指针关联，则创建一个新的回溯指针实例，并用传入的参数为此指针设置顶点和指针的前一个目标
+   * <p>2.若顶点已关联到一个回溯指针那么什么都不做
+   * <p>3.若本次操作中进行了顶点关联，则应当返回true,否则返回false
    *
    * @param vert 进行遍历检查的顶点
    * @param previous 该指针的前一个回溯指针，可以为空
-   * @return 若尚未关联，则返回true,否则返回false*/
+   * @return 若顶点尚未与指针关联，则返回true,否则返回false*/
   boolean relateToPointer(Vert vert, PathPointer<Vert> previous);
 
   /**获取顶点关联的回溯指针，若顶点尚未关联，则应当返回null

@@ -36,12 +36,11 @@ public class UncCore extends Mod{
 
   /**本模组的文件位置*/
   public static final Fi coreFile = Objects.requireNonNull(ModGetter.getModWithName(coreName)).file;
-  
+  public static ClassHandler classes;
+
   static{
     signup(UncCore.class);
   }
-
-  public static ClassHandler classHandler = ImpCore.classes.getHandler(UncCore.class);
   
   /**方块类别处理工具实例*/
   public static CategoryHandler categories = new CategoryHandler();
@@ -59,6 +58,8 @@ public class UncCore extends Mod{
   
   public UncCore(){
     Log.info("[Universe Core] core loading");
+
+    classes = ImpCore.classes.getHandler(UncCore.class);
 
     Events.run(EventType.Trigger.update, () -> {
       cellActions.update();
@@ -88,6 +89,5 @@ public class UncCore extends Mod{
   public void init(){
     if(! Vars.net.server()) Vars.ui.database = new UncDatabaseDialog();
 
-    classHandler.generateFinish();
   }
 }

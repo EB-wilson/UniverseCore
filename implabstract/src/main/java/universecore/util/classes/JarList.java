@@ -31,7 +31,7 @@ public class JarList{
         list.put(entry.name, entry);
       }
     }catch(IOException e){
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
   }
   

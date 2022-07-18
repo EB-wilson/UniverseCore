@@ -2,150 +2,146 @@ package universecore.androidcore.classes;
 
 import com.android.dex.Dex;
 import com.android.dex.DexFormat;
-import com.android.dx.cf.direct.DirectClassFile;
-import com.android.dx.cf.direct.StdAttributeFactory;
 import com.android.dx.command.dexer.DxContext;
-import com.android.dx.dex.DexOptions;
-import com.android.dx.dex.cf.CfOptions;
-import com.android.dx.dex.cf.CfTranslator;
-import com.android.dx.dex.file.DexFile;
 import com.android.dx.merge.CollisionPolicy;
 import com.android.dx.merge.DexMerger;
 import universecore.util.classes.BaseDynamicClassLoader;
+import universecore.util.classes.JarList;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 
 public class DexLoaderFactory{
-  public static AsClassDexLoader generateClassLoader(ClassLoader parent){
+  private static Class<?> inMemoryLoaderClass;
+
+  private static Constructor<?> loaderCstr;
+  private static Constructor<?> inMemLoaderCstr;
+
+  static{
     try{
-      return new MemoryDexClassLoader(Class.forName("dalvik.system.InMemoryDexClassLoader"), parent);
-    }catch(ClassNotFoundException e){
+      inMemoryLoaderClass = Class.forName("dalvik.system.InMemoryDexClassLoader");
+      Class<?> dexLoaderClass = Class.forName("dalvik.system.DexClassLoader");
+
+      loaderCstr = dexLoaderClass.getConstructor(String.class, String.class, String.class, ClassLoader.class);
+      inMemLoaderCstr = inMemoryLoaderClass.getConstructor(ByteBuffer.class, ClassLoader.class);
+    }catch(ClassNotFoundException|NoSuchMethodException ignored){}
+  }
+
+  public static AsClassDexLoader getClassLoader(ClassLoader parent){
+    if(inMemoryLoaderClass != null) return new MemoryDexClassLoader(parent);
+    return new DexFileClassLoader(parent);
+  }
+
+  public static void writeFile(byte[] data, File file){
+    try(JarOutputStream out = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(file)))){
+      JarEntry entry = new JarEntry(DexFormat.DEX_IN_JAR_NAME);
+      entry.setSize(data.length);
+      out.putNextEntry(entry);
+      out.write(data);
+    }catch(IOException e){
       throw new RuntimeException(e);
     }
   }
-  
+
   public static abstract class AsClassDexLoader extends BaseDynamicClassLoader{
-    protected final Class<?> dvLoaderClass;
-    protected DxContext context;
-    
-    protected AsClassDexLoader(Class<?> loaderClass, ClassLoader parent){
+    protected AsClassDexLoader(ClassLoader parent){
       super(parent);
-      dvLoaderClass = loaderClass;
     }
-    
-    public void defineClass(String name, byte[] code){
-      try{
-        DexOptions options = new DexOptions();
-        DexFile dexFile = new DexFile(options);
-        DirectClassFile classFile = new DirectClassFile(code, name.replace(".", "/") + ".class", true);
-        classFile.setAttributeFactory(StdAttributeFactory.THE_ONE);
-        classFile.getMagic();
-        context = new DxContext();
-        dexFile.add(CfTranslator.translate(context, classFile, null, new CfOptions(), options, dexFile));
-        Dex resultDex = new Dex(dexFile.toDex(null, false));
-        writeFile(merge(resultDex.getBytes()));
-        loadJar();
-      }catch(IOException e){
-        throw new RuntimeException(e);
-      }
-    }
-    
+
     public abstract void reset();
   }
-  
+
   public static class DexFileClassLoader extends AsClassDexLoader{
-    private DexFileClassLoader(Class<?> loaderClass, ClassLoader parent){
-      super(loaderClass, parent);
+    private final ClassLoader dvLoader;
+
+    private DexFileClassLoader(ClassLoader parent){
+      super(parent);
+      try{
+        dvLoader = (ClassLoader) loaderCstr.newInstance(
+            JarList.jarFileCache.child("temp").path(),
+            JarList.jarFileCache.path() + "/oct",
+            null,
+            parent
+        );
+      }catch(InstantiationException|IllegalAccessException|InvocationTargetException e){
+        throw new RuntimeException(e);
+      }
+
       reset();
     }
-  
-    public void writeFile(byte[] data){
-      try(JarOutputStream out = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(file)))){
-        JarEntry entry = new JarEntry(DexFormat.DEX_IN_JAR_NAME);
-        entry.setSize(data.length);
-        out.putNextEntry(entry);
-        try{
-          out.write(data);
-        }finally{
-          out.closeEntry();
-        }
-      }catch(IOException e){
-        throw new RuntimeException(e);
-      }
-    }
-  
-    @Override
-    protected ClassLoader getVMLoader(){
-      try{
-        return (ClassLoader)dvLoaderClass.getConstructor(String.class, String.class, String.class, ClassLoader.class)
-            .newInstance(file.getPath(), file.getPath() + "/oct", null, getParent());
-      }catch(InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e){
-        throw new RuntimeException(e);
-      }
-    }
-  
-    @Override
-    public byte[] merge(byte[] code){
-      try{
-        return new DexMerger(new Dex[]{new Dex(file), new Dex(code)}, CollisionPolicy.KEEP_FIRST, context).merge().getBytes();
-      }catch(IOException e){
-        throw new RuntimeException(e);
-      }
-    }
-  
+
     @Override
     public void reset(){
       file.delete();
     }
+
+    @Override
+    public void declareClass(String name, byte[] byteCode){
+      try{
+        byte[] bytes = new DexMerger(
+            new Dex[]{new Dex(file), new Dex(byteCode)},
+            CollisionPolicy.KEEP_FIRST,
+            new DxContext()
+        ).merge().getBytes();
+
+        writeFile(bytes, file);
+      }catch(IOException e){
+        throw new RuntimeException(e);
+      }
+    }
+
+    @Override
+    public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException{
+      Class<?> c = dvLoader.loadClass(name);
+      if(resolve) resolveClass(c);
+
+      return c;
+    }
   }
-  
+
   public static class MemoryDexClassLoader extends AsClassDexLoader{
     private Dex dex;
-  
-    private MemoryDexClassLoader(Class<?> loaderClass, ClassLoader parent){
-      super(loaderClass, parent);
+
+    private ClassLoader loader;
+
+    private MemoryDexClassLoader(ClassLoader parent){
+      super(parent);
     }
-  
-    @Override
-    protected ClassLoader getVMLoader(){
-      try{
-        return (ClassLoader) dvLoaderClass.getConstructor(ByteBuffer.class, ClassLoader.class).newInstance(ByteBuffer.wrap(dex.getBytes()), getParent());
-      }catch(InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e){
-        throw new RuntimeException(e);
-      }
-    }
-  
-    public void writeFile(byte[] data){
-      try{
-        dex = new Dex(data);
-      }catch(IOException e){
-        throw new RuntimeException(e);
-      }
-    }
-  
-    @Override
-    public boolean fileExist(){
-      return dex != null;
-    }
-  
-    @Override
-    public byte[] merge(byte[] code){
-      try{
-        return new DexMerger(new Dex[]{dex, new Dex(code)}, CollisionPolicy.KEEP_FIRST, context).merge().getBytes();
-      }catch(IOException e){
-        throw new RuntimeException(e);
-      }
-    }
-  
+
+
     @Override
     public void reset(){
       dex = null;
+    }
+
+    @Override
+    public void declareClass(String name, byte[] byteCode){
+      try{
+        dex = new DexMerger(
+            new Dex[]{new Dex(byteCode), dex},
+            CollisionPolicy.KEEP_FIRST,
+            new DxContext()
+        ).merge();
+
+        loader = (ClassLoader) inMemLoaderCstr.newInstance(ByteBuffer.wrap(dex.getBytes()), getParent());
+      }catch(InstantiationException|IllegalAccessException|InvocationTargetException|IOException e){
+        throw new RuntimeException(e);
+      }
+    }
+
+    @Override
+    public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException{
+      Class<?> c = loader.loadClass(name);
+      if(resolve) resolveClass(c);
+
+      return c;
     }
   }
 }

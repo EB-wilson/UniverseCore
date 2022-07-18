@@ -12,6 +12,7 @@ import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
 import java.io.*;
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -21,11 +22,11 @@ import java.util.regex.Pattern;
 
 @AutoService(Processor.class)
 public class ImportUNCProcessor extends BaseProcessor{
-  private static final String checkStatus =
-      "if($status$ == -1) throw new RuntimeException(\"universeCore mod file was not found\");\n" +
-      "else if($status$ == 1) throw new RuntimeException(\"universeCore version was deprecated, version: \" + $status$ + \", require: \" + $requireVersion);";
+  private static final String STATUS_CHECKER = "checkStatus";
+  private static final String STATUS_FIELD = "$status$";;
 
   private static final String sourceFile = "java/PreloadLibMethodTemplate.java";
+
   private static String code;
   
   private static final Pattern bundleMatcher = Pattern.compile("^bundles/bundle.*\\.properties$");
@@ -35,7 +36,7 @@ public class ImportUNCProcessor extends BaseProcessor{
   @Override
   public synchronized void init(ProcessingEnvironment processingEnv){
     super.init(processingEnv);
-    
+
     String[] path = Objects.requireNonNull(this.getClass().getResource("")).getFile().split("/");
     StringBuilder builder = new StringBuilder(path[0].replace("file:", ""));
     
@@ -101,27 +102,49 @@ public class ImportUNCProcessor extends BaseProcessor{
         
         maker.at(tree);
 
+        ArrayList<JCTree.JCExpressionStatement> init = new ArrayList<>();
+        ArrayList<JCTree> vars = new ArrayList<>();
+
         Symbol.VarSymbol status = new Symbol.VarSymbol(
             Modifier.PRIVATE | Modifier.STATIC,
-            names.fromString("$status$"),
+            names.fromString(STATUS_FIELD),
             symtab.longType,
             tree.sym
         );
         tree.defs = tree.defs.prepend(maker.VarDef(status, null));
-        
-        String genCode = genLoadCode(tree.sym.getQualifiedName().toString(), annotation.requireVersion());
-        JCTree.JCBlock preLoadBody = parsers.newParser(genCode, false, false, false).block(), cinit = null;
 
-        JCTree.JCStatement thrStat = parsers.newParser(checkStatus.replace("$requireVersion", String.valueOf(annotation.requireVersion())), false, false, false).parseStatement();
-
-        for(JCTree child: tree.defs){
-          if(child instanceof JCTree.JCBlock){
-            if(((JCTree.JCBlock) child).isStatic()){
-              cinit = (JCTree.JCBlock) child;
+        for(JCTree def: tree.defs){
+          if(def instanceof JCTree.JCVariableDecl variable){
+            if((variable.mods.flags & Modifier.STATIC) != 0){
+              if(variable.init != null){
+                init.add(
+                    maker.Exec(
+                        maker.Assign(
+                            maker.Ident(variable), variable.init)));
+                variable.init = null;
+              }
+              vars.add(variable);
             }
           }
-          if(child instanceof JCTree.JCMethodDecl){
-            if(((JCTree.JCMethodDecl) child).sym.isConstructor() && ((JCTree.JCMethodDecl) child).params.size() == 0){
+        }
+
+        ArrayList<JCTree> tmp = new ArrayList<>(Arrays.asList(tree.defs.toArray(new JCTree[0])));
+        tmp.removeIf(vars::contains);
+        tree.defs = List.from(tmp);
+        
+        String genCode = genLoadCode(tree.sym.getQualifiedName().toString(), annotation.requireVersion(), List.from(init));
+        JCTree.JCBlock 
+            preLoadBody = parsers.newParser(genCode, false, false, false).block(),
+            cinit = null;
+
+        for(JCTree def: tree.defs){
+          if(def instanceof JCTree.JCBlock cinitBlock){
+            if(cinitBlock.isStatic()){
+              cinit = cinitBlock;
+            }
+          }
+          if(def instanceof JCTree.JCMethodDecl method){
+            if(method.sym.isConstructor() && method.params.size() == 0){
               JCTree.JCClassDecl internalClass = maker.ClassDef(
                   maker.Modifiers(Modifier.PRIVATE),
                   names.fromString("INIT_INTERNAL"),
@@ -135,13 +158,17 @@ public class ImportUNCProcessor extends BaseProcessor{
                       List.nil(),
                       List.nil(),
                       List.nil(),
-                      maker.Block(0, List.from(((JCTree.JCMethodDecl) child).body.stats.toArray(new JCTree.JCStatement[0]))),
+                      maker.Block(0, List.from(method.body.stats.toArray(new JCTree.JCStatement[0]))),
                       null
                   ))
               );
               tree.defs = tree.defs.append(internalClass);
-              JCTree.JCBlock block = ((JCTree.JCMethodDecl) child).body = parsers.newParser("{new INIT_INTERNAL();}", false, false, false).block();
-              block.stats = block.stats.prepend(thrStat);
+              method.body = parsers.newParser("{if(" + STATUS_FIELD + " != 0) return; new INIT_INTERNAL();}", false, false, false).block();
+            }
+            else if(!method.sym.isConstructor()){
+              method.body.stats = method.body.stats.prepend(
+                  parsers.newParser("if(" + STATUS_FIELD + " != 0) return " + getDef(method.restype.type.getKind()) + ";", false, false, false).parseStatement()
+              );
             }
           }
         }
@@ -154,6 +181,8 @@ public class ImportUNCProcessor extends BaseProcessor{
               preLoadBody.stats
           );
         }
+
+        tree.defs = tree.defs.prependList(List.from(vars));
 
         genLog(anno, tree);
       }
@@ -169,16 +198,39 @@ public class ImportUNCProcessor extends BaseProcessor{
     return annotations;
   }
   
-  private String genLoadCode(String modMain, long requireVersion){
+  private String genLoadCode(String modMain, long requireVersion, List<JCTree.JCExpressionStatement> initList){
     StringBuilder bundles = new StringBuilder();
     boolean first = true;
     for(Map.Entry<String, String> entry : this.bundles.entrySet()){
       bundles.append(first ? "" : ", ").append("\"").append(entry.getKey()).append("\", \"").append(entry.getValue()).append("\"");
       first = false;
     }
-    
+
+    StringBuilder init = new StringBuilder();
+    StringBuilder errorInit = new StringBuilder();
+
+    for(JCTree.JCExpressionStatement state: initList){
+      init.append(state);
+      errorInit.append(((JCTree.JCAssign)state.expr).getVariable())
+          .append(" = ")
+          .append(getDef(((JCTree.JCAssign)state.expr).getVariable().type.getKind()))
+          .append(";")
+          .append(System.lineSeparator());
+    }
+
     return code.replace("$bundles", bundles.toString())
         .replace("$requireVersion", String.valueOf(requireVersion))
-        .replace("$className", modMain);
+        .replace("$className", modMain)
+        .replace("$cinitField$", init.toString())
+        .replace("$cinitFieldError$", errorInit.toString());
+  }
+
+  private static String getDef(TypeKind kind){
+    return switch(kind){
+      case VOID -> "";
+      case INT, SHORT, BYTE, LONG, FLOAT, DOUBLE, CHAR -> "0";
+      case BOOLEAN -> "false";
+      default -> "null";
+    };
   }
 }

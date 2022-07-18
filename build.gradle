@@ -1,13 +1,16 @@
 import java.util.jar.JarEntry
 import java.util.jar.JarOutputStream
 
-apply plugin: "java-library"
+plugins {
+  id 'java'
+  id 'com.github.johnrengelman.shadow' version '2.0.4'
+}
 
 version '1.0'
 
 ext{
   //the build number that this mod is made for
-  mindustryVersion = 'v135.2'
+  mindustryVersion = 'v135'
   //version of SDK you will be using
   minSdkAPI = 30
   sdkRoot = System.getenv("ANDROID_HOME")
@@ -43,24 +46,23 @@ allprojects{
 dependencies {
   implementation project(":core")
   implementation project(":abstract")
-  implementation project(":abstract2")
+  implementation project(":implabstract")
   implementation project(":utilities")
   implementation project(":mindustry")
-  implementation project(":android")
-  implementation project(":desktop")
-  implementation project(":annotations")
+
+  compileOnly project(":android")
+  compileOnly project(":desktop")
+  compileOnly project(":annotations")
 }
 
-jar{
+shadowJar{
+  dependsOn project(":android").getTasksByName("shadowJar", true)
+  dependsOn project(":desktop").getTasksByName("shadowJar", true)
   archiveFileName = "${rootProject.name}-base.jar"
-
-  from{
-    (subprojects - [project(":android"), project(":desktop"), project(":annotations")]).collect{zipTree("${it.buildDir}/libs/${it.name}.jar")}
-  }
 }
 
 task buildAndroid(type: Jar){
-  dependsOn jar
+  dependsOn shadowJar
 
   archiveFileName = "${rootProject.name}-android.jar"
 
@@ -77,7 +79,7 @@ task buildAndroid(type: Jar){
       def dependencies = (configurations.compileClasspath.asList() + configurations.runtimeClasspath.asList() + [new File(platformRoot, "android.jar")]).collect { "--classpath $it.path" }.join(" ")
 
       try{
-        System.out.println("build android dex,,,")
+        System.out.println("build android dex...")
 
         //dex and desugar files - this requires d8 in your PATH
         "d8 $dependencies --min-api $minSdkAPI --output ${rootProject.name}-android.jar ${project.archivesBaseName}-android.jar"
@@ -117,7 +119,7 @@ task buildAndroid(type: Jar){
 }
 
 task buildDesktop(type: Jar){
-  dependsOn "jar"
+  dependsOn shadowJar
 
   archiveFileName = "${rootProject.name}-desktop.jar"
 

@@ -1,105 +1,64 @@
 package universecore.androidcore.classes;
 
 import com.android.dex.Dex;
-import com.android.dex.DexFormat;
 import com.android.dx.command.dexer.DxContext;
 import com.android.dx.merge.CollisionPolicy;
 import com.android.dx.merge.DexMerger;
-import universecore.util.mods.ModInfo;
 import universecore.util.classes.BaseGeneratedClassLoader;
-import universecore.util.classes.JarList;
+import universecore.util.mods.ModInfo;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.jar.JarEntry;
-import java.util.jar.JarOutputStream;
 
 @SuppressWarnings("unchecked")
 public class AndroidGeneratedClassLoader extends BaseGeneratedClassLoader{
   protected static final Class<? extends ClassLoader> dvLoaderClass;
-  protected static final Class<? extends ClassLoader> baseDexClassLoaderClass;
 
-  protected static final Method addDexPath;
   protected static final Constructor<? extends ClassLoader> loaderCstr;
 
   static{
     try{
       dvLoaderClass = (Class<? extends ClassLoader>) Class.forName("dalvik.system.DexClassLoader");
-      baseDexClassLoaderClass = (Class<? extends ClassLoader>) Class.forName("dalvik.system.BaseDexClassLoader");
-      addDexPath = baseDexClassLoaderClass.getMethod("addDexPath", String.class);
       loaderCstr = dvLoaderClass.getConstructor(String.class, String.class, String.class, ClassLoader.class);
     }catch(ClassNotFoundException|NoSuchMethodException e){
       throw new RuntimeException(e);
     }
   }
 
-  public AndroidGeneratedClassLoader(ModInfo mod, File cacheFile, ClassLoader parent){
-    super(mod, cacheFile, parent);
-  }
-  
-  @Override
-  public ClassLoader getVMLoader(){
+  private final ClassLoader dvLoader;
+
+  public AndroidGeneratedClassLoader(ModInfo mod, ClassLoader parent){
+    super(mod, parent);
     try{
-      return loaderCstr.newInstance(file.getPath(), JarList.jarFileCache.child("oct").path(), null, getParent());
-    }catch(InstantiationException | IllegalAccessException | InvocationTargetException e){
+      dvLoader = loaderCstr.newInstance(file.getPath(), file.getParentFile().getPath() + "/oct", null, parent);
+    }catch(InstantiationException|InvocationTargetException|IllegalAccessException e){
       throw new RuntimeException(e);
     }
   }
-  
+
   @Override
-  public byte[] merge(byte[] other){
+  public void declareClass(String name, byte[] byteCode){
+    DxContext context = new DxContext();
+
     try{
-      DxContext context = new DxContext();
-      Dex old = new Dex(file), generate = new Dex(other);
-      return new DexMerger(new Dex[]{old, generate}, CollisionPolicy.KEEP_FIRST, context).merge().getBytes();
+      DexMerger merger = new DexMerger(
+          new Dex[]{new Dex(file), new Dex(byteCode)},
+          CollisionPolicy.KEEP_FIRST,
+          context
+      );
+      byte[] out = merger.merge().getBytes();
+      DexLoaderFactory.writeFile(out, file);
     }catch(IOException e){
       throw new RuntimeException(e);
     }
   }
-  
+
   @Override
-  public Class<?> loadClass(String name, Class<?> neighbor) throws ClassNotFoundException{
-    ClassLoader l = neighbor.getClassLoader();
-    if(baseDexClassLoaderClass.isAssignableFrom(l.getClass())){
-      ClassLoader lo = new ClassLoader(){
-        @Override
-        protected Class<?> findClass(String name) throws ClassNotFoundException{
-          try{
-            return l.loadClass(name);
-          }catch(ClassNotFoundException e){
-            return AndroidGeneratedClassLoader.this.loadClass(name);
-          }
-        }
-      };
-      
-      try{
-        addDexPath.invoke(l, file.getPath());
-        return lo.loadClass(name);
-      }catch(IllegalAccessException | InvocationTargetException e){
-        throw new RuntimeException(e);
-      }
-    }
-    throw new RuntimeException();
-  }
-  
-  public void writeFile(byte[] data){
-    try(JarOutputStream out = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(file)))){
-      JarEntry entry = new JarEntry(DexFormat.DEX_IN_JAR_NAME);
-      entry.setSize(data.length);
-      out.putNextEntry(entry);
-      try{
-        out.write(data);
-        out.flush();
-      }finally{
-        out.closeEntry();
-      }
-    }catch(IOException e){
-      throw new RuntimeException(e);
-    }
+  public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException{
+    Class<?> c = dvLoader.loadClass(name);
+    if(resolve) resolveClass(c);
+
+    return c;
   }
 }

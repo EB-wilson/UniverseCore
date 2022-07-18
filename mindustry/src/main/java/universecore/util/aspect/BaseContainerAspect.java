@@ -3,8 +3,10 @@ package universecore.util.aspect;
 import arc.func.Boolf;
 import arc.func.Cons;
 import arc.struct.ObjectMap;
+import dynamilize.ArgumentList;
+import dynamilize.DynamicClass;
+import dynamilize.DynamicObject;
 import universecore.UncCore;
-import universecore.util.proxy.IProxy;
 
 import java.lang.reflect.Method;
 
@@ -48,31 +50,34 @@ public abstract class BaseContainerAspect<Type, Cont> extends AbstractAspect<Typ
   public abstract static class BaseContainerType<Cont>{
     protected final ObjectMap<Object, BaseContainerAspect<?, Cont>> aspectMap = new ObjectMap<>();
     protected final Class<Cont> type;
-    
+
+    protected DynamicClass AspectType;
+
     protected BaseContainerType(Class<Cont> type){
       this.type = type;
     }
     
-    public IProxy<Cont> getProxy(Class<? extends Cont> type){
+    public DynamicClass getEntryProxy(Class<? extends Cont> type){
       if(!type.isAssignableFrom(type)) throw new IllegalArgumentException("try create aspect type use a disassignable type: " + type);
-      IProxy<? extends Cont> result = UncCore.classHandler.getProxy(type, "aspect");
+      if(AspectType != null) return AspectType;
+
+      AspectType = DynamicClass.get(type.getSimpleName() + "Aspect");
       for(Method method: getAddEntry()){
-        result.addMethodProxy(method, (self, superHandle, args) -> {
+        AspectType.setFinalFunc(method.getName(), (Cont self, ArgumentList args) -> {
           BaseContainerAspect<Object, Cont> aspect = (BaseContainerAspect<Object, Cont>) aspectMap.get(self);
-          if(aspect != null) onAdd(aspect, self, args);
-          return superHandle.callSuper(self, args);
+          if(aspect != null) onAdd(aspect, self, args.args());
+          return ((DynamicObject<Cont>)self).superPoint().invokeFunc(method.getName(), args);
+        });
+      }
+      for(Method method: getAddEntry()){
+        AspectType.setFinalFunc(method.getName(), (Cont self, ArgumentList args) -> {
+          BaseContainerAspect<Object, Cont> aspect = (BaseContainerAspect<Object, Cont>) aspectMap.get(self);
+          if(aspect != null) onRemove(aspect, self, args.args());
+          return ((DynamicObject<Cont>)self).superPoint().invokeFunc(method.getName(), args);
         });
       }
 
-      for(Method method: getRemoveEntry()){
-        result.addMethodProxy(method, (self, superHandle, args) -> {
-          BaseContainerAspect<Object, Cont> aspect = (BaseContainerAspect<Object, Cont>) aspectMap.get(self);
-          if(aspect != null) onRemove(aspect, self, args);
-          return superHandle.callSuper(self, args);
-        });
-      }
-
-      return (IProxy<Cont>) result;
+      return AspectType;
     }
     
     public Cont instance(Cont source){
@@ -81,7 +86,7 @@ public abstract class BaseContainerAspect<Type, Cont> extends AbstractAspect<Typ
     
     public Cont instance(Class<? extends Cont> type){
       if(!this.type.isAssignableFrom(type)) throw new IllegalArgumentException("can not create a disassignable class: " + type + " instance");
-      return getProxy(type).create(null);
+      return UncCore.classes.getDynamicMaker().newInstance(type, getEntryProxy(type));
     }
     
     public void addAspect(Cont cont, BaseContainerAspect<?, Cont> aspect){

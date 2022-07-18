@@ -1,33 +1,14 @@
 package universecore.desktopcore;
 
-import sun.misc.Unsafe;
 import universecore.util.AccessAndModifyHelper;
 
-import java.lang.reflect.*;
-import java.util.Map;
-import java.util.Set;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
-@SuppressWarnings({"unchecked"})
 public class DesktopAccessAndModifyHelper implements AccessAndModifyHelper{
-  private static final long fieldFilterOffset = 112L;
-
-  private static final Unsafe unsafe;
-
   private static Field fieldModifiers;
-
-  static{
-    try{
-      Constructor<Unsafe> cstr = Unsafe.class.getDeclaredConstructor();
-      cstr.setAccessible(true);
-      unsafe = cstr.newInstance();
-
-      Class<?> clazz = Class.forName("jdk.internal.reflect.Reflection");
-      Map<Class<?>, Set<String>> map = (Map<Class<?>, Set<String>>) unsafe.getObject(clazz, fieldFilterOffset);
-      map.clear();
-    }catch(NoSuchMethodException|InstantiationException|IllegalAccessException|InvocationTargetException|ClassNotFoundException e){
-      throw new RuntimeException(e);
-    }
-  }
 
   @Override
   public void set(Object object, Field field, Object value){

@@ -3,12 +3,14 @@ package universecore.util.aspect;
 import arc.Events;
 import arc.func.Boolf;
 import arc.struct.Seq;
+import dynamilize.ArgumentList;
+import dynamilize.DynamicClass;
+import dynamilize.DynamicObject;
 import mindustry.entities.EntityGroup;
 import mindustry.game.EventType;
-import mindustry.gen.Entityc;
-import mindustry.gen.Groups;
+import mindustry.gen.*;
 import universecore.UncCore;
-import universecore.util.proxy.IProxy;
+import universecore.util.handler.ObjectHandler;
 
 import java.lang.reflect.Field;
 
@@ -26,7 +28,7 @@ public class EntityAspect<EntityType extends Entityc> extends AbstractAspect<Ent
   
   @Override
   public EntityGroup<EntityType> instance(){
-    return group.proxiedGroup;
+    return group.aspectGroup;
   }
   
   @Override
@@ -42,36 +44,40 @@ public class EntityAspect<EntityType extends Entityc> extends AbstractAspect<Ent
   
   @SuppressWarnings("rawtypes")
   public enum Group{
-    all,
-    player,
-    bullet,
-    unit,
-    build,
-    sync,
-    draw,
-    fire,
-    puddle,
-    weather;
+    all(Entityc.class),
+    player(Player.class),
+    bullet(Bullet.class),
+    unit(Unit.class),
+    build(Building.class),
+    sync(Syncc.class),
+    draw(Drawc.class),
+    fire(Fire.class),
+    puddle(Puddle.class),
+    weather(WeatherState.class),
+    label(WorldLabel.class);
 
     static {
       Events.on(EventType.ResetEvent.class, e -> Group.reset());
     }
+
+    private final Class<?> type;
     
     private final Field field;
   
-    Group(){
+    Group(Class<?> type){
+      this.type = type;
       try{
         field = Groups.class.getField(name());
-        setProxy();
+        setAspect();
       }catch(NoSuchFieldException e){
         throw new RuntimeException(e);
       }
     }
   
     private final Seq<EntityAspect<Entityc>> aspects = new Seq<>();
-    
-    private IProxy proxy;
-    private EntityGroup proxiedGroup;
+
+    private DynamicClass GroupAspectType;
+    private EntityGroup aspectGroup;
     private EntityGroup group;
 
     public static void reset(){
@@ -82,39 +88,46 @@ public class EntityAspect<EntityType extends Entityc> extends AbstractAspect<Ent
       }
     }
   
-    public void setSource(EntityGroup<? extends Entityc> source){
+    public void makeAspectType(EntityGroup<? extends Entityc> source){
       group = source;
-      proxy = UncCore.classHandler.getProxy(source.getClass(), "aspect_" + name());
+      GroupAspectType = DynamicClass.get("GroupAspectType");
 
-      if(proxy.isInitialized()) return;
+      GroupAspectType.setFinalFunc(
+          "add",
+          (DynamicObject<? extends EntityGroup<?>> self, ArgumentList args) -> {
+        self.superPoint().invokeFunc("add", args);
+        for(EntityAspect<Entityc> aspect : aspects){
+          aspect.add(args.get(0));
+        }
+        return null;
+      });
 
-      try{
-        proxy.assignConstruct(EntityGroup.class.getDeclaredConstructor(Class.class, boolean.class, boolean.class));
-        proxy.addMethodProxy(EntityGroup.class.getMethod("add", Entityc.class), (self, superHandler, args) -> {
-          superHandler.callSuper(self, args);
-          for(EntityAspect<Entityc> aspect : aspects){
-            aspect.add((Entityc) args[0]);
-          }
-          return null;
-        });
-        proxy.addMethodProxy(EntityGroup.class.getMethod("remove", Entityc.class), (self, superHandler, args) -> {
-          superHandler.callSuper(self, args);
-          for(EntityAspect<Entityc> aspect : aspects){
-            aspect.remove((Entityc) args[0]);
-          }
-          return null;
-        });
-      }catch(NoSuchMethodException e){
-        throw new RuntimeException(e);
-      }
+      GroupAspectType.setFinalFunc(
+          "remove",
+          (DynamicObject<? extends EntityGroup<?>> self, ArgumentList args) -> {
+        self.superPoint().invokeFunc("remove", args);
+        for(EntityAspect<Entityc> aspect : aspects){
+          aspect.remove(args.<Entityc>get(0));
+        }
+        return null;
+      });
     }
     
-    private void setProxy(){
+    private void setAspect(){
       try{
         EntityGroup<? extends Entityc> group = (EntityGroup<?>)field.get(null);
-        setSource(group);
-        proxiedGroup = (EntityGroup) proxy.create(group, group.getClass(), false, false);
-        field.set(null, proxiedGroup);
+        if(GroupAspectType == null) makeAspectType(group);
+        aspectGroup = UncCore.classes.getDynamicMaker().newInstance(
+            group.getClass(),
+            GroupAspectType,
+            type,
+            false,
+            false
+        );
+
+        ObjectHandler.copyField(group, aspectGroup);
+
+        field.set(null, aspectGroup);
         for(Entityc e : group){
           for(EntityAspect<Entityc> aspect : aspects){
             aspect.add(e);

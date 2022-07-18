@@ -1,7 +1,7 @@
 package universecore;
 
 import universecore.util.AccessAndModifyHelper;
-import universecore.util.classes.ClassHandlerFactory;
+import universecore.util.handler.ClassHandlerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

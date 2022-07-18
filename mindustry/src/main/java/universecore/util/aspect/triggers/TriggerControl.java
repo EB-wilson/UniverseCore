@@ -9,7 +9,7 @@ import universecore.util.aspect.BaseTriggerControl;
 
 import java.util.LinkedHashSet;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class TriggerControl extends BaseTriggerControl<TriggerEntry<?>>{
   private final ObjectMap<EventType.Trigger, Runnable> triggerRunnable = new ObjectMap<>();
   

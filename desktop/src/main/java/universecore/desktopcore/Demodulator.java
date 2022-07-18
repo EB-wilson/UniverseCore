@@ -10,7 +10,10 @@ import java.util.*;
 /**反模块化工具， 仅提供了一个主要方法{@link Demodulator#makeModuleOpen(Module, Package, Module)}用于强制对需要的模块开放模块的软件包。
  * <p>此类行为可能完全打破模块化的访问保护，本身是不安全的，若不是必要情况，请尽量避免使用该类
  * <p><strong>此类仅在JDK9之后可用，避免在更早的版本引用此类的方法，且此类仅在desktop平台可用，安卓平台不可使用此类的任何行为</strong>*/
+@SuppressWarnings({"unchecked"})
 public class Demodulator{
+  private static final long fieldFilterOffset = 112L;
+
   private static final Unsafe unsafe;
 
   static{
@@ -18,7 +21,11 @@ public class Demodulator{
       Constructor<Unsafe> cstr = Unsafe.class.getDeclaredConstructor();
       cstr.setAccessible(true);
       unsafe = cstr.newInstance();
-    }catch(NoSuchMethodException|InstantiationException|IllegalAccessException|InvocationTargetException e){
+
+      Class<?> clazz = Class.forName("jdk.internal.reflect.Reflection");
+      Map<Class<?>, Set<String>> map = (Map<Class<?>, Set<String>>) unsafe.getObject(clazz, fieldFilterOffset);
+      map.clear();
+    }catch(NoSuchMethodException|InstantiationException|IllegalAccessException|InvocationTargetException|ClassNotFoundException e){
       throw new RuntimeException(e);
     }
   }
