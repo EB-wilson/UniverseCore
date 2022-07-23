@@ -5,6 +5,7 @@ import dynamilize.classmaker.AbstractClassGenerator;
 import dynamilize.classmaker.ByteClassLoader;
 import dynamilize.classmaker.ClassInfo;
 import mindustry.Vars;
+import mindustry.mod.Mod;
 import universecore.ImpCore;
 import universecore.androidcore.classes.AndroidGeneratedClassLoader;
 import universecore.androidcore.classes.DexGenerator;
@@ -13,6 +14,7 @@ import universecore.util.classes.AbstractFileClassLoader;
 import universecore.util.classes.BaseDynamicClassLoader;
 import universecore.util.classes.BaseGeneratedClassLoader;
 import universecore.util.handler.ClassHandler;
+import universecore.util.mods.ModGetter;
 import universecore.util.mods.ModInfo;
 
 public class AndroidClassHandler implements ClassHandler{
@@ -28,6 +30,19 @@ public class AndroidClassHandler implements ClassHandler{
 
   public AndroidClassHandler(ModInfo mod){
     this.generatedLoader = new AndroidGeneratedClassLoader(mod, Vars.mods.mainLoader());
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public ClassHandler newInstance(Class<?> modMain){
+    if(!modMain.isAssignableFrom(Mod.class))
+      throw new IllegalArgumentException("require class is child of Mod");
+
+    ModInfo mod = ModGetter.getModWithClass((Class<? extends Mod>) modMain);
+    if(mod == null)
+      throw new IllegalArgumentException("mod that inputted main class was not found");
+
+    return new AndroidClassHandler(mod);
   }
 
   @Override

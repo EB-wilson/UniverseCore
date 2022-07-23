@@ -5,6 +5,8 @@ import dynamilize.classmaker.AbstractClassGenerator;
 import universecore.util.classes.AbstractFileClassLoader;
 
 public interface ClassHandler{
+  ClassHandler newInstance(Class<?> modMain);
+
   AbstractClassGenerator getGenerator();
 
   DynamicMaker getDynamicMaker();

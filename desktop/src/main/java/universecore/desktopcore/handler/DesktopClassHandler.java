@@ -6,6 +6,7 @@ import dynamilize.classmaker.AbstractClassGenerator;
 import dynamilize.classmaker.ByteClassLoader;
 import dynamilize.classmaker.ClassInfo;
 import mindustry.Vars;
+import mindustry.mod.Mod;
 import org.objectweb.asm.Opcodes;
 import universecore.ImpCore;
 import universecore.desktopcore.classes.DesktopDynamicClassLoader;
@@ -14,6 +15,7 @@ import universecore.util.classes.AbstractFileClassLoader;
 import universecore.util.classes.BaseDynamicClassLoader;
 import universecore.util.classes.BaseGeneratedClassLoader;
 import universecore.util.handler.ClassHandler;
+import universecore.util.mods.ModGetter;
 import universecore.util.mods.ModInfo;
 
 public class DesktopClassHandler implements ClassHandler{
@@ -28,6 +30,19 @@ public class DesktopClassHandler implements ClassHandler{
   public DesktopClassHandler(ModInfo mod){
     this.generatedLoader = new DesktopGeneratedClassLoader(mod, Vars.mods.mainLoader());
     this.dynamicLoader = new DesktopDynamicClassLoader(this.generatedLoader);
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public ClassHandler newInstance(Class<?> modMain){
+    if(!modMain.isAssignableFrom(Mod.class))
+      throw new IllegalArgumentException("require class is child of Mod");
+
+    ModInfo mod = ModGetter.getModWithClass((Class<? extends Mod>) modMain);
+    if(mod == null)
+      throw new IllegalArgumentException("mod that inputted main class was not found");
+
+    return new DesktopClassHandler(mod);
   }
 
   @Override
