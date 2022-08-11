@@ -27,6 +27,20 @@ public class MethodHandler<T>{
 
   public static Method getDeclaredMethodSuper(Class<?> clazz, String name, Class<?>[] argTypes) throws NoSuchMethodException{
     Class<?> curr = clazz;
+
+    while(curr != null){
+      Method res = null;
+
+      try{
+        res = curr.getDeclaredMethod(name, argTypes);
+      }catch(Throwable ignored){}
+
+      if(res != null) return res;
+
+      curr = curr.getSuperclass();
+    }
+
+    curr = clazz;
     while(curr != null){
       tag: for(Method method: curr.getDeclaredMethods()){
         if(!method.getName().equals(name)) continue;
@@ -35,6 +49,7 @@ public class MethodHandler<T>{
         if(argTypes.length != methodArgs.length) continue;
 
         for(int i = 0; i < argTypes.length; i++){
+          if(argTypes[i] == void.class) continue;
           if(!methodArgs[i].isAssignableFrom(argTypes[i])) continue tag;
         }
 
@@ -67,7 +82,7 @@ public class MethodHandler<T>{
     Class<?>[] argTypes = new Class[args.length];
 
     for(int i = 0; i < args.length; i++){
-      argTypes[i] = asBasic(args[i].getClass());
+      argTypes[i] = asBasic(args[i] == null? void.class: args[i].getClass());
     }
 
     try{
@@ -100,7 +115,7 @@ public class MethodHandler<T>{
     Class<?>[] argTypes = new Class[args.length];
 
     for(int i = 0; i < args.length; i++){
-      argTypes[i] = asBasic(args[i].getClass());
+      argTypes[i] = asBasic(args[i] == null? void.class: args[i].getClass());
     }
 
     try{

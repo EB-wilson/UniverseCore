@@ -13,7 +13,7 @@ public class SetPlatformImpl{
     ImpCore.accessAndModifyHelper = new DesktopAccessAndModifyHelper();
     ImpCore.classes = modMain -> {
       try{
-        if(!modMain.isAssignableFrom(Mod.class))
+        if(!Mod.class.isAssignableFrom(modMain))
           throw new IllegalModHandleException("class was not a mod main class");
 
         ModInfo mod = ModGetter.getModWithClass((Class<? extends Mod>) modMain);

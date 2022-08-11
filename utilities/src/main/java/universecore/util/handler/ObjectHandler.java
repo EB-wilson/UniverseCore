@@ -1,6 +1,7 @@
 package universecore.util.handler;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,7 +12,7 @@ public class ObjectHandler{
 
   public static <S, T extends S> void copyFieldAsBlack(S source, T target, String... blackList){
     Class<?> curr = source.getClass();
-    Set<String> black = Set.of(blackList);
+    Set<String> black = new HashSet<>(Arrays.asList(blackList));
     Set<String> fields = new HashSet<>();
 
     while(curr != Object.class){

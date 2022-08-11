@@ -3,9 +3,7 @@ package universecore.util.aspect;
 import arc.Events;
 import arc.func.Boolf;
 import arc.struct.Seq;
-import dynamilize.ArgumentList;
 import dynamilize.DynamicClass;
-import dynamilize.DynamicObject;
 import mindustry.entities.EntityGroup;
 import mindustry.game.EventType;
 import mindustry.gen.*;
@@ -80,6 +78,12 @@ public class EntityAspect<EntityType extends Entityc> extends AbstractAspect<Ent
     private EntityGroup aspectGroup;
     private EntityGroup group;
 
+    public static void rebuildAll(){
+      for(Group group: values()){
+        group.rebuild();
+      }
+    }
+
     public static void reset(){
       for(Group group: values()){
         for(EntityAspect<Entityc> aspect: group.aspects){
@@ -87,43 +91,54 @@ public class EntityAspect<EntityType extends Entityc> extends AbstractAspect<Ent
         }
       }
     }
-  
-    public void makeAspectType(EntityGroup<? extends Entityc> source){
-      group = source;
-      GroupAspectType = DynamicClass.get("GroupAspectType");
 
-      GroupAspectType.setFinalFunc(
+    public void rebuild(){
+      group = null;
+      GroupAspectType.delete();
+      aspects.clear();
+      aspectGroup = null;
+
+      setAspect();
+    }
+
+    public void makeAspectType(){
+      if(GroupAspectType != null) return;
+
+      GroupAspectType = DynamicClass.get("GroupAspectType$" + name());
+
+      GroupAspectType.setFunction(
           "add",
-          (DynamicObject<? extends EntityGroup<?>> self, ArgumentList args) -> {
-        self.superPoint().invokeFunc("add", args);
+          (self, supe, args) -> {
+        supe.invokeFunc("add", args);
         for(EntityAspect<Entityc> aspect : aspects){
           aspect.add(args.get(0));
         }
-        return null;
-      });
+      }, Entityc.class);
 
-      GroupAspectType.setFinalFunc(
+      GroupAspectType.setFunction(
           "remove",
-          (DynamicObject<? extends EntityGroup<?>> self, ArgumentList args) -> {
-        self.superPoint().invokeFunc("remove", args);
+          (self, supe, args) -> {
+        supe.invokeFunc("remove", args);
         for(EntityAspect<Entityc> aspect : aspects){
           aspect.remove(args.<Entityc>get(0));
         }
-        return null;
-      });
+      }, Entityc.class);
     }
     
     private void setAspect(){
       try{
         EntityGroup<? extends Entityc> group = (EntityGroup<?>)field.get(null);
-        if(GroupAspectType == null) makeAspectType(group);
+        if(this.group == group) return;
+
+        this.group = group;
+        makeAspectType();
         aspectGroup = UncCore.classes.getDynamicMaker().newInstance(
             group.getClass(),
             GroupAspectType,
             type,
             false,
             false
-        );
+        ).self();
 
         ObjectHandler.copyField(group, aspectGroup);
 

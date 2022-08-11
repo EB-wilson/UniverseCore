@@ -14,6 +14,7 @@ import universecore.desktopcore.classes.DesktopGeneratedClassLoader;
 import universecore.util.classes.AbstractFileClassLoader;
 import universecore.util.classes.BaseDynamicClassLoader;
 import universecore.util.classes.BaseGeneratedClassLoader;
+import universecore.util.classes.JarList;
 import universecore.util.handler.ClassHandler;
 import universecore.util.mods.ModGetter;
 import universecore.util.mods.ModInfo;
@@ -27,7 +28,10 @@ public class DesktopClassHandler implements ClassHandler{
   private ASMGenerator generator;
   private DynamicMaker maker;
 
+  private final ModInfo mod;
+
   public DesktopClassHandler(ModInfo mod){
+    this.mod = mod;
     this.generatedLoader = new DesktopGeneratedClassLoader(mod, Vars.mods.mainLoader());
     this.dynamicLoader = new DesktopDynamicClassLoader(this.generatedLoader);
   }
@@ -35,7 +39,7 @@ public class DesktopClassHandler implements ClassHandler{
   @Override
   @SuppressWarnings("unchecked")
   public ClassHandler newInstance(Class<?> modMain){
-    if(!modMain.isAssignableFrom(Mod.class))
+    if(!Mod.class.isAssignableFrom(modMain))
       throw new IllegalArgumentException("require class is child of Mod");
 
     ModInfo mod = ModGetter.getModWithClass((Class<? extends Mod>) modMain);
@@ -60,7 +64,7 @@ public class DesktopClassHandler implements ClassHandler{
     }, Opcodes.V11){
       @Override
       @SuppressWarnings("unchecked")
-      protected <T> Class<T> generateClass(ClassInfo<T> classInfo){
+      protected <T> Class<T> generateClass(ClassInfo<T> classInfo) throws ClassNotFoundException{
         try{
           return (Class<T>) currLoader().loadClass(classInfo.name());
         }catch(ClassNotFoundException ignored){
@@ -97,5 +101,6 @@ public class DesktopClassHandler implements ClassHandler{
   @Override
   public void finishGenerate(){
     generateFinished = true;
+    JarList.inst().update(mod);
   }
 }

@@ -13,6 +13,7 @@ import universecore.androidcore.classes.DexLoaderFactory;
 import universecore.util.classes.AbstractFileClassLoader;
 import universecore.util.classes.BaseDynamicClassLoader;
 import universecore.util.classes.BaseGeneratedClassLoader;
+import universecore.util.classes.JarList;
 import universecore.util.handler.ClassHandler;
 import universecore.util.mods.ModGetter;
 import universecore.util.mods.ModInfo;
@@ -28,14 +29,17 @@ public class AndroidClassHandler implements ClassHandler{
   private DexGenerator generator;
   private DynamicMaker maker;
 
+  private final ModInfo mod;
+
   public AndroidClassHandler(ModInfo mod){
+    this.mod = mod;
     this.generatedLoader = new AndroidGeneratedClassLoader(mod, Vars.mods.mainLoader());
   }
 
   @Override
   @SuppressWarnings("unchecked")
   public ClassHandler newInstance(Class<?> modMain){
-    if(!modMain.isAssignableFrom(Mod.class))
+    if(!Mod.class.isAssignableFrom(modMain))
       throw new IllegalArgumentException("require class is child of Mod");
 
     ModInfo mod = ModGetter.getModWithClass((Class<? extends Mod>) modMain);
@@ -60,7 +64,7 @@ public class AndroidClassHandler implements ClassHandler{
     }){
       @Override
       @SuppressWarnings("unchecked")
-      protected <T> Class<T> generateClass(ClassInfo<T> classInfo){
+      protected <T> Class<T> generateClass(ClassInfo<T> classInfo) throws ClassNotFoundException{
         try{
           return (Class<T>) currLoader().loadClass(classInfo.name());
         }catch(ClassNotFoundException ignored){
@@ -97,5 +101,6 @@ public class AndroidClassHandler implements ClassHandler{
   @Override
   public void finishGenerate(){
     generateFinished = true;
+    JarList.inst().update(mod);
   }
 }

@@ -14,6 +14,7 @@ import universecore.override.dialogs.UncDatabaseDialog;
 import universecore.ui.styles.UncStyles;
 import universecore.util.animate.CellActions;
 import universecore.util.aspect.AspectManager;
+import universecore.util.aspect.EntityAspect;
 import universecore.util.aspect.triggers.EventControl;
 import universecore.util.aspect.triggers.TriggerControl;
 import universecore.util.handler.CategoryHandler;
@@ -60,6 +61,7 @@ public class UncCore extends Mod{
     Log.info("[Universe Core] core loading");
 
     classes = ImpCore.classes.getHandler(UncCore.class);
+    EntityAspect.Group.reset();
 
     Events.run(EventType.Trigger.update, () -> {
       cellActions.update();

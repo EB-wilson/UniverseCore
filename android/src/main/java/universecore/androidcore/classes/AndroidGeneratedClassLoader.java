@@ -26,15 +26,11 @@ public class AndroidGeneratedClassLoader extends BaseGeneratedClassLoader{
     }
   }
 
-  private final ClassLoader dvLoader;
+  private ClassLoader dvLoader;
 
   public AndroidGeneratedClassLoader(ModInfo mod, ClassLoader parent){
     super(mod, parent);
-    try{
-      dvLoader = loaderCstr.newInstance(file.getPath(), file.getParentFile().getPath() + "/oct", null, parent);
-    }catch(InstantiationException|InvocationTargetException|IllegalAccessException e){
-      throw new RuntimeException(e);
-    }
+    updateLoader();
   }
 
   @Override
@@ -42,14 +38,30 @@ public class AndroidGeneratedClassLoader extends BaseGeneratedClassLoader{
     DxContext context = new DxContext();
 
     try{
-      DexMerger merger = new DexMerger(
-          new Dex[]{new Dex(file), new Dex(byteCode)},
-          CollisionPolicy.KEEP_FIRST,
-          context
-      );
-      byte[] out = merger.merge().getBytes();
+      byte[] out;
+      if(file.exists()){
+        DexMerger merger = new DexMerger(
+            new Dex[]{new Dex(file), new Dex(byteCode)},
+            CollisionPolicy.KEEP_FIRST,
+            context
+        );
+        out = merger.merge().getBytes();
+      }
+      else{
+        out = byteCode;
+      }
       DexLoaderFactory.writeFile(out, file);
+
+      updateLoader();
     }catch(IOException e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void updateLoader(){
+    try{
+      dvLoader = loaderCstr.newInstance(file.getPath(), file.getParentFile().getPath() + "/oct", null, getParent());
+    }catch(InstantiationException|InvocationTargetException|IllegalAccessException e){
       throw new RuntimeException(e);
     }
   }

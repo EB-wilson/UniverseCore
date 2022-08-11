@@ -9,12 +9,11 @@ repositories{
 }
 
 dependencies {
-  implementation "com.github.EB-wilson:JavaDynamilizer:V1.0-A4"
-  implementation "com.linkedin.dexmaker:dexmaker:2.28.1"
+  implementation "com.github.EB-wilson:JavaDynamilizer:$JDERVersion"
 
   compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
   compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
-  compileOnly "com.jakewharton.android.repackaged:dalvik-dx:11.0.0_r3"
+  implementation 'com.jakewharton.android.repackaged:dalvik-dx:9.0.0_r3'
 
   compileOnly project(":core")
   compileOnly project(":abstract")
@@ -22,13 +21,19 @@ dependencies {
   compileOnly project(":utilities")
 
   annotationProcessor "com.github.Anuken:jabel:0.7.0"
+
+  testRuntimeClasspath "com.jakewharton.android.repackaged:dalvik-dx:9.0.0_r3"
+  testRuntimeClasspath project(":core")
+  testRuntimeClasspath project(":abstract")
+  testRuntimeClasspath project(":implabstract")
+  testRuntimeClasspath project(":utilities")
 }
 
 shadowJar {
   dependencies {
     exclude dependency("com.github.Anuken.Arc:arc-core:$mindustryVersion")
     exclude dependency("com.github.Anuken.Mindustry:core:$mindustryVersion")
-    exclude dependency("com.jakewharton.android.repackaged:dalvik-dx:11.0.0_r3")
+    exclude dependency("com.jakewharton.android.repackaged:dalvik-dx:9.0.0_r3")
 
     exclude project(":core")
     exclude project(":abstract")

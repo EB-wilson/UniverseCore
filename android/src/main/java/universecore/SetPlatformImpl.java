@@ -10,10 +10,11 @@ import universecore.util.mods.ModInfo;
 public class SetPlatformImpl{
   @SuppressWarnings("unchecked")
   public static void setImplements(){
+
     ImpCore.accessAndModifyHelper = new AndroidAccessAndModifyHelper();
     ImpCore.classes = modMain -> {
       try{
-        if(!modMain.isAssignableFrom(Mod.class))
+        if(!Mod.class.isAssignableFrom(modMain))
           throw new IllegalModHandleException("class was not a mod main class");
 
         ModInfo mod = ModGetter.getModWithClass((Class<? extends Mod>) modMain);

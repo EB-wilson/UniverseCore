@@ -3,9 +3,7 @@ package universecore.util.aspect;
 import arc.func.Boolf;
 import arc.func.Cons;
 import arc.struct.ObjectMap;
-import dynamilize.ArgumentList;
 import dynamilize.DynamicClass;
-import dynamilize.DynamicObject;
 import universecore.UncCore;
 
 import java.lang.reflect.Method;
@@ -63,17 +61,17 @@ public abstract class BaseContainerAspect<Type, Cont> extends AbstractAspect<Typ
 
       AspectType = DynamicClass.get(type.getSimpleName() + "Aspect");
       for(Method method: getAddEntry()){
-        AspectType.setFinalFunc(method.getName(), (Cont self, ArgumentList args) -> {
+        AspectType.setFunction(method.getName(), (self, supe, args) -> {
           BaseContainerAspect<Object, Cont> aspect = (BaseContainerAspect<Object, Cont>) aspectMap.get(self);
-          if(aspect != null) onAdd(aspect, self, args.args());
-          return ((DynamicObject<Cont>)self).superPoint().invokeFunc(method.getName(), args);
+          if(aspect != null) onAdd(aspect, self.self(), args.args());
+          return supe.invokeFunc(method.getName(), args);
         });
       }
       for(Method method: getAddEntry()){
-        AspectType.setFinalFunc(method.getName(), (Cont self, ArgumentList args) -> {
+        AspectType.setFunction(method.getName(), (self, supe, args) -> {
           BaseContainerAspect<Object, Cont> aspect = (BaseContainerAspect<Object, Cont>) aspectMap.get(self);
-          if(aspect != null) onRemove(aspect, self, args.args());
-          return ((DynamicObject<Cont>)self).superPoint().invokeFunc(method.getName(), args);
+          if(aspect != null) onRemove(aspect, self.self(), args.args());
+          return supe.invokeFunc(method.getName(), args);
         });
       }
 
@@ -86,7 +84,7 @@ public abstract class BaseContainerAspect<Type, Cont> extends AbstractAspect<Typ
     
     public Cont instance(Class<? extends Cont> type){
       if(!this.type.isAssignableFrom(type)) throw new IllegalArgumentException("can not create a disassignable class: " + type + " instance");
-      return UncCore.classes.getDynamicMaker().newInstance(type, getEntryProxy(type));
+      return UncCore.classes.getDynamicMaker().newInstance(type, getEntryProxy(type)).self();
     }
     
     public void addAspect(Cont cont, BaseContainerAspect<?, Cont> aspect){

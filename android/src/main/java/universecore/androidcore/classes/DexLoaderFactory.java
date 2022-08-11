@@ -19,6 +19,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 
 public class DexLoaderFactory{
+  public static final String TMP_PATH = JarList.jarFileCache.child("temp").path();
   private static Class<?> inMemoryLoaderClass;
 
   private static Constructor<?> loaderCstr;
@@ -39,7 +40,9 @@ public class DexLoaderFactory{
     return new DexFileClassLoader(parent);
   }
 
-  public static void writeFile(byte[] data, File file){
+  public static void writeFile(byte[] data, File file) throws IOException{
+    if(!file.exists()) file.createNewFile();
+
     try(JarOutputStream out = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(file)))){
       JarEntry entry = new JarEntry(DexFormat.DEX_IN_JAR_NAME);
       entry.setSize(data.length);
@@ -59,20 +62,11 @@ public class DexLoaderFactory{
   }
 
   public static class DexFileClassLoader extends AsClassDexLoader{
-    private final ClassLoader dvLoader;
+    private ClassLoader dvLoader;
 
     private DexFileClassLoader(ClassLoader parent){
       super(parent);
-      try{
-        dvLoader = (ClassLoader) loaderCstr.newInstance(
-            JarList.jarFileCache.child("temp").path(),
-            JarList.jarFileCache.path() + "/oct",
-            null,
-            parent
-        );
-      }catch(InstantiationException|IllegalAccessException|InvocationTargetException e){
-        throw new RuntimeException(e);
-      }
+      updateLoader();
 
       reset();
     }
@@ -92,7 +86,16 @@ public class DexLoaderFactory{
         ).merge().getBytes();
 
         writeFile(bytes, file);
+        updateLoader();
       }catch(IOException e){
+        throw new RuntimeException(e);
+      }
+    }
+
+    private void updateLoader(){
+      try{
+        dvLoader = (ClassLoader) loaderCstr.newInstance(TMP_PATH, JarList.jarFileCache.path() + "/oct", null, getParent());
+      }catch(InstantiationException|IllegalAccessException|InvocationTargetException e){
         throw new RuntimeException(e);
       }
     }

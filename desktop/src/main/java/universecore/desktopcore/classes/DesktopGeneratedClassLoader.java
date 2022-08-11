@@ -47,16 +47,16 @@ public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
     assert select != null;
     if(select.exists()) return;
 
-    try(ZipOutputStream outputStream = new ZipOutputStream(new FileOutputStream(getFile()))){
+    try(ZipOutputStream outputStream = new ZipOutputStream(new FileOutputStream(file))){
       String entryName = name.replace(".", "/") + ".class";
 
       ObjectSet<String> added = new ObjectSet<>();
 
-      ZipFile tempZipped = null;
-      if(getFile().exists()){
-        new Fi(getFile()).copyTo(jarFileCache);
-        tempZipped = new ZipFile(jarFileCache.file());
-      }
+      ZipFile tempZipped;
+      if(!file.exists()) file.createNewFile();
+
+      new Fi(file).copyTo(jarFileCache);
+      tempZipped = new ZipFile(jarFileCache.file());
 
       ZipEntry entry = new ZipEntry(entryName);
       added.add(entry.getName());
@@ -65,10 +65,6 @@ public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
       outputStream.closeEntry();
       outputStream.flush();
 
-      if(tempZipped == null){
-        zip = new ZipFi(new Fi(getFile()));
-        return;
-      }
       Enumeration<? extends ZipEntry> entries = tempZipped.entries();
       while((entry = entries.nextElement()) != null){
         if(entry.isDirectory() || !added.add(entry.getName())) continue;
@@ -83,6 +79,8 @@ public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
       zip = new ZipFi(new Fi(getFile()));
     }catch(IOException e){
       throw new RuntimeException(e);
+    }finally{
+      jarFileCache.delete();
     }
   }
 

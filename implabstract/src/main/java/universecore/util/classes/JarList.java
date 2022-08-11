@@ -14,10 +14,18 @@ import java.util.HashMap;
 
 public class JarList{
   public static final Fi jarFileCache = Core.settings.getDataDirectory().child("universecore").child("cache");
+
   private final static Fi listFile = jarFileCache.child("mod-generatedJars.lis");
+
+  private static final JarList INSTANCE = new JarList();
+
   private final HashMap<String, InfoEntry> list = new HashMap<>();
+
+  public static JarList inst(){
+    return INSTANCE;
+  }
   
-  public JarList(){
+  private JarList(){
     jarFileCache.mkdirs();
     if(!listFile.exists()) return;
     BufferedReader reader = new BufferedReader(listFile.reader());
@@ -33,6 +41,14 @@ public class JarList{
     }catch(IOException e){
       throw new RuntimeException(e);
     }
+  }
+
+  public void update(ModInfo mod){
+    InfoEntry entry = list.get(mod.name);
+    if(entry == null)
+      throw new RuntimeException("unknown mod " + mod);
+
+    entry.md5 = getMd5(entry.file);
   }
   
   public boolean matched(ModInfo mod){

@@ -9,7 +9,7 @@ repositories{
 }
 
 dependencies {
-  implementation 'com.github.EB-wilson:JavaDynamilizer:V1.0-A4'
+  implementation "com.github.EB-wilson:JavaDynamilizer:$JDERVersion"
 
   compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
   compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"

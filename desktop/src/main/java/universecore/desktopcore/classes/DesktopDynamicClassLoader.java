@@ -7,12 +7,10 @@ import java.util.HashMap;
 public class DesktopDynamicClassLoader extends BaseDynamicClassLoader{
   private final HashMap<String, byte[]> classes = new HashMap<>();
   private final HashMap<String, Class<?>> loadedClass = new HashMap<>();
-
   public DesktopDynamicClassLoader(ClassLoader parent){
     super(parent);
     reset();
   }
-  
   @Override
   protected Class<?> findClass(String name) throws ClassNotFoundException{
     Class<?> res = loadedClass.get(name);

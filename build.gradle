@@ -6,13 +6,15 @@ plugins {
   id 'com.github.johnrengelman.shadow' version '2.0.4'
 }
 
-version '1.0'
+version '1.4.0'
 
 ext{
   //the build number that this mod is made for
   mindustryVersion = 'v135'
   //version of SDK you will be using
   minSdkAPI = 30
+  //version of JavaDynamilizer
+  JDERVersion = 'V1.4-A2'
   sdkRoot = System.getenv("ANDROID_HOME")
 }
 
@@ -129,7 +131,7 @@ task buildDesktop(type: Jar){
   ]}
 }
 
-def deleteBase = true;
+def deleteBase = true
 
 task buildMod(type: Jar){
   dependsOn "buildAndroid"
