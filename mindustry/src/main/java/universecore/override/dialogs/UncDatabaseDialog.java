@@ -53,7 +53,7 @@ public class UncDatabaseDialog extends DatabaseDialog{
     for(int j = 0; j < allContent.length; j++){
       ContentType type = UncContentType.displayContentList[j];
       
-      Seq<Content> array = allContent[j].select(c -> c instanceof UnlockableContent && (!((UnlockableContent) c).isHidden() || ((UnlockableContent)c).node() != null));
+      Seq<Content> array = allContent[j].select(c -> c instanceof UnlockableContent && (!((UnlockableContent) c).isHidden() || ((UnlockableContent)c).techNode != null));
       if(array.size == 0) continue;
       
       table.add("@content." + type.name() + ".name").growX().left().color(Pal.accent);

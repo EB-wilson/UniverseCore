@@ -1,4 +1,4 @@
-package universecore.desktopcore;
+package universecore.desktop9core;
 
 import sun.misc.Unsafe;
 
@@ -22,10 +22,8 @@ public class Demodulator{
       cstr.setAccessible(true);
       unsafe = cstr.newInstance();
 
-      Class<?> clazz = Class.forName("jdk.internal.reflect.Reflection");
-      Map<Class<?>, Set<String>> map = (Map<Class<?>, Set<String>>) unsafe.getObject(clazz, fieldFilterOffset);
-      map.clear();
-    }catch(NoSuchMethodException|InstantiationException|IllegalAccessException|InvocationTargetException|ClassNotFoundException e){
+      ensureFieldOpen();
+    }catch(NoSuchMethodException|InstantiationException|IllegalAccessException|InvocationTargetException e){
       throw new RuntimeException(e);
     }
   }
@@ -69,5 +67,15 @@ public class Demodulator{
       return false;
     }
     return true;
+  }
+
+  public static void ensureFieldOpen(){
+    try{
+      Class<?> clazz = Class.forName("jdk.internal.reflect.Reflection");
+      Map<Class<?>, Set<String>> map = (Map<Class<?>, Set<String>>) unsafe.getObject(clazz, fieldFilterOffset);
+      map.clear();
+    }catch(ClassNotFoundException e){
+      throw new RuntimeException(e);
+    }
   }
 }

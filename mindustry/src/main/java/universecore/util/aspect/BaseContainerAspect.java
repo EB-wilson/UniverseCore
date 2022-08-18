@@ -56,7 +56,6 @@ public abstract class BaseContainerAspect<Type, Cont> extends AbstractAspect<Typ
     }
     
     public DynamicClass getEntryProxy(Class<? extends Cont> type){
-      if(!type.isAssignableFrom(type)) throw new IllegalArgumentException("try create aspect type use a disassignable type: " + type);
       if(AspectType != null) return AspectType;
 
       AspectType = DynamicClass.get(type.getSimpleName() + "Aspect");
@@ -65,14 +64,14 @@ public abstract class BaseContainerAspect<Type, Cont> extends AbstractAspect<Typ
           BaseContainerAspect<Object, Cont> aspect = (BaseContainerAspect<Object, Cont>) aspectMap.get(self);
           if(aspect != null) onAdd(aspect, self.self(), args.args());
           return supe.invokeFunc(method.getName(), args);
-        });
+        }, method.getParameterTypes());
       }
-      for(Method method: getAddEntry()){
+      for(Method method: getRemoveEntry()){
         AspectType.setFunction(method.getName(), (self, supe, args) -> {
           BaseContainerAspect<Object, Cont> aspect = (BaseContainerAspect<Object, Cont>) aspectMap.get(self);
           if(aspect != null) onRemove(aspect, self.self(), args.args());
           return supe.invokeFunc(method.getName(), args);
-        });
+        }, method.getParameterTypes());
       }
 
       return AspectType;

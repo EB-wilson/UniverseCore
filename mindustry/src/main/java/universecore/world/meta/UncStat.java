@@ -1,12 +1,25 @@
 package universecore.world.meta;
 
+import arc.struct.Seq;
 import mindustry.world.meta.Stat;
 import mindustry.world.meta.StatCat;
-import universecore.util.handler.EnumHandler;
+import universecore.util.handler.FieldHandler;
 
 public class UncStat{
-  protected static final EnumHandler<Stat> handler = new EnumHandler<>(Stat.class);
-  
-  public static final Stat optionalInputs  = handler.addEnumItemTail("optionalInputs", UncStatCat.other),
-      inputs = handler.addEnumItemTail("inputs", StatCat.crafting);
+  public static final Stat optionalInputs  = create("optionalInputs", UncStatCat.other),
+      inputs = create("inputs", StatCat.crafting);
+
+  private static Stat create(String name, StatCat cat){
+    return create(name, Stat.all.size, cat);
+  }
+
+  private static Stat create(String name, int index, StatCat cat){
+    Seq<Stat> all = Stat.all;
+    Stat res = new Stat(name, cat);
+
+    FieldHandler.setValueDefault(res, "id", index);
+    all.insert(index, res);
+
+    return res;
+  }
 }

@@ -22,10 +22,7 @@ import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.core.World;
 import mindustry.entities.EntityGroup;
-import mindustry.gen.Drawc;
-import mindustry.gen.Entityc;
-import mindustry.gen.Groups;
-import mindustry.gen.Unitc;
+import mindustry.gen.*;
 import mindustry.graphics.Layer;
 import mindustry.graphics.Pal;
 import mindustry.io.TypeIO;
@@ -350,7 +347,12 @@ public class Particle implements Pool.Poolable, Drawc{
     Tile tile = this.tileOn();
     return tile != null && tile.block() == Blocks.air ? tile.floor() : (Floor)Blocks.air;
   }
-  
+
+  @Override
+  public Building buildOn(){
+    return tileOn().build;
+  }
+
   @Override
   public Block blockOn(){
     Tile tile = this.tileOn();

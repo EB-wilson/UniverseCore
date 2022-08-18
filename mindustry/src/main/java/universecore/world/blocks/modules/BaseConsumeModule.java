@@ -8,7 +8,7 @@ import arc.util.io.Reads;
 import arc.util.io.Writes;
 import mindustry.ctype.Content;
 import mindustry.world.meta.BlockStatus;
-import mindustry.world.modules.ConsumeModule;
+import mindustry.world.modules.BlockModule;
 import universecore.components.blockcomp.ConsumerBuildComp;
 import universecore.world.consumers.BaseConsume;
 import universecore.world.consumers.BaseConsumers;
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 /**生产者的消耗器模块，用于集中处理方块的材料需求等，提供了可选需求以及其特殊的触发器
  * @author EBwilson 😀*/
 @SuppressWarnings("all")
-public class BaseConsumeModule extends ConsumeModule{
+public class BaseConsumeModule extends BlockModule{
   protected final ConsumerBuildComp entity;
   protected final ObjectMap<BaseConsumers, float[]> optProgress = new ObjectMap<>();
   
@@ -34,7 +34,6 @@ public class BaseConsumeModule extends ConsumeModule{
   private float powerCons;
 
   public BaseConsumeModule(ConsumerBuildComp entity){
-    super(entity.getBuilding());
     this.entity = entity;
     current = entity.getConsumerBlock().consumers() != null && entity.consumeCurrent() != -1?
         entity.getConsumerBlock().consumers().get(entity.consumeCurrent()): null;
@@ -118,11 +117,9 @@ public class BaseConsumeModule extends ConsumeModule{
   public void setCurrent(){
     current = get().get(entity.consumeCurrent());
   }
-  
-  @Override
+
   public void update(){
     current = null;
-    
     powerCons = 0;
     if((!hasOptional() && !hasConsume())) return;
     boolean docons = entity.shouldConsume() && entity.productionValid();
@@ -188,7 +185,7 @@ public class BaseConsumeModule extends ConsumeModule{
     return index < getOptional().size()? getOptional().get(index) : null;
   }
   
-  /**触发一次所有主要消耗项的trigger方法*/
+  /**触发当前主要消耗项的trigger方法*/
   public void trigger(){
     if(current != null){
       for(BaseConsume cons: current.all()){
@@ -198,7 +195,7 @@ public class BaseConsumeModule extends ConsumeModule{
     }
   }
   
-  /**触发一次所有可选消耗项的trigger方法*/
+  /**触发一个可选消耗项的trigger方法*/
   public void triggerOpt(int id){
     if(getOptional() != null && getOptional().size() > id){
       BaseConsumers cons = getOptional().get(id);
@@ -229,7 +226,7 @@ public class BaseConsumeModule extends ConsumeModule{
     return current.get(type) != null && current.get(type).valid(entity.getBuilding(ConsumerBuildComp.class));
   }
   
-  /**制定的消耗列表是否可用*/
+  /**指定的消耗列表是否可用*/
   public boolean valid(int index){
     if(index >= get().size()) return false;
     

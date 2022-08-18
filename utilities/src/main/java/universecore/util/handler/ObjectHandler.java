@@ -1,6 +1,7 @@
 package universecore.util.handler;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,6 +18,8 @@ public class ObjectHandler{
 
     while(curr != Object.class){
       for(Field field: curr.getDeclaredFields()){
+        if(Modifier.isStatic(field.getModifiers())) continue;
+
         fields.add(field.getName());
       }
 

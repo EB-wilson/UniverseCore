@@ -2,9 +2,7 @@ package universecore.components.blockcomp;
 
 import arc.func.Cons2;
 import arc.math.Mathf;
-import mindustry.gen.Building;
 import mindustry.world.Block;
-import mindustry.world.consumers.ConsumePower;
 import mindustry.world.meta.Stats;
 import universecore.annotations.Annotations;
 import universecore.annotations.Annotations.BindField;
@@ -71,18 +69,15 @@ public interface ConsumerBlockComp{
   @Annotations.MethodEntry(entryMethod = "init", context = "powerCapacity -> powerCapacity")
   default void initPower(float powerCapacity){
     Block block = (Block)this;
-    block.consumes.add(new ConsumePower(0 ,powerCapacity, powerCapacity > 0){
-      @Override
-      public float requestedPower(Building e){
-        ConsumerBuildComp entity = (ConsumerBuildComp)e;
-        if(entity.consumer().current == null) return 0f;
-        if(entity.getBuilding().tile().build == null || entity.consumeCurrent() == -1 || !entity.consumer().excludeValid(UncConsumeType.power)) return 0f;
-        if(buffered){
-          return (1f-entity.getBuilding().power.status)*capacity;
-        }
-        else{
-          return entity.consumer().getPowerUsage() * Mathf.num(entity.shouldConsume());
-        }
+    block.consumePowerDynamic(e -> {
+      ConsumerBuildComp entity = (ConsumerBuildComp)e;
+      if(entity.consumer().current == null) return 0f;
+      if(entity.getBuilding().tile().build == null || entity.consumeCurrent() == -1 || !entity.consumer().excludeValid(UncConsumeType.power)) return 0f;
+      if(powerCapacity > 0){
+        return (1f-entity.getBuilding().power.status)*powerCapacity;
+      }
+      else{
+        return entity.consumer().getPowerUsage() * Mathf.num(entity.shouldConsume());
       }
     });
   }

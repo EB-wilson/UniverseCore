@@ -1,12 +1,8 @@
 package universecore.util.handler;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.*;
+import universecore.ImpCore;
 
-import static universecore.ImpCore.accessAndModifyHelper;
+import java.util.WeakHashMap;
 
 /**字段操作的静态方法集合，包含了读取，写入等操作，所有引用抛出异常都被catch并封装到{@link RuntimeException}，无需手动try或抛出
  * @author EBwilson
@@ -15,36 +11,7 @@ import static universecore.ImpCore.accessAndModifyHelper;
 public class FieldHandler<T>{
   private static final WeakHashMap<Class, FieldHandler> defaultHandlers = new WeakHashMap<>();
 
-  private final HashMap<String, Field> finalFields = new HashMap<>();
-  private final HashMap<String, MethodHandle> getters = new HashMap<>();
-  private final HashMap<String, MethodHandle> setters = new HashMap<>();
-
   private final Class<T> clazz;
-
-  private final MethodHandles.Lookup lookup = MethodHandles.lookup();
-
-  /**不考虑访问修饰符，对目标类获得字段，如果在类中没有找到，则向上递归引用，直到调用到{@link Object}的一级继承类
-   * @param clazz 获取字段的目标类型
-   * @param name 字段名称
-   * @return 获取到的字段
-   * @throws NoSuchFieldException 如果引用到{@link Object}类的直接继承类型时依然没有找到此字段*/
-  public static Field getDeclaredFieldSuper(Class<?> clazz, String name) throws NoSuchFieldException{
-    Class<?> current = clazz;
-    ArrayList<Field> checking = new ArrayList<>();
-    
-    while(current != Object.class){
-      checking.addAll(Arrays.asList(current.getDeclaredFields()));
-      
-      Optional<Field> opt = checking.stream().filter(f -> f.getName().equals(name)).findFirst();
-      if(opt.isPresent()){
-        return opt.get();
-      }
-
-      current = current.getSuperclass();
-    }
-    
-    throw new NoSuchFieldException("no such field \"" + name + "\" found in " + clazz + " and super class!");
-  }
 
   public FieldHandler(Class<T> clazz){
     this.clazz = clazz;
@@ -55,44 +22,8 @@ public class FieldHandler<T>{
    * @param key 要进行更改的属性名称
    * @param value 要写入的值  */
   public void setValue(T object, String key, Object value){
-    if(finalFields.containsKey(key)){
-      if(object == null){
-        if(!Modifier.isStatic(finalFields.get(key).getModifiers())) throw new NullPointerException("field " + key + " is not static, but target object is null");
-        setFinalValueStatic(key, value);
-      }
-      else setFinalValue(object, key, value);
-      return;
-    }
-
-    MethodHandle setter = setters.computeIfAbsent(key, e -> {
-      try{
-        Field field = getDeclaredFieldSuper(clazz, key);
-        accessAndModifyHelper.setAccessible(field);
-        if(Modifier.isFinal(field.getModifiers())){
-          finalFields.put(key, field);
-          setValue(object, key, value);
-          return null;
-        }
-        return lookup.unreflectSetter(field);
-      }catch(IllegalAccessException|NoSuchFieldException ex){
-        throw new RuntimeException(ex);
-      }
-    });
-
-    if(setter == null) return;
-
-    try{
-      if(setter.type().parameterArray().length == 1){
-        setter.invoke(value);
-      }
-      else{
-        if(object == null)
-          throw new NullPointerException("field " + key + " is not a static field, bug given object was null");
-        setter.invoke(object, value);
-      }
-    }catch(Throwable e){
-      throw new RuntimeException(e);
-    }
+    if(object == null) ImpCore.fieldAccessHelper.setStatic(clazz, key, value);
+    else ImpCore.fieldAccessHelper.set(object, key, value);
   }
 
   public static void setValueDefault(Object obj, String key, Object value){
@@ -118,28 +49,7 @@ public class FieldHandler<T>{
    * @return 字段的值，如果它存在的话
    * @throws NullPointerException 若传入的目标对象为null同时字段不是静态的*/
   public <R> R getValue(T object, String key){
-    MethodHandle getter = getters.computeIfAbsent(key, e -> {
-      try{
-        Field field = getDeclaredFieldSuper(clazz, key);
-        accessAndModifyHelper.setAccessible(field);
-        return lookup.unreflectGetter(field);
-      }catch(IllegalAccessException|NoSuchFieldException ex){
-        throw new RuntimeException(ex);
-      }
-    });
-
-    try{
-      if(getter.type().parameterArray().length == 0){
-        return (R) getter.invoke();
-      }
-      else{
-        if(object == null)
-          throw new NullPointerException("field " + key + " is not a static field, bug given object was null");
-        return (R) getter.invoke(object);
-      }
-    }catch(Throwable e){
-      throw new RuntimeException(e);
-    }
+    return object == null? ImpCore.fieldAccessHelper.getStatic(clazz, key): ImpCore.fieldAccessHelper.get(object, key);
   }
 
   public static <T> T getValueDefault(Object obj, String key){
@@ -160,29 +70,5 @@ public class FieldHandler<T>{
 
   public static void clearDefault(){
     defaultHandlers.clear();
-  }
-
-  private void setFinalValueStatic(String key, Object value){
-    Field field = finalFields.computeIfAbsent(key, e -> {
-      try{
-        return getDeclaredFieldSuper(clazz, key);
-      }catch(NoSuchFieldException ex){
-        throw new RuntimeException(ex);
-      }
-    });
-
-    accessAndModifyHelper.setStatic(clazz, field, value);
-  }
-
-  private void setFinalValue(T target, String key, Object value){
-    Field field = finalFields.computeIfAbsent(key, e -> {
-      try{
-        return getDeclaredFieldSuper(clazz, key);
-      }catch(NoSuchFieldException ex){
-        throw new RuntimeException(ex);
-      }
-    });
-
-    accessAndModifyHelper.set(target, field, value);
   }
 }

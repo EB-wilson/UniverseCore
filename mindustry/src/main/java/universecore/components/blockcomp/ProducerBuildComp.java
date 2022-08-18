@@ -31,10 +31,6 @@ public interface ProducerBuildComp extends BuildCompBase, ConsumerBuildComp{
   default ProducerBuildComp getProducerBuilding(){
     return getBlock(ProducerBuildComp.class);
   }
-
-  default boolean consValid(){
-    return getBuilding().consValid();
-  }
   
   default boolean shouldConsume(){
     return getBuilding().shouldConsume();

@@ -29,12 +29,16 @@ public class UncContentType{
 
   public final boolean display;
 
-  public UncContentType(String name, int ordinal){
-    this(name, ordinal, true);
+  public UncContentType(String name, Class<? extends Content> contentClass){
+    this(name, ContentType.values().length, contentClass);
+  }
+
+  public UncContentType(String name, int ordinal, Class<? extends Content> contentClass){
+    this(name, ordinal, contentClass, true);
   }
   
-  public UncContentType(String name, int ordinal, boolean display){
-    value = handler.addEnumItemTail(name);
+  public UncContentType(String name, int ordinal, Class<? extends Content> contentClass, boolean display){
+    value = handler.addEnumItemTail(name, contentClass);
     this.ordinal = ordinal;
     this.display = display;
   
@@ -68,9 +72,5 @@ public class UncContentType{
     catch(Throwable e){
       Log.err(e);
     }
-  }
-  
-  public UncContentType(String name){
-    this(name, ContentType.values().length);
   }
 }

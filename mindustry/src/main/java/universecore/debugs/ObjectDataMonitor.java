@@ -23,7 +23,6 @@ import universecore.util.handler.FieldHandler;
 import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -144,7 +143,7 @@ public class ObjectDataMonitor{
         
             button1.update(() -> {
               String key = vars.findKey(structure, true);
-              button1.setText(Objects.requireNonNullElse(key, "[gray]flag"));
+              button1.setText(key == null? "[gray]flag": key);
             });
         
             button1.clicked(() -> {
@@ -328,7 +327,7 @@ public class ObjectDataMonitor{
               button1.update(() -> {
                 if(timer.get(1, 30f)){
                   String key = vars.findKey(structure, true);
-                  button1.setText(Objects.requireNonNullElse(key, "[gray]flag"));
+                  button1.setText(key == null? "[gray]flag": key);
                 }
               });
               

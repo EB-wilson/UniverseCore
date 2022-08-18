@@ -1,12 +1,13 @@
 package universecore.androidcore.handler;
 
 import dynamilize.DynamicMaker;
-import dynamilize.classmaker.AbstractClassGenerator;
-import dynamilize.classmaker.ByteClassLoader;
-import dynamilize.classmaker.ClassInfo;
+import dynamilize.DynamicObject;
+import dynamilize.IllegalHandleException;
+import dynamilize.classmaker.*;
+import dynamilize.classmaker.code.IClass;
+import dynamilize.classmaker.code.ILocal;
 import mindustry.Vars;
 import mindustry.mod.Mod;
-import universecore.ImpCore;
 import universecore.androidcore.classes.AndroidGeneratedClassLoader;
 import universecore.androidcore.classes.DexGenerator;
 import universecore.androidcore.classes.DexLoaderFactory;
@@ -17,6 +18,11 @@ import universecore.util.classes.JarList;
 import universecore.util.handler.ClassHandler;
 import universecore.util.mods.ModGetter;
 import universecore.util.mods.ModInfo;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class AndroidClassHandler implements ClassHandler{
   private static final BaseDynamicClassLoader dynamicLoader =
@@ -77,7 +83,7 @@ public class AndroidClassHandler implements ClassHandler{
   @Override
   public DynamicMaker getDynamicMaker(){
     return maker != null? maker: (maker = new DynamicMaker(accessibleObject -> {
-      ImpCore.accessAndModifyHelper.setAccessible(accessibleObject);
+      accessibleObject.setAccessible(true);
     }){
       @Override
       @SuppressWarnings("unchecked")
@@ -89,6 +95,54 @@ public class AndroidClassHandler implements ClassHandler{
         }catch(ClassNotFoundException ignored){
           return makeClassInfo(baseClass, interfaces).generate(getGenerator());
         }
+      }
+
+      @SuppressWarnings({"unchecked", "rawtypes"})
+      @Override
+      protected <T> ClassInfo<? extends T> makeClassInfo(Class<T> baseClass, Class<?>[] interfaces){
+        ClassInfo<? extends T> classInfo = super.makeClassInfo(baseClass, interfaces);
+          try{
+            Class<?> staticImpl = DynamicObject.class.getClassLoader().loadClass(DynamicObject.class.getName() + "$-CC");
+            ClassInfo<?> interType = ClassInfo.asType(staticImpl);
+
+            for(Method method: DynamicObject.class.getMethods()){
+              if((method.getModifiers() & Modifier.STATIC) != 0) continue;
+
+              ArrayList<Class<?>> args = new ArrayList<>();
+              args.add(DynamicObject.class);
+              args.addAll(Arrays.asList(method.getParameterTypes()));
+
+              ClassInfo<?> retType = ClassInfo.asType(method.getReturnType());
+              MethodInfo<?, ?> implMethod;
+              try{
+                implMethod = interType.getMethod(
+                    retType,
+                    "$default$" + method.getName(),
+                    args.stream().map(ClassInfo::asType).toArray(IClass[]::new)
+                );
+              }catch(IllegalHandleException ignored){
+                continue;
+              }
+
+              CodeBlock<?> code = classInfo.declareMethod(
+                  Modifier.PUBLIC,
+                  method.getName(),
+                  retType,
+                  Parameter.trans(Arrays.stream(method.getParameterTypes()).map(ClassInfo::asType).toArray(IClass[]::new))
+              );
+
+              if(implMethod.returnType() == ClassInfo.VOID_TYPE){
+                code.invoke(null, implMethod, null, code.getParamAll().toArray(new ILocal[0]));
+              }
+              else{
+                ILocal ret = code.local(retType);
+                code.invoke(null, implMethod, ret, code.getParamAll().toArray(new ILocal[0]));
+                code.returnValue(ret);
+              }
+            }
+          }catch(ClassNotFoundException ignored){}
+
+        return classInfo;
       }
     });
   }

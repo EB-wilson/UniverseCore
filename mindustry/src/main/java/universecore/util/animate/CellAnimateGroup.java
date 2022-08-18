@@ -43,7 +43,7 @@ public class CellAnimateGroup extends CellAction{
   }
   
   public void jump(int index){
-    if(index >= actions.size) throw new IndexOutOfBoundsException(index);
+    if(index >= actions.size) throw new IndexOutOfBoundsException("Index out of range: " + index);
     this.index = index;
     current = actions.get(index);
     currentHandle = afterHandle.get(index);

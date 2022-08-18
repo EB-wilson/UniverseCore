@@ -134,7 +134,7 @@ public class JarList{
         String value;
         boolean inValue = false;
         while((character = reader.read()) != - 1){
-          c = Character.toString(character);
+          c = Character.toString((char)character);
           if(c.equals(";")){
             if(!inValue) throw new IllegalArgumentException("unexpected \";\"");
             key = keyBuffer.toString();

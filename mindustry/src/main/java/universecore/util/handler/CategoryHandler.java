@@ -19,7 +19,6 @@ import java.util.ArrayList;
 
 public class CategoryHandler{
   protected final ArrayList<UncCategory> newCats = new ArrayList<>();
-  protected ArrayList<Binding> binds;
   protected boolean hasNew = false;
   protected final Field selects;
   
@@ -34,13 +33,11 @@ public class CategoryHandler{
   
   public void handleBlockFrag(){
     if(!hasNew) return;
-    Table togglerTable = FieldHandler.getValueDefault(Vars.ui.hudfrag.blockfrag, "toggler");
-    assert togglerTable != null;
-  
-    Table frame = (Table)togglerTable.getChildren().get(0);
+    Table catTable = FieldHandler.getValueDefault(Vars.ui.hudfrag.blockfrag, "blockCatTable");
+
     // frame.update(() -> {});
-    Table blockSelect = (Table)frame.getChildren().get(2);
-    Table categories = (Table)frame.getChildren().get(3);
+    Table blockSelect = (Table)catTable.getChildren().get(0);
+    Table categories = (Table)catTable.getChildren().get(1);
   
     Cell<?> pane = blockSelect.getCells().get(0);
     pane.height(240f);

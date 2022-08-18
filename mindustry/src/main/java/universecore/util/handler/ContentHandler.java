@@ -5,12 +5,12 @@ import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import arc.util.Log;
 import mindustry.Vars;
-import mindustry.content.TechTree;
 import mindustry.core.ContentLoader;
 import mindustry.ctype.Content;
 import mindustry.ctype.ContentType;
 import mindustry.ctype.MappableContent;
 import mindustry.ctype.UnlockableContent;
+import universecore.util.TechTreeConstructor;
 
 import java.lang.reflect.Field;
 import java.util.Locale;
@@ -116,7 +116,7 @@ public class ContentHandler{
     if(declarer != null) overrideContent(oldContent, declarer, (Content) newContent);
 
     if(oldContent instanceof UnlockableContent && newContent instanceof UnlockableContent){
-      TechTree.get((UnlockableContent) oldContent).content = (UnlockableContent)newContent;
+      TechTreeConstructor.get((UnlockableContent) oldContent).content = (UnlockableContent)newContent;
     }
   }
   

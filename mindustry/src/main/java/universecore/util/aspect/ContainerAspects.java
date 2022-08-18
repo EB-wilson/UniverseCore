@@ -17,7 +17,7 @@ public class ContainerAspects{
   public static class SeqAspect<Element> extends BaseContainerAspect<Element, Seq<Element>>{
     protected static final SeqContainerType contType = new SeqContainerType();
     
-    protected SeqAspect(Seq<Element> source, Boolf<Element> filter, Cons<Seq<Element>> fieldSetter){
+    public SeqAspect(Seq<Element> source, Boolf<Element> filter, Cons<Seq<Element>> fieldSetter){
       super(source, filter, fieldSetter);
     }
   
@@ -39,7 +39,7 @@ public class ContainerAspects{
   
     @Override
     public void onRemove(BaseContainerAspect<Object, Seq> aspect, Seq seq, Object[] args){
-      aspect.remove(seq.get((int) args[0]));
+      aspect.remove(args[0]);
     }
   
     @Override
@@ -54,7 +54,7 @@ public class ContainerAspects{
     @Override
     public Method[] getRemoveEntry(){
       try{
-        return new Method[]{Seq.class.getMethod("remove", int.class)};
+        return new Method[]{Seq.class.getMethod("remove", Object.class)};
       }catch(NoSuchMethodException e){
         throw new RuntimeException(e);
       }
@@ -67,7 +67,7 @@ public class ContainerAspects{
   public static class ObjectSetAspect<Element> extends BaseContainerAspect<Element, ObjectSet<Element>>{
     protected static final ObjectSetContainerType contType = new ObjectSetContainerType();
     
-    protected ObjectSetAspect(ObjectSet<Element> source, Boolf<Element> filter, Cons<ObjectSet<Element>> fieldSetter){
+    public ObjectSetAspect(ObjectSet<Element> source, Boolf<Element> filter, Cons<ObjectSet<Element>> fieldSetter){
       super(source, filter, fieldSetter);
     }
     
@@ -117,7 +117,7 @@ public class ContainerAspects{
   public static class ObjectMapAspect<Key, Element> extends BaseContainerAspect<Element, ObjectMap<Key, Element>>{
     protected static final ObjectMapContainerType contType = new ObjectMapContainerType();
     
-    protected ObjectMapAspect(ObjectMap<Key, Element> source, Boolf<Element> filter, Cons<ObjectMap<Key, Element>> fieldSetter){
+    public ObjectMapAspect(ObjectMap<Key, Element> source, Boolf<Element> filter, Cons<ObjectMap<Key, Element>> fieldSetter){
       super(source, filter, fieldSetter);
     }
     

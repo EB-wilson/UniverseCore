@@ -71,7 +71,9 @@ public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
 
         outputStream.putNextEntry(new ZipEntry(entry));
         try(InputStream inputStream = tempZipped.getInputStream(entry)){
-          outputStream.write(inputStream.readAllBytes());
+          for(int l = inputStream.read(); l > 0; l = inputStream.read()){
+            outputStream.write(l);
+          }
           outputStream.closeEntry();
           outputStream.flush();
         }

@@ -38,7 +38,7 @@ public class RecipeTable extends Table{
       if(map.size == 0) continue;
 
       if(stat.useCategories){
-        table.add("@category." + cat.name()).color(Pal.accent).fillX();
+        table.add("@category." + cat.name).color(Pal.accent).fillX();
         table.row();
       }
 

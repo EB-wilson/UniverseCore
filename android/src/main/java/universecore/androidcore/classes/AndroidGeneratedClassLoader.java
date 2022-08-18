@@ -2,9 +2,9 @@ package universecore.androidcore.classes;
 
 import com.android.dex.Dex;
 import com.android.dx.command.dexer.DxContext;
-import com.android.dx.merge.CollisionPolicy;
 import com.android.dx.merge.DexMerger;
 import universecore.util.classes.BaseGeneratedClassLoader;
+import universecore.util.handler.MethodHandler;
 import universecore.util.mods.ModInfo;
 
 import java.io.IOException;
@@ -40,9 +40,8 @@ public class AndroidGeneratedClassLoader extends BaseGeneratedClassLoader{
     try{
       byte[] out;
       if(file.exists()){
-        DexMerger merger = new DexMerger(
+        DexMerger merger = MethodHandler.newInstanceDefault(DexMerger.class,
             new Dex[]{new Dex(file), new Dex(byteCode)},
-            CollisionPolicy.KEEP_FIRST,
             context
         );
         out = merger.merge().getBytes();

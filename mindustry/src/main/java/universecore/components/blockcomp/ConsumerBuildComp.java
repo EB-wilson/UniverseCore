@@ -50,6 +50,10 @@ public interface ConsumerBuildComp extends BuildCompBase{
   default boolean productionValid(){
     return getBuilding().productionValid();
   }
+
+  default boolean consValid(){
+    return consumer().valid();
+  }
   
   default boolean shouldConsume(){
     return consumer() != null && consumer().hasOptional() || consumeCurrent() != -1;

@@ -20,6 +20,7 @@ import universecore.util.aspect.triggers.TriggerControl;
 import universecore.util.handler.CategoryHandler;
 import universecore.util.handler.ClassHandler;
 import universecore.util.mods.ModGetter;
+import universecore.util.mods.ModInfo;
 
 import java.util.Objects;
 
@@ -27,7 +28,7 @@ import java.util.Objects;
  * @author EBwilson
  * @since 0.1*/
 public class UncCore extends Mod{
-  private static final ObjectMap<String, Class<? extends Mod>> referredMods = new ObjectMap<>();
+  private static final ObjectMap<Class<? extends Mod>, ModInfo> referredMods = new ObjectMap<>();
   
   /**此mod内部名称*/
   public static final String coreName = "universe-core";
@@ -37,11 +38,8 @@ public class UncCore extends Mod{
 
   /**本模组的文件位置*/
   public static final Fi coreFile = Objects.requireNonNull(ModGetter.getModWithName(coreName)).file;
-  public static ClassHandler classes;
 
-  static{
-    signup(UncCore.class);
-  }
+  public static ClassHandler classes;
   
   /**方块类别处理工具实例*/
   public static CategoryHandler categories = new CategoryHandler();
@@ -55,12 +53,14 @@ public class UncCore extends Mod{
   static{
     aspects.addTriggerControl(new EventControl());
     aspects.addTriggerControl(new TriggerControl());
+
+    signup(UncCore.class);
+    classes = ImpCore.classes.getHandler(UncCore.class);
   }
   
   public UncCore(){
     Log.info("[Universe Core] core loading");
 
-    classes = ImpCore.classes.getHandler(UncCore.class);
     EntityAspect.Group.reset();
 
     Events.run(EventType.Trigger.update, () -> {
@@ -83,8 +83,7 @@ public class UncCore extends Mod{
   }
   
   public static void signup(Class<? extends Mod> modClass){
-    String modName = Objects.requireNonNull(ModGetter.getModWithClass(modClass)).name;
-    referredMods.put(modName, modClass);
+    referredMods.put(modClass, ModGetter.getModWithClass(modClass));
   }
   
   @Override

@@ -1,7 +1,6 @@
 package universecore.androidcore.classes;
 
 import com.android.dx.cf.direct.DirectClassFile;
-import com.android.dx.cf.direct.StdAttributeFactory;
 import com.android.dx.command.dexer.DxContext;
 import com.android.dx.dex.DexOptions;
 import com.android.dx.dex.cf.CfOptions;
@@ -13,8 +12,7 @@ import dynamilize.classmaker.ClassInfo;
 import dynamilize.classmaker.code.IMethod;
 import dynamilize.classmaker.code.IOperate;
 import org.objectweb.asm.Opcodes;
-
-import java.io.IOException;
+import universecore.util.handler.MethodHandler;
 
 import static dynamilize.classmaker.ClassInfo.STRING_TYPE;
 
@@ -33,25 +31,24 @@ public class DexGenerator extends ASMGenerator{
 
     DexOptions dexOptions = new DexOptions();
     DexFile dexFile = new DexFile(dexOptions);
-    DirectClassFile classFile = new DirectClassFile(byteCode, classInfo.internalName() + ".class", true);
-    classFile.setAttributeFactory(StdAttributeFactory.THE_ONE);
+    DirectClassFile classFile = MethodHandler.newInstanceDefault(
+        DirectClassFile.class,
+        byteCode,
+        classInfo.internalName() + ".class"
+    );
+    MethodHandler.invokeDefault(classFile, "setAttributeFactory");
     classFile.getMagic();
     DxContext context = new DxContext();
 
-    dexFile.add(CfTranslator.translate(
+    dexFile.add(MethodHandler.invokeDefault(CfTranslator.class, "translate",
         context,
         classFile,
-        null,
         new CfOptions(),
         dexOptions,
         dexFile)
     );
 
-    try{
-      return dexFile.toDex(null, false);
-    }catch(IOException e){
-      throw new RuntimeException(e);
-    }
+    return MethodHandler.invokeDefault(dexFile, "toDex");
   }
 
   @Override

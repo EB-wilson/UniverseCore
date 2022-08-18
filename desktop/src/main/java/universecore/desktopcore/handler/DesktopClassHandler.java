@@ -8,7 +8,6 @@ import dynamilize.classmaker.ClassInfo;
 import mindustry.Vars;
 import mindustry.mod.Mod;
 import org.objectweb.asm.Opcodes;
-import universecore.ImpCore;
 import universecore.desktopcore.classes.DesktopDynamicClassLoader;
 import universecore.desktopcore.classes.DesktopGeneratedClassLoader;
 import universecore.util.classes.AbstractFileClassLoader;
@@ -77,7 +76,7 @@ public class DesktopClassHandler implements ClassHandler{
   @Override
   public DynamicMaker getDynamicMaker(){
     return maker != null? maker: (maker = new DynamicMaker(accessibleObject -> {
-      ImpCore.accessAndModifyHelper.setAccessible(accessibleObject);
+      //TODO: accessor
     }){
       @Override
       @SuppressWarnings("unchecked")

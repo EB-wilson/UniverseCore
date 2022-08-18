@@ -27,12 +27,17 @@ public interface BuildCompBase{
   @SuppressWarnings("unchecked")
   default <T> T getBuilding(Class<T> clazz){
     if(clazz.isAssignableFrom(getClass())) return (T)this;
-    return null;
+    throw new ClassCastException(getClass() + " cannot cast to " + clazz);
   }
   
   default Building getBuilding(){
-    if(this instanceof Building) return (Building)this;
-    return null;
+    if(Building.class.isAssignableFrom(getClass())) return (Building) this;
+    throw new ClassCastException(getClass() + " cannot cast to " + Building.class);
+  }
+
+  @SuppressWarnings("unchecked")
+  default <T> T getBuild(){
+    return (T) this;
   }
   
   @Annotations.BindField("items")

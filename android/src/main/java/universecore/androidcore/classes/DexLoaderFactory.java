@@ -3,10 +3,10 @@ package universecore.androidcore.classes;
 import com.android.dex.Dex;
 import com.android.dex.DexFormat;
 import com.android.dx.command.dexer.DxContext;
-import com.android.dx.merge.CollisionPolicy;
 import com.android.dx.merge.DexMerger;
 import universecore.util.classes.BaseDynamicClassLoader;
 import universecore.util.classes.JarList;
+import universecore.util.handler.MethodHandler;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -79,9 +79,8 @@ public class DexLoaderFactory{
     @Override
     public void declareClass(String name, byte[] byteCode){
       try{
-        byte[] bytes = new DexMerger(
+        byte[] bytes = MethodHandler.newInstanceDefault(DexMerger.class,
             new Dex[]{new Dex(file), new Dex(byteCode)},
-            CollisionPolicy.KEEP_FIRST,
             new DxContext()
         ).merge().getBytes();
 
@@ -127,9 +126,8 @@ public class DexLoaderFactory{
     @Override
     public void declareClass(String name, byte[] byteCode){
       try{
-        dex = new DexMerger(
+        dex = MethodHandler.newInstanceDefault(DexMerger.class,
             new Dex[]{new Dex(byteCode), dex},
-            CollisionPolicy.KEEP_FIRST,
             new DxContext()
         ).merge();
 

@@ -4,11 +4,14 @@ if (JavaVersion.current().ordinal() < JavaVersion.VERSION_17.ordinal())
 rootProject.name = "UniverseCore"
 
 include 'desktop'
+include 'desktop9'
 include 'android'
+include 'android26'
 include 'core'
 include 'annotations'
 include 'utilities'
 include 'mindustry'
 include 'abstract'
 include 'implabstract'
+include 'dynamilizer'
 

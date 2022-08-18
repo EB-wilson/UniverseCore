@@ -22,7 +22,7 @@ public class EventsHandler{
           if(f[0].get(cons) == listener) task.get(cons);
         }
         catch(IllegalAccessException e){
-          e.printStackTrace();
+          throw new RuntimeException(e);
         }
       }
     }
@@ -38,16 +38,18 @@ public class EventsHandler{
           if(f[0].get(cons) == listener && isTarget(listener, criterion, fieldTypes)) task.get(cons);
         }
         catch(IllegalAccessException e){
-          e.printStackTrace();
+          throw new RuntimeException(e);
         }
       }
     }
   }
   
   public static void getCons(Class<?> event, Boolf<Object> criterion, Cons<Cons<?>> task, Class<?>... fieldTypes){
-    Events.fireWrap(event, new Object(), cons -> {
+    Seq<Cons<?>> seq = listeners.get(event);
+
+    for(Cons<?> cons: seq.items){
       if(isTarget(cons, criterion, fieldTypes)) task.get(cons);
-    });
+    }
   }
   
   public static boolean isTarget(Object lambda, Boolf<Object> criterion, Class<?>... fieldTypes){
@@ -60,7 +62,7 @@ public class EventsHandler{
           f[0].setAccessible(true);
           if(!criterion.get(f[0].get(lambda))) return false;
         }catch(IllegalAccessException e){
-          Log.info(e);
+          Log.err(e);
           return false;
         }
       }
