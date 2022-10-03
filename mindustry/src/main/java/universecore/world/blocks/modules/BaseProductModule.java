@@ -39,7 +39,7 @@ public class BaseProductModule extends BlockModule {
 
   public float getPowerProduct(){
     if(current == null) return 0;
-    return current.get(ProduceType.power).powerProduction*(Mathf.num(entity.shouldConsume() && entity.consValid())*((BaseProduce<ProducerBuildComp>)current.get(ProduceType.power)).multiple(entity));
+    return current.get(ProduceType.power).powerProduction*(Mathf.num(entity.shouldConsume() && entity.consumeValid())*((BaseProduce<ProducerBuildComp>)current.get(ProduceType.power)).multiple(entity));
   }
   
   public void setCurrent(){
@@ -53,7 +53,7 @@ public class BaseProductModule extends BlockModule {
     //只在选择了生产列表时才进行产出更新
     if(entity.produceCurrent() >= 0){
       setCurrent();
-      boolean docons = entity.consValid() && entity.shouldConsume() && entity.productionValid();
+      boolean docons = entity.consumeValid() && entity.shouldConsume() && entity.shouldProduct();
       boolean preValid = valid();
   
       valid = true;
@@ -76,7 +76,7 @@ public class BaseProductModule extends BlockModule {
   }
   
   public boolean valid(){
-    return valid && entity.productionValid() && entity.getBuilding().enabled;
+    return valid && entity.shouldProduct() && entity.getBuilding().enabled;
   }
 
   @Override

@@ -48,6 +48,8 @@ public class DexLoaderFactory{
       entry.setSize(data.length);
       out.putNextEntry(entry);
       out.write(data);
+      out.finish();
+      out.flush();
     }catch(IOException e){
       throw new RuntimeException(e);
     }

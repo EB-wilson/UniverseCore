@@ -34,7 +34,8 @@ public class DesktopMethodInvokeHelper9 extends DesktopMethodInvokeHelper{
         Demodulator.checkAndMakeModuleOpen(curr.getModule(), curr.getPackage(), DesktopFieldAccessHelper9.class.getModule());
         met.setAccessible(true);
         res = lookup.unreflect(met);
-      }catch(Throwable ignored){}
+      }
+      catch(Throwable ignored){}
 
       if(res != null){
         map.put(FunctionType.inst(res.type().parameterArray()), res);

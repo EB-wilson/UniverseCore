@@ -7,7 +7,6 @@ import arc.func.Func;
 import arc.graphics.Color;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Fill;
-import arc.math.Mathf;
 import arc.math.geom.Position;
 import arc.math.geom.Vec2;
 import arc.struct.Queue;
@@ -24,7 +23,6 @@ import mindustry.core.World;
 import mindustry.entities.EntityGroup;
 import mindustry.gen.*;
 import mindustry.graphics.Layer;
-import mindustry.graphics.Pal;
 import mindustry.io.TypeIO;
 import mindustry.world.Block;
 import mindustry.world.Tile;
@@ -53,7 +51,8 @@ public class Particle implements Pool.Poolable, Drawc{
   
   protected Vec2 startPos = new Vec2();
   protected Vec2 tempPos = new Vec2();
-  protected Deflect deflect = new Deflect();
+  protected Seq<Cons<Particle>> deflects = new Seq<>();
+  public Cloud currentCloud;
   
   /**粒子的速度，矢量*/
   public Vec2 speed = new Vec2();
@@ -64,35 +63,21 @@ public class Particle implements Pool.Poolable, Drawc{
   /**粒子当前的尺寸，由计算获得，不要手动更改*/
   public float size;
   
-  public float attenuate = 0.2f;
-  public float angleThreshold = 2f;
-  public float deflectAngle = 90f;
-  
   public transient int id = EntityGroup.nextId();
   public boolean added = false;
   public float x, y;
-  
-  public Func<Particle, Color> color = e -> Pal.reactorPurple;
-  public Func<Particle, Color> tailColor = e -> Pal.reactorPurple;
-  public Boolf<Particle> isFinal = e -> e.speed.len() <= 0.1f;
-  public Floatf<Particle> sizeF = e -> e.maxSize*(e.speed.len()/e.defSpeed);
+
+  public Boolf<Particle> shouldCloud;
+  public Func<Particle, Color> color;
+  public Func<Particle, Color> tailColor;
+  public Boolf<Particle> isFinal;
+  public Floatf<Particle> particleSize;
   public Cons<Particle> update;
-  public Cons<Particle> regionDraw = e -> {
-    Draw.color(color.get(e));
-    Fill.circle(e.x, e.y, e.size/2);
-    Draw.reset();
-  };
+  public Cons<Particle> drawer;
   
-  public Cons<Cloud> cloudUpdater = e -> {
-    e.size = Mathf.lerpDelta(e.size, 0, 0.04f);
-    e.color.lerp(Color.lightGray, 0.02f*Time.delta);
-  };
+  public Seq<Cons<Cloud>> cloudUpdaters = new Seq<>();
   
-  public static Particle create(float x, float y, float sx, float sy){
-    return create(x, y, sx, sy, 5);
-  }
-  
-  public static Particle create(float x, float y, float sx, float sy, float size){
+  static Particle create(float x, float y, float sx, float sy, float size){
     if(counter >= maxAmount){
       all.getLast().remove();
     }
@@ -107,41 +92,30 @@ public class Particle implements Pool.Poolable, Drawc{
     return ent;
   }
   
-  public static Seq<Particle> get(Boolf<Particle> valid){
+  public static Seq<Particle> get(Boolf<Particle> filter){
     temp.clear();
     for(Particle particle : all){
-      if(valid.get(particle)) temp.add(particle);
+      if(filter.get(particle)) temp.add(particle);
     }
     return temp;
   }
-  
-  public Deflect deflect(){
-    return deflect;
-  }
-  
+
   @Override
   public void draw(){
     Draw.z(Layer.effect);
-    regionDraw.get(this);
+    drawer.get(this);
     
     for(Cloud c: tailing){
       c.draw();
     }
-    Draw.color(Pal.accent);
-    
+
     Draw.reset();
   }
   
   @Override
   public void read(Reads read){
-    short REV = read.s();
-    if (REV == 0) {
-      x = read.f();
-      read.i();
-    } else {
-      if (REV != 1) throw new IllegalArgumentException("Unknown revision '" + REV + "' for entity type 'PuddleComp'");
-      x = read.f();
-    }
+    read.s();
+    x = read.f();
     y = read.f();
     tile = TypeIO.readTile(read);
     
@@ -166,62 +140,55 @@ public class Particle implements Pool.Poolable, Drawc{
     return added;
   }
   
-  public Particle setAttenuate(float att){
-    attenuate = att;
-    return this;
-  }
-  
-  public void deflection(){
-    float angle = Tmp.v1.set(speed).scl(-1).angle();
-    Tmp.v2.set(speed).setAngle(angle + Mathf.random(-deflectAngle, deflectAngle)).scl(speed.len()/defSpeed*attenuate*Time.delta);
-    speed.add(Tmp.v2);
-    
-    deflect.doDeflect(this);
+  public void deflect(){
+    for(Cons<Particle> deflect: deflects){
+      deflect.get(this);
+    }
   }
   
   @Override
   public void update(){
-    deflection();
+    deflect();
     x += speed.x*Time.delta;
     y += speed.y*Time.delta;
 
-    Cloud currentCloud = tailing.isEmpty()? null: tailing.getLast();
+    if(shouldCloud != null){
+      currentCloud = tailing.isEmpty() ? null : tailing.getLast();
+      if(currentCloud == null){
+        currentCloud = Pools.obtain(Cloud.class, Cloud::new);
+        currentCloud.set(x, y, size, tailColor.get(this).cpy(), null);
+        tailing.addLast(currentCloud);
+      }
 
-    float speedRate = speed.len();
-    float rate = speedRate/defSpeed;
-    
-    if(currentCloud == null){
-      currentCloud = Pools.obtain(Cloud.class, Cloud::new);
-      currentCloud.set(x, y, size, tailColor.get(this).cpy(), null);
-      tailing.addLast(currentCloud);
-    }
-
-    if(rate > 0.05f){
       currentCloud.x = x;
       currentCloud.y = y;
+      currentCloud.size = size;
 
-      if(Math.abs(currentCloud.vector().angle() - currentCloud.lastCloud.vector().angle()) > angleThreshold*Time.delta){
+      if(shouldCloud.get(this)){
         Cloud cloud = Pools.obtain(Cloud.class, Cloud::new);
         cloud.set(x, y, size, tailColor.get(this).cpy(), currentCloud);
         tailing.addLast(cloud);
+      }
+
+      Iterator<Cloud> itr = tailing.iterator();
+
+      while(itr.hasNext()){
+        Cloud cld = itr.next();
+
+        for(Cons<Cloud> updater: cloudUpdaters){
+          updater.get(cld);
+        }
+
+        if(cld.size <= 0.1f){
+          itr.remove();
+          freeQueue.addLast(cld);
+        }
       }
     }
 
     if(update != null) update.get(this);
 
-    Iterator<Cloud> itr = tailing.iterator();
-    Cloud c;
-    while(itr.hasNext()){
-      c = itr.next();
-      c.update();
-
-      if(c.size <= 0.05f){
-        itr.remove();
-        freeQueue.addLast(c);
-      }
-    }
-
-    size = sizeF.get(this);
+    size = particleSize.get(this);
     if(isFinal.get(this) && tailing.size() == 0) remove();
   }
   
@@ -405,7 +372,7 @@ public class Particle implements Pool.Poolable, Drawc{
     id = EntityGroup.nextId();
     x = 0;
     y = 0;
-    deflect.clear();
+    deflects.clear();
     startPos.setZero();
     tempPos.setZero();
     for(Cloud cloud: tailing){
@@ -420,25 +387,14 @@ public class Particle implements Pool.Poolable, Drawc{
     maxSize = 0;
     size = 0;
 
-    attenuate = 0.2f;
-    angleThreshold = 2f;
-    deflectAngle = 90f;
-
-    color = e -> Pal.reactorPurple;
-    tailColor = e -> Pal.reactorPurple;
-    isFinal = e -> e.speed.len() <= 0.1f;
-    sizeF = e -> e.maxSize*(e.speed.len()/e.defSpeed);
+    color = null;
+    tailColor = null;
+    isFinal = null;
+    particleSize = null;
     update = null;
-    regionDraw = e -> {
-      Draw.color(color.get(e));
-      Fill.circle(e.x, e.y, e.size/2);
-      Draw.reset();
-    };
+    drawer = null;
 
-    cloudUpdater = e -> {
-      e.size = Mathf.lerpDelta(e.size, 0, 0.04f);
-      e.color.lerp(Color.lightGray, 0.02f*Time.delta);
-    };
+    cloudUpdaters.clear();
 
     added = false;
   }
@@ -482,10 +438,6 @@ public class Particle implements Pool.Poolable, Drawc{
           lastCloud.x - Tmp.v1.x, lastCloud.y - Tmp.v1.y,
           x - Tmp.v2.x, y - Tmp.v2.y,
           x + Tmp.v2.x, y + Tmp.v2.y);
-    }
-    
-    public void update(){
-      if(cloudUpdater != null) cloudUpdater.get(this);
     }
 
     @Override

@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 /**基于{@link LinkedList}的通用路径实现，可以满足一般情况的路径信息存储需求*/
-public class GenericPath<Vert extends PathVertices<Vert>> implements IPath<Vert>{
+public class GenericPath<Vert> implements IPath<Vert>{
   private final LinkedList<Vert> path = new LinkedList<>();
 
   @Override

@@ -8,85 +8,93 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Optional;
 
+@SuppressWarnings("unchecked")
 public class DesktopFieldAccessHelper implements FieldAccessHelper{
-  protected static final ObjectMap<Class<?>, ObjectSet<String>> initiled = new ObjectMap<>();
-  protected static final ObjectMap<Class<?>, ObjectMap<String, Field>> finalFields = new ObjectMap<>();
-  protected static final ObjectMap<Class<?>, ObjectMap<String, MethodHandle>> setters = new ObjectMap<>();
-  protected static final ObjectMap<Class<?>, ObjectMap<String, MethodHandle>> getters = new ObjectMap<>();
+  private static final ObjectMap<Class<?>, ObjectMap<String, Field>> fieldMap = new ObjectMap<>();
+  private static final ObjectMap<String, Field> EMP = new ObjectMap<>();
 
-  protected static final MethodHandles.Lookup lookup = MethodHandles.lookup();
-  private static final ObjectMap<String, MethodHandle> EMP_MAP = new ObjectMap<>();
-  private static final ObjectMap<String, Field> EMP_FIELD = new ObjectMap<>();
+  private static final ObjectSet<Field> finalFields = new ObjectSet<>();
 
-  protected void initField(Class<?> clazz, String field) throws FinalFieldBranch{
-    if(!initiled.get(clazz, ObjectSet::new).contains(field)) return;
+  private static final ObjectMap<Field, MethodHandle> getters = new ObjectMap<>();
+  private static final ObjectMap<Field, MethodHandle> setters = new ObjectMap<>();
+
+  private static final MethodHandles.Lookup lookup = MethodHandles.lookup();
+
+  public Field getField(Class<?> clazz, String field, boolean isStatic) throws NoSuchFieldException{
+    Field res = fieldMap.get(clazz, EMP).get(field);
+    if(res != null) return res;
 
     try{
-      Field f = null;
-      Class<?> current = clazz;
-      ArrayList<Field> checking = new ArrayList<>();
+      if(isStatic){
+        return getField0(clazz, field);
+      }
+      else{
+        Class<?> curr = clazz;
+        while(curr != null){
+          try{
+            return getField0(curr, field);
+          }
+          catch(NoSuchFieldException ignored){}
 
-      while(current != Object.class){
-        checking.addAll(Arrays.asList(current.getDeclaredFields()));
-
-        Optional<Field> opt = checking.stream().filter(fi -> fi.getName().equals(field)).findFirst();
-        if(opt.isPresent()){
-          f = opt.get();
-          break;
+          curr = curr.getSuperclass();
         }
-
-        current = current.getSuperclass();
       }
-
-      if(f == null)
-        throw new NoSuchFieldException("no such field \"" + field + "\" found in " + clazz + " and super class!");
-
-      if(Modifier.isFinal(f.getModifiers())){
-        finalFields.get(clazz, ObjectMap::new).put(field, f);
-
-        Field mod = Field.class.getDeclaredField("modifiers");
-        mod.setAccessible(true);
-        int m = (int) mod.get(f);
-        mod.set(f, m & ~Modifier.FINAL);
-      }
-
-      f.setAccessible(true);
-
-      setters.get(clazz, ObjectMap::new).put(field, lookup.unreflectSetter(f));
-      getters.get(clazz, ObjectMap::new).put(field, lookup.unreflectGetter(f));
-
-      initiled.get(clazz).add(field);
-    }catch(NoSuchFieldException|IllegalAccessException e){
+    }catch(Throwable e){
       throw new RuntimeException(e);
     }
+
+    throw new NoSuchFieldException();
   }
 
-  protected MethodHandle getGetter(Class<?> clazz, String field){
-    try{
-      initField(clazz, field);
-    }catch(FinalFieldBranch ignored){}
-    return getters.get(clazz, EMP_MAP).get(field);
+  protected Field getField0(Class<?> clazz, String field) throws NoSuchFieldException{
+    Field res = clazz.getDeclaredField(field);
+    res.setAccessible(true);
+
+    if((res.getModifiers() & Modifier.FINAL) != 0){
+      try{
+        Field modifiers = Field.class.getDeclaredField("modifiers");
+        modifiers.setAccessible(true);
+        modifiers.set(res, res.getModifiers() & ~Modifier.FINAL);
+
+        finalFields.add(res);
+      }catch(Throwable e){
+        throw new RuntimeException(e);
+      }
+    }
+
+    return res;
   }
 
-  protected MethodHandle getSetter(Class<?> clazz, String field) throws FinalFieldBranch{
-    initField(clazz, field);
-    Field fin;
-    if((fin = finalFields.get(clazz, EMP_FIELD).get(field)) != null)
-      throw new FinalFieldBranch(fin);
-
-    return setters.get(clazz, EMP_MAP).get(field);
+  protected void initField(Field field){
+    getters.get(field, () -> {
+      try{
+        return lookup.unreflectGetter(field);
+      }catch(IllegalAccessException e){
+        throw new RuntimeException(e);
+      }
+    });
+    setters.get(field, () -> {
+      try{
+        return lookup.unreflectSetter(field);
+      }catch(IllegalAccessException e){
+        throw new RuntimeException(e);
+      }
+    });
   }
 
   @Override
   public void set(Object object, String field, Object value){
     try{
-      getSetter(object.getClass(), field).invoke(object, value);
-    }catch(FinalFieldBranch branch){
-      setFinal(object, branch.source, value);
+      Field f = getField(object.getClass(), field, false);
+
+      if(finalFields.contains(f)){
+        f.set(object, value);
+        return;
+      }
+
+      initField(f);
+      setters.get(f).invoke(object, value);
     }catch(Throwable e){
       throw new RuntimeException(e);
     }
@@ -95,47 +103,39 @@ public class DesktopFieldAccessHelper implements FieldAccessHelper{
   @Override
   public void setStatic(Class<?> clazz, String field, Object value){
     try{
-      getSetter(clazz, field).invoke(value);
-    }catch(FinalFieldBranch branch){
-      setFinal(null, branch.source, value);
+      Field f = getField(clazz, field, false);
+
+      if(finalFields.contains(f)){
+        f.set(null, value);
+        return;
+      }
+
+      initField(f);
+      setters.get(f).invoke(value);
     }catch(Throwable e){
       throw new RuntimeException(e);
     }
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T> T get(Object object, String field){
     try{
-      return (T) getGetter(object.getClass(), field).invoke(object);
+      Field f = getField(object.getClass(), field, false);
+      initField(f);
+      return (T) getters.get(f).invoke(object);
     }catch(Throwable e){
       throw new RuntimeException(e);
     }
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T> T getStatic(Class<?> clazz, String field){
     try{
-      return (T) getGetter(clazz, field).invoke();
+      Field f = getField(clazz, field, true);
+      initField(f);
+      return (T) getters.get(f).invoke();
     }catch(Throwable e){
       throw new RuntimeException(e);
-    }
-  }
-
-  protected void setFinal(Object object, Field field, Object value){
-    try{
-      field.set(object, value);
-    }catch(IllegalAccessException e){
-      throw new RuntimeException(e);
-    }
-  }
-
-  protected static class FinalFieldBranch extends Throwable{
-    public final Field source;
-
-    public FinalFieldBranch(Field f){
-      source = f;
     }
   }
 }

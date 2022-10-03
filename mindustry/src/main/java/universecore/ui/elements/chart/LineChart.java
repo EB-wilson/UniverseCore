@@ -1,16 +1,15 @@
 package universecore.ui.elements.chart;
 
+import arc.func.Floatc2;
 import arc.graphics.Color;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Lines;
-import arc.scene.style.Drawable;
 import arc.util.Align;
 import mindustry.ui.Fonts;
 
 /**折线统计图实现，按折线方式绘制统计数据呈现*/
-public class LineChart extends Chart{
+public class LineChart extends Chart<LineChart.LineChartStat>{
   public float lineStroke = 5;
-  public float pointSize;
 
   public boolean displayScale = true;
 
@@ -35,7 +34,7 @@ public class LineChart extends Chart{
   public void draw(){
     super.draw();
 
-    for(StatGroup group: data){
+    for(LineChartStat group: data){
       if(!group.show) continue;
       Lines.stroke(lineStroke, group.color);
       Draw.alpha(parentAlpha);
@@ -47,6 +46,10 @@ public class LineChart extends Chart{
       for(int i = viewOffset, end = viewOffset + viewLength; i < end; i++){
         if(Float.isNaN(group.displayValues[i])) continue;
         Lines.linePoint(originX + horInterval*i, originY + group.displayValues[i]*heightStep);
+        if(group.drawPoint != null) group.drawPoint.get(
+            originX + horInterval*i,
+            originY + group.displayValues[i]*heightStep
+        );
       }
       Lines.endLine();
     }
@@ -80,6 +83,6 @@ public class LineChart extends Chart{
   }
 
   public class LineChartStat extends StatGroup{
-    public Drawable point;
+    public Floatc2 drawPoint;
   }
 }

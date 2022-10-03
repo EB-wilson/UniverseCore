@@ -1,5 +1,7 @@
 package universecore;
 
+import arc.util.Log;
+import com.android.dex.DexFormat;
 import mindustry.mod.Mod;
 import universecore.androidcore.AndroidFieldAccessHelper;
 import universecore.androidcore.AndroidMethodInvokeHelper;
@@ -10,16 +12,14 @@ import universecore.util.mods.IllegalModHandleException;
 import universecore.util.mods.ModGetter;
 import universecore.util.mods.ModInfo;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.jar.JarInputStream;
 
 public class SetPlatformImpl{
   @SuppressWarnings({"unchecked", "ConstantConditions"})
@@ -28,6 +28,7 @@ public class SetPlatformImpl{
       Class.forName("java.lang.invoke.MethodHandle");
 
       try{
+        Log.info(SetPlatformImpl.class.getResource("").getFile());
         String[] path = SetPlatformImpl.class.getResource("").getFile().split("/");
         StringBuilder builder = new StringBuilder(path[0].replace("file:", ""));
         for(int i = 1; i < path.length; i++){
@@ -38,15 +39,6 @@ public class SetPlatformImpl{
         JarFile jf = new JarFile(selfFile);
         InputStream in = jf.getInputStream(new JarEntry("android-api-26.jar"));
 
-        ArrayList<Byte> byteArr = new ArrayList<>();
-        for(int i = in.read(); i != -1; i = in.read()){
-          byteArr.add((byte) i);
-        }
-        byte[] bytes = new byte[byteArr.size()];
-        for(int i = 0; i < byteArr.size(); i++){
-          bytes[i] = byteArr.get(i);
-        }
-
         ClassLoader loader;
         try{
           Class<? extends ClassLoader> inMemLoaderType =
@@ -55,9 +47,21 @@ public class SetPlatformImpl{
           Constructor<ClassLoader> cstr =
               (Constructor<ClassLoader>) inMemLoaderType.getConstructor(ByteBuffer.class, ClassLoader.class);
 
-          loader = cstr.newInstance(ByteBuffer.wrap(bytes), SetPlatformImpl.class.getClassLoader());
+          JarInputStream classesReader = new JarInputStream(in);
+          while(true) if(classesReader.getNextJarEntry().getName().equals(DexFormat.DEX_IN_JAR_NAME)) break;
 
-          throw new ClassNotFoundException();
+          ArrayList<Byte> byteArr = new ArrayList<>();
+          byteArr.clear();
+          for(int i = classesReader.read(); i != -1; i = classesReader.read()){
+            byteArr.add((byte) i);
+          }
+
+          byte[] bytes = new byte[byteArr.size()];
+          for(int i = 0; i < byteArr.size(); i++){
+            bytes[i] = byteArr.get(i);
+          }
+
+          loader = cstr.newInstance(ByteBuffer.wrap(bytes), SetPlatformImpl.class.getClassLoader());
         }catch(ClassNotFoundException ignored){
           Class<? extends ClassLoader> loaderType =
               (Class<? extends ClassLoader>) Class.forName("dalvik.system.DexClassLoader");
@@ -68,6 +72,15 @@ public class SetPlatformImpl{
           File tmpFile = new File(selfFile.getParent(), "tmp/android-api-26.jar");
           tmpFile.getParentFile().mkdirs();
           tmpFile.createNewFile();
+
+          ArrayList<Byte> byteArr = new ArrayList<>();
+          for(int i = in.read(); i != -1; i = in.read()){
+            byteArr.add((byte) i);
+          }
+          byte[] bytes = new byte[byteArr.size()];
+          for(int i = 0; i < byteArr.size(); i++){
+            bytes[i] = byteArr.get(i);
+          }
 
           FileOutputStream copyTo = new FileOutputStream(tmpFile);
           copyTo.write(bytes);

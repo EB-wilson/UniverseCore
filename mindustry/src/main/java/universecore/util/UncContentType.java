@@ -21,13 +21,26 @@ public class UncContentType{
   private final static FieldHandler<ContentLoader> fieldHandler = new FieldHandler<>(ContentLoader.class);
   private final static EnumHandler<ContentType> handler = new EnumHandler<>(ContentType.class);
   
-  public static final Seq<UncContentType> allUncContentType = new Seq<>();
+  public static final ObjectMap<ContentType, UncContentType> allUncContentType = new ObjectMap<>();
+
+  static {
+    for(ContentType value: ContentType.values()){
+      allUncContentType.put(value, new UncContentType(value));
+    }
+  }
+
   public static ContentType[] displayContentList = new ContentType[0];
   
   public final ContentType value;
   public final int ordinal;
 
   public final boolean display;
+
+  private UncContentType(ContentType type){
+    this.value = type;
+    this.ordinal = type.ordinal();
+    this.display = true;
+  }
 
   public UncContentType(String name, Class<? extends Content> contentClass){
     this(name, ContentType.values().length, contentClass);
@@ -42,19 +55,11 @@ public class UncContentType{
     this.ordinal = ordinal;
     this.display = display;
   
-    allUncContentType.add(this);
+    allUncContentType.put(value, this);
     
     FieldHandler.setValueDefault(ContentType.class, "all", ContentType.values());
-    
-    ArrayList<ContentType> list = new ArrayList<>(Arrays.asList(ContentType.values()));
-    
-    for(UncContentType type: allUncContentType){
-      if(!type.display) continue;
-      list.remove(type.value);
-      list.add(type.ordinal, type.value);
-    }
-    
-    displayContentList = list.toArray(new ContentType[0]);
+
+    reloadDisplay();
   
     try{
       ObjectMap<String, MappableContent>[] contentNameMap = fieldHandler.getValue( Vars.content, "contentNameMap");
@@ -72,5 +77,17 @@ public class UncContentType{
     catch(Throwable e){
       Log.err(e);
     }
+  }
+
+  protected void reloadDisplay(){
+    Seq<ContentType> list = new Seq<>();
+
+    for(ContentType type: ContentType.values()){
+      UncContentType t = allUncContentType.get(type);
+      if(!t.display) continue;
+      list.insert(t.ordinal, t.value);
+    }
+
+    displayContentList = list.toArray(ContentType.class);
   }
 }

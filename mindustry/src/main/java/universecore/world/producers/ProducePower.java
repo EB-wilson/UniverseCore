@@ -8,23 +8,25 @@ import universecore.components.blockcomp.ProducerBuildComp;
 
 public class ProducePower<T extends Building & ProducerBuildComp> extends BaseProduce<T>{
   public float powerProduction;
-  public final Stat generationType;
   
   public ProducePower(float prod){
     powerProduction = prod;
-    generationType = Stat.basePowerGeneration;
-  }
-  
-  public ProducePower(float prod, Stat type){
-    powerProduction = prod;
-    generationType = type;
   }
   
   @Override
   public ProduceType<ProducePower<?>> type(){
     return ProduceType.power;
   }
-  
+
+  @Override
+  public void merge(BaseProduce<T> other){
+    if(other instanceof ProducePower cons){
+      powerProduction += cons.powerProduction;
+      return;
+    }
+    throw new IllegalArgumentException("only merge production with same type");
+  }
+
   @Override
   public void produce(Building entity) {
     /*不在此更新能量生产*/
@@ -37,6 +39,11 @@ public class ProducePower<T extends Building & ProducerBuildComp> extends BasePr
   
   @Override
   public void display(Stats stats) {
-    stats.add(generationType, powerProduction * 60.0f, StatUnit.powerSecond);
+    stats.add(Stat.basePowerGeneration, powerProduction * 60.0f, StatUnit.powerSecond);
+  }
+
+  @Override
+  public boolean valid(T entity){
+    return entity.power != null;
   }
 }

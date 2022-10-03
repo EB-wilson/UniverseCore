@@ -5,7 +5,7 @@ package universecore.util.path;
  *
  * @author EBwilson
  * @since 1.3*/
-public interface BFSPathFinder<Vert extends PathVertices<Vert>> extends PathFinder<Vert>{
+public interface BFSPathFinder<Vert> extends PathFinder<Vert>{
   /**重置搜索状态或者（和）临时缓存,包括复位已经遍历过的顶点和边等*/
   void reset();
 
@@ -19,6 +19,15 @@ public interface BFSPathFinder<Vert extends PathVertices<Vert>> extends PathFind
    * @return 若顶点尚未与指针关联，则返回true,否则返回false*/
   boolean relateToPointer(Vert vert, PathPointer<Vert> previous);
 
+  /**检查当前传入的节点是否是被排除的节点，若是则跳过该点
+   * <p>此方法的实施需要进行重写，根据实际情况返回，默认永远不排除顶点
+   *
+   * @param vert 当前检查的顶点
+   * @return 此节点是否应该排除*/
+  default boolean exclude(Vert vert){
+    return false;
+  }
+
   /**获取顶点关联的回溯指针，若顶点尚未关联，则应当返回null
    *
    * @param vert 获取指针的顶点
@@ -26,7 +35,7 @@ public interface BFSPathFinder<Vert extends PathVertices<Vert>> extends PathFind
   PathPointer<Vert> getPointer(Vert vert);
 
   /**从搜索队列中读取下一个顶点，并将其从队列中弹出，若队列为空则返回null。
-   * <p>此方法通与{@link BFSPathFinder#queueAdd(PathVertices)}应当满足堆栈实现，<strong>更晚加入的顶点应当更优先被取出</strong>。
+   * <p>此方法通与{@link BFSPathFinder#queueAdd(Object)}应当满足堆栈实现，<strong>更晚加入的顶点应当更优先被取出</strong>。
    *
    * @return 一个处于堆栈顶端的顶点，若没有顶点，则返回null*/
   Vert queueNext();
@@ -46,7 +55,7 @@ public interface BFSPathFinder<Vert extends PathVertices<Vert>> extends PathFind
 
   /**一个标准的BFS寻路实现，通常搜寻到的路径是在无权值的图中最短的或最短之一
    *
-   * @see PathFinder#findPath(PathVertices, PathFindFunc.PathAcceptor) */
+   * @see PathFinder#findPath(Object, PathFindFunc.PathAcceptor) */
   @Override
   default void findPath(Vert origin, PathFindFunc.PathAcceptor<Vert> pathConsumer){
     reset();
@@ -56,8 +65,8 @@ public interface BFSPathFinder<Vert extends PathVertices<Vert>> extends PathFind
     Vert next;
     while((next = queueNext()) != null){
       PathPointer<Vert> pointer = getPointer(next);
-      for(Vert vert: next.getLinkVertices()){
-        if(relateToPointer(vert, pointer)){
+      for(Vert vert: getLinkVertices(next)){
+        if(!exclude(vert) && relateToPointer(vert, pointer)){
           queueAdd(vert);
         }
       }
@@ -78,7 +87,7 @@ public interface BFSPathFinder<Vert extends PathVertices<Vert>> extends PathFind
 
   /**基于BFS的图遍历实现，遍历顺序为从给出的起点向外扩散直到每一个顶点都被遍历过
    *
-   * @see PathFinder#eachVertices(PathVertices, PathFindFunc.VerticesAcceptor) */
+   * @see PathFinder#eachVertices(Object, PathFindFunc.VerticesAcceptor) */
   @Override
   default void eachVertices(Vert origin, PathFindFunc.VerticesAcceptor<Vert> vertConsumer){
     reset();
@@ -87,8 +96,8 @@ public interface BFSPathFinder<Vert extends PathVertices<Vert>> extends PathFind
 
     Vert v;
     while((v = queueNext()) != null){
-      for(Vert vert: v.getLinkVertices()){
-        if(relateToPointer(vert, null)){
+      for(Vert vert: getLinkVertices(v)){
+        if(!exclude(vert) && relateToPointer(vert, null)){
           queueAdd(vert);
         }
       }
@@ -101,6 +110,11 @@ public interface BFSPathFinder<Vert extends PathVertices<Vert>> extends PathFind
     public PathPointer<Vert> previous;
 
     public Vert self;
+
+    /**构造一个携带给出参数信息的指针对象*/
+    public PathPointer(Vert self){
+      this.self = self;
+    }
 
     /**构造一个携带给出参数信息的指针对象*/
     public PathPointer(Vert self, PathPointer<Vert> previous){

@@ -50,7 +50,7 @@ public class CategoryHandler{
       if(button == null) continue;
       button.getStyle().imageUp = new TextureRegionDrawable(Core.atlas.find(cat.icon));
       button.resizeImage(32);
-    }   
+    }
     
     categories.clearChildren();
     categories.pane(t -> {
@@ -62,7 +62,7 @@ public class CategoryHandler{
       }
       
       if(catButtons.size%2 != 0) t.image(Styles.black6);
-    }).size(125, 300);
+    }).size(catButtons.size > 12? 125: 100, 300);
   }
   
   public Category add(String name, int ordinal, String iconName){

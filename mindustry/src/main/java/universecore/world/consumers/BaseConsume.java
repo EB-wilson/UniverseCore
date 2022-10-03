@@ -8,17 +8,19 @@ import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ConsumerBuildComp;
 
 public abstract class BaseConsume<T extends ConsumerBuildComp>{
-  public Floatf<T> consMultiple;
+  public static TextureRegion EMP = new TextureRegion();
 
-  public static final TextureRegion EMPTY_TEX = new TextureRegion();
   public BaseConsumers parent;
+  public Floatf<T> consMultiplier;
 
   /**消耗的类型*/
   public abstract UncConsumeType<?> type();
   
   public TextureRegion icon(){
-    return EMPTY_TEX;
+    return EMP;
   }
+
+  public abstract void merge(BaseConsume<T> other);
   
   public abstract void consume(T entity);
   public abstract void update(T entity);
@@ -29,12 +31,12 @@ public abstract class BaseConsume<T extends ConsumerBuildComp>{
   public abstract Bits filter(T entity);
 
   public float multiple(T entity){
-    return consMultiple == null? 1: consMultiple.get(entity);
+    return consMultiplier == null? 1: consMultiplier.get(entity);
   }
 
   @SuppressWarnings("unchecked")
   public <N extends ConsumerBuildComp> BaseConsume<T> setMultiple(Floatf<N> multiple){
-    consMultiple = (Floatf<T>) multiple;
+    consMultiplier = (Floatf<T>) multiple;
     return this;
   }
 }

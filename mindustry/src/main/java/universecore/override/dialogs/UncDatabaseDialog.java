@@ -37,6 +37,7 @@ public class UncDatabaseDialog extends DatabaseDialog{
   @Override
   public Dialog show(){
     super.show();
+
     cont.clear();
     
     Table table = new Table();
@@ -46,7 +47,6 @@ public class UncDatabaseDialog extends DatabaseDialog{
     Seq<Content>[] allContent = new Seq[UncContentType.displayContentList.length];
     
     for(int i = 0; i<UncContentType.displayContentList.length; i++){
-
       allContent[i] = Vars.content.getBy(UncContentType.displayContentList[i]);
     }
     

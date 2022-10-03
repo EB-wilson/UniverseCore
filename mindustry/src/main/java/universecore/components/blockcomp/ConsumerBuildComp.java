@@ -1,6 +1,6 @@
 package universecore.components.blockcomp;
 
-import arc.struct.ObjectMap;
+import universecore.annotations.Annotations;
 import universecore.annotations.Annotations.BindField;
 import universecore.world.blocks.modules.BaseConsumeModule;
 
@@ -17,42 +17,26 @@ public interface ConsumerBuildComp extends BuildCompBase{
   default BaseConsumeModule consumer(){
     return null;
   }
-  
-  @BindField("consData")
-  default ObjectMap<Class<?>, Object> consData(){
-    return null;
+
+  @Annotations.MethodEntry(entryMethod = "update")
+  default void updateProducer(){
+    consumer().update();
   }
+
+  float consEfficiency();
   
   /**获得该块的ConsumerBlock*/
   default ConsumerBlockComp getConsumerBlock(){
     return getBlock(ConsumerBlockComp.class);
   }
   
-  @SuppressWarnings("unchecked")
-  default <T> T consData(Class<T> clazz){
-    return (T)consData().get(clazz);
-  }
-  
-  @SuppressWarnings("unchecked")
-  default <T> T consData(Class<T> clazz, T def){
-    return (T)consData().get(clazz, def);
-  }
-  
-  default <T> void consData(T object){
-    consData().put(object.getClass(), object);
-  }
-  
   /**获得该块的NuclearEnergyBlock*/
   default ConsumerBuildComp getConsumerBuilding(){
     return getBlock(ConsumerBuildComp.class);
   }
-  
-  default boolean productionValid(){
-    return getBuilding().productionValid();
-  }
 
-  default boolean consValid(){
-    return consumer().valid();
+  default boolean consumeValid(){
+    return consumer() == null || !consumer().hasConsume() || consumer().valid();
   }
   
   default boolean shouldConsume(){

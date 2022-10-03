@@ -4,7 +4,29 @@ package universecore.util.path;
  *
  * @author EBwilson
  * @since 1.3*/
-public interface PathFinder<Vert extends PathVertices<Vert>>{
+public interface PathFinder<Vert>{
+  /**获取给出顶点所链接的其他顶点的可迭代对象，这应该正确的提供该顶点所链接的其他顶点
+   * <p>该方法返回的对象迭代出的元素即为该点连接到的子节点，例如：
+   * <pre>{@code
+   * ┌───┐   ┌───┐   ┌───┐
+   * │ A ├───► B ├───► E │
+   * └┬─┬┘   └───┘   └───┘
+   *  │ │
+   *  │ └────▲───┐   ┌───┐
+   *  │      │ D ├───► F │
+   * ┌▼──┐   └─┬─┘   └───┘
+   * │ C │     │
+   * └───┘     │     ┌───┐
+   *           └─────► G │
+   *                 └───┘
+   * }</pre>
+   * 节点A的此方法则应当可迭代节点B C D，同样的，其中B可以迭代E，D可以迭代F和G
+   * <p><strong>注意：</strong>此方法与子节点的连接表示是单向的，若两个节点之间是双向连接，则需要两个节点可互相迭代另一个节点
+   *
+   * @param curr 当前正在获取子节点的节点
+   * @return 当前节点连接到的所有子节点*/
+  Iterable<Vert> getLinkVertices(Vert curr);
+
   /**判断从给出的起点，目标顶点是否为这个起点的一个终点，这回决定网络的搜索结果
    *
    * @param origin 搜索开始的起点

@@ -7,14 +7,14 @@ package universecore.util.path;
 public class PathFindFunc{
   /**路径接收器函数，用于搜索路径时将终点与路径对象传递给函数进行回调*/
   @FunctionalInterface
-  public interface PathAcceptor<Vert extends PathVertices<Vert>>{
+  public interface PathAcceptor<Vert>{
     /**回调函数入口，接收一个顶点和路径对象，分别表示路径的终点和路径信息*/
     void accept(Vert destination, IPath<Vert> path);
   }
 
   /**顶点接收器函数，用于搜索路径时将顶点对象传递给函数进行回调*/
   @FunctionalInterface
-  public interface VerticesAcceptor<Vert extends PathVertices<Vert>>{
+  public interface VerticesAcceptor<Vert>{
     /**回调函数入口，可以接收一个顶点对象*/
     void accept(Vert vert);
   }

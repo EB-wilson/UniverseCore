@@ -20,16 +20,21 @@ import java.util.zip.ZipOutputStream;
 
 public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
   private static final Fi jarFileCache = Core.settings.getDataDirectory().child("universecore").child("cache");
+  public static final Fi TMP_FILE = jarFileCache.child("temp_file.jar");
 
-  private final URLClassLoader fileLoader;
+  private URLClassLoader fileLoader;
 
   private ZipFi zip;
 
   public DesktopGeneratedClassLoader(ModInfo mod, ClassLoader parent){
     super(mod, parent);
-    zip = new ZipFi(new Fi(getFile()));
+
+    updateLoader();
+  }
+
+  private void updateLoader(){
     try{
-      fileLoader = new URLClassLoader(new URL[]{getFile().toURI().toURL()}, parent);
+      fileLoader = new URLClassLoader(new URL[]{file.toURI().toURL()}, getParent());
     }catch(MalformedURLException e){
       throw new RuntimeException(e);
     }
@@ -39,51 +44,58 @@ public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
   public void declareClass(String name, byte[] byteCode){
     Fi select = null;
 
-    String[] paths = name.split("\\.");
-    for(int i = 0; i < paths.length; i++){
-      select = zip.child(paths[i] + (i == paths.length - 1? ".class": ""));
+    if(zip != null){
+      String[] paths = name.split("\\.");
+      for(int i = 0; i < paths.length; i++){
+        select = zip.child(paths[i] + (i == paths.length - 1 ? ".class" : ""));
+      }
+
+      assert select != null;
+      if(select.exists()) return;
     }
 
-    assert select != null;
-    if(select.exists()) return;
-
+    boolean existed = file.exists();
     try(ZipOutputStream outputStream = new ZipOutputStream(new FileOutputStream(file))){
       String entryName = name.replace(".", "/") + ".class";
 
       ObjectSet<String> added = new ObjectSet<>();
 
-      ZipFile tempZipped;
-      if(!file.exists()) file.createNewFile();
-
-      new Fi(file).copyTo(jarFileCache);
-      tempZipped = new ZipFile(jarFileCache.file());
-
-      ZipEntry entry = new ZipEntry(entryName);
+      ZipEntry declaringEntry = new ZipEntry(entryName), entry = declaringEntry;
       added.add(entry.getName());
-      outputStream.putNextEntry(entry);
-      outputStream.write(byteCode);
-      outputStream.closeEntry();
-      outputStream.flush();
 
-      Enumeration<? extends ZipEntry> entries = tempZipped.entries();
-      while((entry = entries.nextElement()) != null){
-        if(entry.isDirectory() || !added.add(entry.getName())) continue;
+      if(existed){
+        new Fi(file).copyTo(TMP_FILE);
+        ZipFile tempZipped = new ZipFile(TMP_FILE.file());
 
-        outputStream.putNextEntry(new ZipEntry(entry));
-        try(InputStream inputStream = tempZipped.getInputStream(entry)){
-          for(int l = inputStream.read(); l > 0; l = inputStream.read()){
-            outputStream.write(l);
+        Enumeration<? extends ZipEntry> entries = tempZipped.entries();
+        while((entry = entries.nextElement()) != null){
+          if(entry.isDirectory() || !added.add(entry.getName())) continue;
+
+          outputStream.putNextEntry(new ZipEntry(entry));
+          try(InputStream inputStream = tempZipped.getInputStream(entry)){
+            for(int l = inputStream.read(); l > 0; l = inputStream.read()){
+              outputStream.write(l);
+            }
+            outputStream.closeEntry();
+            outputStream.flush();
           }
-          outputStream.closeEntry();
-          outputStream.flush();
         }
       }
-      zip = new ZipFi(new Fi(getFile()));
+
+      outputStream.putNextEntry(declaringEntry);
+      outputStream.write(byteCode);
+      outputStream.closeEntry();
+      outputStream.finish();
+      outputStream.flush();
+
+      zip = new ZipFi(new Fi(file));
     }catch(IOException e){
       throw new RuntimeException(e);
     }finally{
-      jarFileCache.delete();
+      TMP_FILE.delete();
     }
+
+    updateLoader();
   }
 
   @Override

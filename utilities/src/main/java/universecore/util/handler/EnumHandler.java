@@ -59,17 +59,12 @@ public class EnumHandler<T extends Enum<?>>{
         paramType[i + 2] = param[i].getClass();
       }
 
-      T result = (T) handleMap.computeIfAbsent(
+      return (T) handleMap.computeIfAbsent(
           MethodType.methodType(clazz, paramType).unwrap(),
           e -> {
             throw new NoSuchMethodError("can not find constructor in " + clazz + " with parameter " + Arrays.toString(paramType));
           }
-      ).invokeWithArguments(params);;
-  
-      fieldHandler.setValue(result, "name", name);
-      fieldHandler.setValue(result, "ordinal", ordinal);
-      
-      return result;
+      ).invokeWithArguments(params);
     }catch(Throwable e){
       throw new RuntimeException(e);
     }
@@ -126,10 +121,7 @@ public class EnumHandler<T extends Enum<?>>{
       values.remove(instance);
       
       values.add(ordinal, instance);
-      
-      for(int i=0; i<values.size(); i++){
-        fieldHandler.setValue(values.get(i), "ordinal", i);
-      }
+
       fieldHandler.setValue(null, valuesField.getName(), values.toArray((T[]) Array.newInstance(clazz, 0)));
     }
     catch (SecurityException | IllegalArgumentException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e){

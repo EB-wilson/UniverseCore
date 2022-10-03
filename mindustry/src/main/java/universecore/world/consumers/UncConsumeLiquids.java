@@ -4,8 +4,11 @@ import arc.Core;
 import arc.graphics.g2d.TextureRegion;
 import arc.scene.ui.layout.Table;
 import arc.struct.Bits;
+import arc.struct.ObjectMap;
+import arc.util.Time;
 import mindustry.Vars;
 import mindustry.gen.Building;
+import mindustry.type.Liquid;
 import mindustry.ui.LiquidDisplay;
 import mindustry.ui.ReqImage;
 import mindustry.world.meta.Stat;
@@ -14,6 +17,8 @@ import universecore.components.blockcomp.ConsumerBuildComp;
 import universecore.util.UncLiquidStack;
 
 public class UncConsumeLiquids<T extends Building & ConsumerBuildComp> extends BaseConsume<T>{
+  private static final ObjectMap<Liquid, UncLiquidStack> TMP = new ObjectMap<>();
+
   public boolean portion = false;
   public UncLiquidStack[] liquids;
 
@@ -32,6 +37,24 @@ public class UncConsumeLiquids<T extends Building & ConsumerBuildComp> extends B
   
   public void portion(){
     this.portion = true;
+  }
+
+  @Override
+  public void merge(BaseConsume<T> other){
+    if(other instanceof UncConsumeLiquids cons){
+      TMP.clear();
+      for(UncLiquidStack stack: liquids){
+        TMP.put(stack.liquid, stack);
+      }
+
+      for(UncLiquidStack stack: cons.liquids){
+        TMP.get(stack.liquid, () -> new UncLiquidStack(stack.liquid, 0)).amount += stack.amount;
+      }
+
+      liquids = TMP.values().toSeq().sort((a, b) -> a.liquid.id - b.liquid.id).toArray(UncLiquidStack.class);
+      return;
+    }
+    throw new IllegalArgumentException("only merge consume with same type");
   }
   
   @Override
@@ -66,15 +89,20 @@ public class UncConsumeLiquids<T extends Building & ConsumerBuildComp> extends B
   public void build(T entity, Table table) {
     for(UncLiquidStack stack : liquids){
       table.add(new ReqImage(stack.liquid.uiIcon,
-      () -> entity.liquids != null && entity.liquids.get(stack.liquid) > stack.amount*parent.delta(entity)*multiple(entity) + 0.0001f)).padRight(8);
+      () -> entity.liquids != null && entity.liquids.get(stack.liquid) > (entity.efficiency() > 0.001f?
+          stack.amount*parent.delta(entity)*multiple(entity) + 0.001f:
+          stack.amount*multiple(entity)*Time.delta))).padRight(8);
     }
     table.row();
   }
 
   @Override
   public boolean valid(T entity){
+    if(entity.liquids == null) return false;
     for(UncLiquidStack stack: liquids){
-      if(entity.liquids == null || entity.liquids.get(stack.liquid) < stack.amount*(entity.block.hasPower && entity.power.status > 0? entity.delta()*entity.power.status: entity.delta())*multiple(entity)) return false;
+      if(entity.liquids == null || entity.liquids.get(stack.liquid) < (entity.efficiency() <= 0.001f?
+          stack.amount*multiple(entity)*Time.delta:
+          stack.amount*parent.delta(entity)*multiple(entity))) return false;
     }
     return true;
   }

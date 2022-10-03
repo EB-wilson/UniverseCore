@@ -1,14 +1,14 @@
 package universecore.world.producers;
 
 import arc.func.Floatf;
+import arc.graphics.Color;
 import arc.graphics.g2d.TextureRegion;
 import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ProducerBuildComp;
+import universecore.world.consumers.BaseConsume;
 
 public abstract class BaseProduce<T extends ProducerBuildComp>{
-  public Floatf<T> prodMultiple;
-
-  public static final TextureRegion EMPTY_TEX = new TextureRegion();
+  public Floatf<T> prodMultiplier;
   
   public BaseProducers parent;
   
@@ -16,9 +16,14 @@ public abstract class BaseProduce<T extends ProducerBuildComp>{
   public abstract ProduceType<?> type();
   
   public TextureRegion icon(){
-    return EMPTY_TEX;
+    return BaseConsume.EMP;
   }
-  
+
+  public Color color(){
+    return null;
+  }
+
+  public abstract void merge(BaseProduce<T> other);
   public abstract void produce(T entity);
   public abstract void update(T entity);
   public abstract void display(Stats stats);
@@ -29,11 +34,12 @@ public abstract class BaseProduce<T extends ProducerBuildComp>{
   public void dump(T entity){}
 
   public float multiple(T entity){
-    return prodMultiple == null? 1: prodMultiple.get(entity);
+    return prodMultiplier == null? 1: prodMultiplier.get(entity);
   }
 
-  public BaseProduce<T> setMultiple(Floatf<T> multiple){
-    prodMultiple = multiple;
+  @SuppressWarnings("unchecked")
+  public <N extends ProducerBuildComp> BaseProduce<T> setMultiple(Floatf<N> multiple){
+    prodMultiplier = (Floatf<T>) multiple;
     return this;
   }
 }

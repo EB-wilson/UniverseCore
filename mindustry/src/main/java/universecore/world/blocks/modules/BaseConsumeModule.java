@@ -55,11 +55,11 @@ public class BaseConsumeModule extends BlockModule{
   }
   
   public BlockStatus status(){
-    if(!entity.getBuilding(ConsumerBuildComp.class).shouldConsume()){
+    if(!entity.shouldConsume()){
       return BlockStatus.noOutput;
     }
 
-    if(!valid || !entity.productionValid()){
+    if(!valid){
       return BlockStatus.noInput;
     }
 
@@ -122,7 +122,7 @@ public class BaseConsumeModule extends BlockModule{
     current = null;
     powerCons = 0;
     if((!hasOptional() && !hasConsume())) return;
-    boolean docons = entity.shouldConsume() && entity.productionValid();
+    boolean shouldCons = entity.shouldConsume();
     
     //只在选中消耗列表时才进行消耗更新
     if(entity.consumeCurrent() >= 0 && get() != null){
@@ -133,9 +133,12 @@ public class BaseConsumeModule extends BlockModule{
       if(current != null){
         valid &= current.valid.get(entity);
         for(BaseConsume cons: current.all()){
-          if(cons instanceof UncConsumePower) powerCons += ((UncConsumePower) cons).usage;
+          if(cons instanceof UncConsumePower) powerCons += ((UncConsumePower) cons).requestedPower(entity.getBuild());
           valid &= cons.valid(entity.getBuilding(ConsumerBuildComp.class));
-          if(docons && preValid && cons.valid(entity.getBuilding(ConsumerBuildComp.class))){
+
+          if(!valid) break;
+
+          if(shouldCons && preValid){
             cons.update(entity.getBuilding(ConsumerBuildComp.class));
           }
         }
@@ -156,14 +159,14 @@ public class BaseConsumeModule extends BlockModule{
         if(optionalValid){
           optionalCurr = cons;
 
-          if(!docons || (!cons.optionalAlwaysValid && !valid)) continue;
+          if(!shouldCons || (!cons.optionalAlwaysValid && !valid)) continue;
           for(BaseConsume c: cons.all()){
             c.update(entity.getBuilding(ConsumerBuildComp.class));
-            if(c instanceof UncConsumePower) powerCons += ((UncConsumePower) c).usage;
+            if(c instanceof UncConsumePower) powerCons += ((UncConsumePower) c).requestedPower(entity.getBuild());
           }
 
           float[] arr = optProgress.get(cons, () -> new float[]{0});
-          arr[0] += 1/cons.craftTime*optionalCurr.delta(entity);
+          arr[0] += 1/cons.craftTime*cons.delta(entity);
           while(arr[0] >= 1){
             arr[0] %= 1;
             triggerOpt(id);
@@ -174,7 +177,11 @@ public class BaseConsumeModule extends BlockModule{
       }
     }
   }
-  
+
+  public float consDelta(){
+    return current == null? 0: current.delta(entity);
+  }
+
   /**获取指定索引的消耗列表*/
   public BaseConsumers get(int index){
     return get().get(index);

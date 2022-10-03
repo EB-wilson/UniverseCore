@@ -55,8 +55,9 @@ public class Demodulator{
 
   public static boolean checkModuleOpen(Module from, Package pac, Module to){
     Objects.requireNonNull(from);
-    Objects.requireNonNull(pac);
     Objects.requireNonNull(to);
+
+    if(pac == null) return true;
     
     return from.isOpen(pac.getName(), to);
   }

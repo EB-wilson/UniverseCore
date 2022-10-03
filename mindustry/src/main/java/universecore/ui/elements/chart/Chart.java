@@ -19,12 +19,12 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 /**统计图的基类，默认绘制一个基本的网格，统计表包含一系列的数据集，对各组数据的呈现和绘制需要子类实现*/
-public abstract class Chart extends Element{
+public abstract class Chart<Stat extends Chart.StatGroup> extends Element{
   private static final int[] STEP_BASE = {2, 5, 10};
 
   private final int maxValuesCount;
 
-  protected Seq<StatGroup> data = new Seq<>();
+  protected Seq<Stat> data = new Seq<>();
 
   protected int viewLength;
   protected int viewOffset;
@@ -68,7 +68,7 @@ public abstract class Chart extends Element{
   }
 
   public void updateValueBound(){
-    for(StatGroup datum: data){
+    for(Stat datum: data){
       if(!datum.show) continue;
       for(float value: datum.values){
         maxValue = Float.isNaN(value)? maxValue: Math.max(maxValue, value);
@@ -77,15 +77,15 @@ public abstract class Chart extends Element{
     }
   }
 
-  public StatGroup newStatGroup(){
-    StatGroup group = new StatGroup();
+  public Stat newStatGroup(){
+    Stat group = (Stat) new StatGroup();
     group.color = new Color(1, 1, 1, 1);
 
     data.add(group);
     return group;
   }
 
-  public void remove(StatGroup group){
+  public void remove(Stat group){
     data.remove(group);
   }
 
@@ -97,7 +97,7 @@ public abstract class Chart extends Element{
   public void act(float delta){
     super.act(delta);
     lerpTime = Mathf.clamp(lerpTime);
-    for(StatGroup group: data){
+    for(Stat group: data){
       group.update();
     }
   }
@@ -237,7 +237,7 @@ public abstract class Chart extends Element{
   protected abstract void drawHorizonScale(float horHeight);
 
   public class StatGroup{
-    private final float[] values;
+    protected final float[] values;
     private int cursor;
 
     protected boolean show = true;

@@ -60,7 +60,7 @@ public class DesktopClassHandler implements ClassHandler{
       public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException{
         return currLoader().loadClass(name, resolve);
       }
-    }, Opcodes.V11){
+    }, Opcodes.V1_8){
       @Override
       @SuppressWarnings("unchecked")
       protected <T> Class<T> generateClass(ClassInfo<T> classInfo) throws ClassNotFoundException{

@@ -8,6 +8,7 @@ import universecore.annotations.Annotations;
 import universecore.annotations.Annotations.BindField;
 import universecore.ui.table.RecipeTable;
 import universecore.world.consumers.BaseConsumers;
+import universecore.world.consumers.UncConsumePower;
 import universecore.world.consumers.UncConsumeType;
 import universecore.world.meta.UncStat;
 
@@ -54,32 +55,39 @@ public interface ConsumerBlockComp{
     return consume;
   }
   
-  default BaseConsumers newOptionalConsume(Cons2<ConsumerBuildComp, BaseConsumers> validDef, Cons2<Stats, BaseConsumers> displayDef){
-    BaseConsumers consume = new BaseConsumers(true){
-      {
-        optionalDef = validDef;
+  @SuppressWarnings("unchecked")
+  default <T extends ConsumerBuildComp> BaseConsumers newOptionalConsume(Cons2<T, BaseConsumers> validDef, Cons2<Stats, BaseConsumers> displayDef){
+    BaseConsumers consume = new BaseConsumers(true){{
+        optionalDef = (Cons2<ConsumerBuildComp, BaseConsumers>) validDef;
         display = displayDef;
-      }
-    };
+    }};
     optionalCons().add(consume);
     return consume;
   }
   
   /**为将方块加入到能量网络中，需要初始化一个原有的能量消耗器进行代理，在此进行init之前调用*/
-  @Annotations.MethodEntry(entryMethod = "init", context = "powerCapacity -> powerCapacity")
-  default void initPower(float powerCapacity){
+  @Annotations.MethodEntry(entryMethod = "init")
+  default void initPower(){
     Block block = (Block)this;
-    block.consumePowerDynamic(e -> {
-      ConsumerBuildComp entity = (ConsumerBuildComp)e;
-      if(entity.consumer().current == null) return 0f;
-      if(entity.getBuilding().tile().build == null || entity.consumeCurrent() == -1 || !entity.consumer().excludeValid(UncConsumeType.power)) return 0f;
-      if(powerCapacity > 0){
-        return (1f-entity.getBuilding().power.status)*powerCapacity;
-      }
-      else{
-        return entity.consumer().getPowerUsage() * Mathf.num(entity.shouldConsume());
-      }
-    });
+
+    if(block.consumesPower){
+      block.consumePowerDynamic(e -> {
+        ConsumerBuildComp entity = (ConsumerBuildComp) e;
+        if(entity.consumer().current == null) return 0f;
+        if(entity.getBuilding().tile().build == null || entity.consumeCurrent() == -1 || !entity.consumer().excludeValid(UncConsumeType.power))
+          return 0f;
+
+        UncConsumePower<?> cons = entity.consumer().current.get(UncConsumeType.power);
+        if(cons == null) return 0;
+
+        if(cons.buffered){
+          return (1f - entity.getBuilding().power.status)*cons.capacity;
+        }
+        else{
+          return entity.consumer().getPowerUsage()*Mathf.num(entity.shouldConsume());
+        }
+      });
+    }
   }
 
   @Annotations.MethodEntry(entryMethod = "setStats", context = "stats -> stats")

@@ -30,6 +30,11 @@ public interface FactoryBuildComp extends ProducerBuildComp{
   @Annotations.BindField("warmup")
   default void warmup(float value){}
 
+  @Override
+  default float consEfficiency(){
+    return warmup();
+  }
+
   @Annotations.MethodEntry(entryMethod = "update")
   default void updateFactory(){
     /*当未选择配方时不进行更新*/
@@ -38,24 +43,24 @@ public interface FactoryBuildComp extends ProducerBuildComp{
       return;
     }
 
-    if(consValid()){
-      progress(progress() + getProgressIncrease(consumer().current.craftTime));
+    if(consumeValid()){
+      progress(progress() + progressIncrease(consumer().current.craftTime));
       warmup(Mathf.lerpDelta(warmup(), 1, getFactoryBlock().warmupSpeed()));
 
-      crafting();
+      onCraftingUpdate();
     }
     else{
       warmup(Mathf.lerpDelta(warmup(), 0, getFactoryBlock().stopSpeed()));
     }
 
-    totalProgress(totalProgress() + warmup()*producer().current.delta(this));
+    totalProgress(totalProgress() + consumer().consDelta());
 
     while(progress() >= 1){
       progress(progress() - 1);
       consumer().trigger();
       producer().trigger();
 
-      crafted();
+      craftTrigger();
     }
   }
 
@@ -73,15 +78,24 @@ public interface FactoryBuildComp extends ProducerBuildComp{
     write.f(warmup());
   }
 
-  default float getProgressIncrease(float baseTime){
-    return 1/baseTime*consumer().current.delta(this);
+  default float workEfficiency(){
+    return consEfficiency();
+  }
+
+  default float progressIncrease(float baseTime){
+    return 1/baseTime*consumer().consDelta();
   }
 
   default FactoryBlockComp getFactoryBlock(){
     return getBlock(FactoryBlockComp.class);
   }
 
-  void crafted();
+  @Override
+  default boolean shouldConsume(){
+    return ProducerBuildComp.super.shouldConsume() && productValid();
+  }
 
-  void crafting();
+  void craftTrigger();
+
+  void onCraftingUpdate();
 }

@@ -1,8 +1,10 @@
 package universecore.world.producers;
 
 import arc.Core;
+import arc.graphics.Color;
 import arc.graphics.g2d.TextureRegion;
 import arc.math.Mathf;
+import arc.struct.ObjectMap;
 import mindustry.gen.Building;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
@@ -12,6 +14,10 @@ import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ProducerBuildComp;
 
 public class ProduceItems<T extends Building & ProducerBuildComp> extends BaseProduce<T>{
+  private static final ObjectMap<Item, ItemStack> TMP = new ObjectMap<>();
+
+  public boolean shouldFill = true;
+
   /*控制是否随机产出产物(也就是是否为分离机)*/
   public boolean random = false;
   public ItemStack[] items;
@@ -28,25 +34,51 @@ public class ProduceItems<T extends Building & ProducerBuildComp> extends BasePr
   public ProduceType<ProduceItems<?>> type() {
     return ProduceType.item;
   }
-  
+
+  @Override
+  public Color color(){
+    return items[0].item.color;
+  }
+
   @Override
   public TextureRegion icon(){
     return items[0].item.uiIcon;
   }
-  
+
+  @Override
+  public void merge(BaseProduce<T> other){
+    if(other instanceof ProduceItems cons){
+      TMP.clear();
+      for(ItemStack stack: items){
+        TMP.put(stack.item, stack);
+      }
+
+      for(ItemStack stack: cons.items){
+        TMP.get(stack.item, () -> new ItemStack(stack.item, 0)).amount += stack.amount;
+      }
+
+      items = TMP.values().toSeq().sort((a, b) -> a.item.id - b.item.id).toArray(ItemStack.class);
+      return;
+    }
+    throw new IllegalArgumentException("only merge production with same type");
+  }
+
   @Override
   public void produce(T entity){
     float f = multiple(entity);
     if(!random){
       for(ItemStack stack: items){
         int amount = stack.amount*((int)Math.floor(f)) + Mathf.num(Math.random()<f%1);
+        amount = Math.min(amount, entity.block.itemCapacity - entity.items.get(stack.item));
         entity.items.add(stack.item, amount);
       }
     }
     /*随机产出一种产物，amount参数变更为权*/
     else{
       int sum = 0;
-      for(ItemStack stack : items) sum += stack.amount;
+      for(ItemStack stack : items){
+        sum += stack.amount;
+      }
 
       int i = Mathf.random(sum);
       int count = 0;
@@ -61,6 +93,7 @@ public class ProduceItems<T extends Building & ProducerBuildComp> extends BasePr
       }
       if(item != null){
         int amount = (int)(Math.floor(f) + Mathf.num(Math.random()<f%1));
+        amount = Math.min(amount, entity.block.itemCapacity - entity.items.get(item));
         entity.items.add(item, amount);
       }
     }
@@ -112,9 +145,15 @@ public class ProduceItems<T extends Building & ProducerBuildComp> extends BasePr
   
   @Override
   public boolean valid(T entity){
+    if(entity.items == null) return false;
+
+    boolean res = false;
     for(ItemStack stack : items){
-      if(entity.items.get(stack.item) > entity.block.itemCapacity - stack.amount*multiple(entity)) return false;
+      if(entity.items.get(stack.item) + stack.amount*multiple(entity) > entity.block.itemCapacity){
+        if(!shouldFill) return false;
+      }
+      else res = true;
     }
-    return true;
+    return res;
   }
 }

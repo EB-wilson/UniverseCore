@@ -80,13 +80,13 @@ public class JarList{
       writeToList();
     }
     else Log.info("loading mod: " + mod.name + " class cache");
+
     return entry.file;
   }
   
   private void writeToList(){
     try(BufferedWriter writer = new BufferedWriter(listFile.writer(false))){
       for(InfoEntry entry : list.values()){
-        Log.info(entry);
         writer.write(entry.toString());
         writer.newLine();
       }
@@ -146,7 +146,7 @@ public class JarList{
               case "name" -> result.name = value;
               case "version" -> result.version = value;
               case "MD5" -> result.md5 = value;
-              case "file" -> result.file = new Fi(jarFileCache.path() + "/" + value);
+              case "file" -> result.file = new Fi(jarFileCache.path()).child(value);
               default -> throw new IllegalArgumentException("unknown key: " + key);
             }
             

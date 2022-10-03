@@ -1,6 +1,5 @@
 package universecore.world.producers;
 
-import arc.func.Floatf;
 import arc.func.Prov;
 import arc.graphics.Color;
 import arc.graphics.g2d.TextureRegion;
@@ -9,21 +8,21 @@ import mindustry.type.Item;
 import mindustry.type.ItemStack;
 import mindustry.type.Liquid;
 import mindustry.world.meta.Stats;
-import universecore.components.blockcomp.ProducerBuildComp;
 import universecore.util.UncLiquidStack;
+import universecore.world.consumers.BaseConsume;
 import universecore.world.consumers.BaseConsumers;
 
 /**产出列表，绑定一个消耗列表，在执行消耗的同时对应执行此生产列表，以实现工厂生产
  * @author EBwilson */
 public class BaseProducers{
-  protected final ObjectMap<ProduceType<?>, BaseProduce<?>> prod = new ObjectMap<>();
+  final static Color TRANS = new Color(0, 0, 0, 0);
 
-  public Floatf<ProducerBuildComp> prodDelta;
+  protected final ObjectMap<ProduceType<?>, BaseProduce<?>> prod = new ObjectMap<>();
 
   /**用于显示选择配方的图标*/
   public Prov<TextureRegion> icon;
   /**用于显示选择配方的顶部颜色*/
-  public Color color;
+  public Color color = TRANS;
   
   public BaseConsumers cons;
 
@@ -35,15 +34,6 @@ public class BaseProducers{
   public BaseProducers setColor(Color color){
     this.color = color;
     return this;
-  }
-
-  @SuppressWarnings("unchecked")
-  public <N extends ProducerBuildComp> void setDelta(Floatf<N> delta){
-    this.prodDelta = (Floatf<ProducerBuildComp>) delta;
-  }
-
-  public float delta(ProducerBuildComp entity){
-    return cons.delta(entity)*(prodDelta == null? 1: prodDelta.get(entity));
   }
   
   public ProduceItems<?> item(Item item, int amount){
@@ -65,14 +55,27 @@ public class BaseProducers{
   public ProducePower<?> power(float prod){
     return add(new ProducePower<>(prod));
   }
+
+  public TextureRegion icon(){
+    return icon == null? cons.icon(): icon.get();
+  }
   
+  @SuppressWarnings({"rawtypes", "unchecked"})
   public <T extends BaseProduce<?>> T add(T produce){
-    prod.put(produce.type(), produce);
-    produce.parent = this;
-    if(icon == null && produce.icon() != BaseProduce.EMPTY_TEX){
-      icon = produce::icon;
+    BaseProduce p = prod.get(produce.type());
+    if(p == null){
+      prod.put(produce.type(), produce);
+      produce.parent = this;
+      if(icon == null && produce.icon() != BaseConsume.EMP){
+        icon = produce::icon;
+      }
+      if(color == TRANS && produce.color() != null){
+        color = produce.color();
+      }
+      return produce;
     }
-    return produce;
+    else p.merge(produce);
+    return (T) p;
   }
 
   @SuppressWarnings("unchecked")

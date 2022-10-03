@@ -2,6 +2,7 @@ package universecore.components.blockcomp;
 
 import mindustry.gen.Building;
 import mindustry.world.Block;
+import mindustry.world.Tile;
 import mindustry.world.modules.ItemModule;
 import mindustry.world.modules.LiquidModule;
 import universecore.annotations.Annotations;
@@ -38,6 +39,10 @@ public interface BuildCompBase{
   @SuppressWarnings("unchecked")
   default <T> T getBuild(){
     return (T) this;
+  }
+
+  default Tile getTile(){
+    return getBuilding().tile;
   }
   
   @Annotations.BindField("items")

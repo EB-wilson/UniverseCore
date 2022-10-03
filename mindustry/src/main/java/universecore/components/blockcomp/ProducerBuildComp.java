@@ -31,12 +31,13 @@ public interface ProducerBuildComp extends BuildCompBase, ConsumerBuildComp{
   default ProducerBuildComp getProducerBuilding(){
     return getBlock(ProducerBuildComp.class);
   }
-  
-  default boolean shouldConsume(){
-    return getBuilding().shouldConsume();
+
+  default boolean productValid(){
+    return producer() == null || producer().valid();
   }
   
-  default boolean productionValid(){
-    return getBuilding().productionValid();
+  default boolean shouldProduct(){
+    return producer() != null && produceCurrent() != -1;
   }
+
 }

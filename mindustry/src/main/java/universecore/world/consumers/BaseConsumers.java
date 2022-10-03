@@ -1,9 +1,11 @@
 package universecore.world.consumers;
 
+import arc.Core;
 import arc.func.*;
 import arc.graphics.g2d.TextureRegion;
 import arc.scene.event.Touchable;
 import arc.struct.ObjectMap;
+import arc.util.Time;
 import mindustry.gen.Building;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
@@ -28,8 +30,6 @@ public class BaseConsumers{
   /**是否为可选*/
   public final boolean optional;
   public boolean optionalAlwaysValid = true;
-
-  public Floatf<ConsumerBuildComp> consDelta;
   
   /**图标，在选择消耗列表时显示，默认为首个消耗项*/
   public Prov<TextureRegion> icon;
@@ -39,6 +39,8 @@ public class BaseConsumers{
   public Cons2<Stats, BaseConsumers> display = (stats, cons) -> {};
 
   public Prov<Visibility> selectable = () -> Visibility.usable;
+
+  public Floatf<ConsumerBuildComp> consDelta = e -> e.getBuilding().delta()*e.consEfficiency();
   /**本消耗的可用控制器*/
   public Boolf<ConsumerBuildComp> valid = e -> true;
   /**消耗触发器，在消耗的trigger()方法执行时触发*/
@@ -53,17 +55,31 @@ public class BaseConsumers{
     return this;
   }
   
-  public void time(float time){
+  public BaseConsumers time(float time){
     this.craftTime = time;
     showTime = true;
+    return this;
   }
 
-  public <N extends ConsumerBuildComp> void setDelta(Floatf<N> delta){
+  public BaseConsumers overdriveValid(boolean valid){
+    this.consDelta = valid?
+        e -> e.getBuilding().delta()*e.consEfficiency():
+        e -> Time.delta*e.consEfficiency();
+    return this;
+  }
+
+  public <T extends ConsumerBuildComp> BaseConsumers setConsDelta(Floatf<T> delta){
     this.consDelta = (Floatf<ConsumerBuildComp>) delta;
+    return this;
+  }
+
+  public <T extends ConsumerBuildComp> BaseConsumers consValidCondition(Boolf<T> cond){
+    this.valid = (Boolf<ConsumerBuildComp>) cond;
+    return this;
   }
 
   public float delta(ConsumerBuildComp entity){
-    return consDelta == null? entity.getBuilding().edelta(): consDelta.get(entity);
+    return consDelta.get(entity);
   }
   
   public UncConsumeItems<? extends ConsumerBuildComp> item(Item item, int amount){
@@ -83,26 +99,55 @@ public class BaseConsumers{
   }
   
   public UncConsumePower<? extends ConsumerBuildComp> power(float usage){
-    return add(new UncConsumePower<>(usage, false));
+    return add(new UncConsumePower<>(usage, 0));
   }
   
   @SuppressWarnings("rawtypes")
-  public UncConsumePower<? extends ConsumerBuildComp> powerCond(float usage, Boolf<Building> cons){
-    return add(new UncConsumePower(usage, false){
-      private final Boolf<Building> consume = cons;
+  public <T extends ConsumerBuildComp> UncConsumePower<?> powerCond(float usage, float capacity, Boolf<T> cons){
+    return add(new UncConsumePower(usage, capacity){
+      @Override
       public float requestedPower(Building entity){
-        return consume.get(entity) ? usage : 0f;
+        return ((Boolf)cons).get(entity) ? super.requestedPower(entity) : 0f;
       }
     });
   }
 
+  @SuppressWarnings("rawtypes")
+  public <T extends ConsumerBuildComp> UncConsumePower<?> powerDynamic(Floatf<T> cons, float capacity, Cons<Stats> statBuilder){
+    return add(new UncConsumePower(0, capacity){
+      @Override
+      public float requestedPower(Building entity){
+        return ((Floatf)cons).get(entity);
+      }
+
+      @Override
+      public void display(Stats stats){
+        statBuilder.get(stats);
+      }
+    });
+  }
+
+  public UncConsumePower<? extends ConsumerBuildComp> powerBuffer(float usage, float capacity){
+    return add(new UncConsumePower<>(usage, capacity));
+  }
+
+  @SuppressWarnings("rawtypes")
   public <T extends BaseConsume<? extends ConsumerBuildComp>> T add(T consume){
-    cons.put(consume.type(), consume);
-    consume.parent = this;
-    if(icon == null && consume.icon() != BaseConsume.EMPTY_TEX){
-      icon = consume::icon;
+    BaseConsume c = cons.get(consume.type());
+    if(c == null){
+      cons.put(consume.type(), consume);
+      consume.parent = this;
+      if(icon == null && consume.icon() != BaseConsume.EMP){
+        icon = consume::icon;
+      }
+      return consume;
     }
-    return consume;
+    else c.merge(consume);
+    return (T) c;
+  }
+
+  public TextureRegion icon(){
+    return icon == null? Core.atlas.find("error"): icon.get();
   }
 
   @SuppressWarnings("unchecked")

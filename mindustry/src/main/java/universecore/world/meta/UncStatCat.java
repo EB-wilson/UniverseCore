@@ -9,7 +9,7 @@ public class UncStatCat{
   public static final StatCat other = create("other");
 
   private static StatCat create(String name){
-    return create(name, Stat.all.size);
+    return create(name, StatCat.all.size);
   }
 
   private static StatCat create(String name, int index){

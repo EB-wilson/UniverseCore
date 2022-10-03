@@ -5,8 +5,10 @@ import arc.graphics.g2d.TextureRegion;
 import arc.math.Mathf;
 import arc.scene.ui.layout.Table;
 import arc.struct.Bits;
+import arc.struct.ObjectMap;
 import mindustry.Vars;
 import mindustry.gen.Building;
+import mindustry.type.Item;
 import mindustry.type.ItemStack;
 import mindustry.ui.ItemDisplay;
 import mindustry.ui.ItemImage;
@@ -16,6 +18,8 @@ import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ConsumerBuildComp;
 
 public class UncConsumeItems<T extends Building & ConsumerBuildComp> extends BaseConsume<T>{
+  private static final ObjectMap<Item, ItemStack> TMP = new ObjectMap<>();
+
   public ItemStack[] items;
 
   public UncConsumeItems(ItemStack[] items){
@@ -30,7 +34,25 @@ public class UncConsumeItems<T extends Building & ConsumerBuildComp> extends Bas
   public TextureRegion icon(){
     return items[0].item.uiIcon;
   }
-  
+
+  @Override
+  public void merge(BaseConsume<T> other){
+    if(other instanceof UncConsumeItems cons){
+      TMP.clear();
+      for(ItemStack stack: items){
+        TMP.put(stack.item, stack);
+      }
+
+      for(ItemStack stack: cons.items){
+        TMP.get(stack.item, () -> new ItemStack(stack.item, 0)).amount += stack.amount;
+      }
+
+      items = TMP.values().toSeq().sort((a, b) -> a.item.id - b.item.id).toArray(ItemStack.class);
+      return;
+    }
+    throw new IllegalArgumentException("only merge consume with same type");
+  }
+
   @Override
   public void consume(T object){
     float f = multiple(object);
@@ -41,9 +63,7 @@ public class UncConsumeItems<T extends Building & ConsumerBuildComp> extends Bas
   }
 
   @Override
-  public void update(T entity) {
-
-  }
+  public void update(T entity) {}
   
   @Override
   public void display(Stats stats) {
@@ -62,14 +82,19 @@ public class UncConsumeItems<T extends Building & ConsumerBuildComp> extends Bas
   @Override
   public void build(T entity, Table table) {
     for(ItemStack stack : items){
+      int amount = (int)(stack.amount*multiple(entity));
+      if(amount == 0 && !entity.consumer().valid()) amount = stack.amount;
+
+      int n = amount;
       table.add(new ReqImage(new ItemImage(stack.item.uiIcon, stack.amount),
-      () -> entity.items != null && entity.items.has(stack.item, stack.amount))).padRight(8);
+      () -> entity.items != null && entity.items.has(stack.item, n))).padRight(8);
     }
     table.row();
   }
 
   @Override
   public boolean valid(T entity){
+    if(entity.items == null) return false;
     for(ItemStack stack: items){
       if(entity.items == null || entity.items.get(stack.item) < stack.amount*multiple(entity)) return false;
     }
