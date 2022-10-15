@@ -57,12 +57,16 @@ public class BaseProductModule extends BlockModule {
       boolean preValid = valid();
   
       valid = true;
+      boolean anyValid = false;
       if(current != null) for(BaseProduce prod : current.all()){
-        valid &= prod.valid(entity.getBuilding(ProducerBuildComp.class));
-        if(docons && preValid && prod.valid(entity.getBuilding(ProducerBuildComp.class))){
+        boolean v = prod.valid(entity.getBuilding(ProducerBuildComp.class));
+        anyValid |= v;
+        valid &= !prod.shouldBlockWhenFull() || v;
+        if(docons && preValid && v){
           prod.update(entity.getBuilding(ProducerBuildComp.class));
         }
       }
+      if(!anyValid) valid = false;
     }
     
     //无论何时都向外导出产品
@@ -70,8 +74,10 @@ public class BaseProductModule extends BlockModule {
   }
   
   public void doDump(ProducerBuildComp entity){
-    for(BaseProducers p: get()){
-      for(BaseProduce prod: p.all()) prod.dump(entity.getBuilding(ProducerBuildComp.class));
+    if(current != null){
+      for(BaseProduce prod: current.all()){
+        prod.dump(entity.getBuilding(ProducerBuildComp.class));
+      }
     }
   }
   

@@ -30,7 +30,9 @@ public class BaseConsumeModule extends BlockModule{
   public Seq<ObjectMap<UncConsumeType<?>, Bits>> filter = new Seq<>();
   public ObjectMap<UncConsumeType<?>, Bits> optionalFilter = new ObjectMap<>();
   public ObjectMap<UncConsumeType<?>, Bits> allFilter = new ObjectMap<>();
-  
+
+  public float consEfficiency;
+
   private float powerCons;
 
   public BaseConsumeModule(ConsumerBuildComp entity){
@@ -132,11 +134,17 @@ public class BaseConsumeModule extends BlockModule{
       setCurrent();
       if(current != null){
         valid &= current.valid.get(entity);
+        consEfficiency = valid? 1: 0;
         for(BaseConsume cons: current.all()){
           if(cons instanceof UncConsumePower) powerCons += ((UncConsumePower) cons).requestedPower(entity.getBuild());
-          valid &= cons.valid(entity.getBuilding(ConsumerBuildComp.class));
+          float eff = cons.efficiency(entity.getBuilding(ConsumerBuildComp.class));
+          consEfficiency *= eff;
+          valid &= eff > 0.0001f;
 
-          if(!valid) break;
+          if(!valid){
+            consEfficiency = 0;
+            break;
+          }
 
           if(shouldCons && preValid){
             cons.update(entity.getBuilding(ConsumerBuildComp.class));
@@ -154,7 +162,7 @@ public class BaseConsumeModule extends BlockModule{
         
         boolean optionalValid = cons.valid.get(entity);
         for(BaseConsume c: cons.all()){
-          optionalValid &= c.valid(entity.getBuilding(ConsumerBuildComp.class));
+          optionalValid &= c.efficiency(entity.getBuilding(ConsumerBuildComp.class)) > 0.0001f;
         }
         if(optionalValid){
           optionalCurr = cons;
@@ -218,7 +226,7 @@ public class BaseConsumeModule extends BlockModule{
     boolean temp = true;
     for(BaseConsume cons: current.all()){
       if(cons.type() == type) continue;
-      temp &= cons.valid(entity.getBuilding(ConsumerBuildComp.class));
+      temp &= cons.efficiency(entity.getBuilding(ConsumerBuildComp.class)) > 0.0001f;
     }
     return temp;
   }
@@ -230,7 +238,7 @@ public class BaseConsumeModule extends BlockModule{
   
   /**当前消耗列表指定消耗项是否可用*/
   public boolean valid(UncConsumeType type){
-    return current.get(type) != null && current.get(type).valid(entity.getBuilding(ConsumerBuildComp.class));
+    return current.get(type) != null && current.get(type).efficiency(entity.getBuilding(ConsumerBuildComp.class)) > 0.0001;
   }
   
   /**指定的消耗列表是否可用*/
@@ -238,7 +246,7 @@ public class BaseConsumeModule extends BlockModule{
     if(index >= get().size()) return false;
     
     for(BaseConsume c: get().get(index).all()){
-      if(!c.valid(entity.getBuilding(ConsumerBuildComp.class))) return false;
+      if(c.efficiency(entity.getBuilding(ConsumerBuildComp.class)) < 0.0001f) return false;
     }
     
     return true;

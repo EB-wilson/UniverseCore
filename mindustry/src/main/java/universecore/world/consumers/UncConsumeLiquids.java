@@ -2,10 +2,10 @@ package universecore.world.consumers;
 
 import arc.Core;
 import arc.graphics.g2d.TextureRegion;
+import arc.math.Mathf;
 import arc.scene.ui.layout.Table;
 import arc.struct.Bits;
 import arc.struct.ObjectMap;
-import arc.util.Time;
 import mindustry.Vars;
 import mindustry.gen.Building;
 import mindustry.type.Liquid;
@@ -89,22 +89,30 @@ public class UncConsumeLiquids<T extends Building & ConsumerBuildComp> extends B
   public void build(T entity, Table table) {
     for(UncLiquidStack stack : liquids){
       table.add(new ReqImage(stack.liquid.uiIcon,
-      () -> entity.liquids != null && entity.liquids.get(stack.liquid) > (entity.efficiency() > 0.001f?
-          stack.amount*parent.delta(entity)*multiple(entity) + 0.001f:
-          stack.amount*multiple(entity)*Time.delta))).padRight(8);
+      () -> entity.liquids != null && entity.liquids.get(stack.liquid) > 0)).padRight(8);
     }
     table.row();
   }
 
   @Override
-  public boolean valid(T entity){
-    if(entity.liquids == null) return false;
-    for(UncLiquidStack stack: liquids){
-      if(entity.liquids == null || entity.liquids.get(stack.liquid) < (entity.efficiency() <= 0.001f?
-          stack.amount*multiple(entity)*Time.delta:
-          stack.amount*parent.delta(entity)*multiple(entity))) return false;
+  public float efficiency(T entity){
+    if(entity.liquids == null) return 0;
+    if(portion){
+      for(UncLiquidStack stack: liquids){
+        if(entity.liquids.get(stack.liquid) < stack.amount*multiple(entity)*60) return 0;
+      }
+      return 1;
     }
-    return true;
+    else{
+      float min = 1;
+
+      for(UncLiquidStack stack: liquids){
+        min = Math.min(entity.liquids.get(stack.liquid)/(stack.amount*multiple(entity)), min);
+      }
+
+      if(min < 0.0001f) return 0;
+      return Mathf.clamp(min);
+    }
   }
   
   @Override

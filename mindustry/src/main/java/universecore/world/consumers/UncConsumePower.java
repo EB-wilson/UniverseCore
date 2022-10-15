@@ -54,13 +54,13 @@ public class UncConsumePower<T extends Building & ConsumerBuildComp> extends Bas
   public void update(T entity){}
 
   @Override
-  public boolean valid(T entity){
-    if(entity.power == null) return false;
+  public float efficiency(T entity){
+    if(entity.power == null) return 0;
     if(buffered){
-      return true;
+      return entity.power.status > 0? 1: 0;
     }
     else{
-      return entity.power.status > 0f;
+      return entity.power.status;
     }
   }
 

@@ -16,8 +16,6 @@ import universecore.components.blockcomp.ProducerBuildComp;
 public class ProduceItems<T extends Building & ProducerBuildComp> extends BaseProduce<T>{
   private static final ObjectMap<Item, ItemStack> TMP = new ObjectMap<>();
 
-  public boolean shouldFill = true;
-
   /*控制是否随机产出产物(也就是是否为分离机)*/
   public boolean random = false;
   public ItemStack[] items;
@@ -142,7 +140,7 @@ public class ProduceItems<T extends Building & ProducerBuildComp> extends BasePr
       }).left().padLeft(5);
     });
   }
-  
+
   @Override
   public boolean valid(T entity){
     if(entity.items == null) return false;
@@ -150,7 +148,7 @@ public class ProduceItems<T extends Building & ProducerBuildComp> extends BasePr
     boolean res = false;
     for(ItemStack stack : items){
       if(entity.items.get(stack.item) + stack.amount*multiple(entity) > entity.block.itemCapacity){
-        if(!shouldFill) return false;
+        if(blockWhenFull) return false;
       }
       else res = true;
     }

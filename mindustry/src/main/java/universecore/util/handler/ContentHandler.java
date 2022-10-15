@@ -10,7 +10,6 @@ import mindustry.ctype.Content;
 import mindustry.ctype.ContentType;
 import mindustry.ctype.MappableContent;
 import mindustry.ctype.UnlockableContent;
-import universecore.util.TechTreeConstructor;
 
 import java.lang.reflect.Field;
 import java.util.Locale;
@@ -101,7 +100,6 @@ public class ContentHandler{
       throw new RuntimeException("The old content cannot override by new content, because the content type are different");
   
     if(newContent instanceof UnlockableContent newC){
-
       newC.localizedName = Core.bundle.get(type + "." + oldName + ".name", oldName);
       newC.description = Core.bundle.getOrNull(type + "." + oldName + ".description");
       newC.details = Core.bundle.getOrNull(type + "." + oldName + ".details");
@@ -114,10 +112,6 @@ public class ContentHandler{
     }
 
     if(declarer != null) overrideContent(oldContent, declarer, (Content) newContent);
-
-    if(oldContent instanceof UnlockableContent && newContent instanceof UnlockableContent){
-      TechTreeConstructor.get((UnlockableContent) oldContent).content = (UnlockableContent)newContent;
-    }
   }
   
   public static void overrideContent(Content oldContent, Field srcField, Content newContent){

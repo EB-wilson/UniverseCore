@@ -32,7 +32,7 @@ public interface FactoryBuildComp extends ProducerBuildComp{
 
   @Override
   default float consEfficiency(){
-    return warmup();
+    return ProducerBuildComp.super.consEfficiency()*warmup();
   }
 
   @Annotations.MethodEntry(entryMethod = "update")

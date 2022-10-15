@@ -1,7 +1,10 @@
 package universecore.util;
 
 import arc.func.Cons;
+import arc.struct.ObjectMap;
+import arc.struct.Queue;
 import arc.struct.Seq;
+import mindustry.content.Planets;
 import mindustry.content.TechTree;
 import mindustry.ctype.UnlockableContent;
 import mindustry.game.Objectives;
@@ -10,12 +13,63 @@ import mindustry.type.ItemStack;
 public class TechTreeConstructor{
   public final TechTree.TechNode node;
 
-  public static TechTree.TechNode get(UnlockableContent content){
-    return TechTree.all.find(e -> e.content == content);
+  private static TechTree.TechNode currRoot = Planets.serpulo.techTree;
+
+  private final static ObjectMap<TechTree.TechNode, ObjectMap<UnlockableContent, TechTree.TechNode>> allMaps = new ObjectMap<>();
+  private final static ObjectMap<TechTree.TechNode, TechTree.TechNode> all = new ObjectMap<>();
+  private final static Queue<TechTree.TechNode> queue = new Queue<>();
+
+  public static void rebuildAll(){
+    allMaps.clear();
+    all.clear();
+    for(TechTree.TechNode root: TechTree.roots){
+      allMaps.put(root, ObjectMap.of(root.content, root));
+    }
+
+    queue.clear();
+    for(TechTree.TechNode node: TechTree.all){
+      TechTree.TechNode curr = node;
+      while(curr.parent != null && !allMaps.containsKey(curr.parent) && !all.containsKey(curr.parent)){
+        queue.add(curr);
+        curr = node.parent;
+      }
+      if(curr.parent != null){
+        queue.add(curr);
+        TechTree.TechNode root = allMaps.containsKey(curr.parent)? curr.parent: all.get(curr.parent);
+        ObjectMap<UnlockableContent, TechTree.TechNode> map = allMaps.get(root, ObjectMap::new);
+
+        for(TechTree.TechNode techNode: queue){
+          map.put(techNode.content, techNode);
+          all.put(techNode, root);
+        }
+      }
+      queue.clear();
+    }
   }
 
-  public static void nodeProduce(UnlockableContent parent, UnlockableContent content, Seq<Objectives.Objective> objectives,
-                           Cons<TechTreeConstructor> child){
+  public static void currentRoot(TechTree.TechNode root){
+    currRoot = root;
+  }
+
+  public static TechTree.TechNode getRoot(TechTree.TechNode node){
+    return all.get(node);
+  }
+
+  public static TechTree.TechNode get(UnlockableContent content){
+    TechTree.TechNode node = allMaps.get(currRoot, ObjectMap::new).get(content);
+    if(node == null){
+      rebuildAll();
+      node = allMaps.get(currRoot, ObjectMap::new).get(content);
+    }
+    if(node == null) throw new RuntimeException("no such tech node \"" + content + "\" assign in tree that root by \"" + currRoot.content + "\"");
+    return node;
+  }
+
+  public static Seq<TechTree.TechNode> getByRoot(TechTree.TechNode root){
+    return allMaps.get(root, Empties.nilMapO()).values().toSeq();
+  }
+
+  public static void nodeProduce(UnlockableContent parent, UnlockableContent content, Seq<Objectives.Objective> objectives, Cons<TechTreeConstructor> child){
     new TechTreeConstructor(parent, content, content.researchRequirements(), objectives.add(new Objectives.Produce(content)), child);
   }
 

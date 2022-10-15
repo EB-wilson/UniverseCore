@@ -23,7 +23,9 @@ public interface ConsumerBuildComp extends BuildCompBase{
     consumer().update();
   }
 
-  float consEfficiency();
+  default float consEfficiency(){
+    return consumer().consEfficiency;
+  }
   
   /**获得该块的ConsumerBlock*/
   default ConsumerBlockComp getConsumerBlock(){

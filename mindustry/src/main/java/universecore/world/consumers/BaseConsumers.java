@@ -101,7 +101,11 @@ public class BaseConsumers{
   public UncConsumePower<? extends ConsumerBuildComp> power(float usage){
     return add(new UncConsumePower<>(usage, 0));
   }
-  
+
+  public UncConsumePower<? extends ConsumerBuildComp> power(float usage, float capacity){
+    return add(new UncConsumePower<>(usage, capacity));
+  }
+
   @SuppressWarnings("rawtypes")
   public <T extends ConsumerBuildComp> UncConsumePower<?> powerCond(float usage, float capacity, Boolf<T> cons){
     return add(new UncConsumePower(usage, capacity){

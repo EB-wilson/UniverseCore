@@ -7,11 +7,11 @@ plugins {
   id 'com.github.johnrengelman.shadow' version '2.0.4'
 }
 
-version '1.4.1'
+version '1.4.4'
 
 ext{
   //the build number that this mod is made for
-  mindustryVersion = 'v137'
+  mindustryVersion = 'v139'
   //version of SDK you will be using
   minSdkAPI = 30
   //version of JavaDynamilizer

@@ -25,8 +25,7 @@ import universecore.util.mods.ModInfo;
 import java.util.Objects;
 
 /**UniverseCore的mod主类，同时也是调用核心类，这里会保存各种可能会用到的默认实例以及许多必要实例
- * @author EBwilson
- * @since 0.1*/
+ * @author EBwilson*/
 public class UncCore extends Mod{
   private static final ObjectMap<Class<? extends Mod>, ModInfo> referredMods = new ObjectMap<>();
   

@@ -93,12 +93,12 @@ public class UncConsumeItems<T extends Building & ConsumerBuildComp> extends Bas
   }
 
   @Override
-  public boolean valid(T entity){
-    if(entity.items == null) return false;
+  public float efficiency(T entity){
+    if(entity.items == null) return 0;
     for(ItemStack stack: items){
-      if(entity.items == null || entity.items.get(stack.item) < stack.amount*multiple(entity)) return false;
+      if(entity.items == null || entity.items.get(stack.item) < stack.amount*multiple(entity)) return 0;
     }
-    return true;
+    return 1;
   }
 
   @Override

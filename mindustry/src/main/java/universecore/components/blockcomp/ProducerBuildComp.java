@@ -39,5 +39,4 @@ public interface ProducerBuildComp extends BuildCompBase, ConsumerBuildComp{
   default boolean shouldProduct(){
     return producer() != null && produceCurrent() != -1;
   }
-
 }

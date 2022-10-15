@@ -15,7 +15,6 @@ import universecore.util.UncLiquidStack;
 public class ProduceLiquids<T extends Building & ProducerBuildComp> extends BaseProduce<T>{
   private static final ObjectMap<Liquid, UncLiquidStack> TMP = new ObjectMap<>();
 
-  public boolean shouldFill = true;
   public boolean portion = false;
   public UncLiquidStack[] liquids;
 
@@ -96,16 +95,15 @@ public class ProduceLiquids<T extends Building & ProducerBuildComp> extends Base
       }).left().padLeft(5);
     });
   }
-  
+
   @Override
   public boolean valid(T entity){
     if(entity.liquids == null) return false;
 
     boolean res = false;
     for(UncLiquidStack stack: liquids){
-      float mult = parent.cons.delta(entity)*multiple(entity);
-      if(entity.liquids.get(stack.liquid) + stack.amount*mult > entity.block.liquidCapacity){
-        if(!shouldFill) return false;
+      if(entity.liquids.get(stack.liquid) + stack.amount*multiple(entity) > entity.block.liquidCapacity - 0.001f){
+        if(blockWhenFull) return false;
       }
       else res = true;
     }

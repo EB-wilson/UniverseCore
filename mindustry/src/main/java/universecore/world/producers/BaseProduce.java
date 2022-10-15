@@ -11,7 +11,8 @@ public abstract class BaseProduce<T extends ProducerBuildComp>{
   public Floatf<T> prodMultiplier;
   
   public BaseProducers parent;
-  
+  public boolean blockWhenFull;
+
   /**产出资源类型*/
   public abstract ProduceType<?> type();
   
@@ -21,6 +22,10 @@ public abstract class BaseProduce<T extends ProducerBuildComp>{
 
   public Color color(){
     return null;
+  }
+
+  public boolean shouldBlockWhenFull(){
+    return blockWhenFull;
   }
 
   public abstract void merge(BaseProduce<T> other);
