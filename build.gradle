@@ -6,7 +6,9 @@ plugins {
   id 'java'
   id 'com.github.johnrengelman.shadow' version '2.0.4'
 }
+apply plugin: 'maven-publish'
 
+group 'com.github.EB-wilson'
 version '1.4.4'
 
 ext{
@@ -58,6 +60,14 @@ dependencies {
   compileOnly project(":desktop")
   compileOnly project(":desktop9")
   compileOnly project(":annotations")
+}
+
+publishing {
+  publications {
+    maven(MavenPublication) {
+      from components.java
+    }
+  }
 }
 
 shadowJar{
@@ -121,8 +131,6 @@ task buildAndroid(type: Jar){
       }
       out.close()
     }
-
-
   }
 }
 
@@ -278,5 +286,18 @@ task buildProject{
   doLast {
     delete("${rootProject.buildDir}/libs/${rootProject.name}-desktop.jar")
     delete("${rootProject.buildDir}/libs/${rootProject.name}-base.jar")
+  }
+}
+
+generateMetadataFileForMavenPublication{
+  dependsOn buildLib
+
+  doLast{
+    delete("${rootProject.buildDir}/libs/${rootProject.name}-base.jar")
+    delete("${rootProject.buildDir}/libs/${rootProject.name}-desktop.jar")
+    delete("${rootProject.buildDir}/libs/${rootProject.name}-android.jar")
+    delete("${rootProject.buildDir}/libs/${rootProject.name}.jar")
+    file("${rootProject.buildDir}/libs/UniverseCore-lib.jar")
+        .renameTo(file("${rootProject.buildDir}/libs/UniverseCore.jar"))
   }
 }
