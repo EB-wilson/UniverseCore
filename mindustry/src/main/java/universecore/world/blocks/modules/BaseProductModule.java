@@ -43,26 +43,25 @@ public class BaseProductModule extends BlockModule {
   }
   
   public void setCurrent(){
-    current = get().get(entity.consumeCurrent());
+    current = entity.consumeCurrent() == -1? null: get().get(entity.consumeCurrent());
   }
   
   public void update(){
-    current = null;
-    if(get() == null) return;
-    
+    setCurrent();
+
+    valid = true;
     //只在选择了生产列表时才进行产出更新
-    if(entity.produceCurrent() >= 0){
+    if(current != null){
       setCurrent();
-      boolean docons = entity.consumeValid() && entity.shouldConsume() && entity.shouldProduct();
+      boolean doprod = entity.consumeValid() && entity.shouldConsume() && entity.shouldProduct();
       boolean preValid = valid();
-  
-      valid = true;
+
       boolean anyValid = false;
-      if(current != null) for(BaseProduce prod : current.all()){
+      for(BaseProduce prod : current.all()){
         boolean v = prod.valid(entity.getBuilding(ProducerBuildComp.class));
         anyValid |= v;
         valid &= !prod.shouldBlockWhenFull() || v;
-        if(docons && preValid && v){
+        if(doprod && preValid && v){
           prod.update(entity.getBuilding(ProducerBuildComp.class));
         }
       }
@@ -82,7 +81,7 @@ public class BaseProductModule extends BlockModule {
   }
   
   public boolean valid(){
-    return valid && entity.shouldProduct() && entity.getBuilding().enabled;
+    return valid && entity.getBuilding().enabled;
   }
 
   @Override

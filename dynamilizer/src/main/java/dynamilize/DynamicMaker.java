@@ -10,6 +10,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -43,7 +44,7 @@ import static dynamilize.classmaker.ClassInfo.*;
  * @see DataPool
  *
  * @author EBwilson */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "DuplicatedCode"})
 public abstract class DynamicMaker{
   public static final String CALLSUPER = "$super";
 
@@ -96,6 +97,7 @@ public abstract class DynamicMaker{
 
   private final HashMap<ClassImplements<?>, Class<?>> classPool = new HashMap<>();
   private final HashMap<Class<?>, DataPool> classPoolsMap = new HashMap<>();
+  private final HashMap<Class<?>, HashMap<FunctionType, MethodHandle>> constructors = new HashMap<>();
 
   /**创建一个实例，并传入其要使用的{@linkplain JavaHandleHelper java行为支持器}，子类引用此构造器可能直接设置默认的行为支持器而无需外部传入*/
   protected DynamicMaker(JavaHandleHelper helper){
@@ -122,19 +124,47 @@ public abstract class DynamicMaker{
     };
   }
 
+  /**使用默认构造函数构造没有实现额外接口的动态类的实例，实例的java类型委托类为{@link Object}
+   *
+   * @param dynamicClass 用于实例化的动态类型
+   * @return 构造出的动态实例*/
   public DynamicObject newInstance(DynamicClass dynamicClass){
     return newInstance(EMPTY_CLASSES, dynamicClass);
   }
 
+  /**使用默认构造函数构造动态类的实例，实例实现了给出的接口列表，java类型委托为{@link Object}
+   *
+   * @param interfaces 实例实现的接口列表
+   * @param dynamicClass 用于实例化的动态类型
+   * @return 构造出的动态实例*/
   @SuppressWarnings("rawtypes")
   public DynamicObject newInstance(Class<?>[] interfaces, DynamicClass dynamicClass){
     return newInstance(Object.class, interfaces, dynamicClass);
   }
 
+  /**用给出的构造函数参数构造动态类的实例，参数表必须可以在委托的java类型中存在匹配的可用构造器。
+   * <p>实例无额外接口，类型委托由参数确定
+   *
+   * @param base 执行委托的java类型，这将决定此实例可分配到的类型
+   * @param dynamicClass 用于实例化的动态类型
+   * @param args 构造函数实参
+   * @return 构造出的动态实例
+   *
+   * @throws RuntimeException 若构造函数实参无法匹配到相应的构造器或者存在其他异常*/
   public <T> DynamicObject<T> newInstance(Class<T> base, DynamicClass dynamicClass, Object... args){
     return newInstance(base, EMPTY_CLASSES, dynamicClass, args);
   }
 
+  /**用给出的构造函数参数构造动态类的实例，参数表必须可以在委托的java类型中存在匹配的可用构造器。
+   * <p>实例实现了给出的接口列表，类型委托由参数确定
+   *
+   * @param base 执行委托的java类型，这将决定此实例可分配到的类型
+   * @param interfaces 实例实现的接口列表
+   * @param dynamicClass 用于实例化的动态类型
+   * @param args 构造函数实参
+   * @return 构造出的动态实例
+   *
+   * @throws RuntimeException 若构造函数实参无法匹配到相应的构造器或者存在其他异常*/
   @SuppressWarnings("unchecked")
   public <T> DynamicObject<T> newInstance(Class<T> base, Class<?>[] interfaces, DynamicClass dynamicClass, Object... args){
     checkBase(base);
@@ -158,11 +188,8 @@ public abstract class DynamicMaker{
     return helper;
   }
 
-  /**检查委托基类的可用性，基类若为final或者不是动态委托产生的类型则都会抛出异常*/
+  /**检查委托基类的可用性，基类若为final或者基类为接口则抛出异常*/
   protected <T> void checkBase(Class<T> base){
-    if(base.getAnnotation(DynamicType.class) != null)
-      throw new IllegalHandleException("cannot derive a dynamic class with a dynamic class");
-
     if(base.isInterface())
       throw new IllegalHandleException("interface cannot use to derive a dynamic class, please write it in parameter \"interfaces\" to implement this interface");
 
@@ -196,21 +223,24 @@ public abstract class DynamicMaker{
         }
       };
 
-      for(Method method: clazz.getDeclaredMethods()){
-        CallSuperMethod callSuper = method.getAnnotation(CallSuperMethod.class);
-        if(callSuper != null){
-          String name = callSuper.srcMethod();
-          String signature = FunctionType.signature(name, method.getParameterTypes());
-          res.setFunction(
-              name,
-              (self, args) -> ((SuperInvoker) self).invokeSuper(signature, args.args()),
-              method.getParameterTypes()
-          );
-        }
-      }
-
       Class<?> curr = clazz;
       while(curr != null){
+        if(curr.getAnnotation(DynamicType.class) != null){
+          for(Method method: curr.getDeclaredMethods()){
+            CallSuperMethod callSuper = method.getAnnotation(CallSuperMethod.class);
+            if(callSuper != null){
+              String name = callSuper.srcMethod();
+              String signature = FunctionType.signature(name, method.getParameterTypes());
+              res.setFunction(
+                  name,
+                  (self, args) -> ((SuperInvoker) self).invokeSuper(signature, args.args()),
+                  method.getParameterTypes()
+              );
+            }
+          }
+          curr = curr.getSuperclass();
+        }
+
         for(Field field: curr.getDeclaredFields()){
           if(Modifier.isStatic(field.getModifiers()) || isInternalField(field.getName())) continue;
 
@@ -626,10 +656,10 @@ public abstract class DynamicMaker{
     HashMap<Method, Integer> callSuperCaseMap = new HashMap<>();
 
     // public <init>(DynamicClass $dyC$, DataPool $datP$, DataPool.ReadOnlyPool $basePool$, *parameters*){
-    //   super(*parameters*);
     //   this.$dynamic_type$ = $dyC$;
     //   this.$datapool$ = $datP$;
     //   this.$varValuePool$ = new HashMap<>();
+    //   super(*parameters*);
     //   this.$superbasepointer$ = $datapool$.getReader(this);
     //
     //   this.$datapool$.init(*parameters*);
@@ -646,25 +676,26 @@ public abstract class DynamicMaker{
       List<Parameter<?>> superParams = Arrays.asList(Parameter.asParameter(cstr.getParameters()));
       params.addAll(superParams);
 
-      IMethod<?, Void> constructor = classInfo.superClass().getConstructor(superParams.stream().map(Parameter::getType).toArray(IClass[]::new));
+      IMethod<?, Void> constructor =classInfo.superClass().getConstructor(superParams.stream().map(Parameter::getType).toArray(IClass[]::new));
 
       CodeBlock<Void> code = classInfo.declareConstructor(Modifier.PUBLIC, params.toArray(new Parameter[0]));
       List<ILocal<?>> l = code.getParamList();
       ILocal<?> self = code.getThis();
-      code.invokeSuper(self, constructor, null, l.subList(3, l.size()).toArray(LOCALS_EMP));
 
       ILocal<DynamicClass> dyC = code.getParam(1);
       ILocal<DataPool> datP = code.getParam(2);
       code.assign(self, dyC, dyType);
       code.assign(self, datP, dataPool);
 
-      ILocal<DataPool.ReadOnlyPool> base = code.local(READONLY_POOL_TYPE);
-      code.invoke(code.getParam(3), GET_READER, base, self);
-      code.assign(self, base, basePoolPointer);
-
       ILocal<HashMap> map = code.local(HASH_MAP_TYPE);
       code.newInstance(HASH_MAP_TYPE.getConstructor(), map);
       code.assign(self, map, varPool);
+
+      code.invokeSuper(self, constructor, null, l.subList(3, l.size()).toArray(LOCALS_EMP));
+
+      ILocal<DataPool.ReadOnlyPool> base = code.local(READONLY_POOL_TYPE);
+      code.invoke(code.getParam(3), GET_READER, base, self);
+      code.assign(self, base, basePoolPointer);
 
       ILocal<Object[]> argList = code.local(OBJECT_TYPE.asArray());
       ILocal<Integer> length = code.local(INT_TYPE);

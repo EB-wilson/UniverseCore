@@ -173,7 +173,7 @@ public interface DynamicObject<Self>{
     return res.invoke( this, args);
   }
 
-  default <T extends Self> T self(){
+  default <T extends Self> T castGet(){
     return (T) this;
   }
 }

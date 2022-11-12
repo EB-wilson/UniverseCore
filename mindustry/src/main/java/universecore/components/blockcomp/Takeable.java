@@ -7,6 +7,7 @@ import mindustry.gen.Building;
 import universecore.annotations.Annotations;
 
 /**此接口给予实现者从一堆元素中依次取出（或者预测取出）元素的功能
+ *
  * @author EBwilson
  * @since 1.2*/
 public interface Takeable extends BuildCompBase{
@@ -16,6 +17,7 @@ public interface Takeable extends BuildCompBase{
   }
   
   /**添加一个输出元素堆，用一个字符串作为名字和一个Seq容器初始化，这个操作不是绝对必要的
+   *
    * @param name 堆命名，用于索引
    * @param targets 所有堆元素，选取操作在这当中进行*/
   default void addHeap(String name, Seq<?> targets){
@@ -23,6 +25,7 @@ public interface Takeable extends BuildCompBase{
   }
   
   /**添加一个输出元素堆，用一个字符串作为名字和一个Seq容器，以及一个返回布尔值的过滤器函数初始化，这个操作不是绝对必要的
+   *
    * @param name 堆命名，用于索引
    * @param targets 所有堆元素，选取操作在这当中进行
    * @param valid 选择过滤器*/

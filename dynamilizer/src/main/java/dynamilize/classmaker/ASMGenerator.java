@@ -407,19 +407,6 @@ public class ASMGenerator extends AbstractClassGenerator implements Opcodes{
       labelMap.put(label, new Label());
     }
 
-    if(block.owner().name().equals("<init>") && (!(block.codes().get(0) instanceof IInvoke<?>)
-    || !((IInvoke<?>)block.codes().get(0)).method().name().equals("<init>"))){
-      block.owner().owner().superClass().getConstructor();
-
-      methodVisitor.visitMethodInsn(
-          INVOKESPECIAL,
-          block.owner().owner().superClass().internalName(),
-          "<init>",
-          "()V",
-          false
-      );
-    }
-
     currCodeBlock = block;
     codeCount = 0;
     for(Element element: block.codes()){
@@ -438,7 +425,7 @@ public class ASMGenerator extends AbstractClassGenerator implements Opcodes{
     if(block.owner().returnType() == ClassInfo.VOID_TYPE){
       methodVisitor.visitInsn(RETURN);
     }
-    else throw new IllegalHandleException("method return a non-null value, but the method is not returning correctly");
+    else throw new IllegalHandleException("method return value is not void, but the method is not returning correctly, owner: " + block.owner().name() + block.owner().typeDescription() + " in " + block.owner().owner().name());
   }
 
   @Override

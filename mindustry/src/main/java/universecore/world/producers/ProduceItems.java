@@ -16,6 +16,8 @@ import universecore.components.blockcomp.ProducerBuildComp;
 public class ProduceItems<T extends Building & ProducerBuildComp> extends BaseProduce<T>{
   private static final ObjectMap<Item, ItemStack> TMP = new ObjectMap<>();
 
+  public boolean showPerSecond = true;
+
   /*控制是否随机产出产物(也就是是否为分离机)*/
   public boolean random = false;
   public ItemStack[] items;
@@ -118,7 +120,8 @@ public class ProduceItems<T extends Building & ProducerBuildComp> extends BasePr
         t.add(Core.bundle.get("misc.item") + ":").left();
         if(!random){
           for(ItemStack stack: items){
-            t.add(new ItemDisplay(stack.item, stack.amount, parent.cons.craftTime, true));
+            t.add(showPerSecond? new ItemDisplay(stack.item, stack.amount, parent.cons.craftTime, true):
+                new ItemDisplay(stack.item, stack.amount, true));
           }
         }
         else{

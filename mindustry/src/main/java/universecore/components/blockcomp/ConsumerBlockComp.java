@@ -8,8 +8,8 @@ import universecore.annotations.Annotations;
 import universecore.annotations.Annotations.BindField;
 import universecore.ui.table.RecipeTable;
 import universecore.world.consumers.BaseConsumers;
-import universecore.world.consumers.UncConsumePower;
-import universecore.world.consumers.UncConsumeType;
+import universecore.world.consumers.ConsumePower;
+import universecore.world.consumers.ConsumeType;
 import universecore.world.meta.UncStat;
 
 import java.util.ArrayList;
@@ -74,10 +74,10 @@ public interface ConsumerBlockComp{
       block.consumePowerDynamic(e -> {
         ConsumerBuildComp entity = (ConsumerBuildComp) e;
         if(entity.consumer().current == null) return 0f;
-        if(entity.getBuilding().tile().build == null || entity.consumeCurrent() == -1 || !entity.consumer().excludeValid(UncConsumeType.power))
+        if(entity.getBuilding().tile().build == null || entity.consumeCurrent() == -1 || !entity.consumer().excludeValid(ConsumeType.power))
           return 0f;
 
-        UncConsumePower<?> cons = entity.consumer().current.get(UncConsumeType.power);
+        ConsumePower<?> cons = entity.consumer().current.get(ConsumeType.power);
         if(cons == null) return 0;
 
         if(cons.buffered){

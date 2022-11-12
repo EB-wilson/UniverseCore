@@ -178,6 +178,8 @@ public class EntryProcessor extends BaseProcessor{
     }
     
     String mName = entry.getString("entryMethod");
+    if(symbol.getQualifiedName().equals(mName))
+      throw new IllegalArgumentException("entry method name cannot be equal this method, method name: " + mName);
 
     String[] paramTypeList = entry.getArr("paramTypes", new String[0]);
     String[] contextList = entry.getArr("context", new String[0]);
@@ -278,15 +280,8 @@ public class EntryProcessor extends BaseProcessor{
       }
       parameter = parameterBuild.length() == 0 ? "" : parameterBuild.substring(0, parameterBuild.length() - 2);
 
-      boolean existed = false;
-      for(HashSet<Symbol.MethodSymbol> set: methods.values()){
-        for(Symbol.MethodSymbol m: set){
-          if(equalOrSub(m, symbol)) existed = true;
-        }
-      }
-
       JCTree.JCMethodDecl methodEntry;
-      String callEntry = (symbol.isDefault() && (!existed || symbol.getQualifiedName().toString().equals(method.getQualifiedName().toString())) ? sourceInterface.tsym.getQualifiedName().toString() + ".super." : "") + symbol.getQualifiedName() + "(" + parameter + ");";
+      String callEntry = "this." + symbol.getQualifiedName() + "(" + parameter + ");";
       
       if(!method.getEnclosingElement().equals(tree.sym)){
         StringBuilder callSuperParam = new StringBuilder();

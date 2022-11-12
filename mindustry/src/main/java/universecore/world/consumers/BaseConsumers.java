@@ -5,6 +5,7 @@ import arc.func.*;
 import arc.graphics.g2d.TextureRegion;
 import arc.scene.event.Touchable;
 import arc.struct.ObjectMap;
+import arc.struct.Seq;
 import arc.util.Time;
 import mindustry.gen.Building;
 import mindustry.type.Item;
@@ -20,7 +21,7 @@ import universecore.util.UncLiquidStack;
  * @author EBwilson */
 @SuppressWarnings("unchecked")
 public class BaseConsumers{
-  protected final ObjectMap<UncConsumeType<?>, BaseConsume<?>> cons = new ObjectMap<>();
+  protected final ObjectMap<ConsumeType<?>, BaseConsume<?>> cons = new ObjectMap<>();
   
   /**该值控制生产消耗的时间*/
   public float craftTime = 60;
@@ -42,9 +43,9 @@ public class BaseConsumers{
 
   public Floatf<ConsumerBuildComp> consDelta = e -> e.getBuilding().delta()*e.consEfficiency();
   /**本消耗的可用控制器*/
-  public Boolf<ConsumerBuildComp> valid = e -> true;
+  public Seq<Boolf<ConsumerBuildComp>> valid = new Seq<>();
   /**消耗触发器，在消耗的trigger()方法执行时触发*/
-  public Cons<ConsumerBuildComp> trigger = e -> {};
+  public Seq<Cons<ConsumerBuildComp>> triggers = new Seq<>();
 
   public BaseConsumers(boolean optional){
     this.optional = optional;
@@ -57,7 +58,7 @@ public class BaseConsumers{
   
   public BaseConsumers time(float time){
     this.craftTime = time;
-    showTime = true;
+    showTime = time > 0;
     return this;
   }
 
@@ -74,7 +75,12 @@ public class BaseConsumers{
   }
 
   public <T extends ConsumerBuildComp> BaseConsumers consValidCondition(Boolf<T> cond){
-    this.valid = (Boolf<ConsumerBuildComp>) cond;
+    this.valid.add((Boolf<ConsumerBuildComp>) cond);
+    return this;
+  }
+
+  public <T extends ConsumerBuildComp> BaseConsumers setConsTrigger(Cons<T> cond){
+    this.triggers.add((Cons<ConsumerBuildComp>) cond);
     return this;
   }
 
@@ -82,33 +88,33 @@ public class BaseConsumers{
     return consDelta.get(entity);
   }
   
-  public UncConsumeItems<? extends ConsumerBuildComp> item(Item item, int amount){
-    return items(new ItemStack[]{new ItemStack(item, amount)});
+  public ConsumeItems<? extends ConsumerBuildComp> item(Item item, int amount){
+    return items(new ItemStack(item, amount));
   }
   
-  public UncConsumeItems<? extends ConsumerBuildComp> items(ItemStack[] items){
-    return add(new UncConsumeItems<>(items));
-  }
-  
-  public UncConsumeLiquids<? extends ConsumerBuildComp> liquid(Liquid liquid, float amount){
-    return liquids(new UncLiquidStack[]{new UncLiquidStack(liquid, amount)});
-  }
-  
-  public UncConsumeLiquids<? extends ConsumerBuildComp> liquids(UncLiquidStack[] liquids){
-    return add(new UncConsumeLiquids<>(liquids));
-  }
-  
-  public UncConsumePower<? extends ConsumerBuildComp> power(float usage){
-    return add(new UncConsumePower<>(usage, 0));
+  public ConsumeItems<? extends ConsumerBuildComp> items(ItemStack... items){
+    return add(new ConsumeItems<>(items));
   }
 
-  public UncConsumePower<? extends ConsumerBuildComp> power(float usage, float capacity){
-    return add(new UncConsumePower<>(usage, capacity));
+  public ConsumeLiquids<? extends ConsumerBuildComp> liquid(Liquid liquid, float amount){
+    return liquids(new UncLiquidStack(liquid, amount));
+  }
+  
+  public ConsumeLiquids<? extends ConsumerBuildComp> liquids(UncLiquidStack... liquids){
+    return add(new ConsumeLiquids<>(liquids));
+  }
+  
+  public ConsumePower<? extends ConsumerBuildComp> power(float usage){
+    return add(new ConsumePower<>(usage, 0));
+  }
+
+  public ConsumePower<? extends ConsumerBuildComp> power(float usage, float capacity){
+    return add(new ConsumePower<>(usage, capacity));
   }
 
   @SuppressWarnings("rawtypes")
-  public <T extends ConsumerBuildComp> UncConsumePower<?> powerCond(float usage, float capacity, Boolf<T> cons){
-    return add(new UncConsumePower(usage, capacity){
+  public <T extends ConsumerBuildComp> ConsumePower<?> powerCond(float usage, float capacity, Boolf<T> cons){
+    return add(new ConsumePower(usage, capacity){
       @Override
       public float requestedPower(Building entity){
         return ((Boolf)cons).get(entity) ? super.requestedPower(entity) : 0f;
@@ -117,8 +123,8 @@ public class BaseConsumers{
   }
 
   @SuppressWarnings("rawtypes")
-  public <T extends ConsumerBuildComp> UncConsumePower<?> powerDynamic(Floatf<T> cons, float capacity, Cons<Stats> statBuilder){
-    return add(new UncConsumePower(0, capacity){
+  public <T extends ConsumerBuildComp> ConsumePower<?> powerDynamic(Floatf<T> cons, float capacity, Cons<Stats> statBuilder){
+    return add(new ConsumePower(0, capacity){
       @Override
       public float requestedPower(Building entity){
         return ((Floatf)cons).get(entity);
@@ -131,8 +137,8 @@ public class BaseConsumers{
     });
   }
 
-  public UncConsumePower<? extends ConsumerBuildComp> powerBuffer(float usage, float capacity){
-    return add(new UncConsumePower<>(usage, capacity));
+  public ConsumePower<? extends ConsumerBuildComp> powerBuffer(float usage, float capacity){
+    return add(new ConsumePower<>(usage, capacity));
   }
 
   @SuppressWarnings("rawtypes")
@@ -155,7 +161,7 @@ public class BaseConsumers{
   }
 
   @SuppressWarnings("unchecked")
-  public <T extends BaseConsume<? extends ConsumerBuildComp>> T get(UncConsumeType<T> type){
+  public <T extends BaseConsume<? extends ConsumerBuildComp>> T get(ConsumeType<T> type){
     return (T) cons.get(type);
   }
 
@@ -163,7 +169,7 @@ public class BaseConsumers{
     return cons.values();
   }
 
-  public void remove(UncConsumeType<?> type){
+  public void remove(ConsumeType<?> type){
     cons.remove(type);
   }
 

@@ -3,6 +3,7 @@ package universecore;
 import arc.Core;
 import arc.Events;
 import arc.files.Fi;
+import arc.scene.Group;
 import arc.struct.ObjectMap;
 import arc.util.Log;
 import arc.util.Time;
@@ -11,6 +12,7 @@ import mindustry.game.EventType;
 import mindustry.mod.Mod;
 import mindustry.world.Block;
 import universecore.override.dialogs.UncDatabaseDialog;
+import universecore.ui.fragments.SecondaryConfigureFragment;
 import universecore.ui.styles.UncStyles;
 import universecore.util.animate.CellActions;
 import universecore.util.aspect.AspectManager;
@@ -19,6 +21,7 @@ import universecore.util.aspect.triggers.EventControl;
 import universecore.util.aspect.triggers.TriggerControl;
 import universecore.util.handler.CategoryHandler;
 import universecore.util.handler.ClassHandler;
+import universecore.util.handler.FieldHandler;
 import universecore.util.mods.ModGetter;
 import universecore.util.mods.ModInfo;
 
@@ -39,6 +42,8 @@ public class UncCore extends Mod{
   public static final Fi coreFile = Objects.requireNonNull(ModGetter.getModWithName(coreName)).file;
 
   public static ClassHandler classes;
+
+  public static SecondaryConfigureFragment secConfig;
   
   /**方块类别处理工具实例*/
   public static CategoryHandler categories = new CategoryHandler();
@@ -87,7 +92,12 @@ public class UncCore extends Mod{
   
   @Override
   public void init(){
-    if(!Vars.net.server()) Vars.ui.database = new UncDatabaseDialog();
-    Time.run(0, classes::finishGenerate);
+    if(!Vars.net.server()) {
+      Vars.ui.database = UncDatabaseDialog.make();
+      Group overlay = FieldHandler.getValueTemp(Vars.control.input, "group");
+      secConfig = new SecondaryConfigureFragment();
+      secConfig.build(overlay);
+    }
+    Time.run(2, classes::finishGenerate);
   }
 }

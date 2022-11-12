@@ -138,7 +138,7 @@ public class EntityAspect<EntityType extends Entityc> extends AbstractAspect<Ent
             type,
             false,
             false
-        ).self();
+        ).castGet();
 
         ObjectHandler.copyField(group, aspectGroup);
 

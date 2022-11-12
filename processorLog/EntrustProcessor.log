@@ -1,0 +1,46 @@
+processor: EntrustProcessor (full class name: universecore.annotations.EntrustProcessor)
+time: Thu Oct 27 14:03:55 GMT+08:00 2022
+
+-----------------------------------------
+annotation: universecore.annotations.Annotations.Entrust
+-----------------------------------------
+
+> class: EntTest
+ 1| 
+ 2| @Annotations.Entrust(extend = Test.class)
+ 3| public class EntTest<$Type extends .Test> extends Test {
+ 4|     private $Type $entrust;
+ 5|     
+ 6|     public EntTest($Type inst) {
+ 7|         $entrust = inst;
+ 8|     }
+ 9|     
+10|     public java.lang.String get(java.lang.Object obj) {
+11|         return $entrust.get(obj);
+12|     }
+13|     
+14|     public int get(int k, float w) {
+15|         return $entrust.get(k, w);
+16|     }
+17|     
+18|     public java.lang.String get() {
+19|         return $entrust.get();
+20|     }
+21|     
+22|     public java.lang.Object get(java.lang.String get) {
+23|         return $entrust.get(get);
+24|     }
+25|     
+26|     public void ryb(java.lang.String we) {
+27|         $entrust.ryb(we);
+28|     }
+29|     
+30|     public void run() {
+31|         $entrust.run();
+32|     }
+33|     
+34|     public java.lang.Object get1(int i) {
+35|         return $entrust.get1(i);
+36|     }
+37| }
+

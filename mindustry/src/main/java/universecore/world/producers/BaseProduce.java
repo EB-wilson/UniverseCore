@@ -32,9 +32,7 @@ public abstract class BaseProduce<T extends ProducerBuildComp>{
   public abstract void produce(T entity);
   public abstract void update(T entity);
   public abstract void display(Stats stats);
-  public boolean valid(T entity){
-    return true;
-  }
+  public abstract boolean valid(T entity);
   
   public void dump(T entity){}
 

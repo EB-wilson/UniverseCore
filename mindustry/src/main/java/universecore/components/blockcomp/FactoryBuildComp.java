@@ -5,6 +5,10 @@ import arc.util.io.Reads;
 import arc.util.io.Writes;
 import universecore.annotations.Annotations;
 
+/**工厂建筑的接口组件，该组件赋予方块执行生产/制造的行为，工厂行为整合了{@link ConsumerBuildComp}和{@link ProducerBlockComp}的行为并描述了制造行为的默认实现
+ *
+ * @since 1.4
+ * @author EBwilson*/
 public interface FactoryBuildComp extends ProducerBuildComp{
   @Annotations.BindField("progress")
   default float progress(){
@@ -43,7 +47,7 @@ public interface FactoryBuildComp extends ProducerBuildComp{
       return;
     }
 
-    if(consumeValid()){
+    if(shouldConsume() && consumeValid()){
       progress(progress() + progressIncrease(consumer().current.craftTime));
       warmup(Mathf.lerpDelta(warmup(), 1, getFactoryBlock().warmupSpeed()));
 

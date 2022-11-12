@@ -37,18 +37,18 @@ public class BaseProducers{
   }
   
   public ProduceItems<?> item(Item item, int amount){
-    return items(new ItemStack[]{new ItemStack(item, amount)});
+    return items(new ItemStack(item, amount));
   }
   
-  public ProduceItems<?> items(ItemStack[] items){
+  public ProduceItems<?> items(ItemStack... items){
     return add(new ProduceItems<>(items));
   }
   
   public ProduceLiquids<?> liquid(Liquid liquid, float amount){
-    return liquids(new UncLiquidStack[]{new UncLiquidStack(liquid, amount)});
+    return liquids(new UncLiquidStack(liquid, amount));
   }
   
-  public ProduceLiquids<?> liquids(UncLiquidStack[] liquids){
+  public ProduceLiquids<?> liquids(UncLiquidStack... liquids){
     return add(new ProduceLiquids<>(liquids));
   }
   

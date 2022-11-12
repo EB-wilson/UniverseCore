@@ -4,6 +4,7 @@ import arc.Core;
 import arc.files.Fi;
 import arc.files.ZipFi;
 import arc.struct.ObjectSet;
+import arc.util.Log;
 import universecore.util.classes.BaseGeneratedClassLoader;
 import universecore.util.mods.ModInfo;
 
@@ -15,6 +16,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
@@ -55,6 +57,9 @@ public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
     }
 
     boolean existed = file.exists();
+    if(existed){
+      new Fi(file).copyTo(TMP_FILE);
+    }
     try(ZipOutputStream outputStream = new ZipOutputStream(new FileOutputStream(file))){
       String entryName = name.replace(".", "/") + ".class";
 
@@ -64,21 +69,29 @@ public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
       added.add(entry.getName());
 
       if(existed){
-        new Fi(file).copyTo(TMP_FILE);
-        ZipFile tempZipped = new ZipFile(TMP_FILE.file());
+        try {
+          ZipFile tempZipped = new ZipFile(TMP_FILE.file());
 
-        Enumeration<? extends ZipEntry> entries = tempZipped.entries();
-        while((entry = entries.nextElement()) != null){
-          if(entry.isDirectory() || !added.add(entry.getName())) continue;
+          Enumeration<? extends ZipEntry> entries = tempZipped.entries();
+          while (entries.hasMoreElements()) {
+            entry = entries.nextElement();
+            if (entry.isDirectory() || !added.add(entry.getName())) continue;
 
-          outputStream.putNextEntry(new ZipEntry(entry));
-          try(InputStream inputStream = tempZipped.getInputStream(entry)){
-            for(int l = inputStream.read(); l > 0; l = inputStream.read()){
-              outputStream.write(l);
+            outputStream.putNextEntry(new ZipEntry(entry));
+            try (InputStream inputStream = tempZipped.getInputStream(entry)) {
+              for (int l = inputStream.read(); l > -1; l = inputStream.read()) {
+                outputStream.write(l);
+              }
+              outputStream.closeEntry();
+              outputStream.flush();
             }
-            outputStream.closeEntry();
-            outputStream.flush();
           }
+        }
+        catch (ZipException e){
+          Log.warn("[GeneratedClassLoader] cache zip format error or it was an empty zip, direct write byte code");
+        }finally {
+          TMP_FILE.delete();
+          TMP_FILE.deleteDirectory();
         }
       }
 
@@ -91,8 +104,6 @@ public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
       zip = new ZipFi(new Fi(file));
     }catch(IOException e){
       throw new RuntimeException(e);
-    }finally{
-      TMP_FILE.delete();
     }
 
     updateLoader();

@@ -19,7 +19,7 @@ public interface ConsumerBuildComp extends BuildCompBase{
   }
 
   @Annotations.MethodEntry(entryMethod = "update")
-  default void updateProducer(){
+  default void updateConsumer(){
     consumer().update();
   }
 
@@ -42,6 +42,10 @@ public interface ConsumerBuildComp extends BuildCompBase{
   }
   
   default boolean shouldConsume(){
-    return consumer() != null && consumer().hasOptional() || consumeCurrent() != -1;
+    return consumer() != null && consumeCurrent() != -1;
+  }
+
+  default boolean shouldConsumeOptions(){
+    return shouldConsume() && consumer().hasOptional();
   }
 }

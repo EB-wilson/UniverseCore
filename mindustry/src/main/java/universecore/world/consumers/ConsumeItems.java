@@ -4,9 +4,9 @@ import arc.Core;
 import arc.graphics.g2d.TextureRegion;
 import arc.math.Mathf;
 import arc.scene.ui.layout.Table;
-import arc.struct.Bits;
 import arc.struct.ObjectMap;
-import mindustry.Vars;
+import arc.struct.Seq;
+import mindustry.ctype.Content;
 import mindustry.gen.Building;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
@@ -17,37 +17,34 @@ import mindustry.world.meta.Stat;
 import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ConsumerBuildComp;
 
-public class UncConsumeItems<T extends Building & ConsumerBuildComp> extends BaseConsume<T>{
+public class ConsumeItems<T extends Building & ConsumerBuildComp> extends ConsumeItemBase<T>{
   private static final ObjectMap<Item, ItemStack> TMP = new ObjectMap<>();
 
-  public ItemStack[] items;
+  public boolean showPerSecond = true;
 
-  public UncConsumeItems(ItemStack[] items){
-    this.items = items;
-  }
-  
-  public UncConsumeType<UncConsumeItems<?>> type(){
-    return UncConsumeType.item;
+  public ConsumeItems(ItemStack[] items){
+    this.consItems = items;
   }
   
   @Override
   public TextureRegion icon(){
-    return items[0].item.uiIcon;
+    return consItems[0].item.uiIcon;
   }
 
+  @SuppressWarnings({"rawtypes", "DuplicatedCode"})
   @Override
   public void merge(BaseConsume<T> other){
-    if(other instanceof UncConsumeItems cons){
+    if(other instanceof ConsumeItems cons){
       TMP.clear();
-      for(ItemStack stack: items){
+      for(ItemStack stack: consItems){
         TMP.put(stack.item, stack);
       }
 
-      for(ItemStack stack: cons.items){
+      for(ItemStack stack: cons.consItems){
         TMP.get(stack.item, () -> new ItemStack(stack.item, 0)).amount += stack.amount;
       }
 
-      items = TMP.values().toSeq().sort((a, b) -> a.item.id - b.item.id).toArray(ItemStack.class);
+      consItems = TMP.values().toSeq().sort((a, b) -> a.item.id - b.item.id).toArray(ItemStack.class);
       return;
     }
     throw new IllegalArgumentException("only merge consume with same type");
@@ -56,7 +53,7 @@ public class UncConsumeItems<T extends Building & ConsumerBuildComp> extends Bas
   @Override
   public void consume(T object){
     float f = multiple(object);
-    for(ItemStack stack : items){
+    for(ItemStack stack : consItems){
       int amount = stack.amount*((int)Math.floor(f)) + Mathf.num(Math.random()<f%1);
       object.items.remove(stack.item, amount);
     }
@@ -72,8 +69,9 @@ public class UncConsumeItems<T extends Building & ConsumerBuildComp> extends Bas
       table.table(t -> {
         t.defaults().left().grow().fill().padLeft(6);
         t.add(Core.bundle.get("misc.item") + ":");
-        for(ItemStack stack: items){
-          t.add(new ItemDisplay(stack.item, stack.amount, parent.craftTime, true));
+        for(ItemStack stack: consItems){
+          t.add(showPerSecond? new ItemDisplay(stack.item, stack.amount, parent.craftTime, true):
+              new ItemDisplay(stack.item, stack.amount, true));
         }
       }).left().padLeft(5);
     });
@@ -81,7 +79,7 @@ public class UncConsumeItems<T extends Building & ConsumerBuildComp> extends Bas
 
   @Override
   public void build(T entity, Table table) {
-    for(ItemStack stack : items){
+    for(ItemStack stack : consItems){
       int amount = (int)(stack.amount*multiple(entity));
       if(amount == 0 && !entity.consumer().valid()) amount = stack.amount;
 
@@ -95,18 +93,14 @@ public class UncConsumeItems<T extends Building & ConsumerBuildComp> extends Bas
   @Override
   public float efficiency(T entity){
     if(entity.items == null) return 0;
-    for(ItemStack stack: items){
+    for(ItemStack stack: consItems){
       if(entity.items == null || entity.items.get(stack.item) < stack.amount*multiple(entity)) return 0;
     }
     return 1;
   }
 
   @Override
-  public Bits filter(T entity){
-    Bits result = new Bits(Vars.content.items().size);
-    for(ItemStack stack: items){
-      result.set(stack.item.id);
-    }
-    return result;
+  public Seq<Content> filter(){
+    return Seq.with(consItems).map(s -> s.item);
   }
 }

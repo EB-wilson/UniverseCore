@@ -5,6 +5,7 @@ import arc.files.Fi;
 import arc.files.ZipFi;
 import arc.func.Boolf2;
 import arc.struct.Seq;
+import arc.util.ArcRuntimeException;
 import arc.util.serialization.Jval;
 import mindustry.mod.Mod;
 
@@ -17,7 +18,12 @@ public class ModGetter{
    * @return 这个mod的main meta文件
    * @throws IllegalModHandleException 如果这个文件不是一个mod*/
   public static Fi checkModFormat(Fi modFile) throws IllegalModHandleException{
-    if(!(modFile instanceof ZipFi) && !modFile.isDirectory()) modFile = new ZipFi(modFile);
+    try {
+      if (!(modFile instanceof ZipFi) && !modFile.isDirectory()) modFile = new ZipFi(modFile);
+    }
+    catch(ArcRuntimeException e){
+      throw new IllegalModHandleException("file was not a valid zipped file");
+    }
 
     Fi meta = modFile.child("mod.json").exists()? modFile.child("mod.json"):
         modFile.child("mod.hjson").exists()? modFile.child("mod.hjson"):

@@ -28,10 +28,10 @@ public class EntrustProcessor extends BaseProcessor{
           
           maker.at(tree);
           
-          boolean blackList = true;
-          Type extend = Type.noType;
+          boolean blackList;
+          Type extend;
           HashSet<Type> interfaces = new HashSet<>();
-          AnnotationMirrors anno = getAnnotationParams(tree.sym, Annotations.ImplEntries.class);
+          AnnotationMirrors anno = getAnnotationParams(tree.sym, Annotations.Entrust.class);
           blackList = anno.getBoolean("blackList");
           extend = anno.getType("extend");
           for(Attribute attr: anno.getArr("implement")){
@@ -57,7 +57,35 @@ public class EntrustProcessor extends BaseProcessor{
           HashSet<Type> implementTypes = new HashSet<>();
           LinkedList<Type> queue = new LinkedList<>();
           HashMap<String, HashSet<Symbol.MethodSymbol>> methods = new HashMap<>(), declareMethods = new HashMap<>();
-          
+
+          int pCount = 0;
+          for(Symbol symbol : tree.sym.getEnclosedElements()){
+            if(symbol instanceof Symbol.MethodSymbol){
+              addMethod(declareMethods, (Symbol.MethodSymbol) symbol);
+              if(symbol.isConstructor()){
+                int count = 0;
+                for(Symbol.VarSymbol param : ((Symbol.MethodSymbol) symbol).getParameters()){
+                  if(param.getAnnotation(Annotations.EntrustInst.class) != null){
+                    count++;
+                    pCount++;
+                  }
+                  if(count > 1)
+                    throw new IllegalArgumentException("target parameter should be only one parameter marked with @Entrust annotation, class: " + ((TypeElement) element).getQualifiedName());
+                }
+              }
+            }
+            else if(symbol instanceof Symbol.VarSymbol){
+              if(symbol.getAnnotation(Annotations.EntrustInst.class) != null){
+                if(entrustObj == null){
+                  entrustObj = (JCTree.JCVariableDecl) trees.getTree(symbol);
+                }
+                else throw new IllegalArgumentException("entrust field is require only one, class: " + ((TypeElement) element).getQualifiedName());
+              }
+            }
+          }
+          if(pCount == 0)
+            throw new IllegalArgumentException("a entrust class must have at least one constructor containing the passed in entrust instance, class: " + ((TypeElement) element).getQualifiedName());
+
           boolean test = false;
           Type extendType = null;
           Symbol.ClassSymbol curr = tree.sym;
@@ -66,50 +94,23 @@ public class EntrustProcessor extends BaseProcessor{
               test = true;
               extendType = curr.type;
             }
-            if(curr == tree.sym){
-              int pCount = 0;
-              for(Symbol symbol : curr.getEnclosedElements()){
-                if(symbol instanceof Symbol.MethodSymbol){
-                  addMethod(declareMethods, (Symbol.MethodSymbol) symbol);
-                  if(symbol.isConstructor()){
-                    int count = 0;
-                    for(Symbol.VarSymbol param : ((Symbol.MethodSymbol) symbol).getParameters()){
-                      if(param.getAnnotation(Annotations.EntrustInst.class) != null){
-                        count++;
-                        pCount++;
-                      }
-                      if(count > 1)
-                        throw new IllegalArgumentException("target parameter should be only one parameter marked with @Entrust annotation, class: " + ((TypeElement) element).getQualifiedName());
-                    }
-                  }
-                }
-                else if(symbol instanceof Symbol.VarSymbol){
-                  if(symbol.getAnnotation(Annotations.EntrustInst.class) != null){
-                    if(entrustObj == null){
-                      entrustObj = (JCTree.JCVariableDecl) trees.getTree(symbol);
-                    }
-                    else throw new IllegalArgumentException("entrust field is require only one, class: " + ((TypeElement) element).getQualifiedName());
-                  }
-                }
-              }
-              if(pCount == 0)
-                throw new IllegalArgumentException("a entrust class must have at least one constructor containing the passed in entrust instance, class: " + ((TypeElement) element).getQualifiedName());
-            }
             
             for(Type inte : curr.getInterfaces()){
               if(inte.isInterface()) queue.addFirst(inte);
             }
-            
-            curr = (Symbol.ClassSymbol) curr.getSuperclass().tsym;
-            if(curr == null || curr.getQualifiedName().equals(names.java_lang_Object)) break;
-            
-            for(Symbol symbol : curr.getEnclosedElements()){
-              if(test && symbol instanceof Symbol.MethodSymbol && !symbol.isConstructor() && !((Symbol.MethodSymbol) symbol).isStaticOrInstanceInit()){
-                if((symbol.flags() & Modifier.PUBLIC) != 0
-                    && (symbol.flags() & (Modifier.STATIC | Modifier.FINAL)) == 0)
-                  addMethod(methods, (Symbol.MethodSymbol) symbol);
+
+            if(curr != tree.sym && test){
+              for(Symbol symbol: curr.getEnclosedElements()){
+                if(symbol instanceof Symbol.MethodSymbol && !symbol.isConstructor() && !((Symbol.MethodSymbol) symbol).isStaticOrInstanceInit()){
+                  if((symbol.flags() & Modifier.PUBLIC) != 0
+                      && (symbol.flags() & (Modifier.STATIC | Modifier.FINAL)) == 0)
+                    addMethod(methods, (Symbol.MethodSymbol) symbol);
+                }
               }
             }
+
+            curr = (Symbol.ClassSymbol) curr.getSuperclass().tsym;
+            if(curr.getQualifiedName().equals(names.java_lang_Object)) break;
           }
           
           if(!test && extend != Type.noType)
@@ -136,8 +137,7 @@ public class EntrustProcessor extends BaseProcessor{
           }
           if(!markInterfaces.isEmpty())
             throw new IllegalArgumentException("create entrust require the source class implement all the annotation assigned interfaces, class: " + ((TypeElement) element).getQualifiedName());
-  
-          assert tree.sym != null;
+
           ArrayList<JCTree.JCExpression> types = new ArrayList<>();
           if(extend != Type.noType && !extend.tsym.getQualifiedName().equals(names.java_lang_Object) && tree.sym.getSuperclass() != null) types.add(maker.Type(extendType));
           for(Type type: implementTypes){
@@ -212,7 +212,7 @@ public class EntrustProcessor extends BaseProcessor{
                         maker.Ident(entrustObj.name),
                         maker.Ident(paramTarget.name)))));
           }
-  
+
           for(HashSet<Symbol.MethodSymbol> set : methods.values()){
             entrust:for(Symbol.MethodSymbol method : set){
               boolean whiteValid = blackList;

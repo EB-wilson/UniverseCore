@@ -62,14 +62,14 @@ public abstract class BaseContainerAspect<Type, Cont> extends AbstractAspect<Typ
       for(Method method: getAddEntry()){
         AspectType.setFunction(method.getName(), (self, supe, args) -> {
           BaseContainerAspect<Object, Cont> aspect = (BaseContainerAspect<Object, Cont>) aspectMap.get(self);
-          if(aspect != null) onAdd(aspect, self.self(), args.args());
+          if(aspect != null) onAdd(aspect, self.castGet(), args.args());
           return supe.invokeFunc(method.getName(), args);
         }, method.getParameterTypes());
       }
       for(Method method: getRemoveEntry()){
         AspectType.setFunction(method.getName(), (self, supe, args) -> {
           BaseContainerAspect<Object, Cont> aspect = (BaseContainerAspect<Object, Cont>) aspectMap.get(self);
-          if(aspect != null) onRemove(aspect, self.self(), args.args());
+          if(aspect != null) onRemove(aspect, self.castGet(), args.args());
           return supe.invokeFunc(method.getName(), args);
         }, method.getParameterTypes());
       }
@@ -83,7 +83,7 @@ public abstract class BaseContainerAspect<Type, Cont> extends AbstractAspect<Typ
     
     public Cont instance(Class<? extends Cont> type){
       if(!this.type.isAssignableFrom(type)) throw new IllegalArgumentException("can not create a disassignable class: " + type + " instance");
-      return UncCore.classes.getDynamicMaker().newInstance(type, getEntryProxy(type)).self();
+      return UncCore.classes.getDynamicMaker().newInstance(type, getEntryProxy(type)).castGet();
     }
     
     public void addAspect(Cont cont, BaseContainerAspect<?, Cont> aspect){

@@ -34,4 +34,5 @@ public class ProduceType<T extends BaseProduce<?>>{
   public static final ProduceType<ProduceItems<?>> item = (ProduceType<ProduceItems<?>>) add(ProduceItems.class);
   public static final ProduceType<ProduceLiquids<?>> liquid = (ProduceType<ProduceLiquids<?>>) add(ProduceLiquids.class);
   public static final ProduceType<ProducePower<?>> power = (ProduceType<ProducePower<?>>) add(ProducePower.class);
+  public static final ProduceType<ProducePayload<?>> payload = (ProduceType<ProducePayload<?>>) add(ProducePayload.class);
 }

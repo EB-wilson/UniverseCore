@@ -4,9 +4,9 @@ import arc.Core;
 import arc.graphics.g2d.TextureRegion;
 import arc.math.Mathf;
 import arc.scene.ui.layout.Table;
-import arc.struct.Bits;
 import arc.struct.ObjectMap;
-import mindustry.Vars;
+import arc.struct.Seq;
+import mindustry.ctype.Content;
 import mindustry.gen.Building;
 import mindustry.type.Liquid;
 import mindustry.ui.LiquidDisplay;
@@ -16,42 +16,42 @@ import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ConsumerBuildComp;
 import universecore.util.UncLiquidStack;
 
-public class UncConsumeLiquids<T extends Building & ConsumerBuildComp> extends BaseConsume<T>{
+public class ConsumeLiquids<T extends Building & ConsumerBuildComp> extends ConsumeLiquidBase<T>{
   private static final ObjectMap<Liquid, UncLiquidStack> TMP = new ObjectMap<>();
 
   public boolean portion = false;
-  public UncLiquidStack[] liquids;
 
-  public UncConsumeLiquids(UncLiquidStack[] liquids){
-    this.liquids = liquids;
+  public ConsumeLiquids(UncLiquidStack[] liquids){
+    this.consLiquids = liquids;
   }
   
-  public UncConsumeType<?> type(){
-    return UncConsumeType.liquid;
+  public ConsumeType<?> type(){
+    return ConsumeType.liquid;
   }
   
   @Override
   public TextureRegion icon(){
-    return liquids[0].liquid.uiIcon;
+    return consLiquids[0].liquid.uiIcon;
   }
   
   public void portion(){
     this.portion = true;
   }
 
+  @SuppressWarnings({"rawtypes", "DuplicatedCode"})
   @Override
   public void merge(BaseConsume<T> other){
-    if(other instanceof UncConsumeLiquids cons){
+    if(other instanceof ConsumeLiquids cons){
       TMP.clear();
-      for(UncLiquidStack stack: liquids){
+      for(UncLiquidStack stack: consLiquids){
         TMP.put(stack.liquid, stack);
       }
 
-      for(UncLiquidStack stack: cons.liquids){
+      for(UncLiquidStack stack: cons.consLiquids){
         TMP.get(stack.liquid, () -> new UncLiquidStack(stack.liquid, 0)).amount += stack.amount;
       }
 
-      liquids = TMP.values().toSeq().sort((a, b) -> a.liquid.id - b.liquid.id).toArray(UncLiquidStack.class);
+      consLiquids = TMP.values().toSeq().sort((a, b) -> a.liquid.id - b.liquid.id).toArray(UncLiquidStack.class);
       return;
     }
     throw new IllegalArgumentException("only merge consume with same type");
@@ -59,14 +59,14 @@ public class UncConsumeLiquids<T extends Building & ConsumerBuildComp> extends B
   
   @Override
   public void consume(T entity) {
-    if(portion) for(UncLiquidStack stack: liquids){
+    if(portion) for(UncLiquidStack stack: consLiquids){
       entity.liquids.remove(stack.liquid, stack.amount*60*multiple(entity));
     }
   }
 
   @Override
   public void update(T entity) {
-    if(!portion) for(UncLiquidStack stack: liquids){
+    if(!portion) for(UncLiquidStack stack: consLiquids){
       entity.liquids.remove(stack.liquid, stack.amount*parent.delta(entity)*multiple(entity));
     }
   }
@@ -78,7 +78,7 @@ public class UncConsumeLiquids<T extends Building & ConsumerBuildComp> extends B
       table.table(t -> {
         t.defaults().left().fill().padLeft(6);
         t.add(Core.bundle.get("misc.liquid") + ":");
-        for(UncLiquidStack stack: liquids){
+        for(UncLiquidStack stack: consLiquids){
           t.add(new LiquidDisplay(stack.liquid, stack.amount*60, true));
         }
       }).left().padLeft(5);
@@ -87,7 +87,7 @@ public class UncConsumeLiquids<T extends Building & ConsumerBuildComp> extends B
 
   @Override
   public void build(T entity, Table table) {
-    for(UncLiquidStack stack : liquids){
+    for(UncLiquidStack stack : consLiquids){
       table.add(new ReqImage(stack.liquid.uiIcon,
       () -> entity.liquids != null && entity.liquids.get(stack.liquid) > 0)).padRight(8);
     }
@@ -98,7 +98,7 @@ public class UncConsumeLiquids<T extends Building & ConsumerBuildComp> extends B
   public float efficiency(T entity){
     if(entity.liquids == null) return 0;
     if(portion){
-      for(UncLiquidStack stack: liquids){
+      for(UncLiquidStack stack: consLiquids){
         if(entity.liquids.get(stack.liquid) < stack.amount*multiple(entity)*60) return 0;
       }
       return 1;
@@ -106,7 +106,7 @@ public class UncConsumeLiquids<T extends Building & ConsumerBuildComp> extends B
     else{
       float min = 1;
 
-      for(UncLiquidStack stack: liquids){
+      for(UncLiquidStack stack: consLiquids){
         min = Math.min(entity.liquids.get(stack.liquid)/(stack.amount*multiple(entity)), min);
       }
 
@@ -114,13 +114,9 @@ public class UncConsumeLiquids<T extends Building & ConsumerBuildComp> extends B
       return Mathf.clamp(min);
     }
   }
-  
+
   @Override
-  public Bits filter(T entity){
-    Bits result = new Bits(Vars.content.liquids().size);
-    for(UncLiquidStack stack: liquids){
-      result.set(stack.liquid.id);
-    }
-    return result;
+  public Seq<Content> filter(){
+    return Seq.with(consLiquids).map(s -> s.liquid);
   }
 }
