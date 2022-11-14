@@ -1,5 +1,16 @@
 apply plugin: 'java'
 
+publishing {
+  publications {
+    myApp(MavenPublication) {
+      groupId = 'com.github.EB-wilson'
+      artifactId = 'annotations'
+      version = "$uncVersion"
+      from components.java
+    }
+  }
+}
+
 dependencies{
   compileOnly files("libs/tools.jar")
   compileOnly 'com.google.auto.service:auto-service:1.0.1'

@@ -5,6 +5,17 @@ plugins {
   id 'java'
 }
 
+publishing {
+  publications {
+    myApp(MavenPublication) {
+      groupId = 'com.github.EB-wilson'
+      artifactId = 'android26'
+      version = "$uncVersion"
+      from components.java
+    }
+  }
+}
+
 tasks.withType(JavaCompile){
   options.compilerArgs.addAll(['--release', '8'])
 }

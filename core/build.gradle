@@ -1,6 +1,17 @@
 
 apply plugin: 'java'
 
+publishing {
+    publications {
+        myApp(MavenPublication) {
+            groupId = 'com.github.EB-wilson'
+            artifactId = 'core'
+            version = "$uncVersion"
+            from components.java
+        }
+    }
+}
+
 dependencies {
     repositories{
         mavenCentral()

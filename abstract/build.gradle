@@ -4,6 +4,17 @@ plugins {
 
 version '1.0'
 
+publishing {
+    publications {
+        myApp(MavenPublication) {
+            groupId = 'com.github.EB-wilson'
+            artifactId = 'abstract'
+            version = "$uncVersion"
+            from components.java
+        }
+    }
+}
+
 dependencies{
     repositories{
         mavenCentral()

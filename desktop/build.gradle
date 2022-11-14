@@ -3,6 +3,17 @@ plugins {
   id 'com.github.johnrengelman.shadow'
 }
 
+publishing {
+  publications {
+    myApp(MavenPublication) {
+      groupId = 'com.github.EB-wilson'
+      artifactId = 'desktop'
+      version = "$uncVersion"
+      from components.java
+    }
+  }
+}
+
 tasks.withType(JavaCompile){
   options.compilerArgs.addAll(['--release', '8'])
 }

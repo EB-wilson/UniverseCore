@@ -7,10 +7,9 @@ plugins {
   id 'com.github.johnrengelman.shadow' version '2.0.4'
 }
 
-group 'com.github.EB-wilson'
-version '1.5.0'
-
 ext{
+  uncVersion = '1.0.5'
+
   //the build number that this mod is made for
   mindustryVersion = 'v137'
   //version of SDK you will be using
@@ -19,6 +18,9 @@ ext{
   JDERVersion = 'V1.4-A3'
   sdkRoot = System.getenv("ANDROID_HOME")
 }
+
+group 'com.github.EB-wilson'
+version "$uncVersion"
 
 allprojects{
   apply plugin: 'maven-publish'
@@ -291,4 +293,29 @@ task buildProject{
   doLast {
     delete("${rootProject.buildDir}/libs/${rootProject.name}-desktop.jar")
   }
+}
+
+task buildMavenPublish(type: Jar){
+  dependsOn "buildDesktop"
+
+  archiveFileName = "${rootProject.name}-lib.jar"
+
+  from{[
+      zipTree("${rootProject.buildDir}/libs/${rootProject.name}-desktop.jar"),
+      zipTree("${project(":annotations").buildDir}/libs/annotations.jar")
+  ]}
+
+  from("assets/"){
+    include "**"
+  }
+
+  doLast {
+    delete("${rootProject.buildDir}/libs/${rootProject.name}.jar")
+    file("${rootProject.buildDir}/libs/UniverseCore-lib.jar")
+        .renameTo(file("${rootProject.buildDir}/libs/UniverseCore.jar"))
+  }
+}
+
+generateMetadataFileForMavenPublication{
+  dependsOn "buildMavenPublish"
 }

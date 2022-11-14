@@ -4,6 +4,17 @@ plugins {
 }
 version '1.4-A3'
 
+publishing {
+  publications {
+    myApp(MavenPublication) {
+      groupId = 'com.github.EB-wilson'
+      artifactId = 'dynamilizer'
+      version = "$uncVersion"
+      from components.java
+    }
+  }
+}
+
 repositories {
   mavenCentral()
   maven{ url 'https://www.jitpack.io' }

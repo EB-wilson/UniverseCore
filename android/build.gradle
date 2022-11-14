@@ -3,6 +3,17 @@ plugins {
   id 'com.github.johnrengelman.shadow'
 }
 
+publishing {
+  publications {
+    myApp(MavenPublication) {
+      groupId = 'com.github.EB-wilson'
+      artifactId = 'android'
+      version = "$uncVersion"
+      from components.java
+    }
+  }
+}
+
 dependencies {
   repositories{
     mavenCentral()
