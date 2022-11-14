@@ -21,11 +21,6 @@ ext{
   sdkRoot = System.getenv("ANDROID_HOME")
 }
 
-repositories{
-  mavenCentral()
-  maven{ url 'https://www.jitpack.io' }
-}
-
 allprojects{
   tasks.withType(JavaCompile){
     options.encoding = "UTF-8"
@@ -49,6 +44,11 @@ allprojects{
 }
 
 dependencies {
+  repositories{
+    mavenCentral()
+    maven{ url 'https://www.jitpack.io' }
+  }
+
   implementation project(":core")
   implementation project(":abstract")
   implementation project(":implabstract")

@@ -3,16 +3,16 @@ plugins {
   id 'com.github.johnrengelman.shadow'
 }
 
-repositories{
-  mavenCentral()
-  maven{ url 'https://www.jitpack.io' }
-}
-
 tasks.withType(JavaCompile){
   options.compilerArgs.addAll(['--release', '8'])
 }
 
 dependencies {
+  repositories{
+    mavenCentral()
+    maven{ url 'https://www.jitpack.io' }
+  }
+
   implementation project(":dynamilizer")
 
   compileOnly 'org.ow2.asm:asm:9.3'

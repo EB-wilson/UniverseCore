@@ -1,0 +1,83 @@
+import java.util.jar.JarEntry
+import java.util.jar.JarOutputStream
+
+plugins {
+  id 'java'
+}
+
+tasks.withType(JavaCompile){
+  options.compilerArgs.addAll(['--release', '8'])
+}
+
+dependencies {
+  repositories {
+    mavenCentral()
+    maven{ url 'https://www.jitpack.io' }
+  }
+
+  implementation project(":dynamilizer")
+  implementation "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+  implementation "com.github.Anuken.Mindustry:core:$mindustryVersion"
+
+  implementation project(":core")
+  implementation project(":abstract")
+  implementation project(":android")
+
+  annotationProcessor "com.github.Anuken:jabel:0.7.0"
+}
+
+task buildModule(type: Jar){
+  dependsOn jar
+
+  archiveFileName = "${rootProject.name}-android-api26.jar"
+
+  from{[
+      zipTree("${project(":android26").buildDir}/libs/android26.jar")
+  ]}
+
+  doLast {
+    try {
+      def platformRoot = new File("$sdkRoot/platforms/").listFiles().sort().reverse().find { f -> new File(f, "android.jar").exists() }
+
+      //collect dependencies needed for desugaring
+      def dependencies = (configurations.compileClasspath.asList() + configurations.runtimeClasspath.asList() + [new File(platformRoot, "android.jar")]).collect { "--classpath $it.path" }.join(" ")
+
+      try{
+        System.out.println("build android api 26 dex...")
+
+        //dex and desugar files - this requires d8 in your PATH
+        "d8 $dependencies --min-api 26 --output ${rootProject.name}-android-api26.jar ${rootProject.name}-android-api26.jar"
+            .execute(null, new File("$buildDir/libs")).waitForProcessOutput(System.out, System.err)
+      }
+      catch(Throwable ignored) {
+        def d8 = new File("$sdkRoot/build-tools/").listFiles().find {
+          it.listFiles().any {
+            it.name.contains("d8")
+          } && Integer.valueOf(it.name.substring(0, 2)) >= minSdkAPI
+        }.listFiles().find { it.name.contains("d8") }
+
+        "$d8 $dependencies --min-api 26 --output ${rootProject.name}-android-api26.jar ${rootProject.name}-android-api26.jar"
+            .execute(null, new File("$buildDir/libs")).waitForProcessOutput(System.out, System.err)
+      }
+    } catch (Throwable ignored) {
+      System.out.println("[WARNING] d8 tool or platform tools was not found, if you was installed android SDK, please check your environment variable")
+
+      delete(
+          files("${rootProject.buildDir}/libs/${rootProject.name}-android-api26.jar")
+      )
+
+      def out = new JarOutputStream(new FileOutputStream("${rootProject.buildDir}/libs/${rootProject.name}-android.jar"))
+      out.putNextEntry(new JarEntry("non-androidMod.txt"))
+      StringReader reader = new StringReader(
+          "this mod is don't have classes.dex for android, please consider recompile with a SDK or run this mod on desktop only"
+      )
+
+      int r
+      while((r = reader.read()) != -1){
+        out.write(r)
+        out.flush()
+      }
+      out.close()
+    }
+  }
+}

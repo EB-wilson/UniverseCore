@@ -1,0 +1,24 @@
+plugins {
+  id 'java'
+}
+
+tasks.withType(JavaCompile){
+  options.compilerArgs.addAll(['--release', '9'])
+}
+
+dependencies {
+  repositories {
+    mavenCentral()
+    maven{ url 'https://www.jitpack.io' }
+  }
+
+  implementation project(":dynamilizer")
+  implementation "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+  implementation "com.github.Anuken.Mindustry:core:$mindustryVersion"
+
+  implementation project(":core")
+  implementation project(":abstract")
+  implementation project(":desktop")
+
+  annotationProcessor "com.github.Anuken:jabel:0.7.0"
+}

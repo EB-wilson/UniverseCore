@@ -103,9 +103,17 @@ com_crashlytics_export_strings.xml
 /ios-moe/nbproject/private/
 
 /build/
+/abstract/build/
 /android/build/
+/android26/build/
+/annotations/build/
 /core/build/
 /desktop/build/
+/desktop9/build/
+/dynamilizer/build/
+/implabstract/build/
+/mindustry/build/
+/utilities/build/
 /html/build/
 /ios/build/
 /ios-moe/build/
@@ -142,7 +150,6 @@ nb-configuration.xml
 /local.properties
 .gradle/
 gradle-app.setting
-build.gradle
 
 ## OS Specific
 .DS_Store

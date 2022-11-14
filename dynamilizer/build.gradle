@@ -1,0 +1,30 @@
+plugins {
+  id 'java'
+  id 'com.github.johnrengelman.shadow'
+}
+version '1.4-A3'
+
+repositories {
+  mavenCentral()
+  maven{ url 'https://www.jitpack.io' }
+}
+
+tasks.withType(JavaCompile){
+  options.compilerArgs.addAll(['--release', '8'])
+}
+
+dependencies {
+  implementation 'org.ow2.asm:asm:9.3'
+
+  compileOnly project(":core")
+  compileOnly project(":abstract")
+
+  annotationProcessor "com.github.Anuken:jabel:0.7.0"
+}
+
+assemble{
+  dependsOn(shadowJar)
+}
+
+
+

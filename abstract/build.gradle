@@ -1,0 +1,20 @@
+plugins {
+    id 'java'
+}
+
+version '1.0'
+
+dependencies{
+    repositories{
+        mavenCentral()
+        maven{ url 'https://www.jitpack.io' }
+    }
+
+    compileOnly "com.github.EB-wilson:JavaDynamilizer:V1.4-B1"
+
+    annotationProcessor "com.github.Anuken:jabel:0.7.0"
+}
+
+test {
+    useJUnitPlatform()
+}

@@ -1,0 +1,14 @@
+apply plugin: 'java'
+
+dependencies{
+  compileOnly files("libs/tools.jar")
+  compileOnly 'com.google.auto.service:auto-service:1.0.1'
+
+  annotationProcessor 'com.google.auto.service:auto-service:1.0.1'
+  annotationProcessor "com.github.Anuken:jabel:0.7.0"
+}
+
+repositories{
+  mavenCentral()
+  maven{ url 'https://www.jitpack.io' }
+}
