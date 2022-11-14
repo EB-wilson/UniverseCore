@@ -301,7 +301,7 @@ task buildProject{
 task buildMavenPublish(type: Jar){
   dependsOn "buildDesktop"
 
-  archiveFileName = "lib.jar"
+  archiveFileName = "${rootProject.name}-lib.jar"
 
   from{[
       zipTree("${rootProject.buildDir}/libs/${rootProject.name}-desktop.jar"),
@@ -315,4 +315,10 @@ task buildMavenPublish(type: Jar){
 
 publishToMavenLocal{
   dependsOn "buildMavenPublish"
+
+  doLast{
+    delete("${rootProject.buildDir}/libs/lib.jar")
+    file("${rootProject.buildDir}/libs/${rootProject.name}-lib.jar")
+        .renameTo("${rootProject.buildDir}/libs/lib.jar")
+  }
 }
