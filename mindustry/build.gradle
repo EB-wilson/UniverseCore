@@ -1,37 +1,37 @@
 plugins {
-    id 'java'
+  id 'java'
 }
 
 publishing {
-    publications {
-        myApp(MavenPublication) {
-            groupId = 'com.github.EB-wilson'
-            artifactId = 'mindustry'
-            version = "$uncVersion"
-            from components.java
-        }
+  publications {
+    maven(MavenPublication) {
+      groupId = 'com.github.EB-wilson'
+      artifactId = 'mindustry'
+      version = "$uncVersion"
+      from components.java
     }
+  }
 }
 
 dependencies {
-    repositories {
-        mavenCentral()
-        maven{ url 'https://www.jitpack.io' }
-    }
+  repositories {
+    mavenCentral()
+    maven{ url 'https://www.jitpack.io' }
+  }
 
-    compileOnly project(":dynamilizer")
+  compileOnly project(":dynamilizer")
 
-    compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
-    compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
-    compileOnly project(":core")
-    compileOnly project(":utilities")
-    compileOnly project(":abstract")
-    compileOnly project(":implabstract")
-    compileOnly project(":annotations")
+  compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+  compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+  compileOnly project(":core")
+  compileOnly project(":utilities")
+  compileOnly project(":abstract")
+  compileOnly project(":implabstract")
+  compileOnly project(":annotations")
 
-    annotationProcessor "com.github.Anuken:jabel:0.7.0"
+  annotationProcessor "com.github.Anuken:jabel:0.7.0"
 }
 
 test {
-    useJUnitPlatform()
+  useJUnitPlatform()
 }

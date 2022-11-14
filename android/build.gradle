@@ -5,7 +5,7 @@ plugins {
 
 publishing {
   publications {
-    myApp(MavenPublication) {
+    maven(MavenPublication) {
       groupId = 'com.github.EB-wilson'
       artifactId = 'android'
       version = "$uncVersion"

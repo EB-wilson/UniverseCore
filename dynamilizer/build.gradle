@@ -6,7 +6,7 @@ version '1.4-A3'
 
 publishing {
   publications {
-    myApp(MavenPublication) {
+    maven(MavenPublication) {
       groupId = 'com.github.EB-wilson'
       artifactId = 'dynamilizer'
       version = "$uncVersion"

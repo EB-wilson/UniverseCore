@@ -3,7 +3,7 @@ apply plugin: 'java'
 
 publishing {
     publications {
-        myApp(MavenPublication) {
+        maven(MavenPublication) {
             groupId = 'com.github.EB-wilson'
             artifactId = 'core'
             version = "$uncVersion"

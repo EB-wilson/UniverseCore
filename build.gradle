@@ -46,6 +46,16 @@ allprojects{
   }
 }
 
+publishing {
+  publications {
+    maven(MavenPublication) {
+      groupId = 'com.github.EB-wilson'
+      version = "$uncVersion"
+      from components.java
+    }
+  }
+}
+
 dependencies {
   repositories{
     mavenCentral()
