@@ -1,4 +1,4 @@
-name: Commit Testing
+name: Build project
 
 on: 
   workflow_dispatch:
@@ -17,7 +17,7 @@ jobs:
       with:
         java-version: 17
     - name: Build mod jar
-      run: ./gradlew deploy
+      run: ./gradlew buildProject
     - name: Upload built jar file
       uses: actions/upload-artifact@v2
       with:
