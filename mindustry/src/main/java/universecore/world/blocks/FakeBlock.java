@@ -28,6 +28,18 @@ public class FakeBlock extends Block {
     this.maskedBlock = maskedBlock;
     if (!maskedBlock.hasBuilding())
       throw new IllegalArgumentException("masked block must has building");
+  }
+
+  @Override
+  public void setStats() {
+    maskedBlock.setStats();
+    stats = maskedBlock.stats;
+  }
+
+  @Override
+  public void init() {
+    super.init();
+    health = maskedBlock.health;
 
     localizedName = maskedBlock.localizedName;
     description = maskedBlock.description;
@@ -48,17 +60,6 @@ public class FakeBlock extends Block {
   }
 
   @Override
-  public void setStats() {
-    stats = maskedBlock.stats;
-  }
-
-  @Override
-  public void init() {
-    super.init();
-    health = maskedBlock.health;
-  }
-
-  @Override
   public void drawPlace(int x, int y, int rotation, boolean valid) {
     maskedBlock.drawPlace(x, y, rotation, valid);
   }
@@ -75,7 +76,7 @@ public class FakeBlock extends Block {
 
   @Override
   public boolean canPlaceOn(Tile tile, Team team, int rotation) {
-    return placeValid == null || placeValid.get(tile, team, rotation);
+    return (tile.block() != maskedBlock && tile.block().size == size && (tile.build == null || !tile.block().rotate || tile.build.rotation == rotation)) && (placeValid == null || placeValid.get(tile, team, rotation));
   }
 
   @Override

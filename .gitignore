@@ -34,6 +34,7 @@ packr-out/
 config/
 *.gif
 
+gradle.properties
 version.properties
 
 .attach_*
