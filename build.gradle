@@ -46,16 +46,6 @@ allprojects{
   }
 }
 
-publishing {
-  publications {
-    maven(MavenPublication) {
-      groupId = 'com.github.EB-wilson'
-      version = "$uncVersion"
-      from components.java
-    }
-  }
-}
-
 dependencies {
   repositories{
     mavenCentral()
@@ -75,6 +65,16 @@ dependencies {
   compileOnly project(":annotations")
 
   annotationProcessor project(":annotations")
+}
+
+publishing {
+  publications {
+    maven(MavenPublication) {
+      groupId = 'com.github.EB-wilson'
+      version = "$uncVersion"
+      from components.java
+    }
+  }
 }
 
 shadowJar{
@@ -297,4 +297,27 @@ task buildProject{
   }
 }
 
+task buildMavenPublish(type: Jar){
+  dependsOn "buildDesktop"
 
+  archiveFileName = "${rootProject.name}-lib.jar"
+
+  from{[
+      zipTree("${rootProject.buildDir}/libs/${rootProject.name}-desktop.jar"),
+      zipTree("${project(":annotations").buildDir}/libs/annotations.jar")
+  ]}
+
+  from("assets/"){
+    include "**"
+  }
+
+  doLast {
+    delete("${rootProject.buildDir}/libs/${rootProject.name}.jar")
+    file("${rootProject.buildDir}/libs/UniverseCore-lib.jar")
+        .renameTo(file("${rootProject.buildDir}/libs/UniverseCore.jar"))
+  }
+}
+
+generateMetadataFileForMavenPublication{
+  dependsOn "buildMavenPublish"
+}
