@@ -6,7 +6,6 @@ plugins {
   id 'java'
   id 'com.github.johnrengelman.shadow' version '2.0.4'
 }
-apply plugin: 'maven-publish'
 
 group 'com.github.EB-wilson'
 version '1.5.0'
@@ -22,6 +21,8 @@ ext{
 }
 
 allprojects{
+  apply plugin: 'maven-publish'
+
   tasks.withType(JavaCompile){
     options.encoding = "UTF-8"
 
@@ -292,14 +293,27 @@ task buildProject{
   }
 }
 
-generateMetadataFileForMavenPublication{
-  dependsOn buildLib
+task buildMavenPublish(type: Jar){
+  dependsOn "buildDesktop"
 
-  doLast{
-    delete("${rootProject.buildDir}/libs/${rootProject.name}-desktop.jar")
-    delete("${rootProject.buildDir}/libs/${rootProject.name}-android.jar")
+  archiveFileName = "${rootProject.name}-lib.jar"
+
+  from{[
+      zipTree("${rootProject.buildDir}/libs/${rootProject.name}-desktop.jar"),
+      zipTree("${project(":annotations").buildDir}/libs/annotations.jar")
+  ]}
+
+  from("assets/"){
+    include "**"
+  }
+
+  doLast {
     delete("${rootProject.buildDir}/libs/${rootProject.name}.jar")
     file("${rootProject.buildDir}/libs/UniverseCore-lib.jar")
         .renameTo(file("${rootProject.buildDir}/libs/UniverseCore.jar"))
   }
+}
+
+generateMetadataFileForMavenPublication{
+  dependsOn "buildMavenPublish"
 }
