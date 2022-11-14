@@ -65,6 +65,14 @@ dependencies {
   annotationProcessor project(":annotations")
 }
 
+publishing {
+  publications {
+    maven(MavenPublication) {
+      from components.java
+    }
+  }
+}
+
 shadowJar{
   dependsOn project(":android").getTasksByName("shadowJar", true)
   dependsOn project(":desktop").getTasksByName("shadowJar", true)
