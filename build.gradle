@@ -314,6 +314,6 @@ task buildMavenPublish(type: Jar){
   }
 }
 
-generateMetadataFileForMavenPublication{
+publishToMavenLocal{
   dependsOn "buildMavenPublish"
 }
