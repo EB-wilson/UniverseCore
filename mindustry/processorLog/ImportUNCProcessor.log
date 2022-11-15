@@ -1,0 +1,199 @@
+processor: ImportUNCProcessor (full class name: universecore.annotations.ImportUNCProcessor)
+time: Tue Nov 15 16:59:47 CST 2022
+
+-----------------------------------------
+annotation: universecore.annotations.Annotations.ImportUNC
+-----------------------------------------
+
+> class: Test
+  1| 
+  2| @Annotations.ImportUNC(requireVersion = 15)
+  3| public class Test extends Mod {
+  4|     
+  5|     public Test() {
+  6|         super();
+  7|     }
+  8|     private static long $status$;
+  9|     static {
+ 10|         final arc.struct.ObjectMap<String, String> bundles = arc.struct.ObjectMap.of("zh_CN", "gen.sure = \u786e\u5b9a\ngen.download = \u4e0b\u8f7d\ngen.openfile = \u4ece\u6587\u4ef6\u5bfc\u5165\ngen.exit = \u9000\u51fa\ngen.cancel = \u53d6\u6d88\ngen.downloading = \u4e0b\u8f7d\u4e2d...\ngen.updatedRestart = \u524d\u7f6e\u5df2\u5b89\u88c5\uff0c\u8bf7\u91cd\u542f\u6e38\u620f\ngen.libVersionOld = Universe Core\u7248\u672c\u8fc7\u65e7\ngen.goLibPage = \u524d\u5f80github\ngen.libNotExist = UniverseCore\u672a\u5b89\u88c5\u6216\u6587\u4ef6\u5df2\u4e22\u5931\ngen.downloadLib = \u8bf7\u5b89\u88c5\u6216\u66f4\u65b0\u6700\u65b0\u7248\u672c\u7684UniverseCore\ngen.downLibTip1 = \u60a8\u4e5f\u53ef\u80fd\u540c\u65f6\u5b89\u88c5\u4e86\u65b0\u65e7\u7248\u672c\u7684\u524d\u7f6e\uff0c\u53ef\u524d\u5f80mods\u6587\u4ef6\u5939\u5c06\u65e7\u7248\u672c\u5220\u9664\ngen.downLibTip2 = \u5982\u679c\u60a8\u5df2\u7ecf\u4e0b\u8f7d\u4e86mod\u6587\u4ef6\uff0c\u90a3\u4e48\u60a8\u53ef\u4ee5\u5c06\u5b83\u653e\u5165mods\u6587\u4ef6\u5939\ngen.androidOpenFolder = \u6253\u5f00\u76ee\u5f55\u5931\u8d25\uff0c\u60a8\u53ef\u524d\u5f80\u5982\u4e0b\u8def\u5f84\uff1a\n[accent]android/data/io.anuke.mindustry/mods[]\n[gray]\u5730\u5740\u5df2\u590d\u5236\u5230\u526a\u8d34\u677f\ngen.openModDir = \u524d\u5f80mods\u76ee\u5f55\n");
+ 11|         arc.files.Fi[] modsFiles = arc.Core.settings.getDataDirectory().child("mods").list();
+ 12|         arc.files.Fi libFileTemp = null;
+ 13|         long libVersionValue = -1;
+ 14|         for (arc.files.Fi file : modsFiles) {
+ 15|             if (file.isDirectory()) continue;
+ 16|             arc.files.Fi zipped = new arc.files.ZipFi(file);
+ 17|             arc.files.Fi modManifest = zipped.child("mod.hjson");
+ 18|             if (modManifest.exists()) {
+ 19|                 arc.util.serialization.Jval fest = arc.util.serialization.Jval.read(modManifest.readString());
+ 20|                 String name = fest.get("name").asString();
+ 21|                 String version = fest.get("version").asString();
+ 22|                 if (name.equals("universe-core")) {
+ 23|                     libFileTemp = file;
+ 24|                     String[] vars = version.split("\\.");
+ 25|                     libVersionValue = 0;
+ 26|                     int priority = 10;
+ 27|                     for (String s : vars) {
+ 28|                         long base = Long.parseLong(s);
+ 29|                         libVersionValue += base * priority;
+ 30|                         priority /= 10;
+ 31|                     }
+ 32|                 }
+ 33|             }
+ 34|         }
+ 35|         arc.files.Fi libFile = libFileTemp;
+ 36|         long libVersion = libVersionValue;
+ 37|         if (mindustry.Vars.mods.getMod("universe-core") == null) {
+ 38|             if (libFile == null || !libFile.exists() || libVersion < 15) {
+ 39|                 String[] path = Test.class.getResource("").getFile().split("/");
+ 40|                 StringBuilder builder = new StringBuilder(path[0].replace("file:", ""));
+ 41|                 for (int i = 1; i < path.length; i++) {
+ 42|                     builder.append("/").append(path[i]);
+ 43|                     if (path[i].contains(".jar!") || path[i].contains(".zip!")) break;
+ 44|                 }
+ 45|                 String str = arc.Core.bundle.getLocale().toString();
+ 46|                 String locale = (str.isEmpty() ? "bundle" : str);
+ 47|                 arc.util.io.PropertiesUtils.load(arc.Core.bundle.getProperties(), new java.io.StringReader(bundles.get(locale)));
+ 48|                 arc.util.Time.run(1, ()->{
+ 49|                     mindustry.ui.dialogs.BaseDialog tip = new mindustry.ui.dialogs.BaseDialog(""){
+ 50|                         {
+ 51|                             cont.table((t)->{
+ 52|                                 t.defaults().grow();
+ 53|                                 t.table(mindustry.gen.Tex.pane, (info)->{
+ 54|                                     info.defaults().padTop(4);
+ 55|                                     if (libFile != null && libFile.exists() && libVersion < 15) {
+ 56|                                         info.add(arc.Core.bundle.get("gen.libVersionOld")).color(arc.graphics.Color.crimson).top().padTop(10);
+ 57|                                     } else info.add(arc.Core.bundle.get("gen.libNotExist")).color(arc.graphics.Color.crimson).top().padTop(10);
+ 58|                                     info.row();
+ 59|                                     info.add(arc.Core.bundle.get("gen.downloadLib"));
+ 60|                                     info.row();
+ 61|                                     info.add(arc.Core.bundle.get("gen.downLibTip1")).color(arc.graphics.Color.gray);
+ 62|                                     info.row();
+ 63|                                     info.add(arc.Core.bundle.get("gen.downLibTip2")).color(arc.graphics.Color.gray).bottom().padBottom(10);
+ 64|                                 }).height(215);
+ 65|                                 t.row();
+ 66|                                 t.table((buttons)->{
+ 67|                                     buttons.defaults().grow();
+ 68|                                     buttons.table((top)->{
+ 69|                                         top.defaults().grow();
+ 70|                                         top.button(arc.Core.bundle.get("gen.download"), ()->{
+ 71|                                             java.io.InputStream[] stream = new java.io.InputStream[1];
+ 72|                                             float[] downloadProgress = {0};
+ 73|                                             arc.util.Http.get("", (request)->{
+ 74|                                                 stream[0] = request.getResultAsStream();
+ 75|                                                 arc.files.Fi temp = mindustry.Vars.tmpDirectory.child("Universearc.Core.jar");
+ 76|                                                 arc.files.Fi file = mindustry.Vars.modDirectory.child("Universearc.Core.jar");
+ 77|                                                 long length = request.getContentLength();
+ 78|                                                 arc.func.Floatc cons = length <= 0 ? (f)->{
+ 79|                                                 } : (p)->downloadProgress[0] = p;
+ 80|                                                 arc.util.io.Streams.copyProgress(stream[0], temp.write(false), length, 4096, cons);
+ 81|                                                 if (libFile != null && libFile.exists()) libFile.delete();
+ 82|                                                 temp.moveTo(file);
+ 83|                                                 try {
+ 84|                                                     mindustry.Vars.mods.importMod(file);
+ 85|                                                     hide();
+ 86|                                                     mindustry.Vars.ui.mods.show();
+ 87|                                                 } catch (java.io.IOException e) {
+ 88|                                                     mindustry.Vars.ui.showException(e);
+ 89|                                                     arc.util.Log.err(e);
+ 90|                                                 }
+ 91|                                             }, (e)->{
+ 92|                                                 if (!(e instanceof java.io.IOException)) {
+ 93|                                                     StringBuilder error = new StringBuilder();
+ 94|                                                     for (StackTraceElement ele : e.getStackTrace()) {
+ 95|                                                         error.append(ele);
+ 96|                                                     }
+ 97|                                                     mindustry.Vars.ui.showErrorMessage(arc.Core.bundle.get("gen.downloadFailed") + "\n" + error);
+ 98|                                                 }
+ 99|                                             });
+100|                                             new mindustry.ui.dialogs.BaseDialog(""){
+101|                                                 {
+102|                                                     titleTable.clearChildren();
+103|                                                     cont.table(mindustry.gen.Tex.pane, (t)->{
+104|                                                         t.add(arc.Core.bundle.get("gen.downloading")).top().padTop(10).get();
+105|                                                         t.row();
+106|                                                         t.add(new mindustry.ui.Bar(()->arc.util.Strings.autoFixed(downloadProgress[0], 1) + "%", ()->mindustry.graphics.Pal.accent, ()->downloadProgress[0])).growX().height(30).pad(4);
+107|                                                     }).size(320, 175);
+108|                                                     cont.row();
+109|                                                     cont.button(arc.Core.bundle.get("gen.cancel"), ()->{
+110|                                                         hide();
+111|                                                         try {
+112|                                                             if (stream[0] != null) stream[0].close();
+113|                                                         } catch (java.io.IOException e) {
+114|                                                             arc.util.Log.err(e);
+115|                                                         }
+116|                                                     }).fill();
+117|                                                 }
+118|                                             }.show();
+119|                                         });
+120|                                         top.button(arc.Core.bundle.get("gen.openfile"), ()->{
+121|                                             mindustry.Vars.platform.showMultiFileChooser((file)->{
+122|                                                 try {
+123|                                                     mindustry.Vars.mods.importMod(file);
+124|                                                     hide();
+125|                                                     mindustry.Vars.ui.mods.show();
+126|                                                 } catch (java.io.IOException e) {
+127|                                                     mindustry.Vars.ui.showException(e);
+128|                                                     arc.util.Log.err(e);
+129|                                                 }
+130|                                             }, "zip", "jar");
+131|                                         });
+132|                                         top.button(arc.Core.bundle.get("gen.goLibPage"), ()->{
+133|                                             if (!arc.Core.app.openURI("https://github.com/EB-wilson/UniverseCore")) {
+134|                                                 mindustry.Vars.ui.showErrorMessage("@linkfail");
+135|                                                 arc.Core.app.setClipboardText("https://github.com/EB-wilson/UniverseCore");
+136|                                             }
+137|                                         });
+138|                                     });
+139|                                     buttons.row();
+140|                                     buttons.table((bottom)->{
+141|                                         bottom.defaults().grow();
+142|                                         bottom.button(arc.Core.bundle.get("gen.openModDir"), ()->{
+143|                                             if (!arc.Core.app.openFolder(mindustry.Vars.modDirectory.path())) {
+144|                                                 mindustry.Vars.ui.showInfo(arc.Core.bundle.get("gen.androidOpenFolder"));
+145|                                                 arc.Core.app.setClipboardText(mindustry.Vars.modDirectory.path());
+146|                                             }
+147|                                         });
+148|                                         bottom.button(arc.Core.bundle.get("gen.exit"), ()->arc.Core.app.exit());
+149|                                     });
+150|                                 }).padTop(10);
+151|                             }).height(340).width(400);
+152|                         }
+153|                     };
+154|                     tip.titleTable.clearChildren();
+155|                     tip.show();
+156|                 });
+157|                 if (libVersion == -1) $status$ = -1; else $status$ = libVersion;
+158|             } else {
+159|                 arc.util.Log.info("dependence mod was not loaded, load it now");
+160|                 arc.util.Log.info("you will receive an exception that threw by game, tell you the UniverseCore was load fail and skipped.\ndon\'t worry, this is expected, it will not affect your game");
+161|                 try {
+162|                     java.lang.reflect.Method load = mindustry.mod.Mods.class.getDeclaredMethod("loadMod", arc.files.Fi.class);
+163|                     load.setAccessible(true);
+164|                     java.lang.reflect.Field f = mindustry.mod.Mods.class.getDeclaredField("mods");
+165|                     f.setAccessible(true);
+166|                     arc.struct.Seq<mindustry.mod.Mods.LoadedMod> mods = (arc.struct.Seq<mindustry.mod.Mods.LoadedMod>)f.get(mindustry.Vars.mods);
+167|                     mods.add((mindustry.mod.Mods.LoadedMod)load.invoke(mindustry.Vars.mods, libFile));
+168|                 } catch (NoSuchFieldException | NoSuchMethodException | IllegalAccessException | java.lang.reflect.InvocationTargetException e) {
+169|                     e.printStackTrace();
+170|                 }
+171|             }
+172|         }
+173|         if ($status$ == 0) {
+174|             universecore.UncCore.signup(Test.class);
+175|         } else {
+176|             if ($status$ == -1) {
+177|                 arc.util.Log.err("universeCore mod file was not found");
+178|             } else if ($status$ >= 1) {
+179|                 arc.util.Log.err("universeCore version was deprecated, version: " + $status$ + " require: 15");
+180|             }
+181|         }
+182|     }
+183|     
+184|     private class INIT_INTERNAL {
+185|         
+186|         public INIT_INTERNAL() {
+187|             super();
+188|         }
+189|     }
+190| }
+

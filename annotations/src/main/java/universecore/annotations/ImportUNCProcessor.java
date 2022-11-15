@@ -273,7 +273,7 @@ public class ImportUNCProcessor extends BaseProcessor{
         tree.defs = List.from(tmp);
         
         String genCode = genLoadCode(tree.sym.getQualifiedName().toString(), annotation.requireVersion(), List.from(init));
-        System.out.println(genCode);
+
         JCTree.JCBlock 
             preLoadBody = parsers.newParser(genCode, false, false, false).block(),
             cinit = null;
