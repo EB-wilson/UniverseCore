@@ -7,8 +7,8 @@ annotation: universecore.annotations.Annotations.Entrust
 
 > class: EntTest
  1| 
- 2| @Annotations.Entrust(extend = Test.class)
- 3| public class EntTest<$Type extends .Test> extends Test {
+ 2| @Annotations.Entrust(extend = universecore.Test.class)
+ 3| public class EntTest<$Type extends .universecore.Test> extends universecore.Test {
  4|     private $Type $entrust;
  5|     
  6|     public EntTest($Type inst) {

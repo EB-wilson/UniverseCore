@@ -12,6 +12,9 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
@@ -270,6 +273,7 @@ public class ImportUNCProcessor extends BaseProcessor{
         tree.defs = List.from(tmp);
         
         String genCode = genLoadCode(tree.sym.getQualifiedName().toString(), annotation.requireVersion(), List.from(init));
+        System.out.println(genCode);
         JCTree.JCBlock 
             preLoadBody = parsers.newParser(genCode, false, false, false).block(),
             cinit = null;
@@ -338,8 +342,8 @@ public class ImportUNCProcessor extends BaseProcessor{
   private String genLoadCode(String modMain, long requireVersion, List<JCTree.JCExpressionStatement> initList){
     StringBuilder bundles = new StringBuilder();
     boolean first = true;
-    for(Map.Entry<String, String> entry : this.bundles.entrySet()){
-      bundles.append(first ? "" : ", ").append("\"").append(entry.getKey()).append("\", \"").append(entry.getValue()).append("\"");
+    for(Map.Entry<String, String> entry : ImportUNCProcessor.bundles.entrySet()){
+      bundles.append(first ? "" : ", ").append("\"").append(entry.getKey()).append("\", \"").append(format(entry.getValue())).append("\"");
       first = false;
     }
 
@@ -360,6 +364,21 @@ public class ImportUNCProcessor extends BaseProcessor{
         .replace("$className", modMain)
         .replace("$cinitField$", init.toString())
         .replace("$cinitFieldError$", errorInit.toString());
+  }
+
+  private static String format(String input) {
+    BufferedReader reader = new BufferedReader(new StringReader(input));
+    StringBuilder res = new StringBuilder();
+    String line;
+    try {
+      while ((line = reader.readLine()) != null) {
+        res.append(line).append("\\n");
+      }
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    return res.toString();
   }
 
   private static String getDef(TypeKind kind){

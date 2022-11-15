@@ -56,7 +56,7 @@ public class Annotations{
    * 编译后具有{@link ImplEntries}注解的此接口实现类，若上述两方法未进行实现，则生成的代码等价于：
    * <pre>{@code
    * @ImplEntries
-   * public class Test implements Sample{
+   * public class universecore.Test implements Sample{
    *   ......
    *
    *   @FieldKey("field")
@@ -100,7 +100,7 @@ public class Annotations{
    * }
    *
    * @ImplEntries
-   * public class Test implements Sample{
+   * public class universecore.Test implements Sample{
    *   public void test(Object obj){
    *
    *   }
@@ -108,7 +108,7 @@ public class Annotations{
    *
    * 则生成的Test类等价于:
    * @ImplEntries
-   * public class Test implements Sample{
+   * public class universecore.Test implements Sample{
    *   public void test(Object obj, float value){
    *     Sample.super.entry(obj);
    *   }
@@ -175,15 +175,15 @@ public class Annotations{
    * }
    *
    * @Entrust(implement = Interface.class, extend = Sample.class)
-   * public abstract class Test extends Sample implements Interface{
-   *   public Test(@EntrustInst Object source){}
+   * public abstract class universecore.Test extends Sample implements Interface{
+   *   public universecore.Test(@EntrustInst Object source){}
    * }
    *
    * 生成的Test类等价于：
-   * public class Test<$Type extends Ent & Interface> extends Sample implements Interface{
+   * public class universecore.Test<$Type extends Ent & Interface> extends Sample implements Interface{
    *   private final $Type source;
    *
-   *   public Test($Type source){
+   *   public universecore.Test($Type source){
    *     this.source = source;
    *   }
    *
