@@ -1,4 +1,4 @@
-需要快速使用UniverseCore,你只需要在依赖项中添加如下代码：
+需要快速使用UniverseCore,你只需要在`build.gradle`中添加如下依赖项：
 
     dependencies {
       implementation "com.github.EB-wilson.UniverseCore:mindustry:$uncVersion"
@@ -33,3 +33,19 @@
     }
 
 这么做之后，当你的mod启动时会检查该前置是否正确安装，如果前置缺失，游戏会弹出提示，指导玩家安装该前置。关于导入语句当中的`requireVersion`，这表示的是你的mod当前版本要求的最低UniverseCore版本的序列号，目前序列号是UNC版本号前两位的直接数字组合，后续可能会发生变动，不过不会影响兼容，无需担心
+
+另外，如果你用于编译的JDK版本为14以上，那么你可能需要在使用了`annotations`模块的build.gradle文件中额外添加如下代码后才能正常编译：
+
+    tasks.withType(JavaCompile){
+      options.fork = true
+      options.forkOptions.jvmArgs.addAll([
+      "--add-opens", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+      "--add-opens", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
+      "--add-opens", "jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
+      "--add-opens", "jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED",
+      "--add-opens", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+      "--add-opens", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
+      ])
+    }
+
+（待施工）
