@@ -10,6 +10,7 @@
     dependencies {
       implementation "com.github.EB-wilson.UniverseCore:mindustry:$uncVersion"//涵盖了大部分mod制作相关的工具
       implementation "com.github.EB-wilson.UniverseCore:utilties:$uncVersion"//实用工具集，包含了许多通用工具模块
+      implementation "com.github.EB-wilson.UniverseCore:abstract:$uncVersion"//功能抽象层，一些平台相关的行为被抽象为接口，要使用平台相关API时必须导入该模块
       implementation "com.github.EB-wilson.UniverseCore:implabstract:$uncVersion"//中间实现层，有一些关于mod和加载器的功能
       implementation "com.github.EB-wilson.UniverseCore:dynamilizer:$uncVersion"//JDER动态化仓库的内置模块
       implementation "com.github.EB-wilson.UniverseCore:annotations:$uncVersion"//包括组件化接口在内的注解处理器
@@ -18,7 +19,6 @@
                     
       //以下是通常不会用到的内部模块，但仍然允许导入，便于对一些较为复杂的需求进行自定义行为
       //implementation "com.github.EB-wilson.UniverseCore:core:$uncVersion"//仅有一个核心静态容器，保存了所有的功能接口的实现单例
-      //implementation "com.github.EB-wilson.UniverseCore:abstract:$uncVersion"//功能抽象层，一些平台相关的行为被抽象为接口并放在这当中作为API
       //implementation "com.github.EB-wilson.UniverseCore:android:$uncVersion"//平台相关的功能在安卓的默认实现
       //implementation "com.github.EB-wilson.UniverseCore:android26:$uncVersion"//在安卓API26以上的安卓平台运行时的实现
       //implementation "com.github.EB-wilson.UniverseCore:desktop:$uncVersion"//平台相关的功能在桌面的默认实现
