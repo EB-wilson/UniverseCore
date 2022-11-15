@@ -19,12 +19,12 @@ dependencies {
         maven{ url 'https://www.jitpack.io' }
     }
 
-    compileOnly project(":dynamilizer")
+    implementation project(":dynamilizer")
 
     compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
     compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
-    compileOnly project(":abstract")
-    compileOnly project(":utilities")
+    implementation project(":abstract")
+    implementation project(":utilities")
 
     annotationProcessor "com.github.Anuken:jabel:0.7.0"
 }

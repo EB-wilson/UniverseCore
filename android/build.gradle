@@ -20,7 +20,7 @@ dependencies {
     maven{ url 'https://www.jitpack.io' }
   }
 
-  implementation project(":dynamilizer")
+  compileOnly project(":dynamilizer")
 
   compileOnly 'org.ow2.asm:asm:9.3'
 

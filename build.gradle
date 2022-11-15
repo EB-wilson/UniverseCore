@@ -37,7 +37,6 @@ allprojects{
         "--add-opens", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
         "--add-opens", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
     ])
-
     options.compilerArgs.addAll(['--release', '8'])
   }
 
@@ -57,6 +56,7 @@ dependencies {
   implementation project(":implabstract")
   implementation project(":utilities")
   implementation project(":mindustry")
+  implementation project(":dynamilizer")
 
   compileOnly project(":android")
   compileOnly project(":android26")
@@ -316,7 +316,7 @@ task buildMavenPublish(type: Jar){
 publishToMavenLocal{
   dependsOn "buildMavenPublish"
 
-  doLast{
+  doFirst{
     delete("${rootProject.buildDir}/libs/lib.jar")
     file("${rootProject.buildDir}/libs/${rootProject.name}-lib.jar")
         .renameTo("${rootProject.buildDir}/libs/lib.jar")

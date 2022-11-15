@@ -27,8 +27,8 @@ tasks.withType(JavaCompile){
 dependencies {
   implementation 'org.ow2.asm:asm:9.3'
 
-  compileOnly project(":core")
-  compileOnly project(":abstract")
+  implementation project(":core")
+  implementation project(":abstract")
 
   annotationProcessor "com.github.Anuken:jabel:0.7.0"
 }

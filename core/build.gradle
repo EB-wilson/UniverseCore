@@ -18,7 +18,7 @@ dependencies {
         maven{ url 'https://www.jitpack.io' }
     }
 
-    compileOnly project(":abstract")
+    implementation project(":abstract")
 
     annotationProcessor "com.github.Anuken:jabel:0.7.0"
 }

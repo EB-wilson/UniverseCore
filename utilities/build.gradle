@@ -14,8 +14,8 @@ publishing {
 }
 
 dependencies {
-  compileOnly project(":abstract")
-  compileOnly project(":core")
+  implementation project(":abstract")
+  implementation project(":core")
 }
 
 test {
