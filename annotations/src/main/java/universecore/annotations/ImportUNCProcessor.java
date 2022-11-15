@@ -7,87 +7,224 @@ import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.List;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
-import java.io.*;
 import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.regex.Pattern;
 
 @AutoService(Processor.class)
 public class ImportUNCProcessor extends BaseProcessor{
-  private static final String STATUS_CHECKER = "checkStatus";
-  private static final String STATUS_FIELD = "$status$";;
+  private static final String STATUS_FIELD = "$status$";
 
-  private static final String sourceFile = "java/PreloadLibMethodTemplate.java";
-
-  private static String code;
-  
-  private static final Pattern bundleMatcher = Pattern.compile("^bundles/bundle.*\\.properties$");
-  
-  private final HashMap<String , String> bundles = new HashMap<>();
-  
-  @Override
-  public synchronized void init(ProcessingEnvironment processingEnv){
-    super.init(processingEnv);
-
-    String[] path = Objects.requireNonNull(this.getClass().getResource("")).getFile().split("/");
-    StringBuilder builder = new StringBuilder(path[0].replace("file:", ""));
-    
-    for(int i = 1; i < path.length; ++i) {
-      builder.append("/").append(path[i]);
-      if (path[i].contains(".jar!") || path[i].contains(".zip!")) {
-        break;
-      }
-    }
-    File file = new File(builder.substring(0, builder.length() - 1));
-    try{
-      JarFile jar = new JarFile(file);
-      
-      Enumeration<JarEntry> entries = jar.entries();
-      while(entries.hasMoreElements()){
-        JarEntry entry = entries.nextElement();
-        String name = entry.getName();
-        if(bundleMatcher.matcher(name).matches()){
-          String[] entryName = name.split("/");
-          String locate = entryName[entryName.length - 1].split("\\.")[0].replace("bundle_", "");
-          StringWriter writer = new StringWriter();
-          InputStream stream = jar.getInputStream(entry);
-          int data;
-          while((data = stream.read()) != - 1){
-            writer.write(data);
-          }
-          BufferedReader input = new BufferedReader(new StringReader(writer.toString()));
-          String line;
-          StringBuilder result = new StringBuilder();
-          boolean b = false;
-          while((line = input.readLine()) != null){
-            if(b){
-              result.append(line).append("\\n");
+  private static final String code = """
+      {
+        final arc.struct.ObjectMap<String, String> bundles = arc.struct.ObjectMap.of($bundles);
+        arc.files.Fi[] modsFiles = arc.Core.settings.getDataDirectory().child("mods").list();
+        arc.files.Fi libFileTemp = null;
+        long libVersionValue = -1;
+        for (arc.files.Fi file : modsFiles) {
+          if (file.isDirectory()) continue;
+          arc.files.Fi zipped = new arc.files.ZipFi(file);
+          arc.files.Fi modManifest = zipped.child("mod.hjson");
+          if (modManifest.exists()) {
+            arc.util.serialization.Jval fest = arc.util.serialization.Jval.read(modManifest.readString());
+            String name = fest.get("name").asString();
+            String version = fest.get("version").asString();
+            if (name.equals("universe-core")) {
+              libFileTemp = file;
+              String[] vars = version.split("\\\\.");
+              libVersionValue = 0;
+              int priority = 10;
+              for (String s : vars) {
+                long base = Long.parseLong(s);
+                libVersionValue += base * priority;
+                priority /= 10;
+              }
             }
-            if(line.equals("#----------Generate----------#")) b = true;
           }
-          bundles.put(locate, result.toString());
         }
-        else if(name.equals(sourceFile)){
-          StringWriter writer = new StringWriter();
-          InputStream stream = jar.getInputStream(entry);
-          int data;
-          while((data = stream.read()) != - 1){
-            writer.write(data);
+        arc.files.Fi libFile = libFileTemp;
+        long libVersion = libVersionValue;
+        if (mindustry.Vars.mods.getMod("universe-core") == null) {
+          if (libFile == null || !libFile.exists() || libVersion < $requireVersion) {
+            String[] path = $className.class.getResource("").getFile().split("/");
+            StringBuilder builder = new StringBuilder(path[0].replace("file:", ""));
+            for(int i = 1; i < path.length; i++){
+              builder.append("/").append(path[i]);
+              if(path[i].contains(".jar!") || path[i].contains(".zip!")) break;
+            }
+            String str = arc.Core.bundle.getLocale().toString();
+            String locale = (str.isEmpty() ? "bundle" : str);
+            arc.util.io.PropertiesUtils.load(arc.Core.bundle.getProperties(), new java.io.StringReader(bundles.get(locale)));
+            
+            arc.util.Time.run(1, () -> {
+              mindustry.ui.dialogs.BaseDialog tip = new mindustry.ui.dialogs.BaseDialog(""){
+                {
+                  cont.table(t -> {
+                    t.defaults().grow();
+                    t.table(mindustry.gen.Tex.pane, (info) -> {
+                      info.defaults().padTop(4);
+                      if(libFile != null && libFile.exists() && libVersion < $requireVersion){
+                        info.add(arc.Core.bundle.get("gen.libVersionOld")).color(arc.graphics.Color.crimson).top().padTop(10);
+                      }else
+                        info.add(arc.Core.bundle.get("gen.libNotExist")).color(arc.graphics.Color.crimson).top().padTop(10);
+                      info.row();
+                      info.add(arc.Core.bundle.get("gen.downloadLib"));
+                      info.row();
+                      info.add(arc.Core.bundle.get("gen.downLibTip1")).color(arc.graphics.Color.gray);
+                      info.row();
+                      info.add(arc.Core.bundle.get("gen.downLibTip2")).color(arc.graphics.Color.gray).bottom().padBottom(10);
+                    }).height(215);
+                    t.row();
+                    t.table(buttons -> {
+                      buttons.defaults().grow();
+                      buttons.table(top -> {
+                        top.defaults().grow();
+                        top.button(arc.Core.bundle.get("gen.download"), () -> {
+                          java.io.InputStream[] stream = new java.io.InputStream[1];
+                          float[] downloadProgress = {0};
+                          arc.util.Http.get("", (request) -> {
+                            stream[0] = request.getResultAsStream();
+                            arc.files.Fi temp = mindustry.Vars.tmpDirectory.child("Universearc.Core.jar");
+                            arc.files.Fi file = mindustry.Vars.modDirectory.child("Universearc.Core.jar");
+                            long length = request.getContentLength();
+                            arc.func.Floatc cons = length <= 0 ? f -> {} :p -> downloadProgress[0] = p;
+                            arc.util.io.Streams.copyProgress(stream[0], temp.write(false), length, 4096, cons);
+                            if(libFile != null && libFile.exists()) libFile.delete();
+                            temp.moveTo(file);
+                            try{
+                              mindustry.Vars.mods.importMod(file);
+                              hide();
+                              mindustry.Vars.ui.mods.show();
+                            }catch(java.io.IOException e){
+                              mindustry.Vars.ui.showException(e);
+                              arc.util.Log.err(e);
+                            }
+                          }, (e) -> {
+                            if(! (e instanceof java.io.IOException)){
+                              StringBuilder error = new StringBuilder();
+                              for(StackTraceElement ele : e.getStackTrace()){
+                                error.append(ele);
+                              }
+                              mindustry.Vars.ui.showErrorMessage(arc.Core.bundle.get("gen.downloadFailed") + "\\n" + error);
+                            }
+                          });
+                          new mindustry.ui.dialogs.BaseDialog(""){{
+                            titleTable.clearChildren();
+                            cont.table(mindustry.gen.Tex.pane, (t) -> {
+                              t.add(arc.Core.bundle.get("gen.downloading")).top().padTop(10).get();
+                              t.row();
+                              t.add(new mindustry.ui.Bar(() -> arc.util.Strings.autoFixed(downloadProgress[0], 1) + "%", () -> mindustry.graphics.Pal.accent, () -> downloadProgress[0])).growX().height(30).pad(4);
+                            }).size(320, 175);
+                            cont.row();
+                            cont.button(arc.Core.bundle.get("gen.cancel"), () -> {
+                              hide();
+                              try{
+                                if(stream[0] != null) stream[0].close();
+                              }catch(java.io.IOException e){
+                                arc.util.Log.err(e);
+                              }
+                            }).fill();
+                          }}.show();
+                        });
+                        top.button(arc.Core.bundle.get("gen.openfile"), () -> {
+                          mindustry.Vars.platform.showMultiFileChooser(file -> {
+                            try{
+                              mindustry.Vars.mods.importMod(file);
+                              hide();
+                              mindustry.Vars.ui.mods.show();
+                            }catch(java.io.IOException e){
+                              mindustry.Vars.ui.showException(e);
+                              arc.util.Log.err(e);
+                            }
+                          }, "zip", "jar");
+                        });
+                        top.button(arc.Core.bundle.get("gen.goLibPage"), () -> {
+                          if(! arc.Core.app.openURI("https://github.com/EB-wilson/UniverseCore")){
+                            mindustry.Vars.ui.showErrorMessage("@linkfail");
+                            arc.Core.app.setClipboardText("https://github.com/EB-wilson/UniverseCore");
+                          }
+                        });
+                      });
+            
+                      buttons.row();
+                      buttons.table(bottom ->{
+                        bottom.defaults().grow();
+                        bottom.button(arc.Core.bundle.get("gen.openModDir"),()->{
+                          if(!arc.Core.app.openFolder(mindustry.Vars.modDirectory.path())){
+                            mindustry.Vars.ui.showInfo(arc.Core.bundle.get("gen.androidOpenFolder"));
+                            arc.Core.app.setClipboardText(mindustry.Vars.modDirectory.path());
+                          }
+                        });
+                        bottom.button(arc.Core.bundle.get("gen.exit"),()->arc.Core.app.exit());
+                      });
+                    }).padTop(10);
+                  }).height(340).width(400);
+                }
+              };
+              tip.titleTable.clearChildren();
+              tip.show();
+            });
+            
+            if(libVersion == -1) $status$ = -1;
+            else $status$ = libVersion;
           }
-          code = writer.toString();
+          else{
+            arc.util.Log.info("dependence mod was not loaded, load it now");
+            arc.util.Log.info("you will receive an exception that threw by game, tell you the UniverseCore was load fail and skipped.\\ndon't worry, this is expected, it will not affect your game");
+            try{
+              java.lang.reflect.Method load = mindustry.mod.Mods.class.getDeclaredMethod("loadMod", arc.files.Fi.class);
+              load.setAccessible(true);
+              java.lang.reflect.Field f = mindustry.mod.Mods.class.getDeclaredField("mods");
+              f.setAccessible(true);
+              arc.struct.Seq<mindustry.mod.Mods.LoadedMod> mods = (arc.struct.Seq<mindustry.mod.Mods.LoadedMod>) f.get(mindustry.Vars.mods);
+              mods.add((mindustry.mod.Mods.LoadedMod) load.invoke(mindustry.Vars.mods, libFile));
+            }catch(NoSuchFieldException | NoSuchMethodException | IllegalAccessException | java.lang.reflect.InvocationTargetException e){
+              e.printStackTrace();
+            }
+          }
+        }
+            
+        if($status$ == 0){
+          universecore.UncCore.signup($className.class);
+          $cinitField$
+        }
+        else{
+          $cinitFieldError$
+            
+          if($status$ == -1){
+            arc.util.Log.err("universeCore mod file was not found");
+          }
+          else if($status$ >= 1){
+            arc.util.Log.err("universeCore version was deprecated, version: " + $status$ + " require: $requireVersion");
+          }
         }
       }
-    }catch(IOException e){
-      throw new RuntimeException(e);
-    }
+      """;
+  
+  private static final HashMap<String , String> bundles = new HashMap<>();
+
+  static {
+    bundles.put("zh_CN", """
+    gen.sure = 确定
+    gen.download = 下载
+    gen.openfile = 从文件导入
+    gen.exit = 退出
+    gen.cancel = 取消
+    gen.downloading = 下载中...
+    gen.updatedRestart = 前置已安装，请重启游戏
+    gen.libVersionOld = Universe Core版本过旧
+    gen.goLibPage = 前往github
+    gen.libNotExist = UniverseCore未安装或文件已丢失
+    gen.downloadLib = 请安装或更新最新版本的UniverseCore
+    gen.downLibTip1 = 您也可能同时安装了新旧版本的前置，可前往mods文件夹将旧版本删除
+    gen.downLibTip2 = 如果您已经下载了mod文件，那么您可以将它放入mods文件夹
+    gen.androidOpenFolder = 打开目录失败，您可前往如下路径：\\n[accent]android/data/io.anuke.mindustry/mods[]\\n[gray]地址已复制到剪贴板
+    gen.openModDir = 前往mods目录
+    """);
   }
   
   @Override
