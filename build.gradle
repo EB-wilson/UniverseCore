@@ -67,17 +67,6 @@ dependencies {
   annotationProcessor project(":annotations")
 }
 
-publishing {
-  publications {
-    maven(MavenPublication) {
-      groupId = 'com.github.EB-wilson'
-      artifactId = 'lib'
-      version = "$uncVersion"
-      from components.java
-    }
-  }
-}
-
 shadowJar{
   dependsOn project(":android").getTasksByName("shadowJar", true)
   dependsOn project(":desktop").getTasksByName("shadowJar", true)
@@ -298,27 +287,3 @@ task buildProject{
   }
 }
 
-task buildMavenPublish(type: Jar){
-  dependsOn "buildDesktop"
-
-  archiveFileName = "${rootProject.name}-lib.jar"
-
-  from{[
-      zipTree("${rootProject.buildDir}/libs/${rootProject.name}-desktop.jar"),
-      zipTree("${project(":annotations").buildDir}/libs/annotations.jar")
-  ]}
-
-  from("assets/"){
-    include "**"
-  }
-}
-
-generateMetadataFileForMavenPublication{
-  dependsOn "buildMavenPublish"
-
-  doLast{
-    delete("${rootProject.buildDir}/libs/lib.jar")
-    file("${rootProject.buildDir}/libs/${rootProject.name}-lib.jar")
-        .renameTo("${rootProject.buildDir}/libs/lib.jar")
-  }
-}
