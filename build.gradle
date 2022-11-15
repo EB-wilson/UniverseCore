@@ -313,10 +313,10 @@ task buildMavenPublish(type: Jar){
   }
 }
 
-publishToMavenLocal{
+generateMetadataFileForMavenPublication{
   dependsOn "buildMavenPublish"
 
-  doFirst{
+  doLast{
     delete("${rootProject.buildDir}/libs/lib.jar")
     file("${rootProject.buildDir}/libs/${rootProject.name}-lib.jar")
         .renameTo("${rootProject.buildDir}/libs/lib.jar")
