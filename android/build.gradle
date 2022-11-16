@@ -3,6 +3,9 @@ plugins {
   id 'com.github.johnrengelman.shadow'
 }
 
+sourceSets.main.java.srcDirs = ["src/main/java"]
+sourceSets.test.java.srcDirs = ["src/test/java"]
+
 publishing {
   publications {
     maven(MavenPublication) {
@@ -22,11 +25,11 @@ dependencies {
 
   compileOnly project(":dynamilizer")
 
-  compileOnly 'org.ow2.asm:asm:9.3'
+  compileOnly 'org.ow2.asm:asm:9.4'
 
   compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
   compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
-  implementation 'com.jakewharton.android.repackaged:dalvik-dx:9.0.0_r3'
+  implementation 'com.jakewharton.android.repackaged:dalvik-dx:11.0.0_r3'
 
   compileOnly project(":core")
   compileOnly project(":abstract")
@@ -35,7 +38,7 @@ dependencies {
 
   annotationProcessor "com.github.Anuken:jabel:0.7.0"
 
-  testRuntimeClasspath "com.jakewharton.android.repackaged:dalvik-dx:9.0.0_r3"
+  testRuntimeClasspath "com.jakewharton.android.repackaged:dalvik-dx:11.0.0_r3"
   testRuntimeClasspath project(":core")
   testRuntimeClasspath project(":abstract")
   testRuntimeClasspath project(":implabstract")
@@ -46,11 +49,15 @@ shadowJar {
   dependencies {
     exclude dependency("com.github.Anuken.Arc:arc-core:$mindustryVersion")
     exclude dependency("com.github.Anuken.Mindustry:core:$mindustryVersion")
-    exclude dependency("com.jakewharton.android.repackaged:dalvik-dx:9.0.0_r3")
+    exclude dependency("com.jakewharton.android.repackaged:dalvik-dx:11.0.0_r3")
 
     exclude project(":core")
     exclude project(":abstract")
     exclude project(":implabstract")
     exclude project(":utilities")
   }
+}
+
+repositories {
+  mavenCentral()
 }

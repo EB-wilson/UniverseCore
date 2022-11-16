@@ -3,6 +3,9 @@ plugins {
   id 'com.github.johnrengelman.shadow'
 }
 
+sourceSets.main.java.srcDirs = ["src/main/java"]
+sourceSets.test.java.srcDirs = ["src/test/java"]
+
 publishing {
   publications {
     maven(MavenPublication) {

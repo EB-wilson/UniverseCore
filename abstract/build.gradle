@@ -2,7 +2,8 @@ plugins {
     id 'java'
 }
 
-version '1.0'
+sourceSets.main.java.srcDirs = ["src/main/java"]
+sourceSets.test.java.srcDirs = ["src/test/java"]
 
 publishing {
     publications {
@@ -24,8 +25,4 @@ dependencies{
     compileOnly "com.github.EB-wilson:JavaDynamilizer:V1.4-B1"
 
     annotationProcessor "com.github.Anuken:jabel:0.7.0"
-}
-
-test {
-    useJUnitPlatform()
 }

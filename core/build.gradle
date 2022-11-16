@@ -1,5 +1,7 @@
-
 apply plugin: 'java'
+
+sourceSets.main.java.srcDirs = ["src/main/java"]
+sourceSets.test.java.srcDirs = ["src/test/java"]
 
 publishing {
     publications {

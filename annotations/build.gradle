@@ -1,5 +1,8 @@
 apply plugin: 'java'
 
+sourceSets.main.java.srcDirs = ["src/main/java"]
+sourceSets.test.java.srcDirs = ["src/test/java"]
+
 publishing {
   publications {
     maven(MavenPublication) {
@@ -12,14 +15,14 @@ publishing {
 }
 
 dependencies{
+  repositories{
+    mavenCentral()
+    maven{ url 'https://www.jitpack.io' }
+  }
+
   compileOnly files("libs/tools.jar")
   compileOnly 'com.google.auto.service:auto-service:1.0.1'
 
   annotationProcessor 'com.google.auto.service:auto-service:1.0.1'
   annotationProcessor "com.github.Anuken:jabel:0.7.0"
-}
-
-repositories{
-  mavenCentral()
-  maven{ url 'https://www.jitpack.io' }
 }

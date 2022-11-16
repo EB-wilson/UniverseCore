@@ -4,6 +4,9 @@ plugins {
 }
 version '1.4-A3'
 
+sourceSets.main.java.srcDirs = ["src/main/java"]
+sourceSets.test.java.srcDirs = ["src/test/java"]
+
 publishing {
   publications {
     maven(MavenPublication) {
@@ -25,7 +28,7 @@ tasks.withType(JavaCompile){
 }
 
 dependencies {
-  implementation 'org.ow2.asm:asm:9.3'
+  implementation 'org.ow2.asm:asm:9.4'
 
   implementation project(":core")
   implementation project(":abstract")
