@@ -6,11 +6,23 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+/**对对象的一些实用工具集，用于将对象的字段属性拷贝到另一个*/
 public class ObjectHandler{
+  /**将来源对象的所有属性值完整的复制到目标对象，目标对象必须是来源对象的类型或者子类
+   *
+   * @param source 属性的源对象
+   * @param target 复制属性到的目标对象
+   * @throws IllegalArgumentException 如果目标对象不分配自来源类*/
   public static <S, T extends S> void copyField(S source, T target){
     copyFieldAsBlack(source, target);
   }
 
+  /**将来源对象的不在黑名单中的属性的值复制到目标对象，目标对象必须是来源对象的类型或者子类
+   *
+   * @param source 属性的源对象
+   * @param target 复制属性到的目标对象
+   * @param blackList 字段黑名单
+   * @throws IllegalArgumentException 如果目标对象不分配自来源类*/
   public static <S, T extends S> void copyFieldAsBlack(S source, T target, String... blackList){
     Class<?> curr = source.getClass();
     Set<String> black = new HashSet<>(Arrays.asList(blackList));
@@ -29,7 +41,16 @@ public class ObjectHandler{
     copyFieldAsWhite(source, target, fields.stream().filter(e -> !black.contains(e)).toArray(String[]::new));
   }
 
+  /**将来源对象的指定属性值复制到目标对象，目标对象必须是来源对象的类型或者子类
+   *
+   * @param source 属性的源对象
+   * @param target 复制属性到的目标对象
+   * @param whiteList 字段白名单
+   * @throws IllegalArgumentException 如果目标对象不分配自来源类*/
   public static <S, T extends S> void copyFieldAsWhite(S source, T target, String... whiteList){
+    if(!source.getClass().isAssignableFrom(target.getClass()))
+      throw new IllegalArgumentException("target object type was not assignable from source object type");
+
     for(String s: whiteList){
       FieldHandler.setValueDefault(target, s, FieldHandler.getValueDefault(source, s));
     }

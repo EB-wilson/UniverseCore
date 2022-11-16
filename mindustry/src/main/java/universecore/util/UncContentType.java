@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**contentType处理对象，用于创建新的内容类型，以及处理类型的显示排序
+ *
  * @author EBwilson
  * @since 1.0*/
 public class UncContentType{
@@ -36,20 +37,36 @@ public class UncContentType{
 
   public final boolean display;
 
+  /**内部方法，用于创建与已有{@link ContentType}关联的标识*/
   private UncContentType(ContentType type){
     this.value = type;
     this.ordinal = type.ordinal();
     this.display = true;
   }
 
+  /**创建一个新的实例，并绑定到一个新生成的对应的{@link ContentType}枚举实例
+   *
+   * @param name 该类型的名称
+   * @param contentClass 这个contentType关联的内容类*/
   public UncContentType(String name, Class<? extends Content> contentClass){
     this(name, ContentType.values().length, contentClass);
   }
 
+  /**创建一个新的实例，并绑定到一个新生成的对应的{@link ContentType}枚举实例
+   *
+   * @param name 该类型的名称
+   * @param ordinal 这个类型在数据库中显示的位置序数
+   * @param contentClass 这个contentType关联的内容类*/
   public UncContentType(String name, int ordinal, Class<? extends Content> contentClass){
     this(name, ordinal, contentClass, true);
   }
-  
+
+  /**创建一个新的实例，并绑定到一个新生成的对应的{@link ContentType}枚举实例
+   *
+   * @param name 该类型的名称
+   * @param ordinal 这个类型在数据库中显示的位置序数
+   * @param contentClass 这个contentType关联的内容类
+   * @param display 是否在数据库内显示*/
   public UncContentType(String name, int ordinal, Class<? extends Content> contentClass, boolean display){
     value = handler.addEnumItemTail(name, contentClass);
     this.ordinal = ordinal;

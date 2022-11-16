@@ -32,28 +32,83 @@ public interface Takeable extends BuildCompBase{
   default <T> void addHeap(String name, Seq<T> targets, Boolf<T> valid){
     heaps().put(name, new Heaps<>(targets, valid));
   }
-  
+
+  /**获取一个输出元素堆
+   *
+   * @param name 堆在容器中保存的名称*/
   @SuppressWarnings("unchecked")
   default <T> Heaps<T> getHeaps(String name){
     return (Heaps<T>) heaps().get(name);
   }
-  
+
+  /**从指定名称的堆中获得下一个元素，如果指定的堆不存在，会创建一个新的堆加入容器
+   *
+   * @param name 堆名称*/
   default Building getNext(String name){
     return getNext(name, true);
   }
-  
+
+  /**从指定名称的堆中获得下一个元素，如果指定的堆不存在，会创建一个新的堆加入容器
+   *
+   * @param name 堆名称
+   * @param targets 提供给堆中元素列表*/
   default <T> T getNext(String name, Seq<T> targets){
     return getNext(name, targets, true);
   }
-  
+
+  /**从指定名称的堆中获得下一个元素，如果指定的堆不存在，会创建一个新的堆加入容器，堆的元素默认来自building的{@link Building#proximity}
+   *
+   * @param name 堆名称
+   * @param valid 元素的过滤器*/
   default Building getNext(String name, Boolf<Building> valid){
     return getNext(name, valid, true);
   }
-  
+
+  /**从指定名称的堆中获得下一个元素，如果指定的堆不存在，会创建一个新的堆加入容器
+   *
+   * @param name 堆名称
+   * @param targets 提供给堆中元素列表
+   * @param valid 元素的过滤器*/
   default <T> T getNext(String name, Seq<T> targets, Boolf<T> valid){
     return getNext(name, targets, valid, true);
   }
-  
+
+  /**预测下一个获得的元素，如果指定的堆不存在，会创建一个新的堆加入容器，堆的元素默认来自building的{@link Building#proximity}
+   *
+   * @param name 堆名称*/
+  default Building peek(String name){
+    return getNext(name, false);
+  }
+
+  /**预测下一个获得的元素，如果指定的堆不存在，会创建一个新的堆加入容器
+   *
+   * @param name 堆名称
+   * @param targets 提供给堆中元素列表*/
+  default <T> T peek(String name, Seq<T> targets){
+    return getNext(name, targets, false);
+  }
+
+  /**预测下一个获得的元素，如果指定的堆不存在，会创建一个新的堆加入容器，堆的元素默认来自building的{@link Building#proximity}
+   *
+   * @param name 堆名称
+   * @param valid 元素的过滤器*/
+  default Building peek(String name, Boolf<Building> valid){
+    return getNext(name, valid, false);
+  }
+
+  /**预测下一个获得的元素，如果指定的堆不存在，会创建一个新的堆加入容器
+   * 
+   * @param name 堆名称
+   * @param targets 提供给堆中元素列表
+   * @param valid 元素的过滤器*/
+  default <T> T peek(String name, Seq<T> targets, Boolf<T> valid){
+    return getNext(name, targets, valid, false);
+  }
+
+  /**从指定名称的堆中获得下一个元素，如果指定的堆不存在，会创建一个新的堆加入容器，堆的元素默认来自building的{@link Building#proximity}
+   *
+   * @param name 堆名称
+   * @param increase 是否增加一次计数器，如果为false则此方法用于预测下一个元素*/
   @SuppressWarnings("unchecked")
   default Building getNext(String name, boolean increase){
     Heaps<Building> heaps;
@@ -61,9 +116,14 @@ public interface Takeable extends BuildCompBase{
       heaps = new Heaps<>(getBuilding().proximity);
       heaps().put(name, heaps);
     }
-    return increase? heaps.next(): heaps.nextOnly();
+    return increase? heaps.next(): heaps.peek();
   }
-  
+
+  /**从指定名称的堆中获得下一个元素，如果指定的堆不存在，会创建一个新的堆加入容器，堆的元素默认来自building的{@link Building#proximity}
+   *
+   * @param name 堆名称
+   * @param valid 元素的过滤器
+   * @param increase 是否增加一次计数器，如果为false则此方法用于预测下一个元素*/
   @SuppressWarnings("unchecked")
   default Building getNext(String name, Boolf<Building> valid, boolean increase){
     Heaps<Building> heaps;
@@ -71,9 +131,14 @@ public interface Takeable extends BuildCompBase{
       heaps = new Heaps<>(getBuilding().proximity, valid);
       heaps().put(name, heaps);
     }
-    return increase? heaps.next(valid): heaps.nextOnly(valid);
+    return increase? heaps.next(valid): heaps.peek(valid);
   }
-  
+
+  /**从指定名称的堆中获得下一个元素，如果指定的堆不存在，会创建一个新的堆加入容器
+   *
+   * @param name 堆名称
+   * @param targets 提供给堆中元素列表
+   * @param increase 是否增加一次计数器，如果为false则此方法用于预测下一个元素*/
   @SuppressWarnings("unchecked")
   default <T> T getNext(String name, Seq<T> targets, boolean increase){
     Heaps<T> heaps;
@@ -81,9 +146,15 @@ public interface Takeable extends BuildCompBase{
       heaps = new Heaps<>(targets);
       heaps().put(name, heaps);
     }
-    return increase? heaps.next(targets): heaps.nextOnly(targets);
+    return increase? heaps.next(targets): heaps.peek(targets);
   }
-  
+
+  /**从指定名称的堆中获得下一个元素，如果指定的堆不存在，会创建一个新的堆加入容器
+   *
+   * @param name 堆名称
+   * @param targets 提供给堆中元素列表
+   * @param valid 元素的过滤器
+   * @param increase 是否增加一次计数器，如果为false则此方法用于预测下一个元素*/
   @SuppressWarnings("unchecked")
   default <T> T getNext(String name, Seq<T> targets, Boolf<T> valid, boolean increase){
     Heaps<T> heaps;
@@ -91,9 +162,10 @@ public interface Takeable extends BuildCompBase{
       heaps = new Heaps<>(targets, valid);
       heaps().put(name, heaps);
     }
-    return increase? heaps.next(targets, valid): heaps.nextOnly(targets, valid);
+    return increase? heaps.next(targets, valid): heaps.peek(targets, valid);
   }
   
+  /**元素堆，用于保存和计数弹出的目标元素*/
   class Heaps<Type>{
     public Seq<Type> targets = new Seq<>();
     public Boolf<Type> valid = e -> true;
@@ -127,24 +199,24 @@ public interface Takeable extends BuildCompBase{
       return next(targets, valid);
     }
     
-    public Type nextOnly(){
-      return nextOnly(targets, valid);
+    public Type peek(){
+      return peek(targets, valid);
     }
     
     public Type next(Boolf<Type> valid){
       return next(targets, valid);
     }
     
-    public Type nextOnly(Boolf<Type> valid){
-      return nextOnly(targets, valid);
+    public Type peek(Boolf<Type> valid){
+      return peek(targets, valid);
     }
     
     public Type next(Seq<Type> targets){
       return next(targets, valid);
     }
     
-    public Type nextOnly(Seq<Type> targets){
-      return nextOnly(targets, valid);
+    public Type peek(Seq<Type> targets){
+      return peek(targets, valid);
     }
     
     public Type next(Seq<Type> targets, Boolf<Type> valid){
@@ -158,7 +230,7 @@ public interface Takeable extends BuildCompBase{
       return null;
     }
     
-    public Type nextOnly(Seq<Type> targets, Boolf<Type> valid){
+    public Type peek(Seq<Type> targets, Boolf<Type> valid){
       int size = targets.size, curr = heapCounter;
       if(size == 0) return null;
       Type result;

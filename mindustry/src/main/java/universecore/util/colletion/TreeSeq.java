@@ -3,6 +3,9 @@ package universecore.util.colletion;
 import java.util.*;
 import java.util.function.Function;
 
+/**一个基于{@link TreeSet}实现的有序可重集，向这个集合中加入元素会将其插入到合适其大小的位置，根据比较器，这个集合中的元素一定是有序的
+ * <p>区别于{@link TreeSet}，这个集合允许多个比较器认为是相等的对象。
+ * <p>插入复杂度通常为o(logn)，但如果比较器比较的值很集中，这个集合可能会退化到o(n)，遍历这个集合时，遍历获得的元素时有序的*/
 @SuppressWarnings("SortedCollectionWithNonComparableKeys")
 public class TreeSeq<Type> implements Iterable<Type>{
   private final LinkedList<Type> tmp = new LinkedList<>();

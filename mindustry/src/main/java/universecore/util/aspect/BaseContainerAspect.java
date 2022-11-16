@@ -11,6 +11,7 @@ import java.lang.reflect.Method;
 /**arc库容器的切面基类，可对arc容器及容器的子类进行切面化管理，有一个内部抽象类{@link BaseContainerType}控制对来源容器的代理入口策略。
  * <p>针对容器实现的入口实例应当在方法{@link BaseContainerAspect#contType()}被返回，其将被用于构造容器的入口代理实例
  * </p><strong>注意，此切面并未覆盖来源容器的字段，你应当在构造容器切面时，在传入lambda中将来源字段设置为此切面的入口代理实例</strong>
+ *
  * @author EBwilson
  * @since 1.2*/
 @SuppressWarnings({"rawtypes", "unchecked"})

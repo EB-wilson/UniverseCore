@@ -8,6 +8,7 @@ import java.util.HashSet;
  * </p>切面管理器之间，各自保存的切面和触发控制器都是相对独立的，如果你不清楚何时应该创建新的管理器，那么你应当使用默认单例而非新建切面管理器
  * 可通过方法{@code void addTriggerControl(BaseTriggerControl<?> control)}添加自定义的触发控制器
  * </p>关于触发控制器的声明，请参见：{@link BaseTriggerControl}
+ *
  * @author EBwilson
  * @since 1.2*/
 @SuppressWarnings({"unchecked", "rawtypes"})

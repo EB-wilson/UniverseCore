@@ -2,7 +2,9 @@ package universecore.math;
 
 /**提供一些复合、高等数学函数的静态方法
  * 全部需要输入一个x坐标，返回其y轴坐标映射
- * @author EBwilson */
+ *
+ * @since 1.1
+ * @author EBwilson*/
 public class Functions{
   /**渐近函数，由指定起始点到目标点的逼近*/
   public static double lerp(double origin, double dest, double rate, double x){

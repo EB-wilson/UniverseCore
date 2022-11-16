@@ -10,27 +10,33 @@ import universecore.annotations.Annotations;
  * @since 1.4
  * @author EBwilson*/
 public interface FactoryBuildComp extends ProducerBuildComp{
+  /**{@code getter-}生产进度*/
   @Annotations.BindField("progress")
   default float progress(){
     return 0;
   }
 
+  /**{@code setter-}生产进度*/
   @Annotations.BindField("progress")
   default void progress(float value){}
 
+  /**{@code getter-}整体总的生产进度*/
   @Annotations.BindField("totalProgress")
   default float totalProgress(){
     return 0;
   }
 
+  /**{@code setter-}整体总的生产进度*/
   @Annotations.BindField("totalProgress")
   default void totalProgress(float value){}
 
+  /**{@code getter-}工作预热的插值*/
   @Annotations.BindField("warmup")
   default float warmup(){
     return 0;
   }
 
+  /**{@code setter-}工作预热的插值*/
   @Annotations.BindField("warmup")
   default void warmup(float value){}
 
@@ -82,10 +88,14 @@ public interface FactoryBuildComp extends ProducerBuildComp{
     write.f(warmup());
   }
 
+  /**当前机器的工作效率，0-1*/
   default float workEfficiency(){
     return consEfficiency();
   }
 
+  /**机器工作的销量增量，标准情况下是生产时间的倒数，乘以额外的增量返回
+   *
+   * @param baseTime 当前执行的消耗的基准耗时*/
   default float progressIncrease(float baseTime){
     return 1/baseTime*consumer().consDelta();
   }
@@ -99,7 +109,9 @@ public interface FactoryBuildComp extends ProducerBuildComp{
     return ProducerBuildComp.super.shouldConsume() && productValid();
   }
 
+  /**机器工作中一次生产执行时调用*/
   void craftTrigger();
 
+  /**机器工作中随每一次刷新调用*/
   void onCraftingUpdate();
 }

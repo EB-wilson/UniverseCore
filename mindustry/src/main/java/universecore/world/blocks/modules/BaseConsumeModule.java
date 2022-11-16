@@ -18,8 +18,6 @@ import universecore.world.consumers.BaseConsumers;
 import universecore.world.consumers.ConsumePower;
 import universecore.world.consumers.ConsumeType;
 
-import java.util.ArrayList;
-
 /**生产者的消耗器模块，用于集中处理方块的材料需求等，提供了可选需求以及其特殊的触发器
  * @author EBwilson 😀*/
 @SuppressWarnings("all")
@@ -51,11 +49,11 @@ public class BaseConsumeModule extends BlockModule{
     }
   }
   
-  public ArrayList<BaseConsumers> get(){
+  public Seq<BaseConsumers> get(){
     return entity.getConsumerBlock().consumers();
   }
   
-  public ArrayList<BaseConsumers> getOptional(){
+  public Seq<BaseConsumers> getOptional(){
     return entity.getConsumerBlock().optionalCons();
   }
   
@@ -158,7 +156,7 @@ public class BaseConsumeModule extends BlockModule{
     if(getOptional() != null){
       BaseConsumers cons;
       boolean onlyOne = entity.getConsumerBlock().oneOfOptionCons();
-      for(int id=0; id<getOptional().size(); id++){
+      for(int id=0; id<getOptional().size; id++){
         cons = getOptional().get(id);
         
         boolean optionalValid = true;
@@ -204,7 +202,7 @@ public class BaseConsumeModule extends BlockModule{
   
   /**获取指定索引处的可选消耗列表*/
   public BaseConsumers getOptional(int index){
-    return index < getOptional().size()? getOptional().get(index) : null;
+    return index < getOptional().size? getOptional().get(index) : null;
   }
   
   /**触发当前主要消耗项的trigger方法*/
@@ -221,7 +219,7 @@ public class BaseConsumeModule extends BlockModule{
   
   /**触发一个可选消耗项的trigger方法*/
   public void triggerOpt(int id){
-    if(getOptional() != null && getOptional().size() > id){
+    if(getOptional() != null && getOptional().size > id){
       BaseConsumers cons = getOptional().get(id);
       for(BaseConsume c: cons.all()){
         c.consume(entity.getBuilding(ConsumerBuildComp.class));
@@ -254,7 +252,7 @@ public class BaseConsumeModule extends BlockModule{
   
   /**指定的消耗列表是否可用*/
   public boolean valid(int index){
-    if(index >= get().size()) return false;
+    if(index >= get().size) return false;
     
     for(BaseConsume c: get().get(index).all()){
       if(c.efficiency(entity.getBuilding(ConsumerBuildComp.class)) < 0.0001f) return false;

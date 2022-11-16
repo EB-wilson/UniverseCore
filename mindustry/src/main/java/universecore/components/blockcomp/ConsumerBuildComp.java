@@ -8,11 +8,13 @@ import universecore.world.blocks.modules.BaseConsumeModule;
  * @author EBwilson
  * @since 1.0*/
 public interface ConsumerBuildComp extends BuildCompBase{
+  /**当前已选中的消耗项索引*/
   @BindField("consumeCurrent")
   default int consumeCurrent(){
     return 0;
   }
-  
+
+  /**获取消耗模块*/
   @BindField("consumer")
   default BaseConsumeModule consumer(){
     return null;
@@ -23,6 +25,7 @@ public interface ConsumerBuildComp extends BuildCompBase{
     consumer().update();
   }
 
+  /**当前的消耗执行效率，从0-1*/
   default float consEfficiency(){
     return consumer().consEfficiency;
   }
@@ -37,14 +40,17 @@ public interface ConsumerBuildComp extends BuildCompBase{
     return getBlock(ConsumerBuildComp.class);
   }
 
+  /**这个方块当前的消耗列表的消耗条件是否满足*/
   default boolean consumeValid(){
     return consumer() == null || !consumer().hasConsume() || consumer().valid();
   }
-  
+
+  /**这个方块当前是否应该对消耗列表执行消耗*/
   default boolean shouldConsume(){
     return consumer() != null && consumeCurrent() != -1;
   }
 
+  /**这个方块当前是否应该对可选消耗列表执行消耗*/
   default boolean shouldConsumeOptions(){
     return shouldConsume() && consumer().hasOptional();
   }

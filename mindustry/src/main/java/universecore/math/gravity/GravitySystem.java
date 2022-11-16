@@ -3,9 +3,12 @@ package universecore.math.gravity;
 import arc.math.geom.Vec2;
 import universecore.annotations.Annotations;
 
-/**引力系统接口，引力运算时的处理单元*/
+/**引力系统接口，引力运算时的处理单元
+ *
+ * @since 1.3
+ * @author EBwilson*/
 public interface GravitySystem{
-  /**该系统激发的引力场*/
+  /**该系统所激发的引力场*/
   @Annotations.BindField("gravityField")
   default GravityField field(){
     return null;

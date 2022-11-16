@@ -4,9 +4,11 @@ import mindustry.Vars;
 import mindustry.ctype.ContentType;
 import mindustry.ctype.MappableContent;
 
-import static universecore.util.handler.ContentHandler.*;
+import static universecore.util.handler.ContentHandler.overrideContent;
 
 /**内容覆盖器实现此接口，用于在执行load()方法中进行内容覆盖
+ *
+ * @since 1.0
  * @author EBwilson */
 public interface OverrideContentList{
   void load();

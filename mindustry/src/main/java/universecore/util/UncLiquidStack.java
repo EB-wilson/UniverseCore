@@ -5,7 +5,9 @@ import mindustry.type.Liquid;
 import mindustry.type.LiquidStack;
 
 /**提供更多操作的流体堆
- * @author EBwilson */
+ *
+ * @since 1.0
+ * @author EBwilson*/
 public class UncLiquidStack extends LiquidStack{
   public static final UncLiquidStack[] empty = {};
 

@@ -10,6 +10,10 @@ import mindustry.ctype.UnlockableContent;
 import mindustry.game.Objectives;
 import mindustry.type.ItemStack;
 
+/**科技树的构建辅助工具，提供了一些构造科技树的方法
+ *
+ * @since 1.4
+ * @author EBwilson*/
 public class TechTreeConstructor{
   public final TechTree.TechNode node;
 
@@ -47,14 +51,23 @@ public class TechTreeConstructor{
     }
   }
 
+  /**设置当前处理科技树的根节点，任何时候使用这个类中的方法更改科技树时，都需要使用这个方法设置根节点
+   *
+   * @param root 这个科技树的根节点*/
   public static void currentRoot(TechTree.TechNode root){
     currRoot = root;
   }
 
+  /**获取一个科技树节点的根节点
+   *
+   * @param node 目标科技树节点*/
   public static TechTree.TechNode getRoot(TechTree.TechNode node){
     return all.get(node);
   }
 
+  /**获取指定的内容在当前指定的科技树中对应的科技树节点
+   *
+   * @param content 获取节点的内容*/
   public static TechTree.TechNode get(UnlockableContent content){
     TechTree.TechNode node = allMaps.get(currRoot, ObjectMap::new).get(content);
     if(node == null){

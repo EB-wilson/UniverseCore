@@ -17,6 +17,10 @@ import mindustry.ui.fragments.PlacementFragment;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+/**用于增加右下角方块选择栏分类条目的工具
+ *
+ * @since 1.0
+ * @author EBwilson*/
 public class CategoryHandler{
   protected final ArrayList<UncCategory> newCats = new ArrayList<>();
   protected boolean hasNew = false;
@@ -64,11 +68,39 @@ public class CategoryHandler{
       if(catButtons.size%2 != 0) t.image(Styles.black6);
     }).size(catButtons.size > 12? 125: 100, 300);
   }
-  
+
+  /**新增一个建筑类型到列表中，这会在游戏中的方块选择栏呈现
+   *
+   * @param name 类别的内部名称
+   * @param ordinal 这个类别在选择栏的显示位置序数
+   * @param iconName 这个类别的图标的资源文件名称*/
   public Category add(String name, int ordinal, String iconName){
     return add(name, ordinal, null, iconName);
   }
-  
+
+  /**新增一个建筑类型到列表中，这会在游戏中的方块选择栏呈现
+   *
+   * @param name 类别的内部名称
+   * @param iconName 这个类别的图标的资源文件名称*/
+  public Category add(String name, String iconName){
+    return add(name, null, iconName);
+  }
+
+  /**新增一个建筑类型到列表中，这会在游戏中的方块选择栏呈现
+   *
+   * @param name 类别的内部名称
+   * @param bind 这个类别绑定到的目标键位
+   * @param iconName 这个类别的图标的资源文件名称*/
+  public Category add(String name, Binding bind, String iconName){
+    return add(name, Category.values().length, bind, iconName);
+  }
+
+  /**新增一个建筑类型到列表中，这会在游戏中的方块选择栏呈现
+   *
+   * @param name 类别的内部名称
+   * @param ordinal 这个类别在选择栏的显示位置序数
+   * @param bind 这个类别绑定到的目标键位
+   * @param iconName 这个类别的图标的资源文件名称*/
   public Category add(String name, int ordinal, Binding bind, String iconName){
     hasNew = true;
     UncCategory category = new UncCategory(name, ordinal, bind, iconName);
@@ -76,14 +108,6 @@ public class CategoryHandler{
     //binds.add(ordinal, bind);
     //FieldHandler.setValue(selects, ui.hudfrag.blockfrag, binds.toArray(Binding[]::new));
     return category.cat;
-  }
-  
-  public Category add(String name, String iconName){
-    return add(name, null, iconName);
-  }
-  
-  public Category add(String name, Binding bind, String iconName){
-    return add(name, Category.values().length, bind, iconName);
   }
   
   protected static class UncCategory{

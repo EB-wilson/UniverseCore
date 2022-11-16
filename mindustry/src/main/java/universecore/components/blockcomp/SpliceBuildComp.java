@@ -7,6 +7,7 @@ import universecore.world.DirEdges;
 import java.util.Arrays;
 
 /**拼接方块的建筑组件，使方块会自动同步周围的方块状态并记录，通常用于绘制方块连续的连接材质
+ *<p><strong>这是个不稳定的API，后续可能会调整为更加通用且高效的形式，这会造成API变更，慎用</strong>
  *
  * @since 1.5
  * @author EBwilson*/

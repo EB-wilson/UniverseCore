@@ -1,10 +1,18 @@
 package universecore.util;
 
+/**将数字按一定准则转化为字符串的实用工具集
+ *
+ * @since 1.5
+ * @author EBwilson*/
 public class NumberStrify{
   private static final String[] byteUnit = {
       "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB"
   };
 
+  /**将数字转换为计算机存储容量计数表示，但不带有单位
+   *
+   * @param number 要被转换的数字
+   * @param retain 保留的小数位数*/
   @SuppressWarnings("StringRepeatCanBeUsed")
   public static String toByteFixNonUnit(double number, int retain){
     boolean isNegative = false;
@@ -32,6 +40,10 @@ public class NumberStrify{
     return (isNegative? "-": "") + arr[0] + (retain == 0? "": "." + arr[1].substring(0, realRetain) + end);
   }
 
+  /**将数字转换为计算机存储容量计数表示
+   *
+   * @param number 要被转换的数字
+   * @param retain 保留的小数位数*/
   @SuppressWarnings("StringRepeatCanBeUsed")
   public static String toByteFix(double number, int retain){
     boolean isNegative = false;

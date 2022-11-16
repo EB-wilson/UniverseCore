@@ -8,7 +8,10 @@ import arc.struct.Seq;
 
 import java.lang.reflect.Method;
 
-/**arc库的容器的对应切面处理器集合，提供对常用容器的切面类型和获得这些类型实例的工厂方法*/
+/**arc库的容器的对应切面处理器集合，提供对常用容器的切面类型和获得这些类型实例的工厂方法
+ *
+ * @since 1.2
+ * @author EBwilson*/
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class ContainerAspects{
   /*----------------------------------

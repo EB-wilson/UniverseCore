@@ -1,6 +1,7 @@
 package universecore.world.blocks.modules;
 
 import arc.math.Mathf;
+import arc.struct.Seq;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
 import mindustry.world.modules.BlockModule;
@@ -8,8 +9,6 @@ import universecore.components.blockcomp.ProducerBuildComp;
 import universecore.world.producers.BaseProduce;
 import universecore.world.producers.BaseProducers;
 import universecore.world.producers.ProduceType;
-
-import java.util.ArrayList;
 
 /**生产者的产出模块，用于集中处理方块的生产工作
  * @author EBwilson*/
@@ -27,7 +26,7 @@ public class BaseProductModule extends BlockModule {
     current = entity.produceCurrent() != -1? entity.getProducerBlock().producers().get(entity.produceCurrent()) : null;
   }
 
-  public ArrayList<BaseProducers> get(){
+  public Seq<BaseProducers> get(){
     return entity.getProducerBlock().producers();
   }
   
