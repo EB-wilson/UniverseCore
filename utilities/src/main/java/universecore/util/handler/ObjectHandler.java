@@ -48,7 +48,7 @@ public class ObjectHandler{
    * @param whiteList 字段白名单
    * @throws IllegalArgumentException 如果目标对象不分配自来源类*/
   public static <S, T extends S> void copyFieldAsWhite(S source, T target, String... whiteList){
-    if(!source.getClass().isAssignableFrom(target.getClass()))
+    if(!target.getClass().isAssignableFrom(source.getClass()))
       throw new IllegalArgumentException("target object type was not assignable from source object type");
 
     for(String s: whiteList){
