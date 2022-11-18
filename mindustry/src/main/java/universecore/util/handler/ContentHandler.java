@@ -26,6 +26,25 @@ public class ContentHandler{
     contentMap = handle.getValue(Vars.content, "contentMap");
     contentNameMap = handle.getValue(Vars.content, "contentNameMap");
   }
+
+  public static void removeContent(Content content){
+    updateContainer();
+    if(content.getContentType().ordinal() < contentMap.length){
+      Seq<Content> conts = contentMap[content.getContentType().ordinal()];
+      if(conts != null){
+        conts.remove(content);
+      }
+    }
+
+    if(content instanceof MappableContent){
+      if(content.getContentType().ordinal() < contentNameMap.length){
+        ObjectMap<String, MappableContent> map = contentNameMap[content.getContentType().ordinal()];
+        if(map != null){
+          map.remove(((MappableContent) content).name);
+        }
+      }
+    }
+  }
   
   /**用新的content去覆盖一个原有的content，并设置{@link UnlockableContent}的信息
    *
