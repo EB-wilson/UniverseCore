@@ -29,6 +29,8 @@ public class ImportUNCProcessor extends BaseProcessor{
         arc.files.Fi libFileTemp = null;
         arc.files.Fi modFile = null;
         String libVersionValue = "0.0.0";
+        
+        java.util.concurrent.atomic.AtomicBoolean disabled = new java.util.concurrent.atomic.AtomicBoolean(false);
         for (arc.files.Fi file : modsFiles) {
           if (file.isDirectory()) continue;
           arc.files.Fi zipped = new arc.files.ZipFi(file);
@@ -63,21 +65,24 @@ public class ImportUNCProcessor extends BaseProcessor{
           
         arc.files.Fi libFile = libFileTemp;
         String libVersion = libVersionValue;
-        if (mindustry.Vars.mods.getMod("universe-core") == null || !mindustry.Vars.mods.getMod("universe-core").enabled()) {
-          if (libFile == null || !libFile.exists() || versionValid.get(libVersion) || !mindustry.Vars.mods.getMod("universe-core").enabled()) {
+        
+        boolean upgrade = !versionValid.get(libVersion);
+        if (mindustry.Vars.mods.getMod("universe-core") == null || upgrade || !arc.Core.settings.getBool("mod-universe-core-enabled", true)) {
+          if (libFile == null || !libFile.exists() || upgrade || !arc.Core.settings.getBool("mod-universe-core-enabled", true)) {
             arc.util.io.PropertiesUtils.load(arc.Core.bundle.getProperties(), new java.io.StringReader(bundles.get(arc.Core.bundle.getLocale().toString())));
           
             String curr = arc.Core.settings.getString("unc-checkFailed", "");
             curr += modFile.path() + "::";
-            if (mindustry.Vars.mods.getMod("universe-core") != null && !mindustry.Vars.mods.getMod("universe-core").enabled()){
+            if (!arc.Core.settings.getBool("mod-universe-core-enabled", true)){
               curr += "dis";
               $status$ = 1;
+              disabled.set(true);
             }
             else if (libFile == null){
               curr += "none";
               $status$ = 2;
             }
-            else if (versionValid.get(libVersion)){
+            else if (upgrade){
               curr += "$requireVersion";
               $status$ = 3;
             }
@@ -98,9 +103,11 @@ public class ImportUNCProcessor extends BaseProcessor{
                   cont.table(main -> {
                     main.add(arc.Core.bundle.get("warn.uncLoadFailed"));
                     main.row();
-                    main.image().color(mindustry.graphics.Pal.accent).growX().height(6).colspan(2).pad(0).padBottom(8).padTop(8).margin(0);
+                    main.image().color(mindustry.graphics.Pal.accent).growX().height(5).colspan(2).pad(0).padBottom(8).padTop(8).margin(0);
                     main.row();
                     main.table(t -> {
+                      t.add(arc.Core.bundle.get("warn.caused")).color(arc.graphics.Color.lightGray).padBottom(10);
+                      t.row();
                       t.pane(table -> {
                         for (String s : modStatus.split(";")) {
                           if(s.isEmpty()) continue;
@@ -129,14 +136,14 @@ public class ImportUNCProcessor extends BaseProcessor{
                               text.add("[crimson]" + (
                                   modStat[1].equals("dis")? arc.Core.bundle.get("warn.uncDisabled"):
                                   modStat[1].equals("none")? arc.Core.bundle.get("warn.uncNotFound"):
-                                  arc.Core.bundle.format("warn.uncVersionOld", modStat[1].split("-")[1])
+                                  arc.Core.bundle.format("warn.uncVersionOld", modStat[1])
                               ));
                             }).padLeft(5).top().growX();
                           }).padBottom(4).padLeft(12).padRight(12).minWidth(625).growX().fillY().left();
                           table.row();
                           table.image().color(arc.graphics.Color.gray).growX().height(6).colspan(2).pad(0).margin(0);
                         }
-                      }).fill();
+                      }).growY().fillX();
                     }).grow().top();
                     main.row();
                     main.image().color(mindustry.graphics.Pal.accent).growX().height(6).colspan(2).pad(0).padBottom(12).margin(0).bottom();
@@ -145,65 +152,77 @@ public class ImportUNCProcessor extends BaseProcessor{
                     main.row();
                     main.table(buttons -> {
                       buttons.defaults().width(160).height(55).pad(4);
-                      buttons.button(arc.Core.bundle.get("warn.download"), () -> {
-                        java.io.InputStream[] stream = new java.io.InputStream[1];
-                        float[] downloadProgress = {0};
-                        arc.util.Http.get("https://api.github.com/repos/eb-wilson/universecore/releases", (request) -> {
-                          stream[0] = request.getResultAsStream();
-                          arc.files.Fi temp = mindustry.Vars.tmpDirectory.child("UniverseCore.jar");
-                          arc.files.Fi file = mindustry.Vars.modDirectory.child("UniverseCore.jar");
-                          long length = request.getContentLength();
-                          arc.func.Floatc cons = length <= 0 ? f -> {} :p -> downloadProgress[0] = p;
-                          arc.util.io.Streams.copyProgress(stream[0], temp.write(false), length, 4096, cons);
-                          if(libFile != null && libFile.exists()) libFile.delete();
-                          temp.moveTo(file);
-                          try{
-                            mindustry.Vars.mods.importMod(file);
-                            hide();
-                            mindustry.Vars.ui.mods.show();
-                          }catch(java.io.IOException e){
-                            mindustry.Vars.ui.showException(e);
-                            arc.util.Log.err(e);
-                          }
-                        }, (e) -> {
-                          if(! (e instanceof java.io.IOException)){
-                            StringBuilder error = new StringBuilder();
-                            for(StackTraceElement ele : e.getStackTrace()){
-                              error.append(ele);
-                            }
-                            mindustry.Vars.ui.showErrorMessage(arc.Core.bundle.get("warn.downloadFailed") + "\\n" + error);
-                          }
+                      if(disabled.get()){
+                        buttons.button(arc.Core.bundle.get("warn.enableLib"), () -> {
+                          arc.Core.settings.put("mod-universe-core-enabled", true);
+                          mindustry.Vars.ui.showInfoOnHidden("@mods.reloadexit", () -> {
+                            arc.util.Log.info("Exiting to reload mods.");
+                            arc.Core.app.exit();
+                          });
                         });
-                        new mindustry.ui.dialogs.BaseDialog(""){{
-                          titleTable.clearChildren();
-                          cont.table(mindustry.gen.Tex.pane, (t) -> {
-                            t.add(arc.Core.bundle.get("warn.downloading")).top().padTop(10).get();
-                            t.row();
-                            t.add(new mindustry.ui.Bar(() -> arc.util.Strings.autoFixed(downloadProgress[0], 1) + "%", () -> mindustry.graphics.Pal.accent, () -> downloadProgress[0])).growX().height(30).pad(4);
-                          }).size(320, 175);
-                          cont.row();
-                          cont.button(arc.Core.bundle.get("warn.cancel"), () -> {
-                            hide();
+                      }
+                      else{
+                        buttons.button(arc.Core.bundle.get("warn.download"), () -> {
+                          java.io.InputStream[] stream = new java.io.InputStream[1];
+                          float[] downloadProgress = {0};
+                          
+                          mindustry.ui.dialogs.BaseDialog[] di = new mindustry.ui.dialogs.BaseDialog[]{null};
+                          
+                          arc.util.Http.get("https://api.github.com/repos/eb-wilson/universecore/releases/latest", (request) -> {
+                            stream[0] = request.getResultAsStream();
+                            arc.files.Fi temp = mindustry.Vars.tmpDirectory.child("UniverseCore.jar");
+                            arc.files.Fi file = mindustry.Vars.modDirectory.child("UniverseCore.jar");
+                            long length = request.getContentLength();
+                            arc.func.Floatc cons = length <= 0 ? f -> {} :p -> downloadProgress[0] = p;
+                            arc.util.io.Streams.copyProgress(stream[0], temp.write(false), length, 4096, cons);
+                            if(libFile != null && libFile.exists()) libFile.delete();
+                            temp.moveTo(file);
                             try{
-                              if(stream[0] != null) stream[0].close();
+                              mindustry.Vars.mods.importMod(file);
+                              hide();
+                              mindustry.Vars.ui.mods.show();
                             }catch(java.io.IOException e){
+                              mindustry.Vars.ui.showException(e);
+                              arc.util.Log.err(e);
+                              di[0].hide();
+                            }
+                          }, (e) -> {
+                            mindustry.Vars.ui.showException(arc.Core.bundle.get("warn.downloadFailed"), e);
+                            arc.util.Log.err(e);
+                            di[0].hide();
+                          });
+                          di[0] = new mindustry.ui.dialogs.BaseDialog(""){{
+                            titleTable.clearChildren();
+                            cont.table(mindustry.gen.Tex.pane, (t) -> {
+                              t.add(arc.Core.bundle.get("warn.downloading")).top().padTop(10).get();
+                              t.row();
+                              t.add(new mindustry.ui.Bar(() -> arc.util.Strings.autoFixed(downloadProgress[0], 1) + "%", () -> mindustry.graphics.Pal.accent, () -> downloadProgress[0])).growX().height(30).pad(4);
+                            }).size(320, 175);
+                            cont.row();
+                            cont.button(arc.Core.bundle.get("warn.cancel"), () -> {
+                              hide();
+                              try{
+                                if(stream[0] != null) stream[0].close();
+                              }catch(java.io.IOException e){
+                                arc.util.Log.err(e);
+                              }
+                            }).fill();
+                          }};
+                          di[0].show();
+                        });
+                        buttons.button(arc.Core.bundle.get("warn.openfile"), () -> {
+                          mindustry.Vars.platform.showMultiFileChooser(file -> {
+                            try{
+                              mindustry.Vars.mods.importMod(file);
+                              hide();
+                              mindustry.Vars.ui.mods.show();
+                            }catch(java.io.IOException e){
+                              mindustry.Vars.ui.showException(e);
                               arc.util.Log.err(e);
                             }
-                          }).fill();
-                        }}.show();
-                      });
-                      buttons.button(arc.Core.bundle.get("warn.openfile"), () -> {
-                        mindustry.Vars.platform.showMultiFileChooser(file -> {
-                          try{
-                            mindustry.Vars.mods.importMod(file);
-                            hide();
-                            mindustry.Vars.ui.mods.show();
-                          }catch(java.io.IOException e){
-                            mindustry.Vars.ui.showException(e);
-                            arc.util.Log.err(e);
-                          }
-                        }, "zip", "jar");
-                      });
+                          }, "zip", "jar");
+                        });
+                      }
                       buttons.button(arc.Core.bundle.get("warn.goLibPage"), () -> {
                         if(! arc.Core.app.openURI("https://github.com/EB-wilson/UniverseCore")){
                           mindustry.Vars.ui.showErrorMessage("@linkfail");
@@ -259,7 +278,7 @@ public class ImportUNCProcessor extends BaseProcessor{
         }
       }
       """;
-  
+
   private static final HashMap<String , String> bundles = new HashMap<>();
 
   static {
@@ -279,6 +298,8 @@ public class ImportUNCProcessor extends BaseProcessor{
     warn.openModDir = 前往mods目录
     warn.exit = 退出
     warn.androidOpenFolder = 打开目录失败，您可前往如下路径：\\n[accent]android/data/io.anuke.mindustry/mods[]\\n[gray]地址已复制到剪贴板
+    warn.enableLib = 启用mod
+    warn.caused = 以下mod由于UniverseCore状态异常无法正确加载
     """);
   }
   

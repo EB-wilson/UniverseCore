@@ -27,14 +27,16 @@ import universecore.util.mods.ModInfo;
 
 import java.util.Objects;
 
+;
+
 /**UniverseCore的mod主类，同时也是调用核心类，这里会保存各种可能会用到的默认实例以及许多必要实例
  * @author EBwilson*/
 public class UncCore extends Mod{
   private static final ObjectMap<Class<? extends Mod>, ModInfo> referredMods = new ObjectMap<>();
-  
+
   /**此mod内部名称*/
   public static final String coreName = "universe-core";
-  
+
   /**mod项目地址*/
   public static final String coreGithubProject = "https://github.com/EB-wilson/UniverseCore";
 
