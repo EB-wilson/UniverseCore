@@ -32,7 +32,7 @@ public class ImportUNCProcessor extends BaseProcessor{
         
         java.util.concurrent.atomic.AtomicBoolean disabled = new java.util.concurrent.atomic.AtomicBoolean(false);
         for (arc.files.Fi file : modsFiles) {
-          if (file.isDirectory() || (file.extension() != "jar" && file.extension() != "zip")) continue;
+          if (file.isDirectory() || (!file.extension().equals("jar") && !file.extension().equals("zip"))) continue;
           
           try{
             arc.files.Fi zipped = new arc.files.ZipFi(file);
