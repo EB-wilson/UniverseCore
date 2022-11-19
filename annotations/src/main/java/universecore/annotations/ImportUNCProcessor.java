@@ -32,20 +32,25 @@ public class ImportUNCProcessor extends BaseProcessor{
         
         java.util.concurrent.atomic.AtomicBoolean disabled = new java.util.concurrent.atomic.AtomicBoolean(false);
         for (arc.files.Fi file : modsFiles) {
-          if (file.isDirectory()) continue;
-          arc.files.Fi zipped = new arc.files.ZipFi(file);
-          arc.files.Fi modManifest = zipped.child("mod.hjson");
-          if (modManifest.exists()) {
-            arc.util.serialization.Jval fest = arc.util.serialization.Jval.read(modManifest.readString());
-            String name = fest.get("name").asString();
-            String version = fest.get("version").asString();
-            if (name.equals("universe-core")) {
-              libFileTemp = file;
-              libVersionValue = version;
+          if (file.isDirectory() || (file.extension() != "jar" && file.extension() != "zip")) continue;
+          
+          try{
+            arc.files.Fi zipped = new arc.files.ZipFi(file);
+            arc.files.Fi modManifest = zipped.child("mod.hjson");
+            if (modManifest.exists()) {
+              arc.util.serialization.Jval fest = arc.util.serialization.Jval.read(modManifest.readString());
+              String name = fest.get("name").asString();
+              String version = fest.get("version").asString();
+              if (name.equals("universe-core")) {
+                libFileTemp = file;
+                libVersionValue = version;
+              }
+              else if (fest.has("main") && fest.getString("main").equals($className.class.getName())){
+                modFile = file;
+              }
             }
-            else if (fest.has("main") && fest.getString("main").equals($className.class.getName())){
-              modFile = file;
-            }
+          }catch(java.io.IOException e){
+            continue;
           }
           
           if (modFile != null && libFileTemp != null) break;
