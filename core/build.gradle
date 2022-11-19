@@ -4,23 +4,27 @@ sourceSets.main.java.srcDirs = ["src/main/java"]
 sourceSets.test.java.srcDirs = ["src/test/java"]
 
 publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId = 'com.github.EB-wilson'
-            artifactId = 'core'
-            version = "$uncVersion"
-            from components.java
-        }
+  publications {
+    maven(MavenPublication) {
+      groupId = 'com.github.EB-wilson.UniverseCore'
+      artifactId = 'core'
+      version = "$uncVersion"
+      from components.java
     }
+  }
+
+  repositories{
+    mavenLocal()
+  }
 }
 
 dependencies {
-    repositories{
-        mavenCentral()
-        maven{ url 'https://www.jitpack.io' }
-    }
+  repositories{
+    mavenCentral()
+    maven{ url 'https://www.jitpack.io' }
+  }
 
-    implementation project(":abstract")
+  implementation project(":abstract")
 
-    annotationProcessor "com.github.Anuken:jabel:0.7.0"
+  annotationProcessor "com.github.Anuken:jabel:0.7.0"
 }

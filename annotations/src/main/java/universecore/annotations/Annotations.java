@@ -8,12 +8,12 @@ import java.lang.annotation.Target;
 /**编译注解集，包含了一些编译时注解，用于mixin等*/
 public class Annotations{
   /**UniverseCore导入语句，注解在mod的入口主类上，以在编译生成类时分配注册，预加载以及抽离加载时序
-   * <p>参数requireVersion为最低要求universeCore版本的序列号，运行时若已安装版本低于此版本则不可用*/
+   * <p>参数requireVersion为最低要求universeCore版本号，例如{@code "1.5.5"}，运行时若已安装版本低于此版本则会弹出警告并要求更新*/
   @Target(ElementType.TYPE)
   @Retention(RetentionPolicy.SOURCE)
   public @interface ImportUNC{
     /**要求的最低前置版本序列号*/
-    long requireVersion();
+    String requireVersion();
   }
   
   //-------------

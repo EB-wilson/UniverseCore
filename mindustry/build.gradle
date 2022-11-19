@@ -8,11 +8,15 @@ sourceSets.test.java.srcDirs = ["src/test/java"]
 publishing {
   publications {
     maven(MavenPublication) {
-      groupId = 'com.github.EB-wilson'
+      groupId = 'com.github.EB-wilson.UniverseCore'
       artifactId = 'mindustry'
       version = "$uncVersion"
       from components.java
     }
+  }
+
+  repositories{
+    mavenLocal()
   }
 }
 

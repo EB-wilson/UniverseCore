@@ -1,33 +1,33 @@
 plugins {
-    id 'java'
+  id 'java'
 }
 
 sourceSets.main.java.srcDirs = ["src/main/java"]
 sourceSets.test.java.srcDirs = ["src/test/java"]
 
 publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId = 'com.github.EB-wilson'
-            artifactId = 'implabstract'
-            version = "$uncVersion"
-            from components.java
-        }
+  publications {
+    maven(MavenPublication) {
+      groupId = 'com.github.EB-wilson.UniverseCore'
+      artifactId = 'implabstract'
+      version = "$uncVersion"
+      from components.java
     }
+  }
 }
 
 dependencies {
-    repositories {
-        mavenCentral()
-        maven{ url 'https://www.jitpack.io' }
-    }
+  repositories {
+    mavenCentral()
+    maven{ url 'https://www.jitpack.io' }
+  }
 
-    implementation project(":dynamilizer")
+  implementation project(":dynamilizer")
 
-    compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
-    compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
-    implementation project(":abstract")
-    implementation project(":utilities")
+  compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+  compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+  implementation project(":abstract")
+  implementation project(":utilities")
 
-    annotationProcessor "com.github.Anuken:jabel:0.7.0"
+  annotationProcessor "com.github.Anuken:jabel:0.7.0"
 }

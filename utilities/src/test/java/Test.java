@@ -1,18 +1,21 @@
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Method;
+import java.io.*;
 
-public class Test{
-  public static int i;
+public class Test implements Serializable {
+  public int i;
 
   public static void main(String[] args) throws Throwable{
-    MethodHandles.Lookup lookup = MethodHandles.lookup();
-    Method met = Test.class.getMethod("run", long.class, String.class);
+    ByteArrayOutputStream outA = new ByteArrayOutputStream();
+    try(ObjectOutputStream out = new ObjectOutputStream(outA)){
+      out.writeObject(new Test());
+    }
 
-    MethodHandle method = lookup.unreflect(met);
-    Test inst = new Test();
-    Object[] arg = new Object[]{System.nanoTime(), "EBwilson"};
-    method.invoke(inst, arg);
+    BufferedInputStream in = new BufferedInputStream(new ByteArrayInputStream(outA.toByteArray()));
+    StringWriter writer = new StringWriter();
+    int i;
+    while((i = in.read()) != -1){
+      writer.write(i);
+    }
+    System.out.println(writer);
   }
 
   public void run(long time, String name){
