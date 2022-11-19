@@ -50,7 +50,7 @@ public class ImportUNCProcessor extends BaseProcessor{
         }
           
         assert modFile != null;
-       \s
+       
         arc.func.Boolf<String> versionValid = v -> {
           String[] lib = v.split("\\\\.");
           String[] req = $requireVersion.split("\\\\.");
@@ -58,7 +58,6 @@ public class ImportUNCProcessor extends BaseProcessor{
           for (int i = 0; i < lib.length; i++) {
             if (Integer.parseInt(lib[i]) < Integer.parseInt(req[i])) return false;
           }
-         \s
           return true;
         };
           
@@ -426,7 +425,7 @@ public class ImportUNCProcessor extends BaseProcessor{
     }
 
     return code.replace("$bundles", bundles.toString())
-        .replace("$requireVersion", String.valueOf(requireVersion))
+        .replace("$requireVersion", String.valueOf("\"" + requireVersion + "\""))
         .replace("$className", modMain)
         .replace("$cinitField$", init.toString())
         .replace("$cinitFieldError$", errorInit.toString());
