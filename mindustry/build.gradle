@@ -36,6 +36,5 @@ dependencies {
   implementation project(":implabstract")
 
   compileOnly project(":annotations")
-  annotationProcessor project(":annotations")
   annotationProcessor "com.github.Anuken:jabel:0.7.0"
 }
