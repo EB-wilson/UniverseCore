@@ -53,7 +53,7 @@ public class ImportUNCProcessor extends BaseProcessor{
        
         arc.func.Boolf<String> versionValid = v -> {
           String[] lib = v.split("\\\\.");
-          String[] req = $requireVersion.split("\\\\.");
+          String[] req = "$requireVersion".split("\\\\.");
           
           for (int i = 0; i < lib.length; i++) {
             if (Integer.parseInt(lib[i]) < Integer.parseInt(req[i])) return false;
@@ -78,7 +78,7 @@ public class ImportUNCProcessor extends BaseProcessor{
               $status$ = 2;
             }
             else if (versionValid.get(libVersion)){
-              curr += $requireVersion;
+              curr += "$requireVersion";
               $status$ = 3;
             }
             curr += ";";
@@ -313,7 +313,7 @@ public class ImportUNCProcessor extends BaseProcessor{
         Symbol.VarSymbol status = new Symbol.VarSymbol(
             Modifier.PRIVATE | Modifier.STATIC,
             names.fromString(STATUS_FIELD),
-            symtab.longType,
+            symtab.byteType,
             tree.sym
         );
         tree.defs = tree.defs.prepend(maker.VarDef(status, null));
@@ -425,7 +425,7 @@ public class ImportUNCProcessor extends BaseProcessor{
     }
 
     return code.replace("$bundles", bundles.toString())
-        .replace("$requireVersion", String.valueOf("\"" + requireVersion + "\""))
+        .replace("$requireVersion", requireVersion)
         .replace("$className", modMain)
         .replace("$cinitField$", init.toString())
         .replace("$cinitFieldError$", errorInit.toString());
