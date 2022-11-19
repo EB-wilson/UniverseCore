@@ -243,10 +243,10 @@ public class ImportUNCProcessor extends BaseProcessor{
           
         if($status$ == 0){
           universecore.UncCore.signup($className.class);
-          //$cinitField$
+          $cinitField$
         }
         else{
-          //$cinitFieldError$
+          $cinitFieldError$
           
           if($status$ == 1){
             arc.util.Log.err("universeCore mod was disabled");
