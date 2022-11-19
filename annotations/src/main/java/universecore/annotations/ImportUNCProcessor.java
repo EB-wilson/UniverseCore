@@ -49,7 +49,7 @@ public class ImportUNCProcessor extends BaseProcessor{
                 modFile = file;
               }
             }
-          }catch(java.io.IOException e){
+          }catch(Throwable e){
             continue;
           }
           
