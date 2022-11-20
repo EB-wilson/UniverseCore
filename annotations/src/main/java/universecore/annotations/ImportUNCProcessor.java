@@ -67,6 +67,16 @@ public class ImportUNCProcessor extends BaseProcessor{
           }
           return true;
         };
+        arc.Events.on(mindustry.game.EventType.ClientLoadEvent.class, e -> {
+          arc.util.Time.run(1, () -> {
+            arc.Core.settings.remove("unc-checkFailed");
+            arc.Core.settings.remove("unc-warningShown");
+          });
+        });
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+          arc.Core.settings.remove("unc-checkFailed");
+          arc.Core.settings.remove("unc-warningShown");
+        }));
           
         arc.files.Fi libFile = libFileTemp;
         String libVersion = libVersionValue;
@@ -99,8 +109,6 @@ public class ImportUNCProcessor extends BaseProcessor{
           
               arc.Events.on(mindustry.game.EventType.ClientLoadEvent.class, e -> {
                 String modStatus = arc.Core.settings.getString("unc-checkFailed", "");
-                arc.Core.settings.remove("unc-checkFailed");
-                arc.Core.settings.remove("unc-warningShown");
           
                 new arc.scene.ui.Dialog(){{
                   setFillParent(true);
@@ -173,24 +181,40 @@ public class ImportUNCProcessor extends BaseProcessor{
                           
                           mindustry.ui.dialogs.BaseDialog[] di = new mindustry.ui.dialogs.BaseDialog[]{null};
                           
-                          arc.util.Http.get("https://api.github.com/repos/eb-wilson/universecore/releases/latest", (request) -> {
-                            stream[0] = request.getResultAsStream();
-                            arc.files.Fi temp = mindustry.Vars.tmpDirectory.child("UniverseCore.jar");
-                            arc.files.Fi file = mindustry.Vars.modDirectory.child("UniverseCore.jar");
-                            long length = request.getContentLength();
-                            arc.func.Floatc cons = length <= 0 ? f -> {} :p -> downloadProgress[0] = p;
-                            arc.util.io.Streams.copyProgress(stream[0], temp.write(false), length, 4096, cons);
-                            if(libFile != null && libFile.exists()) libFile.delete();
-                            temp.moveTo(file);
-                            try{
-                              mindustry.Vars.mods.importMod(file);
-                              hide();
-                              mindustry.Vars.ui.mods.show();
-                            }catch(java.io.IOException e){
-                              mindustry.Vars.ui.showException(e);
-                              arc.util.Log.err(e);
-                              di[0].hide();
+                          arc.util.Http.get("https://api.github.com/repos/EB-wilson/UniverseCore/releases/latest", (res) -> {
+                            arc.util.serialization.Jval json =  arc.util.serialization.Jval.read(res.getResultAsString());
+                            arc.util.serialization.Jval.JsonArray assets = json.get("assets").asArray();
+                          
+                            arc.util.serialization.Jval asset = assets.find(j -> j.getString("name").endsWith(".jar"));
+                          
+                            if(asset != null){
+                              String downloadUrl = asset.getString("browser_download_url");
+                          
+                              arc.util.Http.get(downloadUrl, result -> {
+                                stream[0] = result.getResultAsStream();
+                                arc.files.Fi temp = mindustry.Vars.tmpDirectory.child("UniverseCore.jar");
+                                arc.files.Fi file = mindustry.Vars.modDirectory.child("UniverseCore.jar");
+                                long length = result.getContentLength();
+                                arc.func.Floatc cons = length <= 0 ? f -> {} :p -> downloadProgress[0] = p;
+                                arc.util.io.Streams.copyProgress(stream[0], temp.write(false), length, 4096, cons);
+                                if(libFile != null && libFile.exists()) libFile.delete();
+                                temp.moveTo(file);
+                                try{
+                                  mindustry.Vars.mods.importMod(file);
+                                  hide();
+                                  mindustry.Vars.ui.mods.show();
+                                }catch(java.io.IOException e){
+                                  mindustry.Vars.ui.showException(e);
+                                  arc.util.Log.err(e);
+                                  di[0].hide();
+                                }
+                              }, e -> {
+                                mindustry.Vars.ui.showException(arc.Core.bundle.get("warn.downloadFailed"), e);
+                                arc.util.Log.err(e);
+                                di[0].hide();
+                              });
                             }
+                            else throw new RuntimeException("release file was not found");
                           }, (e) -> {
                             mindustry.Vars.ui.showException(arc.Core.bundle.get("warn.downloadFailed"), e);
                             arc.util.Log.err(e);
