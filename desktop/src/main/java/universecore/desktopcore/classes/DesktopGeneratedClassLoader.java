@@ -90,8 +90,8 @@ public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
         catch (ZipException e){
           Log.warn("[GeneratedClassLoader] cache zip format error or it was an empty zip, direct write byte code");
         }finally {
-          TMP_FILE.delete();
-          TMP_FILE.deleteDirectory();
+          TMP_FILE.file().delete();
+          TMP_FILE.file().deleteOnExit();
         }
       }
 

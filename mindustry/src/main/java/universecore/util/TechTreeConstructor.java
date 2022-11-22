@@ -106,8 +106,7 @@ public class TechTreeConstructor{
     node(parent, content, new Seq<>(), children);
   }
 
-  public static void node(TechTree.TechNode parent, UnlockableContent content, Seq<Objectives.Objective> objectives,
-                    Cons<TechTreeConstructor> child){
+  public static void node(TechTree.TechNode parent, UnlockableContent content, Seq<Objectives.Objective> objectives, Cons<TechTreeConstructor> child){
     new TechTreeConstructor(parent, content, content.researchRequirements(), objectives, child);
   }
 
