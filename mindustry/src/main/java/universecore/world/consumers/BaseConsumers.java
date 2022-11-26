@@ -41,7 +41,7 @@ public class BaseConsumers{
 
   public Prov<Visibility> selectable = () -> Visibility.usable;
 
-  public Floatf<ConsumerBuildComp> consDelta = e -> e.getBuilding().delta()*e.consEfficiency();
+  public Floatf<ConsumerBuildComp> consDelta = e -> e.getBuilding().delta();
   /**本消耗的可用控制器*/
   public Seq<Boolf<ConsumerBuildComp>> valid = new Seq<>();
   /**消耗触发器，在消耗的trigger()方法执行时触发*/

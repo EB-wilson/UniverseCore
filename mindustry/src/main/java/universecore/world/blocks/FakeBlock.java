@@ -60,6 +60,11 @@ public class FakeBlock extends Block {
   }
 
   @Override
+  public void drawPlanConfigTop(BuildPlan plan, Eachable<BuildPlan> list) {
+    maskedBlock.drawPlanConfigTop(plan, list);
+  }
+
+  @Override
   public void drawPlace(int x, int y, int rotation, boolean valid) {
     maskedBlock.drawPlace(x, y, rotation, valid);
   }
