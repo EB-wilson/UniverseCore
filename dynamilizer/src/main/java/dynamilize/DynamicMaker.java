@@ -3,15 +3,11 @@ package dynamilize;
 import dynamilize.classmaker.*;
 import dynamilize.classmaker.code.*;
 import dynamilize.classmaker.code.annotation.AnnotationType;
-import org.objectweb.asm.Opcodes;
-import universecore.ImpCore;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -87,7 +83,6 @@ public abstract class DynamicMaker{
   public static final IMethod<ArgumentList, Object[]> GET_LIST = ARG_LIST_TYPE.getMethod(OBJECT_TYPE.asArray(), "getList", INT_TYPE);
   public static final IMethod<ArgumentList, Void> RECYCLE_LIST = ARG_LIST_TYPE.getMethod(VOID_TYPE, "recycleList", OBJECT_TYPE.asArray());
 
-  private static final MethodHandles.Lookup LOOKUP_INST = MethodHandles.lookup();
   private static final Map<String, Set<FunctionType>> OVERRIDES = new HashMap<>();
   private static final Set<Class<?>> INTERFACE_TEMP = new HashSet<>();
   private static final Class[] EMPTY_CLASSES = new Class[0];
@@ -97,32 +92,54 @@ public abstract class DynamicMaker{
 
   private final HashMap<ClassImplements<?>, Class<?>> classPool = new HashMap<>();
   private final HashMap<Class<?>, DataPool> classPoolsMap = new HashMap<>();
-  private final HashMap<Class<?>, HashMap<FunctionType, MethodHandle>> constructors = new HashMap<>();
+  private final HashMap<Class<?>, HashMap<FunctionType, Constructor<?>>> constructors = new HashMap<>();
 
   /**创建一个实例，并传入其要使用的{@linkplain JavaHandleHelper java行为支持器}，子类引用此构造器可能直接设置默认的行为支持器而无需外部传入*/
   protected DynamicMaker(JavaHandleHelper helper){
     this.helper = helper;
   }
 
-  /**获取默认的动态类型工厂，工厂具备基于{@link ASMGenerator}与适用于<i>HotSpot JVM</i>运行时的{@link JavaHandleHelper}进行的实现。
-   * 适用于：
-   * <ul>
-   * <li>java运行时版本1.8的所有jvm
-   * <li>java运行时版本大于等于1.9的<i>甲骨文HotSpot JVM</i>
-   * <li><strong><i>IBM OpenJ9</i>运行时尚未支持</strong>
-   * </ul>
-   * 若有范围外的需求，可按需要进行实现*/
+  /*获取默认的动态类型工厂，工厂具备基于{@link ASMGenerator}与适用于<i>HotSpot JVM</i>运行时的{@link JavaHandleHelper}进行的实现。
+    适用于：
+    <ul>
+    <li>java运行时版本1.8的所有jvm
+    <li>java运行时版本大于等于1.9的<i>甲骨文HotSpot JVM</i>
+    <li><strong><i>IBM OpenJ9</i>运行时尚未支持</strong>
+    </ul>
+    若有范围外的需求，可按需要进行实现*/
+  /*
   public static DynamicMaker getDefault(){
     BaseClassLoader loader = new BaseClassLoader(DynamicMaker.class.getClassLoader());
     ASMGenerator generator = new ASMGenerator(loader, Opcodes.V1_8);
 
-    return new DynamicMaker(acc -> acc.setAccessible(true)){
+    return new DynamicMaker(new JavaHandleHelper() {
+      @Override
+      public <T> T newInstance(Constructor<? extends T> cstr, Object... args) {
+        return null;
+      }
+
+      @Override
+      public <R> R invoke(Method method, Object target, Object... args) {
+        return null;
+      }
+
+      @Override
+      public <T> T get(Field field, Object target) {
+        return null;
+      }
+
+      @Override
+      public void set(Field field, Object target, Object value) {
+
+      }
+    }){
       @Override
       protected <T> Class<? extends T> generateClass(Class<T> baseClass, Class<?>[] interfaces){
         return makeClassInfo(baseClass, interfaces).generate(generator);
       }
     };
   }
+  */
 
   /**使用默认构造函数构造没有实现额外接口的动态类的实例，实例的java类型委托类为{@link Object}
    *
@@ -171,14 +188,31 @@ public abstract class DynamicMaker{
 
     Class<? extends T> clazz = getDynamicBase(base, interfaces);
     try{
-      Object[] argsLis = ArgumentList.getList(args.length + 3);
-      argsLis[0] = dynamicClass;
-      argsLis[1] = genPool(clazz, dynamicClass);
-      argsLis[2] = classPoolsMap.get(clazz);
+      List<Object> argsLis = new ArrayList<>(Arrays.asList(
+          dynamicClass,
+          genPool(clazz, dynamicClass),
+          classPoolsMap.get(clazz)
+      ));
+      argsLis.addAll(Arrays.asList(args));
 
-      if(args.length != 0) System.arraycopy(args, 0, argsLis, 3, args.length);
+      Constructor<?> cstr = null;
+      for(Constructor<?> constructor: clazz.getDeclaredConstructors()){
+        FunctionType t;
+        if((t = FunctionType.from(constructor)).match(argsLis.toArray())){
+          cstr = constructor;
+          break;
+        }
+        t.recycle();
+      }
+      if(cstr == null)
+        throw new NoSuchMethodError("no matched constructor found with parameter " + Arrays.toString(args));
 
-      return (DynamicObject<T>) ImpCore.methodInvokeHelper.newInstance(clazz, argsLis);
+      FunctionType type = FunctionType.inst(cstr.getParameterTypes());
+      Constructor<?> c = cstr;
+      DynamicObject<T> inst = (DynamicObject<T>) helper.newInstance(constructors.computeIfAbsent(clazz, e -> new HashMap<>()).computeIfAbsent(type, i -> c), argsLis.toArray());
+      type.recycle();
+
+      return inst;
     }catch(Throwable e){
       throw new RuntimeException(e);
     }
@@ -205,7 +239,7 @@ public abstract class DynamicMaker{
   protected <T> DataPool genPool(Class<? extends T> base, DynamicClass dynamicClass){
     DataPool basePool = classPoolsMap.computeIfAbsent(base, clazz -> {
       AtomicBoolean immutable = new AtomicBoolean();
-      DataPool res = new DataPool(null){
+      DataPool res = new DataPool(null, helper){
         @Override
         public void setFunction(String name, Function<?, ?> function, Class<?>... argsType){
           if(immutable.get())
@@ -244,8 +278,7 @@ public abstract class DynamicMaker{
         for(Field field: curr.getDeclaredFields()){
           if(Modifier.isStatic(field.getModifiers()) || isInternalField(field.getName())) continue;
 
-          helper.setAccess(field);
-          res.setVariable(new JavaVariable(field));
+          res.setVariable(new JavaVariable(field, helper));
         }
         curr = curr.getSuperclass();
       }
@@ -255,7 +288,7 @@ public abstract class DynamicMaker{
       return res;
     });
 
-    return dynamicClass.genPool(basePool);
+    return dynamicClass.genPool(basePool, helper);
   }
 
   private static boolean isInternalField(String name){
@@ -493,6 +526,31 @@ public abstract class DynamicMaker{
             //   *[return]* super.*name*(*parameters*);
             // }
             if(superMethod != null){
+              if (Modifier.isInterface(superMethod.owner().modifiers())){
+                IClass<?> c = classInfo.superClass();
+                boolean found = false;
+                t: while (c != null && c != OBJECT_TYPE){
+                  for (IClass<?> interf: c.interfaces()) {
+                    if (interf == superMethod.owner()){
+                      found = true;
+                      break t;
+                    }
+                  }
+
+                  c = c.superClass();
+                }
+
+                if (found){
+                  superMethod = new MethodInfo<>(
+                      c,
+                      Modifier.PUBLIC,
+                      superMethod.name(),
+                      superMethod.returnType(),
+                      superMethod.parameters().toArray(new Parameter[0])
+                  );
+                }
+              }
+
               CodeBlock<?> code = classInfo.declareMethod(
                   Modifier.PRIVATE | Modifier.FINAL,
                   methodName + CALLSUPER,
@@ -744,7 +802,7 @@ public abstract class DynamicMaker{
         }
 
         if(!overrideMethods.computeIfAbsent(method.getName(), e -> new HashSet<>()).add(FunctionType.from(method))
-            || finalMethods.getOrDefault(method.getName(), EMP_MAP).contains(FunctionType.from(method))) continue;
+        || finalMethods.getOrDefault(method.getName(), EMP_MAP).contains(FunctionType.from(method))) continue;
 
         String methodName = method.getName();
         ClassInfo<?> returnType = asType(method.getReturnType());

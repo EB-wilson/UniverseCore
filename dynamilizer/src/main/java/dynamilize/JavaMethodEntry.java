@@ -2,7 +2,6 @@ package dynamilize;
 
 import dynamilize.annotation.Super;
 import dynamilize.annotation.This;
-import universecore.ImpCore;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -77,7 +76,7 @@ public class JavaMethodEntry implements IFunctionEntry{
 
       if(argsArray.length != 0) System.arraycopy(argsArray, 0, realArgArr, offset, realArgArr.length);
 
-      Object res = ImpCore.methodInvokeHelper.invoke(null, invokeMethod.getName(), realArgArr);
+      Object res = owner.helper.invoke(invokeMethod, realArgArr);
       ArgumentList.recycleList(realArgArr);
       if(superPool != null) superPool.recycle();
       return res;

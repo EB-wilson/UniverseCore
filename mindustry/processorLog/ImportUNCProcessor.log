@@ -1,5 +1,5 @@
 processor: ImportUNCProcessor (full class name: universecore.annotations.ImportUNCProcessor)
-time: Mon Nov 21 00:45:08 CST 2022
+time: Tue Nov 29 23:27:53 CST 2022
 
 -----------------------------------------
 annotation: universecore.annotations.Annotations.ImportUNC
@@ -67,7 +67,7 @@ annotation: universecore.annotations.Annotations.ImportUNC
  59|             final boolean $upgrade = !$versionValid.get($libVersion);
  60|             if (mindustry.Vars.mods.getMod("universe-core") == null || $upgrade || !arc.Core.settings.getBool("mod-universe-core-enabled", true)) {
  61|                 if ($libFile == null || !$libFile.exists() || $upgrade || !arc.Core.settings.getBool("mod-universe-core-enabled", true)) {
- 62|                     arc.util.io.PropertiesUtils.load(arc.Core.bundle.getProperties(), new java.io.StringReader(bundles.get(arc.Core.bundle.getLocale().toString())));
+ 62|                     arc.util.io.PropertiesUtils.load(arc.Core.bundle.getProperties(), new java.io.StringReader(bundles.get(arc.Core.bundle.getLocale().toString(), bundles.get(""))));
  63|                     String $curr = arc.Core.settings.getString("unc-checkFailed", "");
  64|                     $curr += $modFile.path() + "::";
  65|                     if (!arc.Core.settings.getBool("mod-universe-core-enabled", true)) {

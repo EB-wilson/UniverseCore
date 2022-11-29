@@ -75,6 +75,11 @@ public class FakeBlock extends Block {
   }
 
   @Override
+  public TextureRegion getPlanRegion(BuildPlan plan, Eachable<BuildPlan> list) {
+    return maskedBlock.getPlanRegion(plan, list);
+  }
+
+  @Override
   public float drawPlaceText(String text, int x, int y, boolean valid) {
     return maskedBlock.drawPlaceText(text, x, y, valid);
   }

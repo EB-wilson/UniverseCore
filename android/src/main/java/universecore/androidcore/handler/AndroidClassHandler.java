@@ -3,11 +3,13 @@ package universecore.androidcore.handler;
 import dynamilize.DynamicMaker;
 import dynamilize.DynamicObject;
 import dynamilize.IllegalHandleException;
+import dynamilize.JavaHandleHelper;
 import dynamilize.classmaker.*;
 import dynamilize.classmaker.code.IClass;
 import dynamilize.classmaker.code.ILocal;
 import mindustry.Vars;
 import mindustry.mod.Mod;
+import universecore.ImpCore;
 import universecore.androidcore.classes.AndroidGeneratedClassLoader;
 import universecore.androidcore.classes.DexGenerator;
 import universecore.androidcore.classes.DexLoaderFactory;
@@ -19,6 +21,8 @@ import universecore.util.handler.ClassHandler;
 import universecore.util.mods.ModGetter;
 import universecore.util.mods.ModInfo;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -82,8 +86,35 @@ public class AndroidClassHandler implements ClassHandler{
 
   @Override
   public DynamicMaker getDynamicMaker(){
-    return maker != null? maker: (maker = new DynamicMaker(accessibleObject -> {
-      accessibleObject.setAccessible(true);
+    return maker != null? maker: (maker = new DynamicMaker(new JavaHandleHelper() {
+      @Override
+      public <T> T newInstance(Constructor<? extends T> cstr, Object... args) {
+        return ImpCore.methodInvokeHelper.newInstance(cstr.getDeclaringClass(), args);
+      }
+
+      @Override
+      public <R> R invoke(Method method, Object target, Object... args) {
+        if (Modifier.isStatic(method.getModifiers())) {
+          return ImpCore.methodInvokeHelper.invokeStatic(method.getDeclaringClass(), method.getName(), args);
+        }
+        return ImpCore.methodInvokeHelper.invoke(target, method.getName(), args);
+      }
+
+      @Override
+      public <T> T get(Field field, Object target) {
+        if (Modifier.isStatic(field.getModifiers())) {
+          return ImpCore.fieldAccessHelper.getStatic(field.getDeclaringClass(), field.getName());
+        }
+        else return ImpCore.fieldAccessHelper.get(target, field.getName());
+      }
+
+      @Override
+      public void set(Field field, Object target, Object value) {
+        if (Modifier.isStatic(field.getModifiers())) {
+          ImpCore.fieldAccessHelper.setStatic(field.getDeclaringClass(), field.getName(), value);
+        }
+        else ImpCore.fieldAccessHelper.set(target, field.getName(), value);
+      }
     }){
       @Override
       @SuppressWarnings("unchecked")

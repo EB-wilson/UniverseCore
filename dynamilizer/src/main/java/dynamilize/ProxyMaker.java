@@ -1,7 +1,5 @@
 package dynamilize;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -165,7 +163,6 @@ public abstract class ProxyMaker{
       }
     }
 
-    private final MethodHandle handler;
     private final String signature;
 
     private final Method method;
@@ -175,13 +172,6 @@ public abstract class ProxyMaker{
       this.method = method;
       this.type = FunctionType.from(method);
       signature = method.getDeclaringClass().getName() + "." + FunctionType.signature(method);
-
-      MethodHandles.Lookup lookup = MethodHandles.lookup();
-      try{
-        handler = lookup.unreflect(method);
-      }catch(IllegalAccessException e){
-        throw new RuntimeException(e);
-      }
     }
 
     @Override
@@ -201,7 +191,7 @@ public abstract class ProxyMaker{
       if(args.args().length != 0) System.arraycopy(args.args(), 0, arg, 1, args.args().length);
 
       try{
-        return handler.invokeWithArguments(arg);
+        return maker.getHelper().invoke(method, proxy, args);
       }catch(Throwable e){
         throwException(e);
         return null;

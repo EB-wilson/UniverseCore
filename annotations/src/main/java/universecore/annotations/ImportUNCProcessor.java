@@ -85,7 +85,7 @@ public class ImportUNCProcessor extends BaseProcessor{
           final boolean $upgrade = !$versionValid.get($libVersion);
           if (mindustry.Vars.mods.getMod("universe-core") == null || $upgrade || !arc.Core.settings.getBool("mod-universe-core-enabled", true)) {
             if ($libFile == null || !$libFile.exists() || $upgrade || !arc.Core.settings.getBool("mod-universe-core-enabled", true)) {
-              arc.util.io.PropertiesUtils.load(arc.Core.bundle.getProperties(), new java.io.StringReader(bundles.get(arc.Core.bundle.getLocale().toString())));
+              arc.util.io.PropertiesUtils.load(arc.Core.bundle.getProperties(), new java.io.StringReader(bundles.get(arc.Core.bundle.getLocale().toString(), bundles.get(""))));
       
               String $curr = arc.Core.settings.getString("unc-checkFailed", "");
               $curr += $modFile.path() + "::";

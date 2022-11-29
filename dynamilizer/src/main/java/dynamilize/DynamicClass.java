@@ -98,7 +98,7 @@ public class DynamicClass{
   private DynamicClass(String name, DynamicClass superDyClass){
     this.name = name;
     this.superDyClass = superDyClass;
-    this.data = new DataPool(superDyClass == null? null: superDyClass.data);
+    this.data = new DataPool(superDyClass == null? null: superDyClass.data, null);
   }
 
   /**将此类型对象从池中移除并废弃，任何一个动态类不再被使用后，都应当正确的删除。
@@ -132,8 +132,8 @@ public class DynamicClass{
     return varInit;
   }
 
-  public DataPool genPool(DataPool basePool){
-    return new DataPool(data){
+  public DataPool genPool(DataPool basePool, JavaHandleHelper helper){
+    return new DataPool(data, helper){
       @Override
       public IFunctionEntry select(String name1, FunctionType type){
         IFunctionEntry res1 = super.select(name1, type);

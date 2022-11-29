@@ -53,13 +53,12 @@ public class ClassInfo<T> extends AnnotatedMember implements IClass<T>{
   private static final int CLASS_ACCESS_MODIFIERS =
       Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE |
       Modifier.FINAL | Modifier.STATIC | Modifier.INTERFACE |
-      Modifier.ABSTRACT | 4096/*synthetic*/ | 8192/*annotation*/ | 16384/*enum*/;
+      Modifier.ABSTRACT | 8192/*annotation*/ | 16384/*enum*/;
 
   private static final int METHOD_ACCESS_MODIFIERS =
       Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE |
       Modifier.FINAL | Modifier.STATIC | Modifier.NATIVE |
-      Modifier.SYNCHRONIZED | Modifier.STRICT | Modifier.ABSTRACT |
-      128/*varargs*/ | 4096/*synthetic*/;
+      Modifier.SYNCHRONIZED | Modifier.STRICT | Modifier.ABSTRACT;
 
   private static final int FIELD_ACCESS_MODIFIERS =
       Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE |
@@ -648,7 +647,7 @@ public class ClassInfo<T> extends AnnotatedMember implements IClass<T>{
       throw new IllegalArgumentException("modifiers was conflicted， modifiers: " + Modifier.toString(modifiers));
 
     if((modifiers & ~access) != 0)
-      throw new IllegalArgumentException("unexpected modifiers with " + Modifier.toString(modifiers) + modifiers);
+      throw new IllegalArgumentException("unexpected modifiers with " + Modifier.toString(modifiers));
   }
 
   /**检查当前类生成状态，若不处于可修改状态则抛出异常，可修改状态应满足以下条件：

@@ -22,12 +22,18 @@ public class DataPool{
   private final Map<String, Map<FunctionType, IFunctionEntry>> funcPool = new HashMap<>();
   private final Map<String, IVariable> varPool = new HashMap<>();
 
-  /**创建一个池对象并绑定到父池，父池可为null，这种情况下此池应当为被委托类型的方法/字段引用。
+  final JavaHandleHelper helper;
+
+  /**
+   * 创建一个池对象并绑定到父池，父池可为null，这种情况下此池应当为被委托类型的方法/字段引用。
    * <p><strong>你不应该在外部使用时调用此类型</strong>
    *
-   * @param superPool 此池的父池*/
-  public DataPool(DataPool superPool){
+   * @param superPool 此池的父池
+   * @param helper java层的操作向导，在数据池中用于调用方法
+   */
+  public DataPool(DataPool superPool, JavaHandleHelper helper){
     this.superPool = superPool;
+    this.helper = helper;
   }
 
   public void init(DynamicObject<?> self, Object... args){
