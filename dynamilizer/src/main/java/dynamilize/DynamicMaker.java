@@ -18,7 +18,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static dynamilize.classmaker.ClassInfo.*;
 
 /**动态类型运作的核心工厂类型，用于将传入的动态类型与委托基类等构造出动态委托类型以及其实例。
- * <p>定义了基于{@link ASMGenerator}的默认生成器实现，通过{@link DynamicMaker#getDefault()}获取该实例以使用
  * <p>若需要特殊的实现，则需要重写/实现此类的方法，主要的方法：
  * <ul>
  * <li><strong>{@link DynamicMaker#makeClassInfo(Class, Class[])}</strong>：决定此工厂如何构造委托类的描述信息
@@ -922,6 +921,31 @@ public abstract class DynamicMaker{
           //   *[return]* super.*name*(*parameters*);
           // }
           if(superMethod != null){
+            if (Modifier.isInterface(superMethod.owner().modifiers())){
+              IClass<?> c = classInfo.superClass();
+              boolean found = false;
+              t: while (c != null && c != OBJECT_TYPE){
+                for (IClass<?> interf: c.interfaces()) {
+                  if (interf == superMethod.owner()){
+                    found = true;
+                    break t;
+                  }
+                }
+
+                c = c.superClass();
+              }
+
+              if (found){
+                superMethod = new MethodInfo<>(
+                    c,
+                    Modifier.PUBLIC,
+                    superMethod.name(),
+                    superMethod.returnType(),
+                    superMethod.parameters().toArray(new Parameter[0])
+                );
+              }
+            }
+
             CodeBlock<?> code = classInfo.declareMethod(
                 Modifier.PRIVATE | Modifier.FINAL,
                 methodName + CALLSUPER,
