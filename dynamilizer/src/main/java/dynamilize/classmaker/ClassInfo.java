@@ -53,12 +53,13 @@ public class ClassInfo<T> extends AnnotatedMember implements IClass<T>{
   private static final int CLASS_ACCESS_MODIFIERS =
       Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE |
       Modifier.FINAL | Modifier.STATIC | Modifier.INTERFACE |
-      Modifier.ABSTRACT | 8192/*annotation*/ | 16384/*enum*/;
+      Modifier.ABSTRACT | 4096/*synthetic*/ | 8192/*annotation*/ | 16384/*enum*/;
 
   private static final int METHOD_ACCESS_MODIFIERS =
       Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE |
       Modifier.FINAL | Modifier.STATIC | Modifier.NATIVE |
-      Modifier.SYNCHRONIZED | Modifier.STRICT | Modifier.ABSTRACT;
+      Modifier.SYNCHRONIZED | Modifier.STRICT | Modifier.ABSTRACT |
+      128/*varargs*/ | 4096/*synthetic*/;
 
   private static final int FIELD_ACCESS_MODIFIERS =
       Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE |
