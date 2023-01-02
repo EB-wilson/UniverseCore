@@ -19,7 +19,7 @@ import universecore.world.consumers.ConsumePower;
 import universecore.world.consumers.ConsumeType;
 
 /**生产者的消耗器模块，用于集中处理方块的材料需求等，提供了可选需求以及其特殊的触发器
- * @author EBwilson 😀*/
+ * @author EBwilson*/
 @SuppressWarnings("all")
 public class BaseConsumeModule extends BlockModule{
   protected final ConsumerBuildComp entity;

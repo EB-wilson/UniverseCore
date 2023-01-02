@@ -28,6 +28,8 @@ public class UncContentType{
     for(ContentType value: ContentType.values()){
       allUncContentType.put(value, new UncContentType(value));
     }
+
+    reloadDisplay();
   }
 
   public static ContentType[] displayContentList = new ContentType[0];
@@ -96,7 +98,7 @@ public class UncContentType{
     }
   }
 
-  protected void reloadDisplay(){
+  protected static void reloadDisplay(){
     Seq<ContentType> list = new Seq<>();
 
     for(ContentType type: ContentType.values()){

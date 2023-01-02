@@ -3,6 +3,8 @@ package universecore.components.blockcomp;
 import arc.math.Mathf;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
+import mindustry.gen.Building;
+import mindustry.type.Item;
 import universecore.annotations.Annotations;
 
 /**工厂建筑的接口组件，该组件赋予方块执行生产/制造的行为，工厂行为整合了{@link ConsumerBuildComp}和{@link ProducerBlockComp}的行为并描述了制造行为的默认实现
@@ -71,6 +73,14 @@ public interface FactoryBuildComp extends ProducerBuildComp{
       producer().trigger();
 
       craftTrigger();
+    }
+  }
+
+  /**对生产进行处理，当产出者是Building时需要对产出项进行正确的统计，则当工厂handleItem并传入本身时，将此次添加的物品加入统计*/
+  @Annotations.MethodEntry(entryMethod = "handleItem", paramTypes = {"mindustry.gen.Building -> source", "mindustry.type.Item -> item"})
+  default void handleProductItem(Building source, Item item){
+    if (source == this){
+      source.produced(item);
     }
   }
 

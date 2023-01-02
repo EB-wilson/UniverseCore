@@ -71,7 +71,8 @@ public class ProducePayload<T extends Building & ProducerBuildComp> extends Base
     for(PayloadStack stack: payloads){
       for(int i = 0; i < stack.amount; i++){
         Payload payload = payloadMaker.get(entity, stack.item);
-        if(entity.acceptPayload(entity, payload))entity.handlePayload(entity, payload);
+        payload.set(entity.x, entity.y, entity.rotdeg());
+        if(entity.acceptPayload(entity, payload)) entity.handlePayload(entity, payload);
       }
     }
   }

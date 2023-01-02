@@ -70,7 +70,9 @@ public class ProduceItems<T extends Building & ProducerBuildComp> extends BasePr
       for(ItemStack stack: items){
         int amount = stack.amount*((int)Math.floor(f)) + Mathf.num(Math.random()<f%1);
         amount = Math.min(amount, entity.block.itemCapacity - entity.items.get(stack.item));
-        entity.items.add(stack.item, amount);
+        for (int i = 0; i < amount; i++) {
+          entity.handleItem(entity, stack.item);
+        }
       }
     }
     /*随机产出一种产物，amount参数变更为权*/
@@ -94,7 +96,9 @@ public class ProduceItems<T extends Building & ProducerBuildComp> extends BasePr
       if(item != null){
         int amount = (int)(Math.floor(f) + Mathf.num(Math.random()<f%1));
         amount = Math.min(amount, entity.block.itemCapacity - entity.items.get(item));
-        entity.items.add(item, amount);
+        for (int l = 0; l < amount; l++) {
+          entity.handleItem(entity, item);
+        }
       }
     }
   }

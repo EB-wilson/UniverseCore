@@ -62,7 +62,7 @@ public class ProduceLiquids<T extends Building & ProducerBuildComp> extends Base
   @Override
   public void produce(T entity) {
     if(portion) for(UncLiquidStack stack: liquids){
-      entity.liquids.add(stack.liquid, stack.amount*60);
+      entity.handleLiquid(entity, stack.liquid, stack.amount*60);
     }
   }
 
@@ -71,7 +71,7 @@ public class ProduceLiquids<T extends Building & ProducerBuildComp> extends Base
     if(!portion) for(UncLiquidStack stack: liquids){
       float amount = stack.amount*parent.cons.delta(entity)*multiple(entity);
       amount = Math.min(amount, entity.block.liquidCapacity - entity.liquids.get(stack.liquid));
-      entity.liquids.add(stack.liquid, amount);
+      entity.handleLiquid(entity, stack.liquid, amount);
     }
   }
   
