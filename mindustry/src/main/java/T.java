@@ -39,15 +39,18 @@ public class T {
 
       assert $modFile != null;
 
-      arc.func.Boolf<String> $versionValid = v -> {
+      arc.func.Intf<String> $versionValid = v -> {
         String[] $lib = v.split("\\.");
         String[] $req = "$requireVersion".split("\\.");
 
-        for (int i = 0; i < $lib.length; i++) {
-          if (Integer.parseInt($lib[i]) < Integer.parseInt($req[i])) return false;
+        if (Integer.parseInt($lib[0]) > Integer.parseInt($req[0])) return 2;
+        for (int i = 1; i < $lib.length; i++) {
+          if (Integer.parseInt($lib[i]) > Integer.parseInt($req[i])) return 0;
+          if (Integer.parseInt($lib[i]) < Integer.parseInt($req[i])) return 1;
         }
-        return true;
+        return 0;
       };
+
       arc.Events.on(mindustry.game.EventType.ClientLoadEvent.class, e -> {
         arc.util.Time.run(1, () -> {
           arc.Core.settings.remove("unc-checkFailed");
@@ -62,7 +65,8 @@ public class T {
       final arc.files.Fi $libFile = $libFileTemp;
       final String $libVersion = $libVersionValue;
 
-      final boolean $upgrade = !$versionValid.get($libVersion);
+      final boolean $upgrade = $versionValid.get($libVersion) == 1;
+      final boolean $requireOld = $versionValid.get($libVersion) == 2;
       if (mindustry.Vars.mods.getMod("universe-core") == null || $upgrade || !arc.Core.settings.getBool("mod-universe-core-enabled", true)) {
         if ($libFile == null || !$libFile.exists() || $upgrade || !arc.Core.settings.getBool("mod-universe-core-enabled", true)) {
           arc.util.io.PropertiesUtils.load(arc.Core.bundle.getProperties(), new java.io.StringReader(bundles.get(arc.Core.bundle.getLocale().toString())));
@@ -79,8 +83,12 @@ public class T {
             $status$ = 2;
           }
           else if ($upgrade){
-            $curr += "$requireVersion";
+            $curr += "old$requireVersion";
             $status$ = 3;
+          }
+          else if ($requireOld){
+            $curr += "new$requireVersion";
+            $status$ = 4;
           }
           $curr += ";";
 
@@ -130,7 +138,8 @@ public class T {
                             text.add("[crimson]" + (
                                 $modStat[1].equals("dis")? arc.Core.bundle.get("warn.uncDisabled"):
                                     $modStat[1].equals("none")? arc.Core.bundle.get("warn.uncNotFound"):
-                                        arc.Core.bundle.format("warn.uncVersionOld", $modStat[1])
+                                        $modStat[1].startsWith("old")? arc.Core.bundle.format("warn.uncVersionOld", $modStat[1].replace("old", "")):
+                                            arc.Core.bundle.format("warn.uncVersionNewer", $modStat[1].replace("new", ""))
                             ));
                           }).padLeft(5).top().growX();
                         }).padBottom(4).padLeft(12).padRight(12).growX().fillY().left();
@@ -239,8 +248,11 @@ public class T {
                         if (!$info.getString("name", "").equals("universe-core")){
                           mindustry.Vars.ui.showErrorMessage("not UniverseCore mod file");
                         }
-                        else if(!$versionValid.get($info.getString("version", "0.0.0"))){
+                        else if($versionValid.get($info.getString("version", "0.0.0")) == 1){
                           mindustry.Vars.ui.showErrorMessage("version was deprecated, require: $requireVersion, select: " + $info.getString("version", "0.0.0"));
+                        }
+                        else if($versionValid.get($info.getString("version", "0.0.0")) == 2){
+                          mindustry.Vars.ui.showErrorMessage("version was too newer, require: $requireVersion, select: " + $info.getString("version", "0.0.0"));
                         }
                         else {
                           try {
@@ -335,6 +347,9 @@ public class T {
       }
       else if($status$ == 3){
         arc.util.Log.err("universeCore version was deprecated, version: " + $libVersionValue + " require: $requireVersion");
+      }
+      else if($status$ == 4){
+        arc.util.Log.err("universeCore version was too newer, version: " + $libVersionValue + " require: $requireVersion");
       }
     }
   }

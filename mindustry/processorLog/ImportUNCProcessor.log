@@ -1,5 +1,5 @@
 processor: ImportUNCProcessor (full class name: universecore.annotations.ImportUNCProcessor)
-time: Mon Jan 02 16:39:52 CST 2023
+time: Mon Jan 02 17:32:07 CST 2023
 
 -----------------------------------------
 annotation: universecore.annotations.Annotations.ImportUNC
@@ -17,7 +17,7 @@ annotation: universecore.annotations.Annotations.ImportUNC
   9|     static {
  10|         String $libVersionValue = "0.0.0";
  11|         {
- 12|             final arc.struct.ObjectMap<String, String> bundles = arc.struct.ObjectMap.of("", "warn.uncLoadFailed = UniverseCore failed to load\nwarn.uncDisabled = UniverseCore mod has been disabled\nwarn.uncNotFound = UniverseCore mod file does not exist or is missing\nwarn.libNotFound = NotFound\nwarn.currentUncVersion = Current UniverseCore version: {0} It is recommended to install or update the latest version of UniverseCore\nwarn.uncVersionOld = UniverseCore version is outdated, requires: {0}\nwarn.download = Download\nwarn.downloading = downloading...\nwarn.downloadFailed = download failed\nwarn.cancel = cancel\nwarn.openfile = import from file\nwarn.goLibPage = go to github\nwarn.openModDir = Go to the mods directory\nwarn.exit = quit\nwarn.androidOpenFolder = Failed to open the directory, you can go to the following path:\n[accent]android/data/io.anuke.mindustry/mods[]\n[gray]The address has been copied to the clipboard\nwarn.enableLib = enable mod\nwarn.caused = The following mods cannot be loaded correctly due to abnormal Universe Core status\n", "zh_TW", "warn.uncLoadFailed = UniverseCore \u52a0\u8f09\u5931\u6557\nwarn.uncDisabled = UniverseCore mod \u5df2\u88ab\u7981\u7528\nwarn.uncNotFound = UniverseCore mod \u6587\u4ef6\u4e0d\u5b58\u5728\u6216\u5df2\u4e1f\u5931\nwarn.libNotFound = \u672a\u627e\u5230\nwarn.currentUncVersion = \u7576\u524dUniverseCore\u7248\u672c\uff1a{0} \u5efa\u8b70\u5b89\u88dd\u6216\u66f4\u65b0\u6700\u65b0\u7248\u672c\u7684UniverseCore\nwarn.uncVersionOld = UniverseCore \u7248\u672c\u904e\u820a\uff0c\u9700\u8981\uff1a{0}\nwarn.download = \u4e0b\u8f09\nwarn.downloading = \u4e0b\u8f09\u4e2d...\nwarn.downloadFailed = \u4e0b\u8f09\u5931\u6557\nwarn.cancel = \u53d6\u6d88\nwarn.openfile = \u5f9e\u6587\u4ef6\u5c0e\u5165\nwarn.goLibPage = \u524d\u5f80github\nwarn.openModDir = \u524d\u5f80mods\u76ee\u9304\nwarn.exit = \u9000\u51fa\nwarn.androidOpenFolder = \u6253\u958b\u76ee\u9304\u5931\u6557\uff0c\u60a8\u53ef\u524d\u5f80\u5982\u4e0b\u8def\u5f91\uff1a\n[accent]android/data/io.anuke.mindustry/mods[]\n[gray]\u5730\u5740\u5df2\u5fa9\u88fd\u5230\u526a\u8cbc\u677f\nwarn.enableLib = \u5553\u7528mod\nwarn.caused = \u4ee5\u4e0bmod\u7531\u65bcUniverse Core\u72c0\u614b\u7570\u5e38\u7121\u6cd5\u6b63\u78ba\u52a0\u8f09\n", "ru", "warn.uncLoadFailed = UniverseCore \u043d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c\nwarn.uncDisabled = \u041c\u043e\u0434 UniverseCore \u043e\u0442\u043a\u043b\u044e\u0447\u0435\u043d.\nwarn.uncNotFound = \u0424\u0430\u0439\u043b \u043c\u043e\u0434\u0430 UniverseCore \u043d\u0435 \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0443\u0435\u0442 \u0438\u043b\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u0435\u0442\nwarn.libNotFound = \u041d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\nwarn.currentUncVersion = \u0422\u0435\u043a\u0443\u0449\u0430\u044f \u0432\u0435\u0440\u0441\u0438\u044f UniverseCore: {0} \u0420\u0435\u043a\u043e\u043c\u0435\u043d\u0434\u0443\u0435\u0442\u0441\u044f \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u044c \u0438\u043b\u0438 \u043e\u0431\u043d\u043e\u0432\u0438\u0442\u044c \u043f\u043e\u0441\u043b\u0435\u0434\u043d\u044e\u044e \u0432\u0435\u0440\u0441\u0438\u044e UniverseCore.\nwarn.uncVersionOld = \u0412\u0435\u0440\u0441\u0438\u044f UniverseCore \u0443\u0441\u0442\u0430\u0440\u0435\u043b\u0430, \u0442\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044f: {0}\nwarn.download = \u0441\u043a\u0430\u0447\u0430\u0442\u044c\nwarn.downloading = \u0441\u043a\u0430\u0447\u0438\u0432\u0430\u043d\u0438\u0435...\nwarn.downloadFailed = \u0417\u0430\u0433\u0440\u0443\u0437\u043a\u0430 \u043d\u0435 \u0443\u0434\u0430\u043b\u0430\u0441\u044c\nwarn.cancel = \u041e\u0442\u043c\u0435\u043d\u0430\nwarn.openfile = \u0438\u043c\u043f\u043e\u0440\u0442\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0438\u0437 \u0444\u0430\u0439\u043b\u0430\nwarn.goLibPage = \u043f\u0435\u0440\u0435\u0439\u0442\u0438 \u043d\u0430 \u0433\u0438\u0442\u0445\u0430\u0431\nwarn.openModDir = \u041f\u0435\u0440\u0435\u0439\u0434\u0438\u0442\u0435 \u0432 \u043a\u0430\u0442\u0430\u043b\u043e\u0433 \u043c\u043e\u0434\u043e\u0432\nwarn.exit = \u043f\u043e\u043a\u0438\u0434\u0430\u0442\u044c\nwarn.androidOpenFolder = \u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043e\u0442\u043a\u0440\u044b\u0442\u044c \u043a\u0430\u0442\u0430\u043b\u043e\u0433, \u043c\u043e\u0436\u043d\u043e \u043f\u0435\u0440\u0435\u0439\u0442\u0438 \u043f\u043e \u0441\u043b\u0435\u0434\u0443\u044e\u0449\u0435\u043c\u0443 \u043f\u0443\u0442\u0438:\n[accent]android/data/io.anuke.mindustry/mods[]\n[gray]\u0410\u0434\u0440\u0435\u0441 \u0441\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u043d \u0432 \u0431\u0443\u0444\u0435\u0440 \u043e\u0431\u043c\u0435\u043d\u0430\nwarn.enableLib = \u0432\u043a\u043b\u044e\u0447\u0438\u0442\u044c \u043c\u043e\u0434\u044b\nwarn.caused = \u0421\u043b\u0435\u0434\u0443\u044e\u0449\u0438\u0435 \u043c\u043e\u0434\u044b \u043d\u0435 \u043c\u043e\u0433\u0443\u0442 \u0431\u044b\u0442\u044c \u0437\u0430\u0433\u0440\u0443\u0436\u0435\u043d\u044b \u043f\u0440\u0430\u0432\u0438\u043b\u044c\u043d\u043e \u0438\u0437-\u0437\u0430 \u043d\u0435\u043d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u043e\u0433\u043e \u0441\u0442\u0430\u0442\u0443\u0441\u0430 Universe Core.\n", "ja", "warn.uncLoadFailed = UniverseCore \u3092\u8aad\u307f\u8fbc\u3081\u307e\u305b\u3093\u3067\u3057\u305f\nwarn.uncDisabled = UniverseCore mod \u304c\u7121\u52b9\u5316\u3055\u308c\u307e\u3057\u305f\nwarn.uncNotFound = UniverseCore mod \u30d5\u30a1\u30a4\u30eb\u304c\u5b58\u5728\u3057\u306a\u3044\u304b\u3001\u898b\u3064\u304b\u308a\u307e\u305b\u3093\nwarn.libNotFound = \u898b\u3064\u304b\u308a\u307e\u305b\u3093\nwarn.currentUncVersion = \u73fe\u5728\u306e UniverseCore \u30d0\u30fc\u30b8\u30e7\u30f3: {0} UniverseCore \u306e\u6700\u65b0\u30d0\u30fc\u30b8\u30e7\u30f3\u3092\u30a4\u30f3\u30b9\u30c8\u30fc\u30eb\u307e\u305f\u306f\u66f4\u65b0\u3059\u308b\u3053\u3068\u3092\u304a\u52e7\u3081\u3057\u307e\u3059\nwarn.uncVersionOld = UniverseCore \u306e\u30d0\u30fc\u30b8\u30e7\u30f3\u304c\u53e4\u304f\u306a\u3063\u3066\u3044\u307e\u3059\u3002\u5fc5\u8981\u306a\u3082\u306e: {0}\nwarn.download = \u30c0\u30a6\u30f3\u30ed\u30fc\u30c9\nwarn.downloading = \u30c0\u30a6\u30f3\u30ed\u30fc\u30c9\u4e2d...\nwarn.downloadFailed = \u30c0\u30a6\u30f3\u30ed\u30fc\u30c9\u306b\u5931\u6557\u3057\u307e\u3057\u305f\nwarn.cancel = \u30ad\u30e3\u30f3\u30bb\u30eb\nwarn.openfile = \u30d5\u30a1\u30a4\u30eb\u304b\u3089\u30a4\u30f3\u30dd\u30fc\u30c8\nwarn.goLibPage = \u30ae\u30c3\u30c8\u30cf\u30d6\u306b\u884c\u304f\nwarn.openModDir = mods \u30c7\u30a3\u30ec\u30af\u30c8\u30ea\u306b\u79fb\u52d5\u3057\u307e\u3059\u3002\nwarn.exit = \u7d42\u4e86\u3059\u308b\nwarn.androidOpenFolder = \u30c7\u30a3\u30ec\u30af\u30c8\u30ea\u3092\u958b\u3051\u307e\u305b\u3093\u3067\u3057\u305f\u3002\u6b21\u306e\u30d1\u30b9\u306b\u79fb\u52d5\u3067\u304d\u307e\u3059:\n[accent]android/data/io.anuke.mindustry/mods[]\n[gray]\u30a2\u30c9\u30ec\u30b9\u306f\u30af\u30ea\u30c3\u30d7\u30dc\u30fc\u30c9\u306b\u30b3\u30d4\u30fc\u3055\u308c\u307e\u3057\u305f\nwarn.enableLib = \u6539\u9020\u3092\u6709\u52b9\u306b\u3059\u308b\nwarn.caused = \u30e6\u30cb\u30d0\u30fc\u30b9\u30b3\u30a2\u306e\u72b6\u614b\u7570\u5e38\u306b\u3088\u308a\u3001\u4ee5\u4e0b\u306eMOD\u304c\u6b63\u5e38\u306b\u30ed\u30fc\u30c9\u3067\u304d\u306a\u3044\n", "zh_CN", "warn.uncLoadFailed = UniverseCore \u52a0\u8f7d\u5931\u8d25\nwarn.uncDisabled = UniverseCore mod \u5df2\u88ab\u7981\u7528\nwarn.uncNotFound = UniverseCore mod \u6587\u4ef6\u4e0d\u5b58\u5728\u6216\u5df2\u4e22\u5931\nwarn.libNotFound = \u672a\u627e\u5230\nwarn.currentUncVersion = \u5f53\u524dUniverseCore\u7248\u672c\uff1a{0}  \u5efa\u8bae\u5b89\u88c5\u6216\u66f4\u65b0\u6700\u65b0\u7248\u672c\u7684UniverseCore\nwarn.uncVersionOld = UniverseCore \u7248\u672c\u8fc7\u65e7\uff0c\u9700\u8981\uff1a{0}\nwarn.download = \u4e0b\u8f7d\nwarn.downloading = \u4e0b\u8f7d\u4e2d...\nwarn.downloadFailed = \u4e0b\u8f7d\u5931\u8d25\nwarn.cancel = \u53d6\u6d88\nwarn.openfile = \u4ece\u6587\u4ef6\u5bfc\u5165\nwarn.goLibPage = \u524d\u5f80github\nwarn.openModDir = \u524d\u5f80mods\u76ee\u5f55\nwarn.exit = \u9000\u51fa\nwarn.androidOpenFolder = \u6253\u5f00\u76ee\u5f55\u5931\u8d25\uff0c\u60a8\u53ef\u524d\u5f80\u5982\u4e0b\u8def\u5f84\uff1a\n[accent]android/data/io.anuke.mindustry/mods[]\n[gray]\u5730\u5740\u5df2\u590d\u5236\u5230\u526a\u8d34\u677f\nwarn.enableLib = \u542f\u7528mod\nwarn.caused = \u4ee5\u4e0bmod\u7531\u4e8eUniverseCore\u72b6\u6001\u5f02\u5e38\u65e0\u6cd5\u6b63\u786e\u52a0\u8f7d\n");
+ 12|             final arc.struct.ObjectMap<String, String> bundles = arc.struct.ObjectMap.of("", "warn.uncLoadFailed = UniverseCore failed to load\nwarn.uncDisabled = UniverseCore mod has been disabled\nwarn.uncNotFound = UniverseCore mod file does not exist or is missing\nwarn.libNotFound = NotFound\nwarn.currentUncVersion = Current UniverseCore version: {0} It is recommended to install or update the latest version of UniverseCore\nwarn.uncVersionOld = UniverseCore version is outdated, requires: {0}\nwarn.uncVersionNewer = UniverseCore version is too newer, requires: {0}\nwarn.download = Download\nwarn.downloading = downloading...\nwarn.downloadFailed = download failed\nwarn.cancel = cancel\nwarn.openfile = import from file\nwarn.goLibPage = go to github\nwarn.openModDir = Go to the mods directory\nwarn.exit = quit\nwarn.androidOpenFolder = Failed to open the directory, you can go to the following path:\n[accent]android/data/io.anuke.mindustry/mods[]\n[gray]The address has been copied to the clipboard\nwarn.enableLib = enable mod\nwarn.caused = The following mods cannot be loaded correctly due to abnormal Universe Core status\n", "zh_TW", "warn.uncLoadFailed = UniverseCore \u52a0\u8f09\u5931\u6557\nwarn.uncDisabled = UniverseCore mod \u5df2\u88ab\u7981\u7528\nwarn.uncNotFound = UniverseCore mod \u6587\u4ef6\u4e0d\u5b58\u5728\u6216\u5df2\u4e1f\u5931\nwarn.libNotFound = \u672a\u627e\u5230\nwarn.currentUncVersion = \u7576\u524dUniverseCore\u7248\u672c\uff1a{0} \u5efa\u8b70\u5b89\u88dd\u6216\u66f4\u65b0\u6700\u65b0\u7248\u672c\u7684UniverseCore\nwarn.uncVersionOld = UniverseCore \u7248\u672c\u904e\u820a\uff0c\u9700\u8981\uff1a{0}\nwarn.uncVersionNewer = UniverseCore \u7248\u672c\u592a\u904e\u8d85\u524d\uff0c\u7576\u524d\u9700\u8981\uff1a{0}\nwarn.download = \u4e0b\u8f09\nwarn.downloading = \u4e0b\u8f09\u4e2d...\nwarn.downloadFailed = \u4e0b\u8f09\u5931\u6557\nwarn.cancel = \u53d6\u6d88\nwarn.openfile = \u5f9e\u6587\u4ef6\u5c0e\u5165\nwarn.goLibPage = \u524d\u5f80github\nwarn.openModDir = \u524d\u5f80mods\u76ee\u9304\nwarn.exit = \u9000\u51fa\nwarn.androidOpenFolder = \u6253\u958b\u76ee\u9304\u5931\u6557\uff0c\u60a8\u53ef\u524d\u5f80\u5982\u4e0b\u8def\u5f91\uff1a\n[accent]android/data/io.anuke.mindustry/mods[]\n[gray]\u5730\u5740\u5df2\u5fa9\u88fd\u5230\u526a\u8cbc\u677f\nwarn.enableLib = \u5553\u7528mod\nwarn.caused = \u4ee5\u4e0bmod\u7531\u65bcUniverse Core\u72c0\u614b\u7570\u5e38\u7121\u6cd5\u6b63\u78ba\u52a0\u8f09\n", "ru", "warn.uncLoadFailed = UniverseCore \u043d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c\nwarn.uncDisabled = \u041c\u043e\u0434 UniverseCore \u043e\u0442\u043a\u043b\u044e\u0447\u0435\u043d.\nwarn.uncNotFound = \u0424\u0430\u0439\u043b \u043c\u043e\u0434\u0430 UniverseCore \u043d\u0435 \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0443\u0435\u0442 \u0438\u043b\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u0435\u0442\nwarn.libNotFound = \u041d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\nwarn.currentUncVersion = \u0422\u0435\u043a\u0443\u0449\u0430\u044f \u0432\u0435\u0440\u0441\u0438\u044f UniverseCore: {0} \u0420\u0435\u043a\u043e\u043c\u0435\u043d\u0434\u0443\u0435\u0442\u0441\u044f \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u044c \u0438\u043b\u0438 \u043e\u0431\u043d\u043e\u0432\u0438\u0442\u044c \u043f\u043e\u0441\u043b\u0435\u0434\u043d\u044e\u044e \u0432\u0435\u0440\u0441\u0438\u044e UniverseCore.\nwarn.uncVersionOld = \u0412\u0435\u0440\u0441\u0438\u044f UniverseCore \u0443\u0441\u0442\u0430\u0440\u0435\u043b\u0430, \u0442\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044f: {0}\nwarn.uncVersionNewer = \u0421\u043b\u0438\u0448\u043a\u043e\u043c \u043d\u043e\u0432\u0430\u044f \u0432\u0435\u0440\u0441\u0438\u044f UniverseCore, \u0432 \u043d\u0430\u0441\u0442\u043e\u044f\u0449\u0435\u0435 \u0432\u0440\u0435\u043c\u044f \u0442\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044f: {0}\nwarn.download = \u0441\u043a\u0430\u0447\u0430\u0442\u044c\nwarn.downloading = \u0441\u043a\u0430\u0447\u0438\u0432\u0430\u043d\u0438\u0435...\nwarn.downloadFailed = \u0417\u0430\u0433\u0440\u0443\u0437\u043a\u0430 \u043d\u0435 \u0443\u0434\u0430\u043b\u0430\u0441\u044c\nwarn.cancel = \u041e\u0442\u043c\u0435\u043d\u0430\nwarn.openfile = \u0438\u043c\u043f\u043e\u0440\u0442\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0438\u0437 \u0444\u0430\u0439\u043b\u0430\nwarn.goLibPage = \u043f\u0435\u0440\u0435\u0439\u0442\u0438 \u043d\u0430 \u0433\u0438\u0442\u0445\u0430\u0431\nwarn.openModDir = \u041f\u0435\u0440\u0435\u0439\u0434\u0438\u0442\u0435 \u0432 \u043a\u0430\u0442\u0430\u043b\u043e\u0433 \u043c\u043e\u0434\u043e\u0432\nwarn.exit = \u043f\u043e\u043a\u0438\u0434\u0430\u0442\u044c\nwarn.androidOpenFolder = \u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043e\u0442\u043a\u0440\u044b\u0442\u044c \u043a\u0430\u0442\u0430\u043b\u043e\u0433, \u043c\u043e\u0436\u043d\u043e \u043f\u0435\u0440\u0435\u0439\u0442\u0438 \u043f\u043e \u0441\u043b\u0435\u0434\u0443\u044e\u0449\u0435\u043c\u0443 \u043f\u0443\u0442\u0438:\n[accent]android/data/io.anuke.mindustry/mods[]\n[gray]\u0410\u0434\u0440\u0435\u0441 \u0441\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u043d \u0432 \u0431\u0443\u0444\u0435\u0440 \u043e\u0431\u043c\u0435\u043d\u0430\nwarn.enableLib = \u0432\u043a\u043b\u044e\u0447\u0438\u0442\u044c \u043c\u043e\u0434\u044b\nwarn.caused = \u0421\u043b\u0435\u0434\u0443\u044e\u0449\u0438\u0435 \u043c\u043e\u0434\u044b \u043d\u0435 \u043c\u043e\u0433\u0443\u0442 \u0431\u044b\u0442\u044c \u0437\u0430\u0433\u0440\u0443\u0436\u0435\u043d\u044b \u043f\u0440\u0430\u0432\u0438\u043b\u044c\u043d\u043e \u0438\u0437-\u0437\u0430 \u043d\u0435\u043d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u043e\u0433\u043e \u0441\u0442\u0430\u0442\u0443\u0441\u0430 Universe Core.\n", "ja", "warn.uncLoadFailed = UniverseCore \u3092\u8aad\u307f\u8fbc\u3081\u307e\u305b\u3093\u3067\u3057\u305f\nwarn.uncDisabled = UniverseCore mod \u304c\u7121\u52b9\u5316\u3055\u308c\u307e\u3057\u305f\nwarn.uncNotFound = UniverseCore mod \u30d5\u30a1\u30a4\u30eb\u304c\u5b58\u5728\u3057\u306a\u3044\u304b\u3001\u898b\u3064\u304b\u308a\u307e\u305b\u3093\nwarn.libNotFound = \u898b\u3064\u304b\u308a\u307e\u305b\u3093\nwarn.currentUncVersion = \u73fe\u5728\u306e UniverseCore \u30d0\u30fc\u30b8\u30e7\u30f3: {0} UniverseCore \u306e\u6700\u65b0\u30d0\u30fc\u30b8\u30e7\u30f3\u3092\u30a4\u30f3\u30b9\u30c8\u30fc\u30eb\u307e\u305f\u306f\u66f4\u65b0\u3059\u308b\u3053\u3068\u3092\u304a\u52e7\u3081\u3057\u307e\u3059\nwarn.uncVersionOld = UniverseCore \u306e\u30d0\u30fc\u30b8\u30e7\u30f3\u304c\u53e4\u304f\u306a\u3063\u3066\u3044\u307e\u3059\u3002\u5fc5\u8981\u306a\u3082\u306e: {0}\nwarn.uncVersionNewer = UniverseCore \u306e\u30d0\u30fc\u30b8\u30e7\u30f3\u304c\u65b0\u3057\u3059\u304e\u307e\u3059\u3002\u73fe\u5728\u5fc5\u8981\u306a\u3082\u306e: {0}\nwarn.download = \u30c0\u30a6\u30f3\u30ed\u30fc\u30c9\nwarn.downloading = \u30c0\u30a6\u30f3\u30ed\u30fc\u30c9\u4e2d...\nwarn.downloadFailed = \u30c0\u30a6\u30f3\u30ed\u30fc\u30c9\u306b\u5931\u6557\u3057\u307e\u3057\u305f\nwarn.cancel = \u30ad\u30e3\u30f3\u30bb\u30eb\nwarn.openfile = \u30d5\u30a1\u30a4\u30eb\u304b\u3089\u30a4\u30f3\u30dd\u30fc\u30c8\nwarn.goLibPage = \u30ae\u30c3\u30c8\u30cf\u30d6\u306b\u884c\u304f\nwarn.openModDir = mods \u30c7\u30a3\u30ec\u30af\u30c8\u30ea\u306b\u79fb\u52d5\u3057\u307e\u3059\u3002\nwarn.exit = \u7d42\u4e86\u3059\u308b\nwarn.androidOpenFolder = \u30c7\u30a3\u30ec\u30af\u30c8\u30ea\u3092\u958b\u3051\u307e\u305b\u3093\u3067\u3057\u305f\u3002\u6b21\u306e\u30d1\u30b9\u306b\u79fb\u52d5\u3067\u304d\u307e\u3059:\n[accent]android/data/io.anuke.mindustry/mods[]\n[gray]\u30a2\u30c9\u30ec\u30b9\u306f\u30af\u30ea\u30c3\u30d7\u30dc\u30fc\u30c9\u306b\u30b3\u30d4\u30fc\u3055\u308c\u307e\u3057\u305f\nwarn.enableLib = \u6539\u9020\u3092\u6709\u52b9\u306b\u3059\u308b\nwarn.caused = \u30e6\u30cb\u30d0\u30fc\u30b9\u30b3\u30a2\u306e\u72b6\u614b\u7570\u5e38\u306b\u3088\u308a\u3001\u4ee5\u4e0b\u306eMOD\u304c\u6b63\u5e38\u306b\u30ed\u30fc\u30c9\u3067\u304d\u306a\u3044\n", "zh_CN", "warn.uncLoadFailed = UniverseCore \u52a0\u8f7d\u5931\u8d25\nwarn.uncDisabled = UniverseCore mod \u5df2\u88ab\u7981\u7528\nwarn.uncNotFound = UniverseCore mod \u6587\u4ef6\u4e0d\u5b58\u5728\u6216\u5df2\u4e22\u5931\nwarn.libNotFound = \u672a\u627e\u5230\nwarn.currentUncVersion = \u5f53\u524dUniverseCore\u7248\u672c\uff1a{0}  \u5efa\u8bae\u5b89\u88c5\u6216\u66f4\u65b0\u6700\u65b0\u7248\u672c\u7684UniverseCore\nwarn.uncVersionOld = UniverseCore \u7248\u672c\u8fc7\u65e7\uff0c\u9700\u8981\uff1a{0}\nwarn.uncVersionNewer = UniverseCore \u7248\u672c\u592a\u8fc7\u8d85\u524d\uff0c\u5f53\u524d\u9700\u8981\uff1a{0}\nwarn.download = \u4e0b\u8f7d\nwarn.downloading = \u4e0b\u8f7d\u4e2d...\nwarn.downloadFailed = \u4e0b\u8f7d\u5931\u8d25\nwarn.cancel = \u53d6\u6d88\nwarn.openfile = \u4ece\u6587\u4ef6\u5bfc\u5165\nwarn.goLibPage = \u524d\u5f80github\nwarn.openModDir = \u524d\u5f80mods\u76ee\u5f55\nwarn.exit = \u9000\u51fa\nwarn.androidOpenFolder = \u6253\u5f00\u76ee\u5f55\u5931\u8d25\uff0c\u60a8\u53ef\u524d\u5f80\u5982\u4e0b\u8def\u5f84\uff1a\n[accent]android/data/io.anuke.mindustry/mods[]\n[gray]\u5730\u5740\u5df2\u590d\u5236\u5230\u526a\u8d34\u677f\nwarn.enableLib = \u542f\u7528mod\nwarn.caused = \u4ee5\u4e0bmod\u7531\u4e8eUniverseCore\u72b6\u6001\u5f02\u5e38\u65e0\u6cd5\u6b63\u786e\u52a0\u8f7d\n");
  13|             arc.files.Fi[] $modsFiles = arc.Core.settings.getDataDirectory().child("mods").list();
  14|             arc.files.Fi $libFileTemp = null;
  15|             arc.files.Fi $modFile = null;
@@ -44,269 +44,279 @@ annotation: universecore.annotations.Annotations.ImportUNC
  36|                 if ($modFile != null && $libFileTemp != null) break;
  37|             }
  38|             assert $modFile != null;
- 39|             arc.func.Boolf<String> $versionValid = (v)->{
+ 39|             arc.func.Intf<String> $versionValid = (v)->{
  40|                 String[] $lib = v.split("\\.");
  41|                 String[] $req = "1.5.5".split("\\.");
- 42|                 for (int i = 0; i < $lib.length; i++) {
- 43|                     if (Integer.parseInt($lib[i]) < Integer.parseInt($req[i])) return false;
- 44|                 }
- 45|                 return true;
- 46|             };
- 47|             arc.Events.on(mindustry.game.EventType.ClientLoadEvent.class, (e)->{
- 48|                 arc.util.Time.run(1, ()->{
- 49|                     arc.Core.settings.remove("unc-checkFailed");
- 50|                     arc.Core.settings.remove("unc-warningShown");
- 51|                 });
- 52|             });
- 53|             Runtime.getRuntime().addShutdownHook(new Thread(()->{
- 54|                 arc.Core.settings.remove("unc-checkFailed");
- 55|                 arc.Core.settings.remove("unc-warningShown");
- 56|             }));
- 57|             final arc.files.Fi $libFile = $libFileTemp;
- 58|             final String $libVersion = $libVersionValue;
- 59|             final boolean $upgrade = !$versionValid.get($libVersion);
- 60|             if (mindustry.Vars.mods.getMod("universe-core") == null || $upgrade || !arc.Core.settings.getBool("mod-universe-core-enabled", true)) {
- 61|                 if ($libFile == null || !$libFile.exists() || $upgrade || !arc.Core.settings.getBool("mod-universe-core-enabled", true)) {
- 62|                     arc.util.io.PropertiesUtils.load(arc.Core.bundle.getProperties(), new java.io.StringReader(bundles.get(arc.Core.bundle.getLocale().toString(), bundles.get(""))));
- 63|                     String $curr = arc.Core.settings.getString("unc-checkFailed", "");
- 64|                     $curr += $modFile.path() + "::";
- 65|                     if (!arc.Core.settings.getBool("mod-universe-core-enabled", true)) {
- 66|                         $curr += "dis";
- 67|                         $status$ = 1;
- 68|                         $disabled.set(true);
- 69|                     } else if ($libFile == null) {
- 70|                         $curr += "none";
- 71|                         $status$ = 2;
- 72|                     } else if ($upgrade) {
- 73|                         $curr += "1.5.5";
- 74|                         $status$ = 3;
- 75|                     }
- 76|                     $curr += ";";
- 77|                     arc.Core.settings.put("unc-checkFailed", $curr);
- 78|                     if (!arc.Core.settings.getBool("unc-warningShown", false)) {
- 79|                         arc.Core.settings.put("unc-warningShown", true);
- 80|                         arc.Events.on(mindustry.game.EventType.ClientLoadEvent.class, (e)->{
- 81|                             String $modStatus = arc.Core.settings.getString("unc-checkFailed", "");
- 82|                             new arc.scene.ui.Dialog(){
- 83|                                 {
- 84|                                     setFillParent(true);
- 85|                                     cont.table((main)->{
- 86|                                         main.add(arc.Core.bundle.get("warn.uncLoadFailed"));
- 87|                                         main.row();
- 88|                                         main.image().color(mindustry.graphics.Pal.accent).growX().height(5).colspan(2).pad(0).padBottom(8).padTop(8).margin(0);
- 89|                                         main.row();
- 90|                                         main.table((t)->{
- 91|                                             t.add(arc.Core.bundle.get("warn.caused")).color(arc.graphics.Color.lightGray).padBottom(10);
- 92|                                             t.row();
- 93|                                             t.pane((table)->{
- 94|                                                 for (String $s : $modStatus.split(";")) {
- 95|                                                     if ($s.isEmpty()) continue;
- 96|                                                     final String[] $modStat = $s.split("::");
- 97|                                                     final arc.files.ZipFi $f = new arc.files.ZipFi(new arc.files.Fi($modStat[0]));
- 98|                                                     final arc.files.Fi manifest = $f.child("mod.json").exists() ? $f.child("mod.json") : $f.child("mod.hjson").exists() ? $f.child("mod.hjson") : $f.child("plugin.json").exists() ? $f.child("plugin.json") : $f.child("plugin.hjson");
- 99|                                                     final arc.util.serialization.Jval $info = arc.util.serialization.Jval.read(manifest.reader());
-100|                                                     final String name = $info.getString("name", "");
-101|                                                     final String displayName = $info.getString("displayName", "");
-102|                                                     final arc.files.Fi $icon = $f.child("icon.png");
-103|                                                     table.table((modInf)->{
-104|                                                         modInf.defaults().left();
-105|                                                         modInf.image().size(112).get().setDrawable($icon.exists() ? new arc.scene.style.TextureRegionDrawable(new arc.graphics.g2d.TextureRegion(new arc.graphics.Texture($icon))) : mindustry.gen.Tex.nomap);
-106|                                                         modInf.left().table((text)->{
-107|                                                             text.left().defaults().left();
-108|                                                             text.add("[accent]" + displayName);
-109|                                                             text.row();
-110|                                                             text.add("[gray]" + name);
-111|                                                             text.row();
-112|                                                             text.add("[crimson]" + ($modStat[1].equals("dis") ? arc.Core.bundle.get("warn.uncDisabled") : $modStat[1].equals("none") ? arc.Core.bundle.get("warn.uncNotFound") : arc.Core.bundle.format("warn.uncVersionOld", $modStat[1])));
-113|                                                         }).padLeft(5).top().growX();
-114|                                                     }).padBottom(4).padLeft(12).padRight(12).growX().fillY().left();
-115|                                                     table.row();
-116|                                                     table.image().color(arc.graphics.Color.gray).growX().height(6).colspan(2).pad(0).margin(0);
-117|                                                     table.row();
-118|                                                 }
-119|                                             }).grow().maxWidth(560);
-120|                                         }).grow().top();
-121|                                         main.row();
-122|                                         main.image().color(mindustry.graphics.Pal.accent).growX().height(6).colspan(2).pad(0).padBottom(12).margin(0).bottom();
-123|                                         main.row();
-124|                                         main.add(arc.Core.bundle.format("warn.currentUncVersion", $libFile != null ? "" + $libVersion : arc.Core.bundle.get("warn.libNotFound"))).padBottom(10).bottom();
-125|                                         main.row();
-126|                                         final arc.struct.Seq<arc.scene.ui.Button> $buttons = new arc.struct.Seq<>();
-127|                                         if ($disabled.get()) {
-128|                                             $buttons.add(arc.scene.utils.Elem.newButton(arc.Core.bundle.get("warn.enableLib"), ()->{
-129|                                                 arc.Core.settings.put("mod-universe-core-enabled", true);
-130|                                                 mindustry.Vars.ui.showInfoOnHidden("@mods.reloadexit", ()->{
-131|                                                     arc.util.Log.info("Exiting to reload mods.");
-132|                                                     arc.Core.app.exit();
-133|                                                 });
-134|                                             }));
-135|                                         } else {
-136|                                             $buttons.add(arc.scene.utils.Elem.newButton(arc.Core.bundle.get("warn.download"), ()->{
-137|                                                 final java.io.InputStream[] $stream = new java.io.InputStream[1];
-138|                                                 final float[] $downloadProgress = {0};
-139|                                                 final mindustry.ui.dialogs.BaseDialog[] $di = new mindustry.ui.dialogs.BaseDialog[]{null};
-140|                                                 arc.util.Http.get("https://api.github.com/repos/EB-wilson/UniverseCore/releases/latest").timeout(900).error((e)->{
-141|                                                     mindustry.Vars.ui.showException(arc.Core.bundle.get("warn.downloadFailed"), e);
-142|                                                     arc.util.Log.err(e);
-143|                                                     $di[0].hide();
-144|                                                 }).submit((res)->{
-145|                                                     final arc.util.serialization.Jval $json = arc.util.serialization.Jval.read(res.getResultAsString());
-146|                                                     final arc.util.serialization.Jval.JsonArray $assets = $json.get("assets").asArray();
-147|                                                     final arc.util.serialization.Jval $asset = $assets.find((j)->j.getString("name").endsWith(".jar"));
-148|                                                     if ($asset != null) {
-149|                                                         final String $downloadUrl = $asset.getString("browser_download_url");
-150|                                                         arc.util.Http.get($downloadUrl, (result)->{
-151|                                                             $stream[0] = result.getResultAsStream();
-152|                                                             final arc.files.Fi $temp = mindustry.Vars.tmpDirectory.child("UniverseCore.jar");
-153|                                                             final arc.files.Fi $file = mindustry.Vars.modDirectory.child("UniverseCore.jar");
-154|                                                             final long $length = result.getContentLength();
-155|                                                             final arc.func.Floatc $cons = $length <= 0 ? (f)->{
-156|                                                             } : (p)->$downloadProgress[0] = p;
-157|                                                             arc.util.io.Streams.copyProgress($stream[0], $temp.write(false), $length, 4096, $cons);
-158|                                                             if ($libFile != null && $libFile.exists()) $libFile.delete();
-159|                                                             $temp.moveTo($file);
-160|                                                             try {
-161|                                                                 mindustry.Vars.mods.importMod($file);
-162|                                                                 $file.file().delete();
-163|                                                                 hide();
-164|                                                                 mindustry.Vars.ui.mods.show();
-165|                                                             } catch (java.io.IOException e) {
-166|                                                                 mindustry.Vars.ui.showException(e);
-167|                                                                 arc.util.Log.err(e);
-168|                                                                 $di[0].hide();
-169|                                                             }
-170|                                                         }, (e)->{
-171|                                                             mindustry.Vars.ui.showException(arc.Core.bundle.get("warn.downloadFailed"), e);
-172|                                                             arc.util.Log.err(e);
-173|                                                             $di[0].hide();
-174|                                                         });
-175|                                                     } else throw new RuntimeException("release file was not found");
-176|                                                 });
-177|                                                 $di[0] = new mindustry.ui.dialogs.BaseDialog(""){
-178|                                                     {
-179|                                                         titleTable.clearChildren();
-180|                                                         cont.table(mindustry.gen.Tex.pane, (t)->{
-181|                                                             t.add(arc.Core.bundle.get("warn.downloading")).top().padTop(10).get();
-182|                                                             t.row();
-183|                                                             t.add(new mindustry.ui.Bar(()->arc.util.Strings.autoFixed($downloadProgress[0], 1) + "%", ()->mindustry.graphics.Pal.accent, ()->$downloadProgress[0])).growX().height(30).pad(4);
-184|                                                         }).size(320, 175);
-185|                                                         cont.row();
-186|                                                         cont.button(arc.Core.bundle.get("warn.cancel"), ()->{
-187|                                                             hide();
-188|                                                             try {
-189|                                                                 if ($stream[0] != null) $stream[0].close();
-190|                                                             } catch (java.io.IOException e) {
-191|                                                                 arc.util.Log.err(e);
-192|                                                             }
-193|                                                         }).fill();
-194|                                                     }
-195|                                                 };
-196|                                                 $di[0].show();
-197|                                             }));
-198|                                             $buttons.add(arc.scene.utils.Elem.newButton(arc.Core.bundle.get("warn.openfile"), ()->{
-199|                                                 mindustry.Vars.platform.showMultiFileChooser((fi)->{
-200|                                                     final arc.files.ZipFi $file = new arc.files.ZipFi(fi);
-201|                                                     final arc.files.Fi manifest = $file.child("mod.hjson").exists() ? $file.child("mod.hjson") : null;
-202|                                                     if (manifest == null) {
-203|                                                         mindustry.Vars.ui.showErrorMessage("not a mod file, no mod.hjson found");
-204|                                                         return;
-205|                                                     }
-206|                                                     final arc.util.serialization.Jval $info = arc.util.serialization.Jval.read(manifest.reader());
-207|                                                     if (!$info.getString("name", "").equals("universe-core")) {
-208|                                                         mindustry.Vars.ui.showErrorMessage("not UniverseCore mod file");
-209|                                                     } else if (!$versionValid.get($info.getString("version", "0.0.0"))) {
-210|                                                         mindustry.Vars.ui.showErrorMessage("version was deprecated, require: 1.5.5, select: " + $info.getString("version", "0.0.0"));
-211|                                                     } else {
-212|                                                         try {
-213|                                                             if ($libFile != null && $libFile.exists()) $libFile.delete();
-214|                                                             mindustry.Vars.mods.importMod($file);
-215|                                                             hide();
-216|                                                             mindustry.Vars.ui.mods.show();
-217|                                                         } catch (java.io.IOException e) {
-218|                                                             mindustry.Vars.ui.showException(e);
-219|                                                             arc.util.Log.err(e);
-220|                                                         }
-221|                                                     }
-222|                                                 }, "zip", "jar");
-223|                                             }));
-224|                                         }
-225|                                         $buttons.add(arc.scene.utils.Elem.newButton(arc.Core.bundle.get("warn.goLibPage"), ()->{
-226|                                             if (!arc.Core.app.openURI("https://github.com/EB-wilson/UniverseCore")) {
-227|                                                 mindustry.Vars.ui.showErrorMessage("@linkfail");
-228|                                                 arc.Core.app.setClipboardText("https://github.com/EB-wilson/UniverseCore");
-229|                                             }
-230|                                         }));
-231|                                         $buttons.add(arc.scene.utils.Elem.newButton(arc.Core.bundle.get("warn.openModDir"), ()->{
-232|                                             if (!arc.Core.app.openFolder(mindustry.Vars.modDirectory.path())) {
-233|                                                 mindustry.Vars.ui.showInfo(arc.Core.bundle.get("warn.androidOpenFolder"));
-234|                                                 arc.Core.app.setClipboardText(mindustry.Vars.modDirectory.path());
-235|                                             }
-236|                                         }));
-237|                                         $buttons.add(arc.scene.utils.Elem.newButton(arc.Core.bundle.get("warn.exit"), ()->arc.Core.app.exit()));
-238|                                         main.table((buttons)->{
-239|                                             final java.util.concurrent.atomic.AtomicReference<Runnable> $rebuild = new java.util.concurrent.atomic.AtomicReference<>(()->{
-240|                                                 buttons.clearChildren();
-241|                                                 if (arc.Core.scene.getWidth() < 168 * ($disabled.get() ? 4 : 5)) {
-242|                                                     buttons.table((but)->{
-243|                                                         but.defaults().growX().height(55).pad(4);
-244|                                                         for (arc.scene.ui.Button button : $buttons) {
-245|                                                             but.add(button);
-246|                                                             but.row();
-247|                                                         }
-248|                                                     }).growX().fillY();
-249|                                                 } else {
+ 42|                 if (Integer.parseInt($lib[0]) > Integer.parseInt($req[0])) return 2;
+ 43|                 for (int i = 1; i < $lib.length; i++) {
+ 44|                     if (Integer.parseInt($lib[i]) > Integer.parseInt($req[i])) return 0;
+ 45|                     if (Integer.parseInt($lib[i]) < Integer.parseInt($req[i])) return 1;
+ 46|                 }
+ 47|                 return 0;
+ 48|             };
+ 49|             arc.Events.on(mindustry.game.EventType.ClientLoadEvent.class, (e)->{
+ 50|                 arc.util.Time.run(1, ()->{
+ 51|                     arc.Core.settings.remove("unc-checkFailed");
+ 52|                     arc.Core.settings.remove("unc-warningShown");
+ 53|                 });
+ 54|             });
+ 55|             Runtime.getRuntime().addShutdownHook(new Thread(()->{
+ 56|                 arc.Core.settings.remove("unc-checkFailed");
+ 57|                 arc.Core.settings.remove("unc-warningShown");
+ 58|             }));
+ 59|             final arc.files.Fi $libFile = $libFileTemp;
+ 60|             final String $libVersion = $libVersionValue;
+ 61|             final boolean $upgrade = $versionValid.get($libVersion) == 1;
+ 62|             final boolean $requireOld = $versionValid.get($libVersion) == 2;
+ 63|             if (mindustry.Vars.mods.getMod("universe-core") == null || $upgrade || !arc.Core.settings.getBool("mod-universe-core-enabled", true)) {
+ 64|                 if ($libFile == null || !$libFile.exists() || $upgrade || !arc.Core.settings.getBool("mod-universe-core-enabled", true)) {
+ 65|                     arc.util.io.PropertiesUtils.load(arc.Core.bundle.getProperties(), new java.io.StringReader(bundles.get(arc.Core.bundle.getLocale().toString(), bundles.get(""))));
+ 66|                     String $curr = arc.Core.settings.getString("unc-checkFailed", "");
+ 67|                     $curr += $modFile.path() + "::";
+ 68|                     if (!arc.Core.settings.getBool("mod-universe-core-enabled", true)) {
+ 69|                         $curr += "dis";
+ 70|                         $status$ = 1;
+ 71|                         $disabled.set(true);
+ 72|                     } else if ($libFile == null) {
+ 73|                         $curr += "none";
+ 74|                         $status$ = 2;
+ 75|                     } else if ($upgrade) {
+ 76|                         $curr += "old1.5.5";
+ 77|                         $status$ = 3;
+ 78|                     } else if ($requireOld) {
+ 79|                         $curr += "new1.5.5";
+ 80|                         $status$ = 4;
+ 81|                     }
+ 82|                     $curr += ";";
+ 83|                     arc.Core.settings.put("unc-checkFailed", $curr);
+ 84|                     if (!arc.Core.settings.getBool("unc-warningShown", false)) {
+ 85|                         arc.Core.settings.put("unc-warningShown", true);
+ 86|                         arc.Events.on(mindustry.game.EventType.ClientLoadEvent.class, (e)->{
+ 87|                             String $modStatus = arc.Core.settings.getString("unc-checkFailed", "");
+ 88|                             new arc.scene.ui.Dialog(){
+ 89|                                 {
+ 90|                                     setFillParent(true);
+ 91|                                     cont.table((main)->{
+ 92|                                         main.add(arc.Core.bundle.get("warn.uncLoadFailed"));
+ 93|                                         main.row();
+ 94|                                         main.image().color(mindustry.graphics.Pal.accent).growX().height(5).colspan(2).pad(0).padBottom(8).padTop(8).margin(0);
+ 95|                                         main.row();
+ 96|                                         main.table((t)->{
+ 97|                                             t.add(arc.Core.bundle.get("warn.caused")).color(arc.graphics.Color.lightGray).padBottom(10);
+ 98|                                             t.row();
+ 99|                                             t.pane((table)->{
+100|                                                 for (String $s : $modStatus.split(";")) {
+101|                                                     if ($s.isEmpty()) continue;
+102|                                                     final String[] $modStat = $s.split("::");
+103|                                                     final arc.files.ZipFi $f = new arc.files.ZipFi(new arc.files.Fi($modStat[0]));
+104|                                                     final arc.files.Fi manifest = $f.child("mod.json").exists() ? $f.child("mod.json") : $f.child("mod.hjson").exists() ? $f.child("mod.hjson") : $f.child("plugin.json").exists() ? $f.child("plugin.json") : $f.child("plugin.hjson");
+105|                                                     final arc.util.serialization.Jval $info = arc.util.serialization.Jval.read(manifest.reader());
+106|                                                     final String name = $info.getString("name", "");
+107|                                                     final String displayName = $info.getString("displayName", "");
+108|                                                     final arc.files.Fi $icon = $f.child("icon.png");
+109|                                                     table.table((modInf)->{
+110|                                                         modInf.defaults().left();
+111|                                                         modInf.image().size(112).get().setDrawable($icon.exists() ? new arc.scene.style.TextureRegionDrawable(new arc.graphics.g2d.TextureRegion(new arc.graphics.Texture($icon))) : mindustry.gen.Tex.nomap);
+112|                                                         modInf.left().table((text)->{
+113|                                                             text.left().defaults().left();
+114|                                                             text.add("[accent]" + displayName);
+115|                                                             text.row();
+116|                                                             text.add("[gray]" + name);
+117|                                                             text.row();
+118|                                                             text.add("[crimson]" + ($modStat[1].equals("dis") ? arc.Core.bundle.get("warn.uncDisabled") : $modStat[1].equals("none") ? arc.Core.bundle.get("warn.uncNotFound") : $modStat[1].startsWith("old") ? arc.Core.bundle.format("warn.uncVersionOld", $modStat[1].replace("old", "")) : arc.Core.bundle.format("warn.uncVersionNewer", $modStat[1].replace("new", ""))));
+119|                                                         }).padLeft(5).top().growX();
+120|                                                     }).padBottom(4).padLeft(12).padRight(12).growX().fillY().left();
+121|                                                     table.row();
+122|                                                     table.image().color(arc.graphics.Color.gray).growX().height(6).colspan(2).pad(0).margin(0);
+123|                                                     table.row();
+124|                                                 }
+125|                                             }).grow().maxWidth(560);
+126|                                         }).grow().top();
+127|                                         main.row();
+128|                                         main.image().color(mindustry.graphics.Pal.accent).growX().height(6).colspan(2).pad(0).padBottom(12).margin(0).bottom();
+129|                                         main.row();
+130|                                         main.add(arc.Core.bundle.format("warn.currentUncVersion", $libFile != null ? "" + $libVersion : arc.Core.bundle.get("warn.libNotFound"))).padBottom(10).bottom();
+131|                                         main.row();
+132|                                         final arc.struct.Seq<arc.scene.ui.Button> $buttons = new arc.struct.Seq<>();
+133|                                         if ($disabled.get()) {
+134|                                             $buttons.add(arc.scene.utils.Elem.newButton(arc.Core.bundle.get("warn.enableLib"), ()->{
+135|                                                 arc.Core.settings.put("mod-universe-core-enabled", true);
+136|                                                 mindustry.Vars.ui.showInfoOnHidden("@mods.reloadexit", ()->{
+137|                                                     arc.util.Log.info("Exiting to reload mods.");
+138|                                                     arc.Core.app.exit();
+139|                                                 });
+140|                                             }));
+141|                                         } else {
+142|                                             $buttons.add(arc.scene.utils.Elem.newButton(arc.Core.bundle.get("warn.download"), ()->{
+143|                                                 final java.io.InputStream[] $stream = new java.io.InputStream[1];
+144|                                                 final float[] $downloadProgress = {0};
+145|                                                 final mindustry.ui.dialogs.BaseDialog[] $di = new mindustry.ui.dialogs.BaseDialog[]{null};
+146|                                                 arc.util.Http.get("https://api.github.com/repos/EB-wilson/UniverseCore/releases/latest").timeout(900).error((e)->{
+147|                                                     mindustry.Vars.ui.showException(arc.Core.bundle.get("warn.downloadFailed"), e);
+148|                                                     arc.util.Log.err(e);
+149|                                                     $di[0].hide();
+150|                                                 }).submit((res)->{
+151|                                                     final arc.util.serialization.Jval $json = arc.util.serialization.Jval.read(res.getResultAsString());
+152|                                                     final arc.util.serialization.Jval.JsonArray $assets = $json.get("assets").asArray();
+153|                                                     final arc.util.serialization.Jval $asset = $assets.find((j)->j.getString("name").endsWith(".jar"));
+154|                                                     if ($asset != null) {
+155|                                                         final String $downloadUrl = $asset.getString("browser_download_url");
+156|                                                         arc.util.Http.get($downloadUrl, (result)->{
+157|                                                             $stream[0] = result.getResultAsStream();
+158|                                                             final arc.files.Fi $temp = mindustry.Vars.tmpDirectory.child("UniverseCore.jar");
+159|                                                             final arc.files.Fi $file = mindustry.Vars.modDirectory.child("UniverseCore.jar");
+160|                                                             final long $length = result.getContentLength();
+161|                                                             final arc.func.Floatc $cons = $length <= 0 ? (f)->{
+162|                                                             } : (p)->$downloadProgress[0] = p;
+163|                                                             arc.util.io.Streams.copyProgress($stream[0], $temp.write(false), $length, 4096, $cons);
+164|                                                             if ($libFile != null && $libFile.exists()) $libFile.delete();
+165|                                                             $temp.moveTo($file);
+166|                                                             try {
+167|                                                                 mindustry.Vars.mods.importMod($file);
+168|                                                                 $file.file().delete();
+169|                                                                 hide();
+170|                                                                 mindustry.Vars.ui.mods.show();
+171|                                                             } catch (java.io.IOException e) {
+172|                                                                 mindustry.Vars.ui.showException(e);
+173|                                                                 arc.util.Log.err(e);
+174|                                                                 $di[0].hide();
+175|                                                             }
+176|                                                         }, (e)->{
+177|                                                             mindustry.Vars.ui.showException(arc.Core.bundle.get("warn.downloadFailed"), e);
+178|                                                             arc.util.Log.err(e);
+179|                                                             $di[0].hide();
+180|                                                         });
+181|                                                     } else throw new RuntimeException("release file was not found");
+182|                                                 });
+183|                                                 $di[0] = new mindustry.ui.dialogs.BaseDialog(""){
+184|                                                     {
+185|                                                         titleTable.clearChildren();
+186|                                                         cont.table(mindustry.gen.Tex.pane, (t)->{
+187|                                                             t.add(arc.Core.bundle.get("warn.downloading")).top().padTop(10).get();
+188|                                                             t.row();
+189|                                                             t.add(new mindustry.ui.Bar(()->arc.util.Strings.autoFixed($downloadProgress[0], 1) + "%", ()->mindustry.graphics.Pal.accent, ()->$downloadProgress[0])).growX().height(30).pad(4);
+190|                                                         }).size(320, 175);
+191|                                                         cont.row();
+192|                                                         cont.button(arc.Core.bundle.get("warn.cancel"), ()->{
+193|                                                             hide();
+194|                                                             try {
+195|                                                                 if ($stream[0] != null) $stream[0].close();
+196|                                                             } catch (java.io.IOException e) {
+197|                                                                 arc.util.Log.err(e);
+198|                                                             }
+199|                                                         }).fill();
+200|                                                     }
+201|                                                 };
+202|                                                 $di[0].show();
+203|                                             }));
+204|                                             $buttons.add(arc.scene.utils.Elem.newButton(arc.Core.bundle.get("warn.openfile"), ()->{
+205|                                                 mindustry.Vars.platform.showMultiFileChooser((fi)->{
+206|                                                     final arc.files.ZipFi $file = new arc.files.ZipFi(fi);
+207|                                                     final arc.files.Fi manifest = $file.child("mod.hjson").exists() ? $file.child("mod.hjson") : null;
+208|                                                     if (manifest == null) {
+209|                                                         mindustry.Vars.ui.showErrorMessage("not a mod file, no mod.hjson found");
+210|                                                         return;
+211|                                                     }
+212|                                                     final arc.util.serialization.Jval $info = arc.util.serialization.Jval.read(manifest.reader());
+213|                                                     if (!$info.getString("name", "").equals("universe-core")) {
+214|                                                         mindustry.Vars.ui.showErrorMessage("not UniverseCore mod file");
+215|                                                     } else if ($versionValid.get($info.getString("version", "0.0.0")) == 1) {
+216|                                                         mindustry.Vars.ui.showErrorMessage("version was deprecated, require: 1.5.5, select: " + $info.getString("version", "0.0.0"));
+217|                                                     } else if ($versionValid.get($info.getString("version", "0.0.0")) == 2) {
+218|                                                         mindustry.Vars.ui.showErrorMessage("version was too newer, require: 1.5.5, select: " + $info.getString("version", "0.0.0"));
+219|                                                     } else {
+220|                                                         try {
+221|                                                             if ($libFile != null && $libFile.exists()) $libFile.delete();
+222|                                                             mindustry.Vars.mods.importMod($file);
+223|                                                             hide();
+224|                                                             mindustry.Vars.ui.mods.show();
+225|                                                         } catch (java.io.IOException e) {
+226|                                                             mindustry.Vars.ui.showException(e);
+227|                                                             arc.util.Log.err(e);
+228|                                                         }
+229|                                                     }
+230|                                                 }, "zip", "jar");
+231|                                             }));
+232|                                         }
+233|                                         $buttons.add(arc.scene.utils.Elem.newButton(arc.Core.bundle.get("warn.goLibPage"), ()->{
+234|                                             if (!arc.Core.app.openURI("https://github.com/EB-wilson/UniverseCore")) {
+235|                                                 mindustry.Vars.ui.showErrorMessage("@linkfail");
+236|                                                 arc.Core.app.setClipboardText("https://github.com/EB-wilson/UniverseCore");
+237|                                             }
+238|                                         }));
+239|                                         $buttons.add(arc.scene.utils.Elem.newButton(arc.Core.bundle.get("warn.openModDir"), ()->{
+240|                                             if (!arc.Core.app.openFolder(mindustry.Vars.modDirectory.path())) {
+241|                                                 mindustry.Vars.ui.showInfo(arc.Core.bundle.get("warn.androidOpenFolder"));
+242|                                                 arc.Core.app.setClipboardText(mindustry.Vars.modDirectory.path());
+243|                                             }
+244|                                         }));
+245|                                         $buttons.add(arc.scene.utils.Elem.newButton(arc.Core.bundle.get("warn.exit"), ()->arc.Core.app.exit()));
+246|                                         main.table((buttons)->{
+247|                                             final java.util.concurrent.atomic.AtomicReference<Runnable> $rebuild = new java.util.concurrent.atomic.AtomicReference<>(()->{
+248|                                                 buttons.clearChildren();
+249|                                                 if (arc.Core.scene.getWidth() < 168 * ($disabled.get() ? 4 : 5)) {
 250|                                                     buttons.table((but)->{
-251|                                                         but.defaults().width(160).height(55).pad(4);
+251|                                                         but.defaults().growX().height(55).pad(4);
 252|                                                         for (arc.scene.ui.Button button : $buttons) {
 253|                                                             but.add(button);
-254|                                                         }
-255|                                                     }).fill().bottom().padBottom(8);
-256|                                                 }
-257|                                             });
-258|                                             $rebuild.get();
-259|                                             arc.Events.on(mindustry.game.EventType.ResizeEvent.class, (e)->{
-260|                                                 $rebuild.get().run();
-261|                                             });
-262|                                         }).growX().fillY();
-263|                                     }).grow().top().pad(0).margin(0);
-264|                                 }
-265|                             }.show();
-266|                         });
-267|                     }
-268|                 } else {
-269|                     arc.util.Log.info("dependence mod was not loaded, load it now");
-270|                     arc.util.Log.info("you will receive an exception that threw by game, tell you the UniverseCore was load fail and skipped.\ndon\'t worry, this is expected, it will not affect your game");
-271|                     try {
-272|                         java.lang.reflect.Method $load = mindustry.mod.Mods.class.getDeclaredMethod("loadMod", arc.files.Fi.class);
-273|                         $load.setAccessible(true);
-274|                         java.lang.reflect.Field $f = mindustry.mod.Mods.class.getDeclaredField("mods");
-275|                         $f.setAccessible(true);
-276|                         arc.struct.Seq<mindustry.mod.Mods.LoadedMod> mods = (arc.struct.Seq<mindustry.mod.Mods.LoadedMod>)$f.get(mindustry.Vars.mods);
-277|                         mods.add((mindustry.mod.Mods.LoadedMod)$load.invoke(mindustry.Vars.mods, $libFile));
-278|                     } catch (NoSuchFieldException | NoSuchMethodException | IllegalAccessException | java.lang.reflect.InvocationTargetException e) {
-279|                         e.printStackTrace();
-280|                     }
-281|                 }
-282|             }
-283|         }
-284|         if ($status$ == 0) {
-285|             universecore.UncCore.signup($className.class);
-286|         } else {
-287|             if ($status$ == 1) {
-288|                 arc.util.Log.err("universeCore mod was disabled");
-289|             } else if ($status$ == 2) {
-290|                 arc.util.Log.err("universeCore mod file was not found");
-291|             } else if ($status$ == 3) {
-292|                 arc.util.Log.err("universeCore version was deprecated, version: " + $libVersionValue + " require: 1.5.5");
-293|             }
-294|         }
-295|     }
-296|     
-297|     private class INIT_INTERNAL {
-298|         
-299|         public INIT_INTERNAL() {
-300|             super();
-301|         }
-302|     }
-303| }
+254|                                                             but.row();
+255|                                                         }
+256|                                                     }).growX().fillY();
+257|                                                 } else {
+258|                                                     buttons.table((but)->{
+259|                                                         but.defaults().width(160).height(55).pad(4);
+260|                                                         for (arc.scene.ui.Button button : $buttons) {
+261|                                                             but.add(button);
+262|                                                         }
+263|                                                     }).fill().bottom().padBottom(8);
+264|                                                 }
+265|                                             });
+266|                                             $rebuild.get();
+267|                                             arc.Events.on(mindustry.game.EventType.ResizeEvent.class, (e)->{
+268|                                                 $rebuild.get().run();
+269|                                             });
+270|                                         }).growX().fillY();
+271|                                     }).grow().top().pad(0).margin(0);
+272|                                 }
+273|                             }.show();
+274|                         });
+275|                     }
+276|                 } else {
+277|                     arc.util.Log.info("dependence mod was not loaded, load it now");
+278|                     arc.util.Log.info("you will receive an exception that threw by game, tell you the UniverseCore was load fail and skipped.\ndon\'t worry, this is expected, it will not affect your game");
+279|                     try {
+280|                         java.lang.reflect.Method $load = mindustry.mod.Mods.class.getDeclaredMethod("loadMod", arc.files.Fi.class);
+281|                         $load.setAccessible(true);
+282|                         java.lang.reflect.Field $f = mindustry.mod.Mods.class.getDeclaredField("mods");
+283|                         $f.setAccessible(true);
+284|                         arc.struct.Seq<mindustry.mod.Mods.LoadedMod> mods = (arc.struct.Seq<mindustry.mod.Mods.LoadedMod>)$f.get(mindustry.Vars.mods);
+285|                         mods.add((mindustry.mod.Mods.LoadedMod)$load.invoke(mindustry.Vars.mods, $libFile));
+286|                     } catch (NoSuchFieldException | NoSuchMethodException | IllegalAccessException | java.lang.reflect.InvocationTargetException e) {
+287|                         e.printStackTrace();
+288|                     }
+289|                 }
+290|             }
+291|         }
+292|         if ($status$ == 0) {
+293|             universecore.UncCore.signup($className.class);
+294|         } else {
+295|             if ($status$ == 1) {
+296|                 arc.util.Log.err("universeCore mod was disabled");
+297|             } else if ($status$ == 2) {
+298|                 arc.util.Log.err("universeCore mod file was not found");
+299|             } else if ($status$ == 3) {
+300|                 arc.util.Log.err("universeCore version was deprecated, version: " + $libVersionValue + " require: 1.5.5");
+301|             } else if ($status$ == 4) {
+302|                 arc.util.Log.err("universeCore version was too newer, version: " + $libVersionValue + " require: 1.5.5");
+303|             }
+304|         }
+305|     }
+306|     
+307|     private class INIT_INTERNAL {
+308|         
+309|         public INIT_INTERNAL() {
+310|             super();
+311|         }
+312|     }
+313| }
 

@@ -59,14 +59,16 @@ public class ImportUNCProcessor extends BaseProcessor{
       
           assert $modFile != null;
       
-          arc.func.Boolf<String> $versionValid = v -> {
+          arc.func.Intf<String> $versionValid = v -> {
             String[] $lib = v.split("\\\\.");
             String[] $req = "$requireVersion".split("\\\\.");
-      
-            for (int i = 0; i < $lib.length; i++) {
-              if (Integer.parseInt($lib[i]) < Integer.parseInt($req[i])) return false;
+    
+            if (Integer.parseInt($lib[0]) > Integer.parseInt($req[0])) return 2;
+            for (int i = 1; i < $lib.length; i++) {
+              if (Integer.parseInt($lib[i]) > Integer.parseInt($req[i])) return 0;
+              if (Integer.parseInt($lib[i]) < Integer.parseInt($req[i])) return 1;
             }
-            return true;
+            return 0;
           };
           arc.Events.on(mindustry.game.EventType.ClientLoadEvent.class, e -> {
             arc.util.Time.run(1, () -> {
@@ -82,7 +84,8 @@ public class ImportUNCProcessor extends BaseProcessor{
           final arc.files.Fi $libFile = $libFileTemp;
           final String $libVersion = $libVersionValue;
       
-          final boolean $upgrade = !$versionValid.get($libVersion);
+          final boolean $upgrade = $versionValid.get($libVersion) == 1;
+          final boolean $requireOld = $versionValid.get($libVersion) == 2;
           if (mindustry.Vars.mods.getMod("universe-core") == null || $upgrade || !arc.Core.settings.getBool("mod-universe-core-enabled", true)) {
             if ($libFile == null || !$libFile.exists() || $upgrade || !arc.Core.settings.getBool("mod-universe-core-enabled", true)) {
               arc.util.io.PropertiesUtils.load(arc.Core.bundle.getProperties(), new java.io.StringReader(bundles.get(arc.Core.bundle.getLocale().toString(), bundles.get(""))));
@@ -99,8 +102,12 @@ public class ImportUNCProcessor extends BaseProcessor{
                 $status$ = 2;
               }
               else if ($upgrade){
-                $curr += "$requireVersion";
+                $curr += "old$requireVersion";
                 $status$ = 3;
+              }
+              else if ($requireOld){
+                $curr += "new$requireVersion";
+                $status$ = 4;
               }
               $curr += ";";
       
@@ -150,7 +157,8 @@ public class ImportUNCProcessor extends BaseProcessor{
                                 text.add("[crimson]" + (
                                     $modStat[1].equals("dis")? arc.Core.bundle.get("warn.uncDisabled"):
                                         $modStat[1].equals("none")? arc.Core.bundle.get("warn.uncNotFound"):
-                                            arc.Core.bundle.format("warn.uncVersionOld", $modStat[1])
+                                            $modStat[1].startsWith("old")? arc.Core.bundle.format("warn.uncVersionOld", $modStat[1].replace("old", "")):
+                                                arc.Core.bundle.format("warn.uncVersionNewer", $modStat[1].replace("new", ""))
                                 ));
                               }).padLeft(5).top().growX();
                             }).padBottom(4).padLeft(12).padRight(12).growX().fillY().left();
@@ -259,8 +267,11 @@ public class ImportUNCProcessor extends BaseProcessor{
                             if (!$info.getString("name", "").equals("universe-core")){
                               mindustry.Vars.ui.showErrorMessage("not UniverseCore mod file");
                             }
-                            else if(!$versionValid.get($info.getString("version", "0.0.0"))){
+                            else if($versionValid.get($info.getString("version", "0.0.0")) == 1){
                               mindustry.Vars.ui.showErrorMessage("version was deprecated, require: $requireVersion, select: " + $info.getString("version", "0.0.0"));
+                            }
+                            else if($versionValid.get($info.getString("version", "0.0.0")) == 2){
+                              mindustry.Vars.ui.showErrorMessage("version was too newer, require: $requireVersion, select: " + $info.getString("version", "0.0.0"));
                             }
                             else {
                               try {
@@ -356,6 +367,9 @@ public class ImportUNCProcessor extends BaseProcessor{
           else if($status$ == 3){
             arc.util.Log.err("universeCore version was deprecated, version: " + $libVersionValue + " require: $requireVersion");
           }
+          else if($status$ == 4){
+            arc.util.Log.err("universeCore version was too newer, version: " + $libVersionValue + " require: $requireVersion");
+          }
         }
       }
       """;
@@ -370,6 +384,7 @@ public class ImportUNCProcessor extends BaseProcessor{
     warn.libNotFound = NotFound
     warn.currentUncVersion = Current UniverseCore version: {0} It is recommended to install or update the latest version of UniverseCore
     warn.uncVersionOld = UniverseCore version is outdated, requires: {0}
+    warn.uncVersionNewer = UniverseCore version is too newer, requires: {0}
     warn.download = Download
     warn.downloading = downloading...
     warn.downloadFailed = download failed
@@ -390,6 +405,7 @@ public class ImportUNCProcessor extends BaseProcessor{
     warn.libNotFound = 未找到
     warn.currentUncVersion = 当前UniverseCore版本：{0}  建议安装或更新最新版本的UniverseCore
     warn.uncVersionOld = UniverseCore 版本过旧，需要：{0}
+    warn.uncVersionNewer = UniverseCore 版本太过超前，当前需要：{0}
     warn.download = 下载
     warn.downloading = 下载中...
     warn.downloadFailed = 下载失败
@@ -410,6 +426,7 @@ public class ImportUNCProcessor extends BaseProcessor{
     warn.libNotFound = 未找到
     warn.currentUncVersion = 當前UniverseCore版本：{0} 建議安裝或更新最新版本的UniverseCore
     warn.uncVersionOld = UniverseCore 版本過舊，需要：{0}
+    warn.uncVersionNewer = UniverseCore 版本太過超前，當前需要：{0}
     warn.download = 下載
     warn.downloading = 下載中...
     warn.downloadFailed = 下載失敗
@@ -430,6 +447,7 @@ public class ImportUNCProcessor extends BaseProcessor{
     warn.libNotFound = Не найден
     warn.currentUncVersion = Текущая версия UniverseCore: {0} Рекомендуется установить или обновить последнюю версию UniverseCore.
     warn.uncVersionOld = Версия UniverseCore устарела, требуется: {0}
+    warn.uncVersionNewer = Слишком новая версия UniverseCore, в настоящее время требуется: {0}
     warn.download = скачать
     warn.downloading = скачивание...
     warn.downloadFailed = Загрузка не удалась
@@ -450,6 +468,7 @@ public class ImportUNCProcessor extends BaseProcessor{
     warn.libNotFound = 見つかりません
     warn.currentUncVersion = 現在の UniverseCore バージョン: {0} UniverseCore の最新バージョンをインストールまたは更新することをお勧めします
     warn.uncVersionOld = UniverseCore のバージョンが古くなっています。必要なもの: {0}
+    warn.uncVersionNewer = UniverseCore のバージョンが新しすぎます。現在必要なもの: {0}
     warn.download = ダウンロード
     warn.downloading = ダウンロード中...
     warn.downloadFailed = ダウンロードに失敗しました

@@ -24,15 +24,13 @@ public class UncContentType{
   
   public static final ObjectMap<ContentType, UncContentType> allUncContentType = new ObjectMap<>();
 
+  public static ContentType[] displayContentList = ContentType.all;
+
   static {
     for(ContentType value: ContentType.values()){
       allUncContentType.put(value, new UncContentType(value));
     }
-
-    reloadDisplay();
   }
-
-  public static ContentType[] displayContentList = new ContentType[0];
   
   public final ContentType value;
   public final int ordinal;
