@@ -1,0 +1,57 @@
+processor: EntryProcessor (full class name: universecore.annotations.EntryProcessor)
+time: Thu Jan 05 17:46:06 CST 2023
+
+-----------------------------------------
+annotation: universecore.annotations.Annotations.ImplEntries
+-----------------------------------------
+
+> class: universecore.world.blocks.FakeBlock.FakeBuild
+ 1| 
+ 2| @Annotations.ImplEntries
+ 3| public class FakeBuild extends Building implements ReplaceBuildComp {
+ 4|     
+ 5|     public FakeBuild() {
+ 6|         super();
+ 7|     }
+ 8|     Building realBuild;
+ 9|     
+10|     @Override
+11|     public Building init(Tile tile, Team team, boolean shouldAdd, int rotation) {
+12|         FieldHandler.setValueDefault(tile, "block", maskedBlock);
+13|         realBuild = maskedBlock.newBuilding();
+14|         this.tile = tile;
+15|         this.x = tile.drawx();
+16|         this.y = tile.drawy();
+17|         this.rotation = rotation;
+18|         this.team = team;
+19|         realBuild.init(tile, team, shouldAdd, rotation);
+20|         buildInitialized();
+21|         this.buildInitialized();
+22|         return realBuild;
+23|     }
+24|     
+25|     @Override
+26|     public void onReplaced(ReplaceBuildComp old) {
+27|         if (realBuild instanceof ReplaceBuildComp re) {
+28|             re.onReplaced(old);
+29|         }
+30|     }
+31|     
+32|     public mindustry.world.Tile getTile() {
+33|         return super.tile;
+34|     }
+35|     
+36|     public mindustry.world.modules.ItemModule items() {
+37|         return super.items;
+38|     }
+39|     
+40|     public mindustry.world.modules.LiquidModule liquids() {
+41|         return super.liquids;
+42|     }
+43|     
+44|     public void onRemoved() {
+45|         super.onRemoved();
+46|         this.onRemoving();
+47|     }
+48| }
+

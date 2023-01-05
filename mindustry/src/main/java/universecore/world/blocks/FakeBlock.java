@@ -9,6 +9,7 @@ import mindustry.gen.Building;
 import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.meta.BuildVisibility;
+import universecore.annotations.Annotations;
 import universecore.components.blockcomp.ReplaceBuildComp;
 import universecore.override.dialogs.UncDatabaseDialog;
 import universecore.util.handler.FieldHandler;
@@ -94,6 +95,7 @@ public class FakeBlock extends Block {
     return MethodHandler.invokeDefault(maskedBlock, "icons");
   }
 
+  @Annotations.ImplEntries
   public class FakeBuild extends Building implements ReplaceBuildComp {
     Building realBuild;
 
@@ -101,6 +103,11 @@ public class FakeBlock extends Block {
     public Building init(Tile tile, Team team, boolean shouldAdd, int rotation) {
       FieldHandler.setValueDefault(tile, "block", maskedBlock);
       realBuild = maskedBlock.newBuilding();
+      this.tile = tile;
+      this.x = tile.drawx();
+      this.y = tile.drawy();
+      this.rotation = rotation;
+      this.team = team;
       realBuild.init(tile, team, shouldAdd, rotation);
       buildInitialized();
 

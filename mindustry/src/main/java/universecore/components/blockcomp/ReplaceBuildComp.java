@@ -1,27 +1,20 @@
 package universecore.components.blockcomp;
 
-import arc.util.Time;
+import arc.struct.ObjectMap;
 import mindustry.world.Tile;
 import universecore.annotations.Annotations;
-
-import java.util.WeakHashMap;
 
 /**可（被）替换覆盖放置的方块组件，这使得此方块可以在覆盖放置时传递信息，将旧方块传递给新的方块
  *
  * @since 1.5
  * @author EBwilson*/
 public interface ReplaceBuildComp extends BuildCompBase {
-  WeakHashMap<Tile, ReplaceBuildComp> replaceEntry = new WeakHashMap<>();
+  ObjectMap<Tile, ReplaceBuildComp> replaceEntry = new ObjectMap<>();
 
   @Annotations.MethodEntry(entryMethod = "onRemoved", insert = Annotations.InsertPosition.HEAD)
   default void onRemoving(){
     Tile tile = getTile();
     replaceEntry.put(tile, this);
-    Time.runTask(1, () -> {
-      if (replaceEntry.get(tile) == this){
-        replaceEntry.remove(tile);
-      }
-    });
   }
 
   @Annotations.MethodEntry(entryMethod = "init", paramTypes = {"mindustry.world.Tile", "mindustry.game.Team", "boolean", "int"})

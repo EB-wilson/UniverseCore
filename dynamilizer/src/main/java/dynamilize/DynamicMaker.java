@@ -322,7 +322,7 @@ public abstract class DynamicMaker{
   /**对动态委托产生的类型进行继续委托创建代码的方法，应当将首要处理过程向上传递给超类。
    * 与{@link DynamicMaker#makeClassInfo(Class, Class[])}的行为相似，但需要将部分行为适应到已经具备委托行为的超类*/
   @SuppressWarnings({"unchecked"})
-  protected <T> ClassInfo<? extends T> makeClassInfoOnDynmaic(Class<T> baseClass, Class<?>[] interfaces){
+  protected <T> ClassInfo<? extends T> makeClassInfoOnDyamic(Class<T> baseClass, Class<?>[] interfaces){
     ArrayList<ClassInfo<?>> inter = new ArrayList<>(interfaces.length);
     for(Class<?> i: interfaces){
       inter.add(asType(i));
@@ -647,7 +647,7 @@ public abstract class DynamicMaker{
   @SuppressWarnings({"unchecked", "rawtypes"})
   protected <T> ClassInfo<? extends T> makeClassInfo(Class<T> baseClass, Class<?>[] interfaces){
     if(baseClass.getAnnotation(DynamicType.class) != null)
-      return makeClassInfoOnDynmaic(baseClass, interfaces);
+      return makeClassInfoOnDyamic(baseClass, interfaces);
 
     ArrayList<ClassInfo<?>> inter = new ArrayList<>(interfaces.length + 1);
     inter.add(asType(DynamicObject.class));

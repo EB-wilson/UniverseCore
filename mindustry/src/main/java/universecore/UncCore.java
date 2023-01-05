@@ -67,7 +67,9 @@ public class UncCore extends Mod{
   public UncCore(){
     Log.info("[Universe Core] core loading");
 
-    EntityAspect.Group.reset();
+    Events.on(EventType.ClientLoadEvent.class, e -> {
+      EntityAspect.Group.reset();
+    });
 
     Events.run(EventType.Trigger.update, () -> {
       cellActions.update();
