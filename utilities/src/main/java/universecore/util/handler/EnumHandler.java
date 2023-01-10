@@ -7,6 +7,7 @@ import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 /**枚举处理器，提供了一些对enum的操作方法，可以创建枚举实例并将其放入枚举的values
  * <p>这个处理器是一个实例工厂，你需要对目标枚举类构造一个枚举处理器实例才可以进行操作
@@ -31,7 +32,7 @@ public class EnumHandler<T extends Enum<?>>{
       for(Constructor<?> constructor: clazz.getDeclaredConstructors()){
         constructor.setAccessible(true);
         MethodHandle handle = lookup.unreflectConstructor(constructor);
-        handleMap.put(handle.type(), handle);
+        handleMap.put(handle.type().unwrap(), handle);
       }
     }catch(IllegalAccessException e){
       throw new RuntimeException(e);
@@ -56,15 +57,29 @@ public class EnumHandler<T extends Enum<?>>{
 
       for(int i = 0; i < param.length; i++){
         params[i + 2] = param[i];
-        paramType[i + 2] = param[i].getClass();
+        paramType[i + 2] = param[i] == null? Void.class: param[i].getClass();
       }
 
-      return (T) handleMap.computeIfAbsent(
-          MethodType.methodType(clazz, paramType).unwrap(),
-          e -> {
-            throw new NoSuchMethodError("can not find constructor in " + clazz + " with parameter " + Arrays.toString(paramType));
+      MethodHandle handle = handleMap.get(MethodType.methodType(clazz, paramType).unwrap());
+      if (handle == null){
+        l: for (Map.Entry<MethodType, MethodHandle> entry : handleMap.entrySet()) {
+          Class<?>[] arr = entry.getKey().parameterArray();
+          if (arr.length != paramType.length) continue;
+
+          for (int i = 0; i < paramType.length; i++) {
+            if (paramType[i] == Void.class) continue;
+            if (!arr[i].isAssignableFrom(paramType[i])) continue l;
           }
-      ).invokeWithArguments(params);
+
+          handle = entry.getValue();
+          break;
+        }
+
+        if (handle == null)
+          throw new NoSuchMethodError("can not find constructor in " + clazz + " with parameter " + Arrays.toString(paramType));
+      }
+
+      return (T) handle.invokeWithArguments(params);
     }catch(Throwable e){
       throw new RuntimeException(e);
     }

@@ -102,6 +102,7 @@ public class UncCore extends Mod{
       secConfig = new SecondaryConfigureFragment();
       secConfig.build(overlay);
     }
+    categories.init();
     Time.run(2, classes::finishGenerate);
   }
 }

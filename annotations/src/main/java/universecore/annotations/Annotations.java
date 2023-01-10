@@ -46,7 +46,7 @@ public class Annotations{
    *   @BindField("field")
    *   default void field(int numb){} //setter
    *
-   *   @BindField("numb")
+   *   @BindField("value")
    *   default int field(){
    *     return 0; //getter
    *   }
