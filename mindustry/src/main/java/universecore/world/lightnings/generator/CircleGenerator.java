@@ -75,6 +75,11 @@ public class CircleGenerator extends LightningGenerator{
   }
 
   @Override
+  public boolean isEnclosed(){
+    return enclosed;
+  }
+
+  @Override
   public float clipSize(){
     return radius + maxSpread;
   }

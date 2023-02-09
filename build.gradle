@@ -8,10 +8,10 @@ plugins {
 }
 
 ext{
-  uncVersion = '1.6.1'
+  uncVersion = '1.6.2'
 
   //the build number that this mod is made for
-  mindustryVersion = 'v137'
+  mindustryVersion = 'v141'
   //version of SDK you will be using
   minSdkAPI = 30
   //version of JavaDynamilizer

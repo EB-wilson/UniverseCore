@@ -109,20 +109,47 @@ public class EntityAspect<EntityType extends Entityc> extends AbstractAspect<Ent
       GroupAspectType.setFunction(
           "add",
           (self, supe, args) -> {
-        supe.invokeFunc("add", args);
-        for(EntityAspect<Entityc> aspect : aspects){
-          aspect.add(args.get(0));
-        }
-      }, Entityc.class);
+            supe.invokeFunc("add", args);
+            for(EntityAspect<Entityc> aspect : aspects){
+              aspect.add(args.get(0));
+            }
+          },
+          Entityc.class
+      );
 
       GroupAspectType.setFunction(
           "remove",
           (self, supe, args) -> {
-        supe.invokeFunc("remove", args);
-        for(EntityAspect<Entityc> aspect : aspects){
-          aspect.remove(args.<Entityc>get(0));
-        }
-      }, Entityc.class);
+            supe.invokeFunc("remove", args);
+            for(EntityAspect<Entityc> aspect : aspects){
+              aspect.remove(args.<Entityc>get(0));
+            }
+          },
+          Entityc.class
+      );
+
+      GroupAspectType.setFunction(
+          "removeByID",
+          (self, sup, args) -> {
+            Entityc e = self.<EntityGroup>castGet().getByID(args.get(0));
+            sup.invokeFunc("removeByID", args);
+            for(EntityAspect<Entityc> aspect: aspects){
+              aspect.remove(e);
+            }
+          },
+          int.class
+      );
+
+      GroupAspectType.setFunction(
+          "removeIndex",
+          (self, sup, args) -> {
+            sup.invokeFunc("removeIndex", args);
+            for(EntityAspect<Entityc> aspect: aspects){
+              aspect.remove(args.<Entityc>get(0));
+            }
+          },
+          Entityc.class, int.class
+      );
     }
     
     private void setAspect(){

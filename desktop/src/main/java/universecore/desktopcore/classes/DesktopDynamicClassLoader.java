@@ -1,12 +1,17 @@
 package universecore.desktopcore.classes;
 
 import universecore.util.classes.BaseDynamicClassLoader;
+import universecore.util.handler.MethodHandler;
 
+import java.lang.reflect.Modifier;
+import java.security.ProtectionDomain;
 import java.util.HashMap;
 
 public class DesktopDynamicClassLoader extends BaseDynamicClassLoader{
   private final HashMap<String, byte[]> classes = new HashMap<>();
   private final HashMap<String, Class<?>> loadedClass = new HashMap<>();
+  private Class<?> currAccessor;
+
   public DesktopDynamicClassLoader(ClassLoader parent){
     super(parent);
     reset();
@@ -21,7 +26,25 @@ public class DesktopDynamicClassLoader extends BaseDynamicClassLoader{
     }catch(ClassNotFoundException ignored){
       byte[] code = classes.get(name);
       if(code != null){
-        res = defineClass(name, code, 0, code.length);
+        if(currAccessor != null){
+          ClassLoader loader = currAccessor.getClassLoader();
+          ProtectionDomain domain = currAccessor.getProtectionDomain();
+
+          res = MethodHandler.invokeDefault(ClassLoader.class, "defineClass0",
+              loader,
+              currAccessor,
+              name,
+              code, 0, code.length,
+              domain,
+              false,
+              Modifier.PUBLIC,
+              null
+          );
+          currAccessor = null;
+        }
+        else{
+          res = defineClass(name, code, 0, code.length);
+        }
         loadedClass.put(name, res);
         return res;
       }
@@ -32,6 +55,11 @@ public class DesktopDynamicClassLoader extends BaseDynamicClassLoader{
   @Override
   public void reset(){
     classes.clear();
+  }
+
+  @Override
+  public void setAccessor(Class<?> accessor){
+    currAccessor = accessor;
   }
 
   @Override

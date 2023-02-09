@@ -4,8 +4,9 @@ import arc.func.Cons2;
 import arc.func.FloatFloatf;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Fill;
-import arc.graphics.g2d.Lines;
+import arc.math.Angles;
 import arc.math.Mathf;
+import arc.math.geom.Vec2;
 import arc.util.Time;
 import arc.util.Tmp;
 import arc.util.pooling.Pool;
@@ -23,6 +24,8 @@ import java.util.LinkedList;
  * @author EBwilson
  */
 public class Lightning implements Pool.Poolable{
+  private static final Vec2 last = new Vec2(), self = new Vec2(), next = new Vec2();
+
   public final LinkedList<LightningVertex> vertices = new LinkedList<>();
   /**闪电的持续时间*/
   public float lifeTime;
@@ -48,6 +51,8 @@ public class Lightning implements Pool.Poolable{
 
   int cursor;
 
+  boolean enclosed;
+
   public static Lightning create(LightningGenerator generator, float width, float lifeTime, FloatFloatf lerp, float time, Cons2<LightningVertex, LightningVertex> trigger){
     return create(generator, width, lifeTime, lerp, time, 0, trigger);
   }
@@ -72,6 +77,7 @@ public class Lightning implements Pool.Poolable{
       }
       last = vertex;
     }
+    result.enclosed = generator.isEnclosed();
     result.clipSize = generator.clipSize();
 
     return result;
@@ -126,53 +132,105 @@ public class Lightning implements Pool.Poolable{
    * @param x 绘制闪电的原点x坐标
    * @param y 绘制闪电的原点y坐标
    * */
+  @SuppressWarnings("DuplicatedCode")
   public void draw(float x, float y){
-    LightningVertex last = null;
-
     float lerp = this.lerp.get((Time.time - startTime)/lifeTime);
 
-    for(LightningVertex vertex: vertices){
-      if(last != null){
-        if(!last.valid) break;
+    for(int i = 2; i <= vertices.size(); i++){
+      LightningVertex v1 = i - 3 >= 0? vertices.get(i - 3): enclosed? vertices.get(Mathf.mod(i - 3, vertices.size())): null,
+          v2 = vertices.get(i - 2),
+          v3 = vertices.get(i - 1),
+          v4 = i < vertices.size()? vertices.get(i): enclosed? vertices.get(Mathf.mod(i, vertices.size())): null;
 
-        float hstroke = width/2f*lerp;
+      float lastOffX, lastOffY;
+      float nextOffX, nextOffY;
 
-        Tmp.v1.set(Tmp.v2.set(vertex.x - last.x, vertex.y - last.y)).rotate90(1).setLength(hstroke);
-        Tmp.v2.scl(last.progress);
+      if(!v2.valid) break;
 
-        float lastXAbs = x + last.x;
-        float lastYAbs = y + last.y;
-        if(last.isStart){
-          Fill.tri(
-              lastXAbs + Tmp.v2.x + Tmp.v1.x,
-              lastYAbs + Tmp.v2.y + Tmp.v1.y,
-              lastXAbs + Tmp.v2.x - Tmp.v1.x,
-              lastYAbs + Tmp.v2.y - Tmp.v1.y,
-              lastXAbs,
-              lastYAbs
-          );
-        }
-        else{
-          if(vertex.isEnd){
-            Fill.tri(
-                lastXAbs + Tmp.v1.x,
-                lastYAbs + Tmp.v1.y,
-                lastXAbs - Tmp.v1.x,
-                lastYAbs - Tmp.v1.y,
-                lastXAbs + Tmp.v2.x,
-                lastYAbs + Tmp.v2.y
-            );
-          }
-          else{
-            Lines.stroke(width*lerp);
-            Lines.line(lastXAbs, lastYAbs, lastXAbs + Tmp.v2.x, lastYAbs + Tmp.v2.y);
-          }
-        }
-        Drawf.light(lastXAbs, lastYAbs, x + vertex.x, y + vertex.y, hstroke*4.5f, Draw.getColor(), 0.7f*lerp);
-        if(vertex.valid) vertex.draw(x, y);
+      self.set(v3.x, v3.y).sub(v2.x, v2.y);
+
+      if(v1 != null){
+        last.set(v2.x, v2.y).sub(v1.x, v1.y);
+
+        float aveAngle = (last.angle() + self.angle())/2;
+        float off = width/2*lerp/Mathf.cosDeg(aveAngle - last.angle());
+
+        lastOffX = Angles.trnsx(aveAngle + 90, off);
+        lastOffY = Angles.trnsy(aveAngle + 90, off);
+      }
+      else{
+        Tmp.v1.set(self).rotate90(1).setLength(width/2*lerp);
+        lastOffX = Tmp.v1.x;
+        lastOffY = Tmp.v1.y;
       }
 
-      last = vertex;
+      if(v4 != null){
+        next.set(v4.x, v4.y).sub(v3.x, v3.y);
+        float aveAngle = (self.angle() + next.angle())/2;
+        float off = width/2*lerp/Mathf.cosDeg(aveAngle - self.angle());
+
+        nextOffX = Angles.trnsx(aveAngle + 90, off);
+        nextOffY = Angles.trnsy(aveAngle + 90, off);
+      }
+      else{
+        Tmp.v1.set(self).rotate90(1).setLength(width/2*lerp);
+        nextOffX = Tmp.v1.x;
+        nextOffY = Tmp.v1.y;
+      }
+
+      lastOffX *= lerp;
+      lastOffY *= lerp;
+      nextOffX *= lerp;
+      nextOffY *= lerp;
+
+      float orgX = x + v2.x, orgY = y + v2.y;
+
+      Tmp.v1.set(self).scl(v2.progress);
+      if(v2.isStart){
+        float l = v2.progress;
+        Fill.tri(
+            orgX, orgY,
+            orgX + Tmp.v1.x + nextOffX*l,
+            orgY + Tmp.v1.y + nextOffY*l,
+            orgX + Tmp.v1.x - nextOffX*l,
+            orgY + Tmp.v1.y - nextOffY*l
+        );
+      }
+      else if(v3.isEnd){
+        float l = 1 - v2.progress;
+        Fill.quad(
+            orgX + lastOffX,
+            orgY + lastOffY,
+            orgX - lastOffX,
+            orgY - lastOffY,
+            orgX + Tmp.v1.x - nextOffX*l,
+            orgY + Tmp.v1.y - nextOffY*l,
+            orgX + Tmp.v1.x + nextOffX*l,
+            orgY + Tmp.v1.y + nextOffY*l
+        );
+      }
+      else{
+        Fill.quad(
+            orgX + lastOffX,
+            orgY + lastOffY,
+            orgX - lastOffX,
+            orgY - lastOffY,
+            orgX + Tmp.v1.x - nextOffX,
+            orgY + Tmp.v1.y - nextOffY,
+            orgX + Tmp.v1.x + nextOffX,
+            orgY + Tmp.v1.y + nextOffY
+        );
+      }
+
+      Drawf.light(
+          orgX, orgY,
+          orgX + Tmp.v1.x, orgY + Tmp.v1.y,
+          width*32,
+          Draw.getColor(),
+          Draw.getColor().a
+      );
+
+      v2.draw(x, y);
     }
   }
 
@@ -188,6 +246,7 @@ public class Lightning implements Pool.Poolable{
     time = 0;
     cursor = 0;
     lifeTime = 0;
+    enclosed = false;
     lerp = null;
     lengthMargin = 0;
     startTime = 0;

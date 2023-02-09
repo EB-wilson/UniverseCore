@@ -115,8 +115,8 @@ public abstract class LightningGenerator implements Iterable<LightningVertex>, I
       isEnding = true;
       vertex.isEnd = true;
       float angle = Mathf.angle(vertex.x - last.x, vertex.y - last.y);
-      vertex.x = Angles.trnsx(angle, blockLen);
-      vertex.y = Angles.trnsy(angle, blockLen);
+      vertex.x = last.x + Angles.trnsx(angle, blockLen);
+      vertex.y = last.y + Angles.trnsy(angle, blockLen);
       offsetVertex(vertex);
       afterHandle(vertex);
       return vertex;
@@ -152,6 +152,10 @@ public abstract class LightningGenerator implements Iterable<LightningVertex>, I
 
   public void resetOffset(){
     offsetY = offsetX = 0;
+  }
+
+  public boolean isEnclosed(){
+    return false;
   }
 
   /**顶点处理，实现以为顶点分配属性，如坐标等*/

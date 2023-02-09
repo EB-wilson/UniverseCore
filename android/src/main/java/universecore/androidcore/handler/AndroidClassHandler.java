@@ -63,6 +63,11 @@ public class AndroidClassHandler implements ClassHandler{
   public AbstractClassGenerator getGenerator(){
     return generator != null? generator: (generator = new DexGenerator(new ByteClassLoader(){
       @Override
+      public void setAccessor(Class<?> accessor){
+        currLoader().setAccessor(accessor);
+      }
+
+      @Override
       public void declareClass(String name, byte[] byteCode){
         currLoader().declareClass(name, byteCode);
       }

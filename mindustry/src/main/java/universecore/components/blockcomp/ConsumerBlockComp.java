@@ -9,6 +9,7 @@ import universecore.annotations.Annotations;
 import universecore.annotations.Annotations.BindField;
 import universecore.ui.table.RecipeTable;
 import universecore.world.consumers.BaseConsumers;
+import universecore.world.consumers.ConsFilter;
 import universecore.world.consumers.ConsumePower;
 import universecore.world.consumers.ConsumeType;
 import universecore.world.meta.UncStat;
@@ -58,6 +59,11 @@ public interface ConsumerBlockComp{
     return false;
   }
 
+  @BindField(value = "consFilter", initialize = "new universecore.world.consumers.ConsFilter()")
+  default ConsFilter filter(){
+    return null;
+  }
+
   /**创建一个新的消耗列表插入容器，并返回它*/
   default BaseConsumers newConsume(){
     BaseConsumers consume = new BaseConsumers(false);
@@ -101,6 +107,14 @@ public interface ConsumerBlockComp{
           return entity.consumer().getPowerUsage()*Mathf.num(entity.shouldConsume());
         }
       });
+    }
+  }
+
+  @Annotations.MethodEntry(entryMethod = "init")
+  default void initFilter(){
+    filter().applyFilter(consumers(), optionalCons());
+    for(BaseConsumers consumer: consumers()){
+      consumer.initFilter();
     }
   }
 

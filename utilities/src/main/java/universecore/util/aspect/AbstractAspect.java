@@ -1,6 +1,7 @@
 package universecore.util.aspect;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
@@ -14,7 +15,7 @@ import java.util.function.Consumer;
 @SuppressWarnings("rawtypes")
 public abstract class AbstractAspect<Type, Source> implements Iterable<Type>{
   protected final ArrayList<BaseTriggerEntry<?>> triggers = new ArrayList<>();
-  protected final ArrayList<Type> children = new ArrayList<>();
+  protected final HashSet<Type> children = new HashSet<>();
   
   protected Consumer<BaseTriggerEntry<?>> apply, remove;
   protected Source source;
@@ -58,6 +59,9 @@ public abstract class AbstractAspect<Type, Source> implements Iterable<Type>{
 
   /**将切面重置，这会清空切面保存的元素*/
   public void reset(){
+    for(Type child: children){
+      if(exit != null) exit.accept(child);
+    }
     children.clear();
   }
   
@@ -89,8 +93,7 @@ public abstract class AbstractAspect<Type, Source> implements Iterable<Type>{
    * @param added 尝试添加的元素*/
   public void add(Type added){
     if(filter(added)){
-      children.add(added);
-      if(entry != null) entry.accept(added);
+      if(children.add(added) && entry != null) entry.accept(added);
     }
   }
   
@@ -110,6 +113,6 @@ public abstract class AbstractAspect<Type, Source> implements Iterable<Type>{
   }
   
   public void remove(BaseTriggerEntry entry){
-    if(apply != null) remove.accept(entry);
+    if(remove != null) remove.accept(entry);
   }
 }

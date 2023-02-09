@@ -5,8 +5,10 @@ import arc.func.*;
 import arc.graphics.g2d.TextureRegion;
 import arc.scene.event.Touchable;
 import arc.struct.ObjectMap;
+import arc.struct.ObjectSet;
 import arc.struct.Seq;
 import arc.util.Time;
+import mindustry.ctype.Content;
 import mindustry.gen.Building;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
@@ -15,6 +17,7 @@ import mindustry.world.meta.Stat;
 import mindustry.world.meta.StatUnit;
 import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ConsumerBuildComp;
+import universecore.util.Empties;
 import universecore.util.UncLiquidStack;
 
 /**消耗列表，记录一个消耗的包含生产时间，可选等在内的所有信息
@@ -47,10 +50,33 @@ public class BaseConsumers{
   /**消耗触发器，在消耗的trigger()方法执行时触发*/
   public Seq<Cons<ConsumerBuildComp>> triggers = new Seq<>();
 
+  protected final ObjectMap<ConsumeType<?>, ObjectSet<Content>> filter = new ObjectMap<>();
+  protected final ObjectMap<ConsumeType<?>, ObjectSet<Content>> otherFilter = new ObjectMap<>();
+  protected final ObjectMap<ConsumeType<?>, ObjectSet<Content>> selfAccess = new ObjectMap<>();
+
   public BaseConsumers(boolean optional){
     this.optional = optional;
   }
-  
+
+  public void initFilter(){
+    filter.clear();
+    for(ObjectMap.Entry<ConsumeType<?>, BaseConsume<?>> entry: cons){
+      Seq<Content> cont = entry.value.filter();
+      if(cont != null) filter.get(entry.key, ObjectSet::new).addAll(cont);
+    }
+    for(ObjectMap.Entry<ConsumeType<?>, ObjectSet<Content>> entry: otherFilter){
+      filter.get(entry.key, ObjectSet::new).addAll(entry.value);
+    }
+  }
+
+  public void addToFilter(ConsumeType<?> type, Content content){
+    otherFilter.get(type, ObjectSet::new).add(content);
+  }
+
+  public void addSelfAccess(ConsumeType<?> type, Content content){
+    selfAccess.get(type, ObjectSet::new).add(content);
+  }
+
   public BaseConsumers setIcon(TextureRegion icon){
     this.icon = () -> icon;
     return this;
@@ -182,6 +208,14 @@ public class BaseConsumers{
       }
       display.get(stats, this);
     }
+  }
+
+  public boolean filter(ConsumeType<?> type, Content content){
+    return filter.get(type, Empties.nilSetO()).contains(content);
+  }
+
+  public boolean selfAccess(ConsumeType<?> type, Content content){
+    return selfAccess.get(type, Empties.nilSetO()).contains(content);
   }
 
   public enum Visibility{

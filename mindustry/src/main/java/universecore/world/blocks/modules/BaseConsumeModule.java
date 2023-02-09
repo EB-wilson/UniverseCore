@@ -3,15 +3,14 @@ package universecore.world.blocks.modules;
 import arc.func.Boolf;
 import arc.func.Cons;
 import arc.scene.ui.layout.Table;
-import arc.struct.Bits;
 import arc.struct.ObjectMap;
-import arc.struct.ObjectSet;
 import arc.struct.Seq;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
 import mindustry.ctype.Content;
 import mindustry.world.meta.BlockStatus;
 import mindustry.world.modules.BlockModule;
+import universecore.components.blockcomp.ConsumerBlockComp;
 import universecore.components.blockcomp.ConsumerBuildComp;
 import universecore.world.consumers.BaseConsume;
 import universecore.world.consumers.BaseConsumers;
@@ -28,9 +27,6 @@ public class BaseConsumeModule extends BlockModule{
   public BaseConsumers current;
   public BaseConsumers optionalCurr;
   public boolean valid;
-  public Seq<ObjectMap<ConsumeType<?>, ObjectSet<Content>>> filter = new Seq<>();
-  public ObjectMap<ConsumeType<?>, ObjectSet<Content>> optionalFilter = new ObjectMap<>();
-  public ObjectMap<ConsumeType<?>, ObjectSet<Content>> allFilter = new ObjectMap<>();
 
   public float consEfficiency;
 
@@ -40,7 +36,6 @@ public class BaseConsumeModule extends BlockModule{
     this.entity = entity;
     current = entity.getConsumerBlock().consumers() != null && entity.consumeCurrent() != -1?
         entity.getConsumerBlock().consumers().get(entity.consumeCurrent()): null;
-    applyFilter();
   }
 
   public void build(Table table){
@@ -76,40 +71,11 @@ public class BaseConsumeModule extends BlockModule{
   public boolean hasOptional(){
     return !getOptional().isEmpty();
   }
-  
+
+  /**@deprecated 1.6.2 不再使用，保留API避免异常*/
+  @Deprecated
   public void applyFilter(){
-    if(getOptional() != null){
-      for(BaseConsumers cons: getOptional()){
-        for(BaseConsume<?> c: cons.all()){
-          if((c.filter()) != null){
-            ObjectSet<Content> all = allFilter.get(c.type(), ObjectSet::new);
-            ObjectSet<Content> set = optionalFilter.get(c.type(), () -> new ObjectSet<>());
-            for(Content o: c.filter()){
-              set.add(o);
-              all.add(o);
-            }
-          }
-        }
-      }
-    }
-    
-    if(get() != null){
-      Bits f, t;
-      for(BaseConsumers cons: get()){
-        ObjectMap<ConsumeType<?>, ObjectSet<Content>> map = new ObjectMap<>();
-        filter.add(map);
-        for(BaseConsume<?> c: cons.all()){
-          if((c.filter()) != null){
-            ObjectSet<Content> all = allFilter.get(c.type(), ObjectSet::new);
-            ObjectSet<Content> set = map.get(c.type(), ObjectSet::new);
-            for(Content o: c.filter()){
-              set.add(o);
-              all.add(o);
-            }
-          }
-        }
-      }
-    }
+    //noaction
   }
 
   public float getPowerUsage(){
@@ -262,19 +228,17 @@ public class BaseConsumeModule extends BlockModule{
   }
 
   /**过滤器，将判断对当前选中的区域指定type下对输入的对象是否接受
-  * 若可选过滤器已添加目标对象同样返回true
-  * @param type 过滤器种类
-  * @param target 通过过滤器的目标对象
-  * @param acceptAll 是否接受所有清单的需求
+   * 若可选过滤器已添加目标对象同样返回true
+   * @param type 过滤器种类
+   * @param target 通过过滤器的目标对象
+   * @param acceptAll 是否接受所有清单的需求
    * @return 布尔值，是否接受此对象
-  * */
+   *
+   * @deprecated 1.6.2 过滤器已重新优化以减少内存占用，此方法已废弃，请参阅{@link universecore.world.consumers.ConsFilter}
+   **/
+  @Deprecated
   public boolean filter(ConsumeType<?> type, Content target, boolean acceptAll){
-    if(optionalFilter.containsKey(type) && optionalFilter.get(type).contains(target)) return true;
-    
-    if(acceptAll) return allFilter.containsKey(type) && allFilter.get(type).contains(target);
-    
-    return (entity.consumeCurrent() >= 0 && filter.get(entity.consumeCurrent()).containsKey(type)
-        && filter.get(entity.consumeCurrent()).get(type).contains(target));
+    return entity.getBlock(ConsumerBlockComp.class).filter().filter(entity, type, target, acceptAll);
   }
 
   @Override

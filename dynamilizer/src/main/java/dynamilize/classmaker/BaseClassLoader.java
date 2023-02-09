@@ -14,6 +14,11 @@ public class BaseClassLoader extends ClassLoader implements ByteClassLoader{
   }
 
   @Override
+  public void setAccessor(Class<?> accessor){
+    //no action
+  }
+
+  @Override
   public void declareClass(String name, byte[] byteCode){
     if(bytecodes.put(name, byteCode) != null)
       throw new IllegalHandleException("cannot declare class with same name twice");
