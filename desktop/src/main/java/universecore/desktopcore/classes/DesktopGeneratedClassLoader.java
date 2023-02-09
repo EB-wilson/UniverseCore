@@ -3,7 +3,7 @@ package universecore.desktopcore.classes;
 import arc.Core;
 import arc.files.Fi;
 import arc.files.ZipFi;
-import arc.struct.ObjectSet;
+import arc.util.ArcRuntimeException;
 import arc.util.Log;
 import universecore.util.classes.BaseGeneratedClassLoader;
 import universecore.util.handler.MethodHandler;
@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.security.ProtectionDomain;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -24,6 +25,8 @@ import java.util.zip.ZipOutputStream;
 public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
   private static final Fi jarFileCache = Core.settings.getDataDirectory().child("universecore").child("cache");
   public static final Fi TMP_FILE = jarFileCache.child("temp_file.jar");
+
+  private final HashMap<String, Class<?>> classMap = new HashMap<>();
 
   private ZipFi zip;
   private Class<?> currAccessor;
@@ -39,29 +42,24 @@ public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
 
   @Override
   public void declareClass(String name, byte[] byteCode){
-    Fi select = null;
+    if(classMap.containsKey(name)) return;
 
-    if(zip != null){
-      String[] paths = name.split("\\.");
-      for(int i = 0; i < paths.length; i++){
-        select = zip.child(paths[i] + (i == paths.length - 1 ? ".class" : ""));
-      }
-
-      assert select != null;
-      if(select.exists()) return;
+    boolean existed;
+    try {
+      existed = !file.createNewFile();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
 
-    boolean existed = file.exists();
     if(existed){
+      zip = new ZipFi(new Fi(file));
       new Fi(file).copyTo(TMP_FILE);
     }
-    try(ZipOutputStream outputStream = new ZipOutputStream(new FileOutputStream(file))){
+
+    try(ZipOutputStream outputStream = new ZipOutputStream(new FileOutputStream(file, false))){
       String entryName = name.replace(".", "/") + ".class";
 
-      ObjectSet<String> added = new ObjectSet<>();
-
-      ZipEntry declaringEntry = new ZipEntry(entryName), entry = declaringEntry;
-      added.add(entry.getName());
+      ZipEntry declaringEntry = new ZipEntry(entryName);
 
       if(existed){
         try {
@@ -69,8 +67,8 @@ public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
 
           Enumeration<? extends ZipEntry> entries = tempZipped.entries();
           while (entries.hasMoreElements()) {
-            entry = entries.nextElement();
-            if (entry.isDirectory() || !added.add(entry.getName())) continue;
+            ZipEntry entry = entries.nextElement();
+            if (entry.isDirectory()) continue;
 
             outputStream.putNextEntry(new ZipEntry(entry));
             try (InputStream inputStream = tempZipped.getInputStream(entry)) {
@@ -105,11 +103,16 @@ public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
 
   @Override
   protected Class<?> findClass(String name) throws ClassNotFoundException{
-    try{
-      return super.findClass(name);
-    }catch(ClassNotFoundException ignored){
-      String[] classPath = name.split("\\.");
+    Class<?> res = classMap.computeIfAbsent(name, n -> {
+      String[] classPath = n.split("\\.");
       classPath[classPath.length - 1] = classPath[classPath.length - 1] + ".class";
+
+      if (zip == null){
+        if (!file.exists())
+          return null;
+
+        zip = new ZipFi(new Fi(file));
+      }
 
       Fi f = zip;
       for(String path: classPath){
@@ -124,15 +127,15 @@ public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
         }
         byte[] byteCode = w.toByteArray();
 
-        Class<?> res;
+        Class<?> c;
         if(currAccessor != null){
           ClassLoader loader = currAccessor.getClassLoader();
           ProtectionDomain domain = currAccessor.getProtectionDomain();
 
-          res = MethodHandler.invokeDefault(ClassLoader.class, "defineClass0",
+          c = MethodHandler.invokeDefault(ClassLoader.class, "defineClass0",
               loader,
               currAccessor,
-              name,
+              n,
               byteCode, 0, byteCode.length,
               domain,
               false,
@@ -142,24 +145,32 @@ public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
           currAccessor = null;
         }
         else {
-          res = defineClass(name, byteCode, 0, byteCode.length);
+          c = defineClass(n, byteCode, 0, byteCode.length);
         }
 
-        return res;
-      }catch(IOException ignored1){
-        throw new ClassNotFoundException("no such class: " + name);
+        return c;
+      }catch(IOException | ArcRuntimeException ignored1){
+        return null;
       }
-    }
+    });
+
+    if (res == null)
+      throw new ClassNotFoundException("no such class: " + name);
+
+    return res;
   }
 
   @Override
   public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException{
-    Class<?> c = super.loadClass(name);
-    if(c == null){
-      c = findClass(name);
-      if(resolve) resolveClass(c);
+    Class<?> res;
+    try {
+      res = getParent().loadClass(name);
+    }catch (ClassNotFoundException ignored){
+      res = findClass(name);
     }
 
-    return c;
+    if(resolve) resolveClass(res);
+
+    return res;
   }
 }

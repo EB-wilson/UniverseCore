@@ -70,10 +70,10 @@ public class DesktopDynamicClassLoader extends BaseDynamicClassLoader{
   @Override
   public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException{
     Class<?> res;
-    try{
-       res = super.loadClass(name);
-    }catch(ClassNotFoundException ignored){
-       res = findClass(name);
+    try {
+      res = getParent().loadClass(name);
+    }catch (ClassNotFoundException ignored){
+      res = findClass(name);
     }
 
     if(resolve) resolveClass(res);

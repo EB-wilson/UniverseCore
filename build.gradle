@@ -283,3 +283,13 @@ task buildProject{
   }
 }
 
+task debugMod(dependsOn: classes, type: JavaExec){
+  dependsOn toMod
+
+  main = "-jar"
+  args = [
+      project.properties.get("debugGamePath"),
+      "-debug"
+  ]
+}
+
