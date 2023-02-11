@@ -35,6 +35,19 @@ public class ZoomableTable extends Table{
         }
         return true;
       }
+
+      @Override
+      public boolean mouseMoved(InputEvent event, float x, float y){
+        if(movable){
+          elementChild.requestScroll();
+          if(!defSeted){
+            defX = elementChild.x;
+            defY = elementChild.y;
+            defSeted = true;
+          }
+        }
+        return super.mouseMoved(event, x, y);
+      }
     });
   
     touchable = Touchable.enabled;
