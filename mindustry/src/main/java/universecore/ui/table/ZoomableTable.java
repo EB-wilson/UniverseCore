@@ -11,7 +11,7 @@ import arc.util.Align;
 
 public class ZoomableTable extends Table{
   public float maxZoom = 1f, minZoom = 0.4f;
-  public float defX, defY, defZoom = 1;
+  public float defX, defY;
   public boolean zoomable = true, movable = true;
   boolean defSeted = false;
   protected float lastZoom = 1;
@@ -56,10 +56,6 @@ public class ZoomableTable extends Table{
       @Override
       public void zoom(InputEvent event, float initialDistance, float distance){
         if(zoomable){
-          if(lastZoom < 0){
-            lastZoom = defZoom;
-          }
-  
           zoomCont.setScale(Mathf.clamp(distance/initialDistance*lastZoom, minZoom, maxZoom));
           zoomCont.setOrigin(Align.center);
           zoomCont.setTransform(true);
@@ -95,8 +91,8 @@ public class ZoomableTable extends Table{
   }
   
   public void resetZoom(){
-    lastZoom = defZoom;
-    zoomCont.setScale(defZoom);
+    lastZoom = 1;
+    zoomCont.setScale(1);
     zoomCont.setOrigin(Align.center);
     zoomCont.setTransform(true);
   }
