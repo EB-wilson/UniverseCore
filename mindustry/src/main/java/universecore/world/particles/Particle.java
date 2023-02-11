@@ -72,10 +72,6 @@ public class Particle extends PosTeam implements Pool.Poolable, Drawc{
   public Cons<Particle> drawer;
   
   public Seq<Cons<Cloud>> cloudUpdaters = new Seq<>();
-
-  static {
-    EntityMapping.idMap[102] = Particle::new;
-  }
   
   static Particle create(float x, float y, float sx, float sy, float size){
     if(counter >= maxAmount){
