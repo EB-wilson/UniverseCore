@@ -14,7 +14,7 @@ public class ZoomableTable extends Table{
   public float defX, defY, defZoom = 1;
   public boolean zoomable = true, movable = true;
   boolean defSeted = false;
-  protected float lastZoom = -1;
+  protected float lastZoom = 1;
   protected Table zoomCont = new Table(), elementChild;
   
   public ZoomableTable(Table cont){
