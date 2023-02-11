@@ -10,7 +10,7 @@ import arc.scene.ui.layout.Table;
 import arc.util.Align;
 
 public class ZoomableTable extends Table{
-  public float maxZoom = 1f, minZoom = 0.4f;
+  public float maxZoom = 1.5f, minZoom = 0.5f;
   public float defX, defY;
   public boolean zoomable = true, movable = true;
   boolean defSeted = false;
@@ -34,19 +34,6 @@ public class ZoomableTable extends Table{
           zoomCont.setTransform(true);
         }
         return true;
-      }
-    
-      @Override
-      public boolean mouseMoved(InputEvent event, float x, float y){
-        if(movable){
-          elementChild.requestScroll();
-          if(!defSeted){
-            defX = elementChild.x;
-            defY = elementChild.y;
-            defSeted = true;
-          }
-        }
-        return super.mouseMoved(event, x, y);
       }
     });
   
