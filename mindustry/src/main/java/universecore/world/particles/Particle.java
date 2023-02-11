@@ -36,7 +36,7 @@ import java.util.LinkedList;
  * 附带可控制拖尾
  * @author EBwilson */
 @SuppressWarnings("unchecked")
-public class Particle implements Pool.Poolable, Drawc{
+public class Particle extends PosTeam implements Pool.Poolable, Drawc{
   private static int counter = 0;
   /**粒子的最大共存数量，总量大于此数目时，创建新的粒子会清除最先产生的粒子*/
   public static int maxAmount = 1024;
@@ -62,10 +62,6 @@ public class Particle implements Pool.Poolable, Drawc{
   public float maxSize;
   /**粒子当前的尺寸，由计算获得，不要手动更改*/
   public float size;
-  
-  public transient int id = EntityGroup.nextId();
-  public boolean added = false;
-  public float x, y;
 
   public Boolf<Particle> shouldCloud;
   public Func<Particle, Color> color;
@@ -76,6 +72,10 @@ public class Particle implements Pool.Poolable, Drawc{
   public Cons<Particle> drawer;
   
   public Seq<Cons<Cloud>> cloudUpdaters = new Seq<>();
+
+  static {
+    EntityMapping.idMap[102] = Particle::new;
+  }
   
   static Particle create(float x, float y, float sx, float sy, float size){
     if(counter >= maxAmount){
