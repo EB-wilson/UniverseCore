@@ -29,7 +29,7 @@ public class ZoomableTable extends Table{
       @Override
       public boolean scrolled(InputEvent event, float x, float y, float amountX, float amountY){
         if(zoomable){
-          zoomCont.setScale(Mathf.clamp(zoomCont.scaleX - amountY/10f*zoomCont.scaleX, 0.25f, 1f));
+          zoomCont.setScale(Mathf.clamp(zoomCont.scaleX - amountY/10f*zoomCont.scaleX, minZoom, maxZoom));
           zoomCont.setOrigin(Align.center);
           zoomCont.setTransform(true);
         }
