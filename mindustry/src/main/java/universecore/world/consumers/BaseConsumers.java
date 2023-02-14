@@ -111,7 +111,7 @@ public class BaseConsumers{
   }
 
   public float delta(ConsumerBuildComp entity){
-    return consDelta.get(entity);
+    return optional? entity.getBuilding().delta()*entity.optionalConsEff(this)*Math.max(1, entity.consEfficiency()): consDelta.get(entity);
   }
   
   public ConsumeItems<? extends ConsumerBuildComp> item(Item item, int amount){

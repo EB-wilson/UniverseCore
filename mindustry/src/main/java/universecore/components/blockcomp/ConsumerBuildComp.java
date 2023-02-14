@@ -3,6 +3,7 @@ package universecore.components.blockcomp;
 import universecore.annotations.Annotations;
 import universecore.annotations.Annotations.BindField;
 import universecore.world.blocks.modules.BaseConsumeModule;
+import universecore.world.consumers.BaseConsumers;
 
 /**消耗者组件，令方块具有进行资源消耗与资源检查的能力
  * @author EBwilson
@@ -28,6 +29,10 @@ public interface ConsumerBuildComp extends BuildCompBase{
   /**当前的消耗执行效率，从0-1*/
   default float consEfficiency(){
     return consumer().consEfficiency;
+  }
+
+  default float optionalConsEff(BaseConsumers consumers){
+    return consumer().getOptionalEff(consumers);
   }
   
   /**获得该块的ConsumerBlock*/

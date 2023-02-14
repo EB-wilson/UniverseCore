@@ -21,9 +21,12 @@ import universecore.world.consumers.ConsumeType;
  * @author EBwilson*/
 @SuppressWarnings("all")
 public class BaseConsumeModule extends BlockModule{
+  private static final float[] ZERO = {0};
+
   protected final ConsumerBuildComp entity;
   protected final ObjectMap<BaseConsumers, float[]> optProgress = new ObjectMap<>();
-  
+  protected final ObjectMap<BaseConsumers, float[]> optEfficiency = new ObjectMap<>();
+
   public BaseConsumers current;
   public BaseConsumers optionalCurr;
   public boolean valid;
@@ -78,6 +81,10 @@ public class BaseConsumeModule extends BlockModule{
     //noaction
   }
 
+  public float getOptionalEff(BaseConsumers consumers){
+    return optEfficiency.get(consumers, ZERO)[0];
+  }
+
   public float getPowerUsage(){
     return powerCons*((BaseConsume<ConsumerBuildComp>)current.get(ConsumeType.power)).multiple(entity);
   }
@@ -125,14 +132,16 @@ public class BaseConsumeModule extends BlockModule{
       for(int id=0; id<getOptional().size; id++){
         cons = getOptional().get(id);
         
-        boolean optionalValid = true;
+        float optionalEff = 1;
         for(Boolf<ConsumerBuildComp> b: cons.valid){
-          optionalValid &= b.get(entity);
+          optionalEff *= b.get(entity)? 1: 0;
         }
         for(BaseConsume c: cons.all()){
-          optionalValid &= c.efficiency(entity.getBuilding(ConsumerBuildComp.class)) > 0.0001f;
+          optionalEff *= c.efficiency(entity.getBuilding(ConsumerBuildComp.class));
         }
-        if(optionalValid){
+        optEfficiency.get(cons, () -> new float[1])[0] = optionalEff;
+
+        if(optionalEff > 0.0001f){
           optionalCurr = cons;
 
           if(!entity.shouldConsumeOptions() || (!cons.optionalAlwaysValid && !valid)) continue;

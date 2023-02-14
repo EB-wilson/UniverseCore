@@ -26,15 +26,11 @@ public class ParticleModel{
   public Cons<Particle> drawer;
   /**拖尾更新器，每刻执行，依次传入每一个云对象*/
   public Seq<Cons<Particle.Cloud>> cloudUpdaters = new Seq<>();
-  /**拖尾的创建判据，这将回调此粒子此时是否应当创建拖尾*/
-  public Boolf<Particle> shouldCloud;
   
   public Seq<Cons<Particle>> deflects = new Seq<>();
   
   public Particle create(float x, float y, float sx, float sy, float size){
     Particle inst = Particle.create(x, y, sx, sy, size);
-
-    inst.shouldCloud = shouldCloud;
 
     if(color != null) inst.color = color;
     if(tailColor != null){
@@ -63,7 +59,6 @@ public class ParticleModel{
       Draw.reset();
     };
     this.setTailFade(e -> e -= 0.075f*Time.delta);
-    this.setCloudThreshold(2, 24);
 
     return this;
   }
@@ -131,18 +126,6 @@ public class ParticleModel{
       Tmp.v2.set(e.speed).setAngle(angle + Mathf.random(-deflectAngle, deflectAngle)).scl(scl);
       e.speed.add(Tmp.v2);
     });
-    return this;
-  }
-
-  /**设置粒子的拖尾分节阈值，当前一道拖尾与当前拖尾的角度偏移达到这个数值时才会产生下一条轨迹，数值越小，轨迹越平滑，但性能开销越大
-   *
-   * @param angleThreshold 粒子轨迹拖尾的转折阈值*/
-  public ParticleModel setCloudThreshold(float angleThreshold, float distanceThreshold){
-    shouldCloud = e -> {
-      Particle.Cloud cl = e.currentCloud;
-      return Math.abs(cl.vector().angle() - cl.lastCloud.vector().angle()) > angleThreshold*Time.delta
-      || Mathf.len(cl.x - cl.lastCloud.x, cl.y - cl.lastCloud.y) > distanceThreshold;
-    };
     return this;
   }
 

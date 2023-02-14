@@ -7,26 +7,17 @@ import arc.func.Func;
 import arc.graphics.Color;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Fill;
-import arc.math.geom.Position;
 import arc.math.geom.Vec2;
 import arc.struct.Queue;
 import arc.struct.Seq;
 import arc.util.Time;
 import arc.util.Tmp;
-import arc.util.io.Reads;
-import arc.util.io.Writes;
 import arc.util.pooling.Pool;
 import arc.util.pooling.Pools;
-import mindustry.Vars;
-import mindustry.content.Blocks;
-import mindustry.core.World;
 import mindustry.entities.EntityGroup;
-import mindustry.gen.*;
+import mindustry.gen.Decal;
+import mindustry.gen.Groups;
 import mindustry.graphics.Layer;
-import mindustry.io.TypeIO;
-import mindustry.world.Block;
-import mindustry.world.Tile;
-import mindustry.world.blocks.environment.Floor;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -35,8 +26,7 @@ import java.util.LinkedList;
  * 可通过设置速度，位置，以及偏转方法改变粒子的运动轨迹，通常这个粒子具有数量上限，在正常情况下应当是性能安全的
  * 附带可控制拖尾
  * @author EBwilson */
-@SuppressWarnings("unchecked")
-public class Particle extends PosTeam implements Pool.Poolable, Drawc{
+public class Particle extends Decal{
   private static int counter = 0;
   /**粒子的最大共存数量，总量大于此数目时，创建新的粒子会清除最先产生的粒子*/
   public static int maxAmount = 1024;
@@ -46,8 +36,6 @@ public class Particle extends PosTeam implements Pool.Poolable, Drawc{
   
   protected LinkedList<Cloud> tailing = new LinkedList<>();
   protected Queue<Cloud> freeQueue = new Queue<>();
-  
-  public Tile tile;
   
   protected Vec2 startPos = new Vec2();
   protected Vec2 tempPos = new Vec2();
@@ -63,7 +51,6 @@ public class Particle extends PosTeam implements Pool.Poolable, Drawc{
   /**粒子当前的尺寸，由计算获得，不要手动更改*/
   public float size;
 
-  public Boolf<Particle> shouldCloud;
   public Func<Particle, Color> color;
   public Func<Particle, Color> tailColor;
   public Boolf<Particle> isFinal;
@@ -108,34 +95,6 @@ public class Particle extends PosTeam implements Pool.Poolable, Drawc{
     Draw.reset();
   }
   
-  @Override
-  public void read(Reads read){
-    read.s();
-    x = read.f();
-    y = read.f();
-    tile = TypeIO.readTile(read);
-    
-    this.afterRead();
-  }
-  
-  @Override
-  public void afterRead(){
-  
-  }
-  
-  @Override
-  public void write(Writes writes){
-    writes.s(1);
-    writes.f(x);
-    writes.f(y);
-    TypeIO.writeTile(writes, tile);
-  }
-  
-  @Override
-  public boolean isAdded(){
-    return added;
-  }
-  
   public void deflect(){
     for(Cons<Particle> deflect: deflects){
       deflect.get(this);
@@ -148,37 +107,33 @@ public class Particle extends PosTeam implements Pool.Poolable, Drawc{
     x += speed.x*Time.delta;
     y += speed.y*Time.delta;
 
-    if(shouldCloud != null){
-      currentCloud = tailing.isEmpty() ? null : tailing.getLast();
-      if(currentCloud == null){
-        currentCloud = Pools.obtain(Cloud.class, Cloud::new);
-        currentCloud.set(x, y, size, tailColor.get(this).cpy(), null);
-        tailing.addLast(currentCloud);
+    currentCloud = tailing.isEmpty() ? null : tailing.getLast();
+    if(currentCloud == null){
+      currentCloud = Pools.obtain(Cloud.class, Cloud::new);
+      currentCloud.set(x, y, size, tailColor.get(this).cpy(), null);
+      tailing.addLast(currentCloud);
+    }
+
+    currentCloud.x = x;
+    currentCloud.y = y;
+    currentCloud.size = size;
+
+    Cloud cloud = Pools.obtain(Cloud.class, Cloud::new);
+    cloud.set(x, y, size, tailColor.get(this).cpy(), currentCloud);
+    tailing.addLast(cloud);
+
+    Iterator<Cloud> itr = tailing.iterator();
+
+    while(itr.hasNext()){
+      Cloud cld = itr.next();
+
+      for(Cons<Cloud> updater: cloudUpdaters){
+        updater.get(cld);
       }
 
-      currentCloud.x = x;
-      currentCloud.y = y;
-      currentCloud.size = size;
-
-      if(shouldCloud.get(this)){
-        Cloud cloud = Pools.obtain(Cloud.class, Cloud::new);
-        cloud.set(x, y, size, tailColor.get(this).cpy(), currentCloud);
-        tailing.addLast(cloud);
-      }
-
-      Iterator<Cloud> itr = tailing.iterator();
-
-      while(itr.hasNext()){
-        Cloud cld = itr.next();
-
-        for(Cons<Cloud> updater: cloudUpdaters){
-          updater.get(cld);
-        }
-
-        if(cld.size <= 0.1f){
-          itr.remove();
-          freeQueue.addLast(cld);
-        }
+      if(cld.size <= 0.1f){
+        itr.remove();
+        freeQueue.addLast(cld);
       }
     }
 
@@ -205,163 +160,17 @@ public class Particle extends PosTeam implements Pool.Poolable, Drawc{
       counter--;
     }
   }
-  
-  @Override
-  public void add(){
-    if (!added) {
-      all.addFirst(this);
-      Groups.all.add(this);
-      Groups.draw.add(this);
-      added = true;
-      counter++;
-    }
-  }
-  
-  @Override
-  public boolean isLocal(){
-    if(this instanceof Unitc u){
-      return u.controller() != Vars.player;
-    }
-    
-    return true;
-  }
-  
-  @Override
-  public boolean isRemote(){
-    if (this instanceof Unitc u) {
-      return u.isPlayer() && !this.isLocal();
-    }
-    return false;
-  }
-  
-  @Override
-  public boolean isNull(){
-    return false;
-  }
-  
-  @Override
-  public <T extends Entityc> T self(){
-    return (T)this;
-  }
-  
-  @Override
-  public <T> T as(){
-    return (T)this;
-  }
-  
+
   @Override
   public int classId(){
     return 102;
   }
-  
-  @Override
-  public boolean serialize(){
-    return true;
-  }
-  
-  @Override
-  public int id(){
-    return id;
-  }
-  
-  @Override
-  public void id(int id){
-    this.id = id;
-  }
-  
+
   @Override
   public float clipSize(){
     return tempPos.set(x, y).sub(startPos).len();
   }
-  
-  @Override
-  public void set(float x, float y){
-    this.x = x;
-    this.y = y;
-  }
-  
-  @Override
-  public void set(Position position){
-    set(position.getX(), position.getY());
-  }
-  
-  @Override
-  public void trns(float x, float y) {
-    set(this.x + x, this.y + y);
-  }
-  
-  @Override
-  public void trns(Position position){
-    trns(position.getX(), position.getY());
-  }
-  
-  @Override
-  public int tileX() {
-    return World.toTile(x);
-  }
-  
-  @Override
-  public int tileY() {
-    return World.toTile(y);
-  }
-  
-  @Override
-  public Floor floorOn(){
-    Tile tile = this.tileOn();
-    return tile != null && tile.block() == Blocks.air ? tile.floor() : (Floor)Blocks.air;
-  }
 
-  @Override
-  public Building buildOn(){
-    return tileOn().build;
-  }
-
-  @Override
-  public Block blockOn(){
-    Tile tile = this.tileOn();
-    return tile == null ? Blocks.air : tile.block();
-  }
-  
-  @Override
-  public boolean onSolid(){
-    return false;
-  }
-  
-  @Override
-  public Tile tileOn(){
-    return Vars.world.tileWorld(this.x, this.y);
-  }
-  
-  @Override
-  public float getX(){
-    return x;
-  }
-  
-  @Override
-  public float getY(){
-    return y;
-  }
-  
-  @Override
-  public float x(){
-    return x;
-  }
-  
-  @Override
-  public void x(float x){
-    this.x = x;
-  }
-  
-  @Override
-  public float y(){
-    return y;
-  }
-  
-  @Override
-  public void y(float y){
-    this.y = y;
-  }
-  
   @Override
   public void reset(){
     speed.setZero();
