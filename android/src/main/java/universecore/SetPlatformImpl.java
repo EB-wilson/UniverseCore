@@ -1,30 +1,18 @@
 package universecore;
 
-import arc.util.Log;
-import com.android.dex.DexFormat;
 import mindustry.mod.Mod;
 import universecore.androidcore.AndroidFieldAccessHelper;
 import universecore.androidcore.AndroidMethodInvokeHelper;
 import universecore.androidcore.handler.AndroidClassHandler;
-import universecore.util.FieldAccessHelper;
-import universecore.util.MethodInvokeHelper;
 import universecore.util.mods.IllegalModHandleException;
 import universecore.util.mods.ModGetter;
 import universecore.util.mods.ModInfo;
 
-import java.io.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.jar.JarInputStream;
-
 public class SetPlatformImpl{
-  @SuppressWarnings({"unchecked", "ConstantConditions"})
+  @SuppressWarnings({"unchecked"})
   public static void setImplements(){
-    try{
+    //事实上，在安卓上使用方法句柄的效率似乎并不如反射，暂且不考虑句柄实现
+    /*try{
       Class.forName("java.lang.invoke.MethodHandle");
 
       try{
@@ -105,10 +93,10 @@ public class SetPlatformImpl{
       }catch(ClassNotFoundException|NoSuchMethodException|InstantiationException|IllegalAccessException|InvocationTargetException|IOException e){
         throw new RuntimeException(e);
       }
-    }catch(ClassNotFoundException ignored){
+    }catch(ClassNotFoundException ignored){*/
       ImpCore.fieldAccessHelper = new AndroidFieldAccessHelper();
       ImpCore.methodInvokeHelper = new AndroidMethodInvokeHelper();
-    }
+    //}
 
     ImpCore.classes = modMain -> {
       try{

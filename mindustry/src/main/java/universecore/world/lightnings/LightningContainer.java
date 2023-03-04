@@ -17,11 +17,11 @@ import java.util.Iterator;
  * @since 1.5
  * @author EBwilson
  * */
-public class LightningContainer{
+public class LightningContainer implements Iterable<Lightning>{
   /**当前创建闪电使用的闪电生成器，可随时变更，但通常来说不应该在不同线程里面调用同一个生成器，这是危险的*/
   public LightningGenerator generator;
 
-  /**闪电从产生到完全出现需要的时间，这会平摊给每一段闪电，如果时间小于1/fps则每一段闪电固定使用1帧的时间间隔，fps为当前帧率
+  /**闪电从产生到完全出现需要的时间，这会平摊给每一段闪电，fps为当前帧率
    * 但如果这个值为0,那么闪电会立即出现*/
   public float time = 0;
   /**闪电的扩散速度，小于或等于0时默认使用time提供的路径扩散计算方式，否则使用给出的速度来处理闪电的扩散（单位：/tick）*/
@@ -55,6 +55,11 @@ public class LightningContainer{
         speed,
         trigger
     ));
+  }
+
+  @Override
+  public Iterator<Lightning> iterator(){
+    return lightnings.iterator();
   }
 
   /**更新一次当前容器中所有子闪电的状态*/

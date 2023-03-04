@@ -85,7 +85,7 @@ public abstract class LightningGenerator implements Iterable<LightningVertex>, I
     gen.blockNow = old;
     gen.resetOffset();
 
-    vertex.branchOther.vertices.getFirst().isStart = false;
+    vertex.branchOther.vertices.first().isStart = false;
 
     if(branchCreated != null) branchCreated.get(vertex.branchOther);
   }

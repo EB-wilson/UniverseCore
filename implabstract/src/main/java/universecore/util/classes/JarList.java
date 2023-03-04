@@ -48,7 +48,7 @@ public class JarList{
     if(entry == null)
       throw new RuntimeException("unknown mod " + mod);
 
-    entry.md5 = getMd5(entry.file);
+    entry.md5 = getMd5(mod.file);
   }
   
   public boolean matched(ModInfo mod){

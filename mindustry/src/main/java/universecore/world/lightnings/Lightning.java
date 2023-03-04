@@ -7,14 +7,13 @@ import arc.graphics.g2d.Fill;
 import arc.math.Angles;
 import arc.math.Mathf;
 import arc.math.geom.Vec2;
+import arc.struct.Seq;
 import arc.util.Time;
 import arc.util.Tmp;
 import arc.util.pooling.Pool;
 import arc.util.pooling.Pools;
 import mindustry.graphics.Drawf;
 import universecore.world.lightnings.generator.LightningGenerator;
-
-import java.util.LinkedList;
 
 /**
  * 单条闪电的存储容器，保存了闪电的起始时间还有闪电的顶点信息
@@ -26,7 +25,7 @@ import java.util.LinkedList;
 public class Lightning implements Pool.Poolable{
   private static final Vec2 last = new Vec2(), self = new Vec2(), next = new Vec2();
 
-  public final LinkedList<LightningVertex> vertices = new LinkedList<>();
+  public final Seq<LightningVertex> vertices = new Seq<>();
   /**闪电的持续时间*/
   public float lifeTime;
   /**闪电被创建时的时间*/
@@ -87,7 +86,7 @@ public class Lightning implements Pool.Poolable{
 
   /**更新一次闪电状态*/
   public void update(){
-    if(speed == 0 && time == 0 && cursor < vertices.size()){
+    if(speed == 0 && time == 0 && cursor < vertices.size){
       LightningVertex per = null;
       for(LightningVertex vertex: vertices){
         if(per != null){
@@ -97,17 +96,17 @@ public class Lightning implements Pool.Poolable{
         }
         per = vertex;
       }
-      cursor = vertices.size();
+      cursor = vertices.size;
     }
     else{
-      float increase = (speed == 0? vertices.size()/time: speed/totalLength)*Time.delta;
+      float increase = (speed == 0? vertices.size/time: speed/totalLength)*Time.delta;
 
       while(increase > 0){
         if(cursor == 0){
           cursor++;
         }
 
-        if(cursor >= vertices.size()) break;
+        if(cursor >= vertices.size) break;
 
         LightningVertex per = vertices.get(cursor - 1), curr = vertices.get(cursor);
         float delta = Math.min(increase, 1 - per.progress);
@@ -136,11 +135,11 @@ public class Lightning implements Pool.Poolable{
   public void draw(float x, float y){
     float lerp = this.lerp.get((Time.time - startTime)/lifeTime);
 
-    for(int i = 2; i <= vertices.size(); i++){
-      LightningVertex v1 = i - 3 >= 0? vertices.get(i - 3): enclosed? vertices.get(Mathf.mod(i - 3, vertices.size())): null,
+    for(int i = 2; i <= vertices.size; i++){
+      LightningVertex v1 = i - 3 >= 0? vertices.get(i - 3): enclosed? vertices.get(Mathf.mod(i - 3, vertices.size)): null,
           v2 = vertices.get(i - 2),
           v3 = vertices.get(i - 1),
-          v4 = i < vertices.size()? vertices.get(i): enclosed? vertices.get(Mathf.mod(i, vertices.size())): null;
+          v4 = i < vertices.size? vertices.get(i): enclosed? vertices.get(Mathf.mod(i, vertices.size)): null;
 
       float lastOffX, lastOffY;
       float nextOffX, nextOffY;
