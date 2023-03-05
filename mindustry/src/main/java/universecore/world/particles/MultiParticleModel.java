@@ -3,7 +3,11 @@ package universecore.world.particles;
 import arc.struct.Seq;
 
 public class MultiParticleModel extends ParticleModel{
-  Seq<ParticleModel> models = new Seq<>();
+  public Seq<ParticleModel> models = new Seq<>();
+
+  public MultiParticleModel(ParticleModel... models){
+    this.models.addAll(models);
+  }
 
   @Override
   public void draw(Particle p){

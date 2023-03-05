@@ -36,6 +36,7 @@ public class Particle extends Decal implements ExtraVariableComp{
   protected float clipSize;
 
   Cloud currentCloud, firstCloud;
+  int cloudCount;
   
   /**粒子的速度，矢量*/
   public Vec2 speed = new Vec2();
@@ -101,29 +102,43 @@ public class Particle extends Decal implements ExtraVariableComp{
     c.x = x;
     c.y = y;
     c.size = size;
-    c.color = model.trailColor(this);
+    c.color = model.trailColor(this).cpy();
 
     c.perCloud = currentCloud;
     currentCloud.nextCloud = c;
 
     currentCloud = c;
 
+    cloudCount++;
+
     for(Cloud cloud: currentCloud){
       model.updateTrail(this, cloud);
     }
 
-    Cloud cur = firstCloud;
-    while(cur.nextCloud != null){
-      if(model.isFaded(this, cur)){
-        cur.nextCloud.perCloud = null;
-        Cloud n = cur.nextCloud;
-        Pools.free(cur);
-        cur = n;
+    boolean mark = false;
+    while(firstCloud.nextCloud != null){
+      if(model.isFaded(this, firstCloud)){
+        Cloud n = firstCloud.nextCloud;
+        n.perCloud = null;
+        Pools.free(firstCloud);
+        firstCloud = n;
+
+        mark = true;
+        cloudCount--;
       }
       else break;
     }
 
-    if(model.isFinal(this)) remove();
+    if(!mark && model.isFinal(this)){
+      Cloud n = firstCloud.nextCloud;
+      n.perCloud = null;
+      Pools.free(firstCloud);
+      firstCloud = n;
+
+      cloudCount--;
+    }
+
+    if(cloudCount <= 4 && model.isFinal(this)) remove();
   }
 
   @Override
@@ -154,14 +169,18 @@ public class Particle extends Decal implements ExtraVariableComp{
 
     clipSize = 0;
 
-    Cloud cur = firstCloud;
-    while(cur.nextCloud != null){
-      Cloud n = cur.nextCloud;
-      Pools.free(cur);
-      cur = n;
+    while(firstCloud.nextCloud != null){
+      Cloud n = firstCloud.nextCloud;
+      n.perCloud = null;
+      Pools.free(firstCloud);
+      firstCloud = n;
     }
-    Pools.free(cur);
+    Pools.free(firstCloud);
 
+    currentCloud = null;
+    firstCloud = null;
+
+    cloudCount = 0;
     size = 0;
     extra().clear();
 
@@ -181,15 +200,27 @@ public class Particle extends Decal implements ExtraVariableComp{
 
       if(perCloud != null && nextCloud != null){
         float angle = Angles.angle(x - perCloud.x, y - perCloud.y);
-        float dx1 = Angles.trnsx(size, angle + 90);
-        float dy1 = Angles.trnsy(size, angle + 90);
+        float dx1 = Angles.trnsx(angle + 90, size);
+        float dy1 = Angles.trnsy(angle + 90, size);
         angle = Angles.angle(nextCloud.x - x, nextCloud.y - y);
-        float dx2 = Angles.trnsx(nextCloud.size, angle + 90);
-        float dy2 = Angles.trnsy(nextCloud.size, angle + 90);
+        float dx2 = Angles.trnsx(angle + 90, nextCloud.size);
+        float dy2 = Angles.trnsy(angle + 90, nextCloud.size);
 
         Fill.quad(
             x + dx1, y + dy1,
             x - dx1, y - dy1,
+            nextCloud.x - dx2, nextCloud.y - dy2,
+            nextCloud.x + dx2, nextCloud.y + dy2
+        );
+      }
+      else if(perCloud == null && nextCloud != null){
+        float angle = Angles.angle(nextCloud.x - x, nextCloud.y - y);
+        float dx2 = Angles.trnsx(angle + 90, nextCloud.size);
+        float dy2 = Angles.trnsy(angle + 90, nextCloud.size);
+
+        Fill.quad(
+            x, y,
+            x, y,
             nextCloud.x - dx2, nextCloud.y - dy2,
             nextCloud.x + dx2, nextCloud.y + dy2
         );

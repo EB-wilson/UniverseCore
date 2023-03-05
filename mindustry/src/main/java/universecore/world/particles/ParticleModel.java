@@ -5,6 +5,7 @@ import arc.math.geom.Vec2;
 import arc.util.pooling.Pools;
 
 public class ParticleModel{
+  public Color color = Color.white;
   public Color trailColor = Color.white;
 
 
@@ -17,6 +18,7 @@ public class ParticleModel{
     ent.defSpeed = ent.speed.len();
     ent.defSize = size;
     ent.size = currSize(ent);
+    ent.color = color.cpy();
 
     ent.model = this;
     ent.add();

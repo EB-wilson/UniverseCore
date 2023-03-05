@@ -46,10 +46,9 @@ public class AndroidMethodInvokeHelper implements MethodInvokeHelper{
     a: while(curr != null){
       for(Method method: curr.getDeclaredMethods()){
         if(!method.getName().equals(name)) continue;
-        Class<?>[] methodArgs = method.getParameterTypes();
 
         FunctionType t;
-        if((t = FunctionType.from(method)).match(methodArgs)){
+        if((t = FunctionType.from(method)).match(argTypes.getTypes())){
           method.setAccessible(true);
           res = method;
           map.put(t, res);
@@ -87,7 +86,7 @@ public class AndroidMethodInvokeHelper implements MethodInvokeHelper{
 
     for(Constructor<?> constructor: type.getDeclaredConstructors()){
       FunctionType functionType;
-      if((functionType = FunctionType.from(constructor)).match(argsType)){
+      if((functionType = FunctionType.from(constructor)).match(argsType.getTypes())){
         map.put(functionType, constructor);
         res = (Constructor<T>) constructor;
         res.setAccessible(true);

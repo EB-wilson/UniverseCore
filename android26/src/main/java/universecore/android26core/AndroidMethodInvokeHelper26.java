@@ -51,10 +51,8 @@ public class AndroidMethodInvokeHelper26 implements MethodInvokeHelper{
     a: while(curr != null){
       for(Method method: curr.getDeclaredMethods()){
         if(!method.getName().equals(name)) continue;
-        Class<?>[] methodArgs = method.getParameterTypes();
-
         FunctionType t;
-        if((t = FunctionType.from(method)).match(methodArgs)){
+        if((t = FunctionType.from(method)).match(argTypes.getTypes())){
           method.setAccessible(true);
           try{
             res = lookup.unreflect(method);

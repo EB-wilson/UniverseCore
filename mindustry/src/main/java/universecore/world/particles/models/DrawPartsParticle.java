@@ -33,11 +33,11 @@ public class DrawPartsParticle extends ParticleModel{
     Draw.z(z);
   }
 
-  public static DrawPartsParticle getSimpleCircle(float size, Color color){
+  public static DrawPartsParticle getSimpleCircle(float size, Color cc){
     return new DrawPartsParticle(){{
       parts.add(new ShapePart(){{
         progress = PartProgress.warmup;
-        this.color = color;
+        this.color = cc;
         circle = true;
         radius = 0;
         radiusTo = size;
