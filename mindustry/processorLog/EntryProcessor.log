@@ -1,5 +1,5 @@
 processor: EntryProcessor (full class name: universecore.annotations.EntryProcessor)
-time: Sun Mar 05 11:26:16 GMT+08:00 2023
+time: Tue Mar 07 23:32:05 GMT+08:00 2023
 
 -----------------------------------------
 annotation: universecore.annotations.Annotations.ImplEntries
@@ -256,4 +256,18 @@ annotation: universecore.annotations.Annotations.ImplEntries
 198|         return this.extraVar;
 199|     }
 200| }
+
+> class: $className
+ 1| 
+ 2| @Annotations.ImplEntries
+ 3| public class $className extends C implements T {
+ 4|     
+ 5|     public $className() {
+ 6|         super();
+ 7|     }
+ 8|     
+ 9|     public int result(int in) {
+10|         return this.res(in);
+11|     }
+12| }
 

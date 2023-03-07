@@ -282,7 +282,8 @@ public class EntryProcessor extends BaseProcessor{
 
       JCTree.JCMethodDecl methodEntry;
       String callEntry = "this." + symbol.getQualifiedName() + "(" + parameter + ");";
-      
+
+      boolean resultOverride = method.getReturnType().getKind() != TypeKind.VOID && symbol.getReturnType().equals(method.getReturnType());
       if(!method.getEnclosingElement().equals(tree.sym)){
         StringBuilder callSuperParam = new StringBuilder();
         for(Symbol.VarSymbol param: method.params().toArray(new Symbol.VarSymbol[0])){
@@ -292,7 +293,8 @@ public class EntryProcessor extends BaseProcessor{
 
         JavacParser bodyParser = parsers.newParser(
             method.getReturnType().getKind() == TypeKind.VOID ? "{super." + method.getQualifiedName() + "(" + callSuperParameter + ");}" :
-                "{" + method.getReturnType().tsym.getQualifiedName() + " result = super." + method.getQualifiedName() + "(" + callSuperParameter + "); return result;}", false, false, false);
+            resultOverride? "{return " + callEntry + "}":
+            "{" + method.getReturnType().tsym.getQualifiedName() + " result = super." + method.getQualifiedName() + "(" + callSuperParameter + "); return result;}", false, false, false);
 
         maker.at(tree);
 
@@ -334,6 +336,8 @@ public class EntryProcessor extends BaseProcessor{
         addMethod(methods, method, true);
       }
       else{
+        resultOverride = false;
+
         methodEntry = trees.getTree(method);
         ArrayList<JCTree.JCStatement> stats = new ArrayList<>(methodEntry.body.stats);
         JCTree.JCStatement stat;
@@ -355,21 +359,23 @@ public class EntryProcessor extends BaseProcessor{
         }
       }
 
-      JCTree.JCStatement call = parsers.newParser(callEntry, false, false, false).parseStatement();
-      ArrayList<JCTree.JCStatement> stats = new ArrayList<>(methodEntry.body.stats);
+      if(!resultOverride){
+        JCTree.JCStatement call = parsers.newParser(callEntry, false, false, false).parseStatement();
+        ArrayList<JCTree.JCStatement> stats = new ArrayList<>(methodEntry.body.stats);
 
-      if(insert == Annotations.InsertPosition.HEAD){
-        stats.add(0, call);
-      }
-      else{
-        int index = stats.size();
-        if(stats.size() != 0 && stats.get(stats.size() - 1).getKind() == Tree.Kind.RETURN){
-          index--;
+        if(insert == Annotations.InsertPosition.HEAD){
+          stats.add(0, call);
         }
-        stats.add(index, call);
-      }
+        else{
+          int index = stats.size();
+          if(stats.size() != 0 && stats.get(stats.size() - 1).getKind() == Tree.Kind.RETURN){
+            index--;
+          }
+          stats.add(index, call);
+        }
 
-      methodEntry.body = maker.Block(0, List.from(stats));
+        methodEntry.body = maker.Block(0, List.from(stats));
+      }
     }
   }
   

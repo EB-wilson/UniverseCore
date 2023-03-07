@@ -43,10 +43,10 @@ public class Annotations{
    * <p>如果在实现类中没有对此方法的覆盖，则将实现类的此方法绑定到对应键的字段上，根据签名与参数区分getter/setter
    * <pre>{@code 例如：
    * public interface Sample{
-   *   @BindField("field")
+   *   @BindField("field")//搜索字段标识符
    *   default void field(int numb){} //setter
    *
-   *   @BindField("value")
+   *   @BindField("value")//搜索字段名称，严格模式下不可直接搜索名称
    *   default int field(){
    *     return 0; //getter
    *   }
@@ -59,7 +59,7 @@ public class Annotations{
    * public class universecore.Test implements Sample{
    *   ......
    *
-   *   @FieldKey("field")
+   *   @FieldKey("field")//字段标识符
    *   private int value;
    *
    *   @Override
@@ -114,7 +114,38 @@ public class Annotations{
    *   }
    * }
    * }</pre>
-   * 严格模式下，此注解要求所选择入口必须在目标类中已被声明，在超类或实现的接口中存在是不可被检索的
+   *
+   * 另外，对于有返回值的方法，如果你在目标类型中未重写这个方法，同时当前处于非严格模式，那么，当入口方法与目标方法的返回类型一致时，这个实现将转入到入口，如下：
+   * <pre>{@code
+   * 示例：
+   * @Annotations.ImplEntries
+   * public class Sample extends Cl implements Test{
+   *   //未实现result方法才可直接转移返回目标
+   * }
+   *
+   * class Cl{
+   *   public int result(int in){
+   *     return in*in;
+   *   }
+   * }
+   *
+   * interface Test{
+   *   @Annotations.MethodEntry(entryMethod = "result", paramTypes = {"int -> in"})
+   *   default int res(int in){//返回类型int需要和目标方法相同
+   *     return in*in*in;
+   *   }
+   * }
+   *
+   * 生成的等效代码：
+   * public class Sample extends Cl implements Test{
+   *   @Override
+   *   public int result(int in) {
+   *     return Test.super.res(in);
+   *   }
+   * }
+   * }</pre>
+   *
+   * <strong>严格模式下，此注解要求所选择入口必须在目标类中已被声明，在超类或实现的接口中存在是不可被检索的</strong>
    * */
   @Target(ElementType.METHOD)
   @Retention(RetentionPolicy.CLASS)
