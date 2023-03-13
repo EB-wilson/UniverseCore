@@ -283,7 +283,7 @@ public class EntryProcessor extends BaseProcessor{
       JCTree.JCMethodDecl methodEntry;
       String callEntry = "this." + symbol.getQualifiedName() + "(" + parameter + ");";
 
-      boolean resultOverride = method.getReturnType().getKind() != TypeKind.VOID && symbol.getReturnType().equals(method.getReturnType());
+      boolean override = entry.getBoolean("override") && symbol.getReturnType().equals(method.getReturnType());
       if(!method.getEnclosingElement().equals(tree.sym)){
         StringBuilder callSuperParam = new StringBuilder();
         for(Symbol.VarSymbol param: method.params().toArray(new Symbol.VarSymbol[0])){
@@ -292,8 +292,8 @@ public class EntryProcessor extends BaseProcessor{
         String callSuperParameter = callSuperParam.length() == 0 ? "" : callSuperParam.substring(0, callSuperParam.length() - 2);
 
         JavacParser bodyParser = parsers.newParser(
-            method.getReturnType().getKind() == TypeKind.VOID ? "{super." + method.getQualifiedName() + "(" + callSuperParameter + ");}" :
-            resultOverride? "{return " + callEntry + "}":
+            override? method.getReturnType().getKind() == TypeKind.VOID? "{" + callEntry + "}": "{return " + callEntry + "}":
+            method.getReturnType().getKind() == TypeKind.VOID ? "{super." + method.getQualifiedName() + "(" + callSuperParameter + ");}":
             "{" + method.getReturnType().tsym.getQualifiedName() + " result = super." + method.getQualifiedName() + "(" + callSuperParameter + "); return result;}", false, false, false);
 
         maker.at(tree);
@@ -336,7 +336,7 @@ public class EntryProcessor extends BaseProcessor{
         addMethod(methods, method, true);
       }
       else{
-        resultOverride = false;
+        override = false;
 
         methodEntry = trees.getTree(method);
         ArrayList<JCTree.JCStatement> stats = new ArrayList<>(methodEntry.body.stats);
@@ -359,7 +359,7 @@ public class EntryProcessor extends BaseProcessor{
         }
       }
 
-      if(!resultOverride){
+      if(!override){
         JCTree.JCStatement call = parsers.newParser(callEntry, false, false, false).parseStatement();
         ArrayList<JCTree.JCStatement> stats = new ArrayList<>(methodEntry.body.stats);
 

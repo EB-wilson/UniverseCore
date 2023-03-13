@@ -115,7 +115,7 @@ public class Annotations{
    * }
    * }</pre>
    *
-   * 另外，对于有返回值的方法，如果你在目标类型中未重写这个方法，同时当前处于非严格模式，那么，当入口方法与目标方法的返回类型一致时，这个实现将转入到入口，如下：
+   * 另外，如果使用OVERRIDE模式，同时当前处于非严格模式，那么，当入口方法与目标方法的返回类型一致时，这个方法将转入到入口方法，如下：
    * <pre>{@code
    * 示例：
    * @Annotations.ImplEntries
@@ -130,8 +130,8 @@ public class Annotations{
    * }
    *
    * interface Test{
-   *   @Annotations.MethodEntry(entryMethod = "result", paramTypes = {"int -> in"})
-   *   default int res(int in){//返回类型int需要和目标方法相同
+   *   @Annotations.MethodEntry(entryMethod = "result", paramTypes = {"int -> in"}, override = true)
+   *   default int res(int in){//返回类型int，这需要和目标方法相同
    *     return in*in*in;
    *   }
    * }
@@ -140,7 +140,7 @@ public class Annotations{
    * public class Sample extends Cl implements Test{
    *   @Override
    *   public int result(int in) {
-   *     return Test.super.res(in);
+   *     return Test.super.res(in);//方法直接调用超类
    *   }
    * }
    * }</pre>
@@ -159,6 +159,8 @@ public class Annotations{
     String[] context() default {};
     /**入口在方法中插入的位置*/
     InsertPosition insert() default InsertPosition.END;
+    /**是否启用覆盖模式，如果当前为严格模式此项无效果*/
+    boolean override() default false;
   }
 
   public enum InsertPosition{

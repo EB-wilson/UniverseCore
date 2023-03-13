@@ -3,6 +3,7 @@ package universecore.world.consumers;
 import arc.Core;
 import arc.func.Boolf;
 import arc.func.Floatf;
+import arc.math.Mathf;
 import arc.scene.ui.layout.Table;
 import arc.struct.Seq;
 import mindustry.Vars;
@@ -115,6 +116,7 @@ public class ConsumeLiquidCond<T extends Building & ConsumerBuildComp> extends C
     for(UncLiquidStack con: cons){
       if(con.liquid == curr){
         entity.liquids.remove(con.liquid, con.amount*parent.delta(entity)*multiple(entity));
+        return;
       }
     }
   }
@@ -158,7 +160,7 @@ public class ConsumeLiquidCond<T extends Building & ConsumerBuildComp> extends C
 
     for(UncLiquidStack stack: cons){
       if(curr == stack.liquid){
-        return liquidEfficiency.get(stack.liquid)*entity.liquids.get(stack.liquid)/stack.amount;
+        return liquidEfficiency.get(stack.liquid)*Mathf.clamp(entity.liquids.get(stack.liquid)/stack.amount);
       }
     }
     return 0;

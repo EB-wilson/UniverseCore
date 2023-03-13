@@ -12,7 +12,7 @@ class C{
 }
 
 interface T{
-  @Annotations.MethodEntry(entryMethod = "result", paramTypes = {"int -> in"})
+  @Annotations.MethodEntry(entryMethod = "result", paramTypes = {"int -> in"}, override = true)
   default int res(int in){
     return in*in*in;
   }
