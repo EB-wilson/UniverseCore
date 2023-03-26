@@ -8,6 +8,7 @@ import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.Names;
+import sun.misc.Unsafe;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -17,9 +18,12 @@ import javax.lang.model.util.Elements;
 import javax.tools.StandardLocation;
 import java.io.*;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "Since15"})
 public abstract class BaseProcessor extends AbstractProcessor{
   private static final long fieldFilterOffset = 112L;
 
@@ -37,14 +41,32 @@ public abstract class BaseProcessor extends AbstractProcessor{
  
   Messager messager;
 
-  private static final String[] needOpens = {
-     "com.sun.tools.javac.api",
-     "com.sun.tools.javac.code",
-     "com.sun.tools.javac.parser",
-     "com.sun.tools.javac.processing",
-     "com.sun.tools.javac.tree",
-     "com.sun.tools.javac.util",
-  };
+  static final Unsafe unsafe;
+
+  //使用此模块可替代jabel，使程序进行降级编译（编译到JDK8）
+  static{
+    try{
+      Constructor<Unsafe> cstr = Unsafe.class.getDeclaredConstructor();
+      cstr.setAccessible(true);
+      unsafe = cstr.newInstance();
+
+      Class<?> clazz = Class.forName("jdk.internal.reflect.Reflection");
+      Map<Class<?>, Set<String>> map = (Map<Class<?>, Set<String>>) unsafe.getObject(clazz, fieldFilterOffset);
+      map.clear();
+
+      Field minLevel = Source.Feature.class.getDeclaredField("minLevel");
+      long off = unsafe.objectFieldOffset(minLevel);
+
+      for (Source.Feature feature : Source.Feature.values()) {
+        if (!feature.allowedInSource(Source.JDK8)) {
+          unsafe.putObject(feature, off, Source.JDK8);
+        }
+      }
+    } catch (NoSuchFieldException | ClassNotFoundException | InvocationTargetException | NoSuchMethodException |
+             InstantiationException | IllegalAccessException e) {
+      throw new RuntimeException(e);
+    }
+  }
   
   @Override
   public synchronized void init(ProcessingEnvironment processingEnv){
@@ -52,16 +74,6 @@ public abstract class BaseProcessor extends AbstractProcessor{
     elements = processingEnv.getElementUtils();
     filer = processingEnv.getFiler();
     messager = processingEnv.getMessager();
-
-    processingEnv.getClass();
-
-    Class<?> c;
-    try{
-      c = Class.forName("com.sun.tools.javac.code.Type");
-      String.valueOf(3);
-    }catch(ClassNotFoundException e){
-      e.printStackTrace();
-    }
 
     Context context = ((JavacProcessingEnvironment)processingEnv).getContext();
     trees = JavacTrees.instance(context);
@@ -159,6 +171,18 @@ public abstract class BaseProcessor extends AbstractProcessor{
     return m2.getReturnType().getKind() == m1.getReturnType().getKind()
         && (m1.getReturnType().getKind() == TypeKind.VOID
         || (isAssignable(m1.getReturnType(), m2.getReturnType()) || isAssignable(m2.getReturnType(), m1.getReturnType())));
+  }
+
+  protected boolean containMethod(HashMap<String, HashSet<Symbol.MethodSymbol>> map, Symbol.MethodSymbol symbol){
+    HashSet<Symbol.MethodSymbol> set = map.get(symbol.getSimpleName().toString());
+
+    if (set == null) return false;
+
+    for (Symbol.MethodSymbol methodSymbol : set) {
+      if (equalOrSub(symbol, methodSymbol)) return true;
+    }
+
+    return false;
   }
   
   protected boolean addMethod(HashMap<String, HashSet<Symbol.MethodSymbol>> map, Symbol.MethodSymbol symbol){

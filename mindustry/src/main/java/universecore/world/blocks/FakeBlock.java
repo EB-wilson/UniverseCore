@@ -109,7 +109,6 @@ public class FakeBlock extends Block {
       this.rotation = rotation;
       this.team = team;
       realBuild.init(tile, team, shouldAdd, rotation);
-      buildInitialized();
 
       return realBuild;
     }

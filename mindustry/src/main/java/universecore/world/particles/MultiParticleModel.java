@@ -17,6 +17,13 @@ public class MultiParticleModel extends ParticleModel{
   }
 
   @Override
+  public void drawTrail(Particle c) {
+    for (ParticleModel model : models) {
+      model.drawTrail(c);
+    }
+  }
+
+  @Override
   public void updateTrail(Particle p, Particle.Cloud c){
     for(ParticleModel model: models){
       model.updateTrail(p, c);

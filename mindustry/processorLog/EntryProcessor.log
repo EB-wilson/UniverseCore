@@ -1,5 +1,5 @@
 processor: EntryProcessor (full class name: universecore.annotations.EntryProcessor)
-time: Sun Mar 12 14:17:59 GMT+08:00 2023
+time: Fri Mar 24 12:10:11 GMT+08:00 2023
 
 -----------------------------------------
 annotation: universecore.annotations.Annotations.ImplEntries
@@ -25,35 +25,34 @@ annotation: universecore.annotations.Annotations.ImplEntries
 17|         this.rotation = rotation;
 18|         this.team = team;
 19|         realBuild.init(tile, team, shouldAdd, rotation);
-20|         buildInitialized();
-21|         this.buildInitialized();
-22|         return realBuild;
-23|     }
-24|     
-25|     @Override
-26|     public void onReplaced(ReplaceBuildComp old) {
-27|         if (realBuild instanceof ReplaceBuildComp re) {
-28|             re.onReplaced(old);
-29|         }
-30|     }
-31|     
-32|     public mindustry.world.Tile getTile() {
-33|         return super.tile;
-34|     }
-35|     
-36|     public mindustry.world.modules.ItemModule items() {
-37|         return super.items;
-38|     }
-39|     
-40|     public mindustry.world.modules.LiquidModule liquids() {
-41|         return super.liquids;
-42|     }
-43|     
-44|     public void onRemoved() {
-45|         super.onRemoved();
-46|         this.onRemoving();
-47|     }
-48| }
+20|         universecore.components.blockcomp.ReplaceBuildComp.super.buildInitialized();
+21|         return realBuild;
+22|     }
+23|     
+24|     @Override
+25|     public void onReplaced(ReplaceBuildComp old) {
+26|         if (realBuild instanceof ReplaceBuildComp re) {
+27|             re.onReplaced(old);
+28|         }
+29|     }
+30|     
+31|     public mindustry.world.Tile getTile() {
+32|         return super.tile;
+33|     }
+34|     
+35|     public mindustry.world.modules.ItemModule items() {
+36|         return super.items;
+37|     }
+38|     
+39|     public mindustry.world.modules.LiquidModule liquids() {
+40|         return super.liquids;
+41|     }
+42|     
+43|     public void onRemoved() {
+44|         super.onRemoved();
+45|         universecore.components.blockcomp.ReplaceBuildComp.super.onRemoving();
+46|     }
+47| }
 
 > class: universecore.world.particles.Particle
   1| 
@@ -257,17 +256,45 @@ annotation: universecore.annotations.Annotations.ImplEntries
 199|     }
 200| }
 
-> class: $className
+> class: testbuild.Test
  1| 
  2| @Annotations.ImplEntries
- 3| public class $className extends C implements T {
+ 3| public class Test extends A implements I {
  4|     
- 5|     public $className() {
+ 5|     public Test() {
  6|         super();
  7|     }
- 8|     
- 9|     public int result(int in) {
-10|         return this.res(in);
-11|     }
-12| }
+ 8|     public int value;
+ 9|     
+10|     @Override
+11|     public void subTrigger(String arg) {
+12|         I.super.subTrigger(arg);
+13|         System.out.println(arg);
+14|     }
+15|     
+16|     public void set(int i) {
+17|         this.value = i;
+18|     }
+19|     
+20|     public int get() {
+21|         return this.value;
+22|     }
+23|     
+24|     public void run(java.lang.String in) {
+25|         super.run(in);
+26|         this.subTrigger(in);
+27|     }
+28|     
+29|     public int doing() {
+30|         return testbuild.I.super.doing();
+31|     }
+32|     
+33|     public java.lang.String transToUp(java.lang.String in) {
+34|         return testbuild.I.super.transToUp(in);
+35|     }
+36|     
+37|     public java.lang.String transToLow(java.lang.String in) {
+38|         return testbuild.I.super.transToLow(in);
+39|     }
+40| }
 

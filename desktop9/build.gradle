@@ -38,5 +38,5 @@ dependencies {
   compileOnly project(":abstract")
   implementation project(":desktop")
 
-  annotationProcessor "com.github.Anuken:jabel:0.7.0"
+  annotationProcessor project(":annotations")
 }

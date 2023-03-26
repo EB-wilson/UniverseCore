@@ -2,12 +2,10 @@ package universecore.annotations;
 
 import com.google.auto.service.AutoService;
 import com.sun.source.tree.Tree;
-import com.sun.tools.javac.code.Attribute;
-import com.sun.tools.javac.code.Flags;
-import com.sun.tools.javac.code.Symbol;
-import com.sun.tools.javac.code.Type;
-import com.sun.tools.javac.parser.JavacParser;
+import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.tree.JCTree;
+import com.sun.tools.javac.tree.TreeScanner;
+import com.sun.tools.javac.tree.TreeTranslator;
 import com.sun.tools.javac.util.List;
 
 import javax.annotation.processing.Processor;
@@ -24,6 +22,7 @@ public class EntryProcessor extends BaseProcessor{
   JCTree.JCClassDecl tree;
   
   HashSet<String> superInterfaces = new HashSet<>();
+  HashMap<String, Type> directImplTree = new HashMap<>();
   HashMap<String, FieldEntry> fields = new HashMap<>();
   HashMap<String, FieldEntry> absFields = new HashMap<>();
   HashMap<String, HashSet<Symbol.MethodSymbol>> methods = new HashMap<>();
@@ -40,7 +39,6 @@ public class EntryProcessor extends BaseProcessor{
     for(TypeElement element : annoSet){
       for(Element c : roundEnvironment.getElementsAnnotatedWith(element)){
         tree = (JCTree.JCClassDecl) trees.getTree(c);
-        maker.at(tree);
         defaultDeclare = c.getAnnotation(Annotations.ImplEntries.class).value();
         
         superInterfaces.clear();
@@ -56,6 +54,7 @@ public class EntryProcessor extends BaseProcessor{
         
         boolean inSuper = false, inEnclosing;
         Symbol.ClassSymbol par = tree.sym, curr;
+
         while(par != null){
           if(inSuper){
             if(par.getAnnotation(Annotations.ImplEntries.class) != null){
@@ -94,7 +93,7 @@ public class EntryProcessor extends BaseProcessor{
                 }else if(defaultDeclare && !fields.containsKey(child.name.toString()))
                   fields.put(child.name.toString(), field);
               }
-              else if(child instanceof Symbol.MethodSymbol ){
+              else if(child instanceof Symbol.MethodSymbol){
                 if(!inEnclosing){
                   if(!child.isConstructor()){
                     if(!inSuper){
@@ -134,12 +133,16 @@ public class EntryProcessor extends BaseProcessor{
           LinkedList<Type> list = interfaces.computeIfAbsent(type, e -> new LinkedList<>());
           queue.add(type);
           list.addLast(type);
+
+          directImplTree.put(type.tsym.getQualifiedName().toString(), type);
           while(!queue.isEmpty()){
             Type inter = queue.removeFirst();
             for(Type i: ((Symbol.ClassSymbol) inter.tsym).getInterfaces()){
               if(implemented.add(i.tsym.getQualifiedName().toString()) && !superInterfaces.contains(i.tsym.getQualifiedName().toString())){
                 list.addLast(i);
                 queue.addLast(i);
+
+                directImplTree.put(i.tsym.getQualifiedName().toString(), type);
               }
             }
           }
@@ -178,8 +181,8 @@ public class EntryProcessor extends BaseProcessor{
     }
     
     String mName = entry.getString("entryMethod");
-    if(symbol.getQualifiedName().equals(mName))
-      throw new IllegalArgumentException("entry method name cannot be equal this method, method name: " + mName);
+    if(!entry.getBoolean("override") && symbol.getQualifiedName().equals(names.fromString(mName)))
+      throw new IllegalArgumentException("entry method name cannot be equal this method with non-override mode, method name: " + mName);
 
     String[] paramTypeList = entry.getArr("paramTypes", new String[0]);
     String[] contextList = entry.getArr("context", new String[0]);
@@ -187,7 +190,7 @@ public class EntryProcessor extends BaseProcessor{
     
     ParamMark[] paramMarks = new ParamMark[paramTypeList.length];
     ParamMark[] contextMarks = new ParamMark[contextList.length];
-    String[] paramAssign = new String[symbol.params().size()];
+    Symbol.VarSymbol[] paramAssign = new Symbol.VarSymbol[symbol.params().size()];
     
     for(int i = 0; i < paramTypeList.length; i++){
       paramMarks[i] = new ParamMark(paramTypeList[i], false);
@@ -205,7 +208,7 @@ public class EntryProcessor extends BaseProcessor{
           if(mark.bindParam.equals(param.getQualifiedName().toString())){
             FieldEntry context;
             if((context = (defaultDeclare ? absFields : fields).get(mark.context)) != null){
-              paramAssign[l] = (context.inEnclose ? context.var.owner.getQualifiedName() + ".this." : "this") + "." + context.var.getQualifiedName().toString();
+              paramAssign[l] = context.var;
               break;
             }//TODO: 错误判断
           }
@@ -232,7 +235,7 @@ public class EntryProcessor extends BaseProcessor{
             param = targetParams[l];
             if(mark.bindParam.equals(param.getQualifiedName().toString())){
               if(mark.clazz.equals(param.type.tsym.getQualifiedName().toString())){
-                paramAssign[l] = var.getQualifiedName().toString();
+                paramAssign[l] = var;
                 break;
               }
             }
@@ -240,7 +243,7 @@ public class EntryProcessor extends BaseProcessor{
         }
       }
 
-      for(String s: paramAssign){
+      for(Symbol s: paramAssign){
         if(s == null)
           throw new IllegalArgumentException("parameter assign require the parameter that annotation given equals target method parameter");
       }
@@ -275,28 +278,39 @@ public class EntryProcessor extends BaseProcessor{
         }
       }
 
-      for(String mark: paramAssign){
-        parameterBuild.append(mark).append(", ");
-      }
-      parameter = parameterBuild.length() == 0 ? "" : parameterBuild.substring(0, parameterBuild.length() - 2);
-
       JCTree.JCMethodDecl methodEntry;
-      String callEntry = "this." + symbol.getQualifiedName() + "(" + parameter + ");";
 
-      boolean override = entry.getBoolean("override") && symbol.getReturnType().equals(method.getReturnType());
-      if(!method.getEnclosingElement().equals(tree.sym)){
-        StringBuilder callSuperParam = new StringBuilder();
-        for(Symbol.VarSymbol param: method.params().toArray(new Symbol.VarSymbol[0])){
-          callSuperParam.append(param.getQualifiedName()).append(", ");
+      maker.at(tree.getPreferredPosition());
+      ArrayList<JCTree.JCExpression> argRef = new ArrayList<>();
+      for (Symbol.VarSymbol varSymbol : paramAssign) {
+        if (varSymbol.getKind() == ElementKind.FIELD){
+          argRef.add(
+              maker.Select(maker.This(tree.sym.type), varSymbol)
+          );
         }
-        String callSuperParameter = callSuperParam.length() == 0 ? "" : callSuperParam.substring(0, callSuperParam.length() - 2);
+        else{
+          argRef.add(
+              maker.Ident(varSymbol)
+          );
+        }
+      }
 
-        JavacParser bodyParser = parsers.newParser(
-            override? method.getReturnType().getKind() == TypeKind.VOID? "{" + callEntry + "}": "{return " + callEntry + "}":
-            method.getReturnType().getKind() == TypeKind.VOID ? "{super." + method.getQualifiedName() + "(" + callSuperParameter + ");}":
-            "{" + method.getReturnType().tsym.getQualifiedName() + " result = super." + method.getQualifiedName() + "(" + callSuperParameter + "); return result;}", false, false, false);
+      Symbol.ClassSymbol symInter = (Symbol.ClassSymbol) symbol.owner;
+      JCTree.JCExpression callEntry = maker.at(tree.getPreferredPosition()).Apply(
+          List.nil(),
+          maker.Select(
+              !containMethod(methods, symbol)? maker.Select(
+                  maker.Type(directImplTree.get(symInter.type.tsym.getQualifiedName().toString())),
+                  new Symbol.VarSymbol(16L, names._super, symbol.owner.type, symbol.owner.type.tsym)
+              ): maker.This(tree.sym.type),
+              symbol
+          ),
+          List.from(argRef)
+      );
 
-        maker.at(tree);
+      boolean override = entry.getBoolean("override") && isAssignable(method.getReturnType(), symbol.getReturnType());
+      if(!method.getEnclosingElement().equals(tree.sym)){
+        maker.at(tree.getPreferredPosition());
 
         ArrayList<JCTree.JCTypeParameter> typeParameterList = new ArrayList<>();
         ArrayList<JCTree.JCVariableDecl> parameterList = new ArrayList<>();
@@ -305,29 +319,56 @@ public class EntryProcessor extends BaseProcessor{
         for(Symbol.TypeVariableSymbol typeParameter: method.getTypeParameters()){
           typeParameterList.add(maker.TypeParam(typeParameter.getQualifiedName(), new Type.TypeVar(typeParameter.getQualifiedName(), typeParameter.owner, typeParameter.type)));
         }
-        for(Symbol.VarSymbol param : method.params()){
+        for(Symbol.VarSymbol param: method.params()){
           parameterList.add(maker.VarDef(maker.Modifiers(param.flags()), param.getQualifiedName(), maker.Type(param.type), null));
         }
-        for(Type thrownType : method.getThrownTypes()){
+        for(Type thrownType: method.getThrownTypes()){
           throwsList.add(maker.Type(thrownType));
         }
 
-        (methodEntry = maker.MethodDef(
+        Symbol.MethodSymbol metSym = new Symbol.MethodSymbol(
+            method.flags(),
+            method.getQualifiedName(),
+            method.type,
+            tree.sym
+        );
+        Symbol.VarSymbol resSym = new Symbol.VarSymbol(0, names.fromString("$result$"), method.getReturnType(), metSym);
+
+        ArrayList<JCTree.JCExpression> argRefSu = new ArrayList<>();
+        for (Symbol.VarSymbol param : method.params()) {
+          argRefSu.add(maker.Ident(param));
+        }
+
+        JCTree.JCExpression callSuper = maker.at(tree.getPreferredPosition()).Apply(
+            List.nil(),
+            maker.Select(
+                maker.Super(method.owner.type, method.owner.type.tsym),
+                method
+            ),
+            List.from(argRefSu)
+        );
+
+        JCTree.JCBlock block = maker.at(tree.getPreferredPosition()).Block(0,
+            override? (method.getReturnType().getKind() == TypeKind.VOID? List.of(maker.Exec(callEntry)):
+                List.of(maker.Return(callEntry))):
+                method.getReturnType().getKind() == TypeKind.VOID? List.of(maker.Exec(callSuper)):
+                    List.of(
+                        maker.VarDef(resSym, callSuper),
+                        maker.Return(maker.Ident(resSym))
+                    )
+        );
+
+        (methodEntry = maker.at(tree.getPreferredPosition()).MethodDef(
             maker.Modifiers(method.flags()),
             method.name,
             maker.Type(method.type.getReturnType()),
             List.from(typeParameterList),
             List.from(parameterList),
             List.from(throwsList),
-            bodyParser.block(),
+            block,
             null
         )).setType(method.type.getReturnType());
-        methodEntry.sym = new Symbol.MethodSymbol(
-            method.flags(),
-            method.getQualifiedName(),
-            method.type,
-            tree.sym
-        );
+        methodEntry.sym = metSym;
         method = methodEntry.sym;
 
         tree.defs = tree.defs.append(methodEntry);
@@ -339,12 +380,13 @@ public class EntryProcessor extends BaseProcessor{
         override = false;
 
         methodEntry = trees.getTree(method);
+
+        maker.at(methodEntry.getPreferredPosition());
         ArrayList<JCTree.JCStatement> stats = new ArrayList<>(methodEntry.body.stats);
         JCTree.JCStatement stat;
         if(stats.size() != 0 && (stat = stats.get(stats.size() - 1)).getKind() == Tree.Kind.RETURN){
           JCTree.JCReturn r = (JCTree.JCReturn) stat;
           if(!(r.expr instanceof JCTree.JCIdent) && insert == Annotations.InsertPosition.END){
-            maker.at(tree);
             JCTree.JCVariableDecl res = maker.VarDef(
                 maker.Modifiers(0),
                 names.fromString("$result$"),
@@ -360,18 +402,18 @@ public class EntryProcessor extends BaseProcessor{
       }
 
       if(!override){
-        JCTree.JCStatement call = parsers.newParser(callEntry, false, false, false).parseStatement();
+        maker.at(methodEntry.getPreferredPosition());
         ArrayList<JCTree.JCStatement> stats = new ArrayList<>(methodEntry.body.stats);
 
         if(insert == Annotations.InsertPosition.HEAD){
-          stats.add(0, call);
+          stats.add(0, maker.Exec(callEntry));
         }
         else{
           int index = stats.size();
           if(stats.size() != 0 && stats.get(stats.size() - 1).getKind() == Tree.Kind.RETURN){
             index--;
           }
-          stats.add(index, call);
+          stats.add(index, maker.Exec(callEntry));
         }
 
         methodEntry.body = maker.Block(0, List.from(stats));
@@ -403,7 +445,6 @@ public class EntryProcessor extends BaseProcessor{
 
     String init = bind.initialize();
 
-    maker.at(tree);
     if(!fields.containsKey(method.key) && defaultDeclare){
       FieldEntry genField = absFields.get(method.key);
       Type returnType = method.sym.getReturnType();
@@ -411,8 +452,24 @@ public class EntryProcessor extends BaseProcessor{
         JCTree.JCExpression expr = null;
         if(!init.isEmpty()){
           expr = parsers.newParser(init, false, false, false).parseExpression();
+
+          expr.accept(new TreeScanner() {
+            @Override
+            public void scan(JCTree that) {
+              super.scan(that);
+
+              if (that != null) {
+                that.pos = tree.getPreferredPosition();
+
+                if (that instanceof JCTree.JCVariableDecl) {
+                  ((JCTree.JCVariableDecl) that).startPos = that.pos;
+                }
+              }
+            }
+          });
         }
 
+        maker.at(tree.getPreferredPosition());
         Type rType = returnType.getKind() == TypeKind.VOID? method.sym.params().get(0).asType(): returnType;
         genField = new FieldEntry();
         JCTree.JCVariableDecl var = maker.VarDef(
@@ -433,6 +490,8 @@ public class EntryProcessor extends BaseProcessor{
     
       fields.put(method.key, genField);
     }
+
+    maker.at(tree.getPreferredPosition());
     if(fields.containsKey(method.key)){
       if(symbol.getParameters().size() == 0 && symbol.getReturnType().getKind() != TypeKind.VOID){
         if(isAssignable(symbol.getReturnType(), fields.get(method.key).var.type)){
@@ -476,7 +535,7 @@ public class EntryProcessor extends BaseProcessor{
     Symbol.MethodSymbol sym;
   
     private JCTree.JCMethodDecl genGetter(FieldEntry field){
-      return maker.at(tree).MethodDef(
+      return maker.at(tree.getPreferredPosition()).MethodDef(
           maker.Modifiers(Modifier.PUBLIC),
           sym.name,
           maker.Type(sym.getReturnType()),
@@ -491,14 +550,14 @@ public class EntryProcessor extends BaseProcessor{
     private JCTree.JCMethodDecl genSetter(FieldEntry field){
       String paramName = sym.getParameters().get(0).name.toString();
       
-      JCTree.JCVariableDecl param = maker.at(tree).VarDef(
+      JCTree.JCVariableDecl param = maker.at(tree.getPreferredPosition()).VarDef(
           maker.Modifiers(Flags.PARAMETER, List.nil()),
           names.fromString(paramName),
           maker.Type(sym.getParameters().get(0).type),
           null
       );
   
-      return maker.at(tree).MethodDef(
+      return maker.at(tree.getPreferredPosition()).MethodDef(
           maker.Modifiers(Modifier.PUBLIC),
           sym.name,
           maker.Type(new Type.JCVoidType()),

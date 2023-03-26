@@ -24,7 +24,7 @@ import java.util.Iterator;
  * 附带可控制拖尾
  * @author EBwilson */
 @Annotations.ImplEntries
-public class Particle extends Decal implements ExtraVariableComp{
+public class Particle extends Decal implements ExtraVariableComp, Iterable<Particle.Cloud>{
   private static int counter = 0;
   /**粒子的最大共存数量，总量大于此数目时，创建新的粒子会清除最先产生的粒子*/
   public static int maxAmount = 1024;
@@ -48,7 +48,8 @@ public class Particle extends Decal implements ExtraVariableComp{
 
   /**粒子模型，决定了该粒子的行为*/
   public ParticleModel model;
-  
+  public float layer;
+
   public static Seq<Particle> get(Boolf<Particle> filter){
     temp.clear();
     for(Particle particle : all){
@@ -77,15 +78,15 @@ public class Particle extends Decal implements ExtraVariableComp{
 
   @Override
   public void draw(){
-    Draw.z(Layer.effect);
+    float l = Draw.z();
+    Draw.z(layer);
     model.draw(this);
 
     if(currentCloud != null){
-      for(Cloud c: currentCloud){
-        c.draw();
-      }
+      model.drawTrail(this);
     }
 
+    Draw.z(l);
     Draw.reset();
   }
   
@@ -167,6 +168,7 @@ public class Particle extends Decal implements ExtraVariableComp{
     speed.setZero();
     startPos.setZero();
 
+    layer = 0;
     clipSize = 0;
 
     while(firstCloud.nextCloud != null){
@@ -187,6 +189,11 @@ public class Particle extends Decal implements ExtraVariableComp{
     model = null;
 
     color = null;
+  }
+
+  @Override
+  public Iterator<Cloud> iterator() {
+    return currentCloud.iterator();
   }
 
   public static class Cloud implements Pool.Poolable, Iterable<Cloud>{

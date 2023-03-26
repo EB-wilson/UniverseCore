@@ -8,7 +8,7 @@ plugins {
 }
 
 ext{
-  uncVersion = '1.7.1'
+  uncVersion = '1.7.3'
 
   //the build number that this mod is made for
   mindustryVersion = 'v141'
@@ -22,11 +22,14 @@ ext{
 group 'com.github.EB-wilson'
 version "$uncVersion"
 
-allprojects{
+configure(allprojects - project(":annotations")){
   apply plugin: 'maven-publish'
 
   tasks.withType(JavaCompile){
     options.encoding = "UTF-8"
+
+    sourceCompatibility = 17
+    targetCompatibility = 8
 
     options.fork = true
     options.forkOptions.jvmArgs.addAll([

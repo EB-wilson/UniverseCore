@@ -25,9 +25,9 @@ public class EntrustProcessor extends BaseProcessor{
       for(Element element : roundEnv.getElementsAnnotatedWith(annotation)){
         if(element instanceof TypeElement){
           JCTree.JCClassDecl tree = trees.getTree((TypeElement) element);
-          
-          maker.at(tree);
-          
+
+          maker.at(tree.getPreferredPosition());
+
           boolean blackList;
           Type extend;
           HashSet<Type> interfaces = new HashSet<>();
@@ -187,6 +187,9 @@ public class EntrustProcessor extends BaseProcessor{
           for(Symbol.MethodSymbol constructor: declareMethods.getOrDefault(names.init.toString(), new HashSet<>())){
             boolean paramAssigned = false;
             JCTree.JCMethodDecl cstr = trees.getTree(constructor);
+
+            maker.at(cstr.getPreferredPosition());
+
             ArrayList<JCTree.JCVariableDecl> list = new ArrayList<>(cstr.getParameters());
             JCTree.JCVariableDecl paramTarget = null;
             for(int i=0; i<list.size(); i++){
@@ -229,11 +232,11 @@ public class EntrustProcessor extends BaseProcessor{
               }
               if(!whiteValid) continue;
               
-              maker.at(tree);
-              
               ArrayList<JCTree.JCTypeParameter> typeParameterList = new ArrayList<>();
               ArrayList<JCTree.JCVariableDecl> parameterList = new ArrayList<>();
               ArrayList<JCTree.JCExpression> throwsList = new ArrayList<>();
+
+              maker.at(tree.getPreferredPosition());
   
               for(Symbol.TypeVariableSymbol typeParameter: method.getTypeParameters()){
                 typeParameterList.add(maker.TypeParam(typeParameter.getQualifiedName(), (Type.TypeVar) typeParameter.type));

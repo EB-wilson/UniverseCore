@@ -1,5 +1,6 @@
 package universecore.components;
 
+import arc.func.Prov;
 import universecore.annotations.Annotations;
 
 import java.util.Map;
@@ -18,6 +19,10 @@ public interface ExtraVariableComp{
 
   default <T> T getVar(String field, T def){
     return (T) extra().getOrDefault(field, def);
+  }
+
+  default <T> T getVar(String field, Prov<T> initial){
+    return (T) extra().computeIfAbsent(field, e -> initial.get());
   }
 
   default <T> T getVarThr(String field){

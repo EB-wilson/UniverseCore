@@ -37,7 +37,7 @@ dependencies {
   implementation project(":core")
   implementation project(":abstract")
 
-  annotationProcessor "com.github.Anuken:jabel:0.7.0"
+  annotationProcessor project(":annotations")
 }
 
 assemble{

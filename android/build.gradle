@@ -40,7 +40,7 @@ dependencies {
   compileOnly project(":implabstract")
   compileOnly project(":utilities")
 
-  annotationProcessor "com.github.Anuken:jabel:0.7.0"
+  annotationProcessor project(":annotations")
 
   testRuntimeClasspath "com.jakewharton.android.repackaged:dalvik-dx:11.0.0_r3"
   testRuntimeClasspath project(":core")

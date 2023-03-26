@@ -3,16 +3,21 @@ package universecore.world.particles;
 import arc.graphics.Color;
 import arc.math.geom.Vec2;
 import arc.util.pooling.Pools;
+import mindustry.graphics.Layer;
 
 public class ParticleModel{
   public Color color = Color.white;
   public Color trailColor = Color.white;
 
-
   public Particle create(float x, float y, float sx, float sy, float size){
+    return create(x, y, sx, sy, size, Layer.effect);
+  }
+
+  public Particle create(float x, float y, float sx, float sy, float size, float layer){
     Particle ent = Pools.obtain(Particle.class, Particle::new);
     ent.x = x;
     ent.y = y;
+    ent.layer = layer;
     ent.startPos.set(x, y);
     ent.speed = new Vec2(sx, sy);
     ent.defSpeed = ent.speed.len();
@@ -39,6 +44,10 @@ public class ParticleModel{
   }
 
   public void deflect(Particle p){
+
+  }
+
+  public void drawTrail(Particle c) {
 
   }
 
