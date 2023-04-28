@@ -1,16 +1,18 @@
 package universecore.world.producers;
 
+import arc.struct.Seq;
+
 import java.util.ArrayList;
 
 @SuppressWarnings("unchecked")
 public class ProduceType<T extends BaseProduce<?>>{
-  private static final ArrayList<ProduceType<?>> allType = new ArrayList<>();
+  private static final Seq<ProduceType<?>> allType = new Seq<>();
   
   private final int id;
   private final Class<T> type;
   
   public ProduceType(Class<T> type){
-    id = allType.size();
+    id = allType.size;
     this.type = type;
     allType.add(this);
   }
@@ -24,7 +26,7 @@ public class ProduceType<T extends BaseProduce<?>>{
   }
   
   public static ProduceType<?>[] all(){
-    return allType.toArray(new ProduceType[0]);
+    return allType.toArray(ProduceType.class);
   }
   
   public static <Type extends BaseProduce<?>> ProduceType<? extends Type> add(Class<Type> type){

@@ -7,12 +7,10 @@ import mindustry.world.Block;
 import mindustry.world.meta.Stats;
 import universecore.annotations.Annotations;
 import universecore.annotations.Annotations.BindField;
-import universecore.ui.table.RecipeTable;
 import universecore.world.consumers.BaseConsumers;
 import universecore.world.consumers.ConsFilter;
 import universecore.world.consumers.ConsumePower;
 import universecore.world.consumers.ConsumeType;
-import universecore.world.meta.UncStat;
 
 /**Consume组件，为方块添加可标记消耗项的功能
  *
@@ -30,28 +28,6 @@ public interface ConsumerBlockComp{
   default Seq<BaseConsumers> optionalCons(){
     return null;
   }
-
-  /**{@code getter-}方块的消耗列表ui布局表*/
-  @BindField("recipeTable")
-  default RecipeTable recipeTable(){
-    return null;
-  }
-
-  /**{@code setter-}方块的消耗列表ui布局表*/
-  @BindField("recipeTable")
-  default void recipeTable(RecipeTable table){}
-
-
-  /**{@code setter-}方块的可选消耗列表ui布局表*/
-  @BindField("optionalRecipeTable")
-  default RecipeTable optionalRecipeTable(){
-    return null;
-  }
-
-
-  /**{@code setter-}方块的可选消耗列表ui布局表*/
-  @BindField("optionalRecipeTable")
-  default void optionalRecipeTable(RecipeTable table){}
 
   /**这个方块是否只在一次消耗可选列表时仅选中一个最靠前的可选项*/
   @BindField("oneOfOptionCons")
@@ -115,40 +91,6 @@ public interface ConsumerBlockComp{
     filter().applyFilter(consumers(), optionalCons());
     for(BaseConsumers consumer: consumers()){
       consumer.initFilter();
-    }
-  }
-
-  @Annotations.MethodEntry(entryMethod = "setStats", context = "stats -> stats")
-  default void setConsumeStats(Stats stats){
-    if(consumers().size > 1){
-      recipeTable(new RecipeTable(consumers().size));
-      for(int i=0; i<consumers().size; i++){
-        recipeTable().stats[i] = new Stats();
-        consumers().get(i).display(recipeTable().stats[i]);
-      }
-      recipeTable().build();
-    
-      stats.add(UncStat.inputs, table -> {
-        table.row();
-        table.add(recipeTable()).grow();
-      });
-    }
-    else if(consumers().size == 1){
-      consumers().get(0).display(stats);
-    }
-  
-    if(optionalCons().size > 0){
-      optionalRecipeTable(new RecipeTable(optionalCons().size));
-      for(int i=0; i<optionalCons().size; i++){
-        optionalRecipeTable().stats[i] = new Stats();
-        optionalCons().get(i).display(optionalRecipeTable().stats[i]);
-      }
-      optionalRecipeTable().build();
-    
-      stats.add(UncStat.optionalInputs, table -> {
-        table.row();
-        table.add(optionalRecipeTable()).grow();
-      });
     }
   }
 }

@@ -42,7 +42,7 @@ public class CircleGenerator extends LightningGenerator{
 
   @Override
   protected void handleVertex(LightningVertex vertex){
-    float step = Mathf.random(minInterval, maxInterval);
+    float step = seed.random(minInterval, maxInterval);
     float rotated = step/(Mathf.pi*radius/180)*(directory >= 0? 1: -1);
 
     if(rotated + currentRotated >= 360){
@@ -56,7 +56,7 @@ public class CircleGenerator extends LightningGenerator{
     else{
       currentRotated += rotated;
 
-      float offset = Mathf.random(-maxSpread, maxSpread);
+      float offset = seed.random(-maxSpread, maxSpread);
       Tmp.v2.set(Tmp.v1.set(rad.rotate(rotated))).setLength(offset).scl(offset < 0? -1: 1);
       Tmp.v1.add(Tmp.v2);
 

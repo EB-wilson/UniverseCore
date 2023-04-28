@@ -1,9 +1,14 @@
 package universecore.world.consumers;
 
+import arc.scene.ui.Image;
 import arc.scene.ui.layout.Table;
 import arc.struct.Seq;
+import arc.util.Scaling;
+import mindustry.core.UI;
 import mindustry.ctype.Content;
 import mindustry.gen.Building;
+import mindustry.gen.Icon;
+import mindustry.ui.Styles;
 import mindustry.world.meta.Stat;
 import mindustry.world.meta.StatUnit;
 import mindustry.world.meta.Stats;
@@ -15,6 +20,8 @@ public class ConsumePower<T extends Building & ConsumerBuildComp> extends BaseCo
   public float capacity;
   public boolean buffered;
 
+  public boolean showIcon;
+
   Seq<ConsumePower<T>> others = new Seq<>();
 
   public ConsumePower(float usage, float capacity){
@@ -25,6 +32,32 @@ public class ConsumePower<T extends Building & ConsumerBuildComp> extends BaseCo
   
   public ConsumeType<?> type(){
     return ConsumeType.power;
+  }
+
+  @Override
+  public boolean hasIcons() {
+    return showIcon;
+  }
+
+  @Override
+  public void buildIcons(Table table) {
+    if (showIcon) {
+      buildPowerImage(table, usage);
+    }
+  }
+
+  public static void buildPowerImage(Table table, float usage) {
+    table.stack(
+        new Table(o -> {
+          o.left();
+          o.add(new Image(Icon.power)).size(32f).scaling(Scaling.fit);
+        }),
+        new Table(t -> {
+          t.left().bottom();
+          t.add(usage *60 >= 1000 ? UI.formatAmount((long) (usage *60))+ "/s" : usage *60 + "/s").style(Styles.outlineLabel);
+          t.pack();
+        })
+    );
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})

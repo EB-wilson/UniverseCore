@@ -251,8 +251,72 @@ public class Annotations{
    * @see Entrust
    * */
   @Target({ElementType.PARAMETER, ElementType.FIELD, ElementType.TYPE_PARAMETER})
+  @Retention(RetentionPolicy.SOURCE)
   public @interface EntrustInst{
     /**仅作为构造函数参数时有效，表明是否已经手动分配，若为真，则不会生成构造函数的委托赋值语句*/
     boolean value() default false;
   }
+
+  //----------
+  //optimize
+  //----------
+  /**用于优化在方法中或者一整个类中的{@code new Type(args){{foo}}}形式的实例化行为，因为类似这样的匿名对象没有对超类的方法进行重写，所以可以将实例化的过程和初始化方法块进行分离
+   * <p>具体来说，这个注解只会影响其作用范围内的只有一个初始化代码块的匿名对象实例化，即语句满足以下条件：
+   * <ul>
+   *   <li>语句是创建一个匿名对象，例如{@code new Object(){...};}</li>
+   *   <li>匿名对象后的代码块内只能有初始化代码块（数量不限），不可声明任何字段或者声明/覆盖任何方法</li>
+   * </ul>
+   * 而此注解的作用范围与注释目标有关，具体而言：
+   * <pre>{@code
+   * 如果该注解注释在一个类上时，它会负责处理此类型中出现的对字段默认值分配匿名对象，例如：
+   *
+   * @InstanceOptimize
+   * public class Sample{
+   *   public Object obj = new Object(){{
+   *     System.out.println(toString());
+   *   }};
+   * }
+   *
+   * 编译后的等价代码：
+   *
+   * public class Sample{
+   *   public Object obj = new Object();
+   *
+   *   {
+   *     System.out.println(obj.toString());
+   *   }
+   * }
+   *
+   * 若注解注释在一个方法之上，那么这个注释将处理在这个方法内部的所有匿名对象创建（不改变语义），例如：
+   *
+   * public class Sample{
+   *   @InstanceOptimize
+   *   public List<String> getHelloWorld(){
+   *     return new ArrayList<>(){{
+   *       add("Hello ");
+   *       add("world");
+   *       add("!");
+   *     }};
+   *   }
+   * }
+   *
+   * 编译后的等价代码：
+   *
+   * public class Sample{
+   *   public List<String> getHelloWorld(){
+   *     List<String> var0 = new ArrayList<>();
+   *
+   *     {
+   *       var0.add("Hello ");
+   *       var0.add("world");
+   *       var0.add("!");
+   *     }
+   *
+   *     return var0;
+   *   }
+   * }
+   * }</pre>*/
+  @Target({ElementType.METHOD, ElementType.TYPE})
+  @Retention(RetentionPolicy.SOURCE)
+  public @interface InstanceOptimize{}
 }

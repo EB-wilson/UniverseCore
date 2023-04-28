@@ -43,13 +43,13 @@ public class RandomGenerator extends LightningGenerator{
       first = false;
     }
     else{
-      float distance = Mathf.random(minInterval, maxInterval);
+      float distance = seed.random(minInterval, maxInterval);
       if(currLength + distance > maxLength){
         vertex.isEnd = true;
       }
 
       currLength += distance;
-      Tmp.v1.setLength(distance).setAngle(curr.angle() + Mathf.random(-maxDeflect, maxDeflect));
+      Tmp.v1.setLength(distance).setAngle(curr.angle() + seed.random(-maxDeflect, maxDeflect));
       curr.add(Tmp.v1);
       maxDistance = Math.max(maxDistance, curr.len());
     }

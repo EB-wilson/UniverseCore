@@ -3,6 +3,7 @@ package universecore.world.producers;
 import arc.func.Floatf;
 import arc.graphics.Color;
 import arc.graphics.g2d.TextureRegion;
+import arc.scene.ui.layout.Table;
 import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ProducerBuildComp;
 import universecore.world.consumers.BaseConsume;
@@ -15,10 +16,6 @@ public abstract class BaseProduce<T extends ProducerBuildComp>{
 
   /**产出资源类型*/
   public abstract ProduceType<?> type();
-  
-  public TextureRegion icon(){
-    return BaseConsume.EMP;
-  }
 
   public Color color(){
     return null;
@@ -28,6 +25,11 @@ public abstract class BaseProduce<T extends ProducerBuildComp>{
     return blockWhenFull;
   }
 
+  public boolean hasIcons(){
+    return true;
+  }
+
+  public abstract void buildIcons(Table table);
   public abstract void merge(BaseProduce<T> other);
   public abstract void produce(T entity);
   public abstract void update(T entity);

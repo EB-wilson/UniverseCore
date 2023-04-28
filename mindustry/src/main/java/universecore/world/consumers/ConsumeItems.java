@@ -1,7 +1,6 @@
 package universecore.world.consumers;
 
 import arc.Core;
-import arc.graphics.g2d.TextureRegion;
 import arc.math.Mathf;
 import arc.scene.ui.layout.Table;
 import arc.struct.ObjectMap;
@@ -25,10 +24,10 @@ public class ConsumeItems<T extends Building & ConsumerBuildComp> extends Consum
   public ConsumeItems(ItemStack[] items){
     this.consItems = items;
   }
-  
+
   @Override
-  public TextureRegion icon(){
-    return consItems[0].item.uiIcon;
+  public void buildIcons(Table table) {
+    buildItemIcons(table, consItems, false, displayLim);
   }
 
   @SuppressWarnings({"rawtypes", "DuplicatedCode"})

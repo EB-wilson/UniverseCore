@@ -2,8 +2,8 @@ package universecore.world.producers;
 
 import arc.Core;
 import arc.graphics.Color;
-import arc.graphics.g2d.TextureRegion;
 import arc.math.Mathf;
+import arc.scene.ui.layout.Table;
 import arc.struct.ObjectMap;
 import mindustry.gen.Building;
 import mindustry.type.Item;
@@ -13,10 +13,14 @@ import mindustry.world.meta.Stat;
 import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ProducerBuildComp;
 
+import static universecore.world.consumers.ConsumeItemBase.buildItemIcons;
+
 public class ProduceItems<T extends Building & ProducerBuildComp> extends BaseProduce<T>{
   private static final ObjectMap<Item, ItemStack> TMP = new ObjectMap<>();
 
   public boolean showPerSecond = true;
+
+  public int displayLim = 4;
 
   /*控制是否随机产出产物(也就是是否为分离机)*/
   public boolean random = false;
@@ -41,8 +45,16 @@ public class ProduceItems<T extends Building & ProducerBuildComp> extends BasePr
   }
 
   @Override
-  public TextureRegion icon(){
-    return items[0].item.uiIcon;
+  public void buildIcons(Table table) {
+    if (random){
+      ItemStack[] i = new ItemStack[items.length];
+      for (int l = 0; l < i.length; l++) {
+        i[l] = items[l].copy();
+        i[l].amount = 0;
+      }
+      buildItemIcons(table, i, true, displayLim);
+    }
+    else buildItemIcons(table, items, false, displayLim);
   }
 
   @Override

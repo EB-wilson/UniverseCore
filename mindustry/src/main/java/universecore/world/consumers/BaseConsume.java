@@ -9,17 +9,18 @@ import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ConsumerBuildComp;
 
 public abstract class BaseConsume<T extends ConsumerBuildComp>{
-  public static TextureRegion EMP = new TextureRegion();
-
   public BaseConsumers parent;
   public Floatf<T> consMultiplier;
 
+
   /**消耗的类型*/
   public abstract ConsumeType<?> type();
-  
-  public TextureRegion icon(){
-    return EMP;
+
+  public boolean hasIcons(){
+    return true;
   }
+
+  public abstract void buildIcons(Table table);
 
   public abstract void merge(BaseConsume<T> other);
   

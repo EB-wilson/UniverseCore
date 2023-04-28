@@ -9,10 +9,12 @@ import mindustry.world.meta.Stat;
 import mindustry.world.meta.StatCat;
 import mindustry.world.meta.StatValue;
 import mindustry.world.meta.Stats;
+import universecore.components.blockcomp.FactoryBlockComp;
 
 /**生产消耗的统计信息显示器，用于显示几组生产列表的信息
  * @author EBwilson
- * @since 1.0*/
+ * @since 1.0
+ * */
 public class RecipeTable extends Table{
   public Stats[] stats;
   
@@ -33,27 +35,6 @@ public class RecipeTable extends Table{
   }
   
   public void buildRecipe(Table table, Stats stat){
-    for(StatCat cat : stat.toMap().keys()){
-      OrderedMap<Stat, Seq<StatValue>> map = stat.toMap().get(cat);
-      if(map.size == 0) continue;
-
-      if(stat.useCategories){
-        table.add("@category." + cat.name).color(Pal.accent).fillX();
-        table.row();
-      }
-
-      for(Stat state : map.keys()){
-        table.table(inset -> {
-          inset.left();
-          inset.add("[lightgray]" + state.localized() + ":[] ").left();
-          Seq<StatValue> arr = map.get(state);
-          for(StatValue value : arr){
-            value.display(inset);
-            inset.add().size(10f);
-          }
-        }).fillX().padLeft(10);
-        table.row();
-      }
-    }
+    FactoryBlockComp.buildStatTable(table, stat);
   }
 }

@@ -1,18 +1,19 @@
 package universecore.world.consumers;
 
+import arc.struct.Seq;
 import mindustry.ctype.ContentType;
 
 import java.util.ArrayList;
 
 @SuppressWarnings("unchecked")
 public class ConsumeType<T extends BaseConsume<?>>{
-  private static final ArrayList<ConsumeType<?>> allType = new ArrayList<>();
+  private static final Seq<ConsumeType<?>> allType = new Seq<>();
   private final int id;
   private final Class<T> type;
   private final ContentType contType;
   
   public ConsumeType(Class<T> type, ContentType cType){
-    id = allType.size();
+    id = allType.size;
     this.type = type;
     contType = cType;
     allType.add(this);
@@ -31,7 +32,7 @@ public class ConsumeType<T extends BaseConsume<?>>{
   }
   
   public static ConsumeType<?>[] all(){
-    return allType.toArray(new ConsumeType[0]);
+    return allType.toArray(ConsumeType.class);
   }
   
   public static <Type extends BaseConsume<?>> ConsumeType<? extends Type> add(Class<Type> type, ContentType cType){

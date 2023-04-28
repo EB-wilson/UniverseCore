@@ -7,12 +7,10 @@ import mindustry.type.LiquidStack;
 /**提供更多操作的流体堆
  *
  * @since 1.0
- * @author EBwilson*/
+ * @author EBwilson
+ * @deprecated 无用类型，将废弃*/
 public class UncLiquidStack extends LiquidStack{
   public static final UncLiquidStack[] empty = {};
-
-  public Liquid liquid;
-  public float amount;
 
   public UncLiquidStack(Liquid liquid, float amount){
     if(liquid == null) liquid = Liquids.water;

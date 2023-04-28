@@ -38,6 +38,13 @@ public class MultiParticleModel extends ParticleModel{
   }
 
   @Override
+  public void init(Particle p){
+    for(ParticleModel model: models){
+      model.init(p);
+    }
+  }
+
+  @Override
   public void deflect(Particle p){
     for(ParticleModel model: models){
       model.deflect(p);
@@ -58,5 +65,16 @@ public class MultiParticleModel extends ParticleModel{
       if(model.isFaded(p, cloud)) return true;
     }
     return false;
+  }
+
+  @Override
+  public float currSize(Particle p) {
+    float res = Float.MAX_VALUE;
+
+    for (ParticleModel model : models) {
+      res = Math.min(model.currSize(p), res);
+    }
+
+    return res;
   }
 }

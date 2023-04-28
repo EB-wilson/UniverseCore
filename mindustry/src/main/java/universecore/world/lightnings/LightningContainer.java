@@ -3,6 +3,7 @@ package universecore.world.lightnings;
 import arc.func.Cons;
 import arc.func.Cons2;
 import arc.func.FloatFloatf;
+import arc.math.Interp;
 import arc.math.Mathf;
 import arc.struct.Seq;
 import arc.util.Time;
@@ -24,14 +25,21 @@ public class LightningContainer implements Iterable<Lightning>{
   /**闪电从产生到完全出现需要的时间，这会平摊给每一段闪电，fps为当前帧率
    * 但如果这个值为0,那么闪电会立即出现*/
   public float time = 0;
-  /**闪电的扩散速度，小于或等于0时默认使用time提供的路径扩散计算方式，否则使用给出的速度来处理闪电的扩散（单位：/tick）*/
+  /**闪电的扩散速度，小于或等于0时默认使用time提供的路径扩散计算方式，否则使用给出的速度来处理闪电的扩散（单位：/tick）
+   * @deprecated 规范化，此API不再可用*/
   public float speed = 0;
   /**闪电的存在时间*/
   public float lifeTime = 30;
+  /**闪电消逝的过渡时间，若不设置则消失过度时间等于闪电的存在时间*/
+  public float fadeTime = -1;
+  /**闪电整体的宽度是否随闪电的持续时间淡出*/
+  public boolean fade = true;
+  /**闪电是否随淡出过程从起点开始消失*/
+  public boolean backFade = false;
   /**闪电每一段宽度的随机区间*/
   public float minWidth = 2.5f, maxWidth = 4.5f;
   /**闪电的衰减变换器，传入的数值为闪电的存在时间进度*/
-  public FloatFloatf lerp = f -> Mathf.pow(1 - f, 2);
+  public Interp lerp = Interp.pow2Out;
 
   /**闪电分支创建时调用的回调函数，一般用于定义闪电的分支子容器属性*/
   public Cons<Lightning> branchCreated;
@@ -50,9 +58,11 @@ public class LightningContainer implements Iterable<Lightning>{
         generator,
         Mathf.random(minWidth, maxWidth),
         lifeTime,
+        fadeTime > 0? fadeTime: lifeTime,
         lerp,
         time,
-        speed,
+        fade,
+        backFade,
         trigger
     ));
   }

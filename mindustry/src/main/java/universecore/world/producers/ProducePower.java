@@ -1,13 +1,21 @@
 package universecore.world.producers;
 
+import arc.scene.ui.Image;
+import arc.scene.ui.layout.Table;
+import arc.util.Scaling;
+import mindustry.core.UI;
 import mindustry.gen.Building;
+import mindustry.gen.Icon;
+import mindustry.ui.Styles;
 import mindustry.world.meta.Stat;
 import mindustry.world.meta.StatUnit;
 import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ProducerBuildComp;
+import universecore.world.consumers.ConsumePower;
 
 public class ProducePower<T extends Building & ProducerBuildComp> extends BaseProduce<T>{
   public float powerProduction;
+  public boolean showIcon = true;
   
   public ProducePower(float prod){
     powerProduction = prod;
@@ -16,6 +24,18 @@ public class ProducePower<T extends Building & ProducerBuildComp> extends BasePr
   @Override
   public ProduceType<ProducePower<?>> type(){
     return ProduceType.power;
+  }
+
+  @Override
+  public boolean hasIcons() {
+    return showIcon;
+  }
+
+  @Override
+  public void buildIcons(Table table) {
+    if (showIcon){
+      ConsumePower.buildPowerImage(table, powerProduction);
+    }
   }
 
   @Override

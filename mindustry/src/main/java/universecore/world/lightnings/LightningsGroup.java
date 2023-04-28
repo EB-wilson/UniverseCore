@@ -24,6 +24,7 @@ import universecore.world.lightnings.generator.LightningGenerator;
  *
  * @since 1.5
  * @author EBwilson
+ * @deprecated  可能不使用
  * */
 @SuppressWarnings("unchecked")
 public class LightningsGroup extends LightningContainer implements Drawc, Pool.Poolable{//TODO 未完成

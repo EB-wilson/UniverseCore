@@ -23,23 +23,6 @@ public interface ProducerBlockComp extends ConsumerBlockComp{
     producers().add(produce);
     return produce;
   }
-
-  @Annotations.MethodEntry(entryMethod = "setStats", context = "stats -> stats")
-  default void setProducerStats(Stats stats){
-    if(producers().size > 1){
-      for(int i=0; i<consumers().size; i++){
-        for(BaseProduce<?> p: producers().get(i).all()){
-          p.display(recipeTable().stats[i]);
-        }
-        recipeTable().build();
-      }
-    }
-    else if(producers().size == 1){
-      for(BaseProduce<?> prod: producers().get(0).all()){
-        prod.display(stats);
-      }
-    }
-  }
   
   /**初始化匹配消耗生产列表，在init()最后调用*/
   @Annotations.MethodEntry(entryMethod = "init")

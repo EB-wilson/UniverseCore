@@ -1,5 +1,5 @@
 processor: EntryProcessor (full class name: universecore.annotations.EntryProcessor)
-time: Fri Mar 24 12:10:11 GMT+08:00 2023
+time: Fri Apr 28 19:58:37 CST 2023
 
 -----------------------------------------
 annotation: universecore.annotations.Annotations.ImplEntries
@@ -57,7 +57,7 @@ annotation: universecore.annotations.Annotations.ImplEntries
 > class: universecore.world.particles.Particle
   1| 
   2| @Annotations.ImplEntries
-  3| public class Particle extends Decal implements ExtraVariableComp {
+  3| public class Particle extends Decal implements ExtraVariableComp, Iterable<Particle.Cloud> {
   4|     
   5|     public Particle() {
   6|         super();
@@ -65,7 +65,7 @@ annotation: universecore.annotations.Annotations.ImplEntries
   8|     public java.util.Map<java.lang.String, java.lang.Object> extraVar = new java.util.HashMap<>();
   9|     private static int counter = 0;
  10|     public static int maxAmount = 1024;
- 11|     protected static final OrderedSet<Particle> all = new OrderedSet<>();
+ 11|     protected static final ObjectSet<Particle> all = new ObjectSet<>();
  12|     protected static final Seq<Particle> temp = new Seq<>();
  13|     protected Vec2 startPos = new Vec2();
  14|     protected float clipSize;
@@ -77,184 +77,223 @@ annotation: universecore.annotations.Annotations.ImplEntries
  20|     public float defSpeed;
  21|     public float defSize;
  22|     public ParticleModel model;
- 23|     
- 24|     public static Seq<Particle> get(Boolf<Particle> filter) {
- 25|         temp.clear();
- 26|         for (Particle particle : all) {
- 27|             if (filter.get(particle)) temp.add(particle);
- 28|         }
- 29|         return temp;
- 30|     }
- 31|     
- 32|     @Override
- 33|     public void add() {
- 34|         super.add();
- 35|         counter++;
- 36|         currentCloud = Pools.obtain(Cloud.class, Cloud::new);
- 37|         currentCloud.x = x;
- 38|         currentCloud.y = y;
- 39|         currentCloud.size = 0;
- 40|         currentCloud.color = model.trailColor(this).cpy();
- 41|         firstCloud = currentCloud;
- 42|         if (counter >= maxAmount && !all.isEmpty()) {
- 43|             all.orderedItems().get(all.size - 1).remove();
- 44|         }
- 45|     }
- 46|     
- 47|     @Override
- 48|     public void draw() {
- 49|         Draw.z(Layer.effect);
- 50|         model.draw(this);
- 51|         if (currentCloud != null) {
- 52|             for (Cloud c : currentCloud) {
- 53|                 c.draw();
- 54|             }
- 55|         }
- 56|         Draw.reset();
- 57|     }
- 58|     
- 59|     @Override
- 60|     public void update() {
- 61|         model.deflect(this);
- 62|         x += speed.x * Time.delta;
- 63|         y += speed.y * Time.delta;
- 64|         size = model.currSize(this);
- 65|         Cloud c = Pools.obtain(Cloud.class, Cloud::new);
- 66|         c.x = x;
- 67|         c.y = y;
- 68|         c.size = size;
- 69|         c.color = model.trailColor(this).cpy();
- 70|         c.perCloud = currentCloud;
- 71|         currentCloud.nextCloud = c;
- 72|         currentCloud = c;
- 73|         cloudCount++;
- 74|         for (Cloud cloud : currentCloud) {
- 75|             model.updateTrail(this, cloud);
- 76|         }
- 77|         boolean mark = false;
- 78|         while (firstCloud.nextCloud != null) {
- 79|             if (model.isFaded(this, firstCloud)) {
- 80|                 Cloud n = firstCloud.nextCloud;
- 81|                 n.perCloud = null;
- 82|                 Pools.free(firstCloud);
- 83|                 firstCloud = n;
- 84|                 mark = true;
- 85|                 cloudCount--;
- 86|             } else break;
- 87|         }
- 88|         if (!mark && model.isFinal(this)) {
- 89|             Cloud n = firstCloud.nextCloud;
- 90|             n.perCloud = null;
- 91|             Pools.free(firstCloud);
- 92|             firstCloud = n;
- 93|             cloudCount--;
- 94|         }
- 95|         if (cloudCount <= 4 && model.isFinal(this)) remove();
- 96|     }
- 97|     
- 98|     @Override
- 99|     public void remove() {
-100|         if (this.added) {
-101|             all.remove(this);
-102|             counter--;
-103|         }
-104|         super.remove();
-105|     }
-106|     
-107|     @Override
-108|     public int classId() {
-109|         return 102;
-110|     }
-111|     
-112|     @Override
-113|     public float clipSize() {
-114|         return clipSize = Math.max(Tmp.v1.set(x, y).sub(startPos).len(), clipSize);
-115|     }
-116|     
-117|     @Override
-118|     public void reset() {
-119|         super.reset();
-120|         speed.setZero();
-121|         startPos.setZero();
-122|         clipSize = 0;
-123|         while (firstCloud.nextCloud != null) {
-124|             Cloud n = firstCloud.nextCloud;
-125|             n.perCloud = null;
-126|             Pools.free(firstCloud);
-127|             firstCloud = n;
-128|         }
-129|         Pools.free(firstCloud);
-130|         currentCloud = null;
-131|         firstCloud = null;
-132|         cloudCount = 0;
-133|         size = 0;
-134|         extra().clear();
-135|         model = null;
-136|         color = null;
-137|     }
-138|     
-139|     public static class Cloud implements Pool.Poolable, Iterable<Cloud> {
-140|         
-141|         public Cloud() {
-142|             super();
-143|         }
-144|         public Color color;
-145|         public float x;
-146|         public float y;
-147|         public float size;
-148|         public Cloud perCloud;
-149|         public Cloud nextCloud;
-150|         
-151|         public void draw() {
-152|             Draw.color(color);
-153|             if (perCloud != null && nextCloud != null) {
-154|                 float angle = Angles.angle(x - perCloud.x, y - perCloud.y);
-155|                 float dx1 = Angles.trnsx(angle + 90, size);
-156|                 float dy1 = Angles.trnsy(angle + 90, size);
-157|                 angle = Angles.angle(nextCloud.x - x, nextCloud.y - y);
-158|                 float dx2 = Angles.trnsx(angle + 90, nextCloud.size);
-159|                 float dy2 = Angles.trnsy(angle + 90, nextCloud.size);
-160|                 Fill.quad(x + dx1, y + dy1, x - dx1, y - dy1, nextCloud.x - dx2, nextCloud.y - dy2, nextCloud.x + dx2, nextCloud.y + dy2);
-161|             } else if (perCloud == null && nextCloud != null) {
-162|                 float angle = Angles.angle(nextCloud.x - x, nextCloud.y - y);
-163|                 float dx2 = Angles.trnsx(angle + 90, nextCloud.size);
-164|                 float dy2 = Angles.trnsy(angle + 90, nextCloud.size);
-165|                 Fill.quad(x, y, x, y, nextCloud.x - dx2, nextCloud.y - dy2, nextCloud.x + dx2, nextCloud.y + dy2);
-166|             }
-167|         }
-168|         
-169|         @Override
-170|         public void reset() {
-171|             x = 0;
-172|             y = 0;
-173|             size = 0;
-174|             color = null;
-175|             perCloud = null;
-176|             nextCloud = null;
-177|         }
-178|         
-179|         @Override
-180|         public Iterator<Cloud> iterator() {
-181|             return new Iterator<>(){
-182|                 Cloud curr = Cloud.this;
-183|                 
-184|                 @Override
-185|                 public boolean hasNext() {
-186|                     return curr.perCloud != null;
-187|                 }
-188|                 
-189|                 @Override
-190|                 public Cloud next() {
-191|                     return curr = curr.perCloud;
-192|                 }
-193|             };
+ 23|     public float layer;
+ 24|     
+ 25|     public static int count() {
+ 26|         return all.size;
+ 27|     }
+ 28|     
+ 29|     public static Seq<Particle> get(Boolf<Particle> filter) {
+ 30|         temp.clear();
+ 31|         for (Particle particle : all) {
+ 32|             if (filter.get(particle)) temp.add(particle);
+ 33|         }
+ 34|         return temp;
+ 35|     }
+ 36|     
+ 37|     @Override
+ 38|     public void add() {
+ 39|         index__all = Groups.all.addIndex(this);
+ 40|         index__draw = Groups.draw.addIndex(this);
+ 41|         all.add(this);
+ 42|         counter++;
+ 43|         currentCloud = Pools.get(Cloud.class, Cloud::new, 65536).obtain();
+ 44|         currentCloud.x = x;
+ 45|         currentCloud.y = y;
+ 46|         currentCloud.size = 0;
+ 47|         currentCloud.color.set(model.trailColor(this));
+ 48|         firstCloud = currentCloud;
+ 49|         added = true;
+ 50|         model.init(this);
+ 51|         if (counter >= maxAmount) {
+ 52|             remove();
+ 53|         }
+ 54|     }
+ 55|     
+ 56|     @Override
+ 57|     public void draw() {
+ 58|         float l = Draw.z();
+ 59|         Draw.z(layer);
+ 60|         model.draw(this);
+ 61|         if (currentCloud != null) {
+ 62|             model.drawTrail(this);
+ 63|         }
+ 64|         Draw.z(l);
+ 65|         Draw.reset();
+ 66|     }
+ 67|     
+ 68|     @Override
+ 69|     public void update() {
+ 70|         model.deflect(this);
+ 71|         x += speed.x * Time.delta;
+ 72|         y += speed.y * Time.delta;
+ 73|         size = model.currSize(this);
+ 74|         model.update(this);
+ 75|         Cloud c = Pools.get(Cloud.class, Cloud::new, 65536).obtain();
+ 76|         c.x = x;
+ 77|         c.y = y;
+ 78|         c.size = size;
+ 79|         c.color.set(model.trailColor(this));
+ 80|         c.perCloud = currentCloud;
+ 81|         currentCloud.nextCloud = c;
+ 82|         currentCloud = c;
+ 83|         cloudCount++;
+ 84|         for (Cloud cloud : currentCloud) {
+ 85|             model.updateTrail(this, cloud);
+ 86|         }
+ 87|         boolean mark = false;
+ 88|         while (firstCloud.nextCloud != null) {
+ 89|             if (model.isFaded(this, firstCloud)) {
+ 90|                 popFirst();
+ 91|                 mark = true;
+ 92|             } else break;
+ 93|         }
+ 94|         if (!mark && model.isFinal(this)) {
+ 95|             popFirst();
+ 96|             if (cloudCount > 4) popFirst();
+ 97|         }
+ 98|         if (cloudCount <= 4 && model.isFinal(this)) remove();
+ 99|     }
+100|     
+101|     private void popFirst() {
+102|         Cloud n = firstCloud.nextCloud;
+103|         n.perCloud = null;
+104|         Pools.free(firstCloud);
+105|         firstCloud = n;
+106|         cloudCount--;
+107|     }
+108|     
+109|     @Override
+110|     public void remove() {
+111|         if (added) {
+112|             Groups.all.removeIndex(this, this.index__all);
+113|             index__all = -1;
+114|             Groups.draw.removeIndex(this, this.index__draw);
+115|             index__draw = -1;
+116|             Groups.queueFree(this);
+117|             all.remove(this);
+118|             counter--;
+119|             added = false;
+120|         }
+121|     }
+122|     
+123|     @Override
+124|     public int classId() {
+125|         return 102;
+126|     }
+127|     
+128|     @Override
+129|     public float clipSize() {
+130|         return clipSize = Math.max(Tmp.v1.set(x, y).sub(startPos).len(), clipSize);
+131|     }
+132|     
+133|     @Override
+134|     public void reset() {
+135|         added = false;
+136|         id = EntityGroup.nextId();
+137|         lifetime = 0;
+138|         region = null;
+139|         rotation = 0;
+140|         time = 0;
+141|         x = 0;
+142|         y = 0;
+143|         speed.setZero();
+144|         startPos.setZero();
+145|         layer = 0;
+146|         clipSize = 0;
+147|         while (firstCloud.nextCloud != null) {
+148|             popFirst();
+149|         }
+150|         Pools.free(firstCloud);
+151|         currentCloud = null;
+152|         firstCloud = null;
+153|         cloudCount = 0;
+154|         size = 0;
+155|         extra().clear();
+156|         model = null;
+157|         color = null;
+158|     }
+159|     
+160|     @Override
+161|     public Iterator<Cloud> iterator() {
+162|         return currentCloud.iterator();
+163|     }
+164|     
+165|     public static class Cloud implements Pool.Poolable, Iterable<Cloud> {
+166|         
+167|         public Cloud() {
+168|             super();
+169|         }
+170|         public final Color color = new Color();
+171|         public float x;
+172|         public float y;
+173|         public float size;
+174|         public Cloud perCloud;
+175|         public Cloud nextCloud;
+176|         Itr itr = new Itr();
+177|         
+178|         public void draw() {
+179|             Draw.color(color);
+180|             if (perCloud != null && nextCloud != null) {
+181|                 float angle = Angles.angle(x - perCloud.x, y - perCloud.y);
+182|                 float dx1 = Angles.trnsx(angle + 90, size);
+183|                 float dy1 = Angles.trnsy(angle + 90, size);
+184|                 angle = Angles.angle(nextCloud.x - x, nextCloud.y - y);
+185|                 float dx2 = Angles.trnsx(angle + 90, nextCloud.size);
+186|                 float dy2 = Angles.trnsy(angle + 90, nextCloud.size);
+187|                 Fill.quad(x + dx1, y + dy1, x - dx1, y - dy1, nextCloud.x - dx2, nextCloud.y - dy2, nextCloud.x + dx2, nextCloud.y + dy2);
+188|             } else if (perCloud == null && nextCloud != null) {
+189|                 float angle = Angles.angle(nextCloud.x - x, nextCloud.y - y);
+190|                 float dx2 = Angles.trnsx(angle + 90, nextCloud.size);
+191|                 float dy2 = Angles.trnsy(angle + 90, nextCloud.size);
+192|                 Fill.quad(x, y, x, y, nextCloud.x - dx2, nextCloud.y - dy2, nextCloud.x + dx2, nextCloud.y + dy2);
+193|             }
 194|         }
-195|     }
-196|     
-197|     public java.util.Map<java.lang.String, java.lang.Object> extra() {
-198|         return this.extraVar;
-199|     }
-200| }
+195|         
+196|         @Override
+197|         public void reset() {
+198|             x = 0;
+199|             y = 0;
+200|             size = 0;
+201|             color.set(Color.clear);
+202|             perCloud = null;
+203|             nextCloud = null;
+204|         }
+205|         
+206|         @SuppressWarnings(value = "ReturnOfInnerClass")
+207|         @Override
+208|         public Iterator<Cloud> iterator() {
+209|             itr.reset();
+210|             return itr;
+211|         }
+212|         
+213|         class Itr implements Iterator<Cloud> {
+214|             
+215|             Itr() {
+216|                 super();
+217|             }
+218|             Cloud curr = Cloud.this;
+219|             
+220|             public void reset() {
+221|                 curr = Cloud.this;
+222|             }
+223|             
+224|             @Override
+225|             public boolean hasNext() {
+226|                 return curr.perCloud != null;
+227|             }
+228|             
+229|             @Override
+230|             public Cloud next() {
+231|                 return curr = curr.perCloud;
+232|             }
+233|         }
+234|     }
+235|     
+236|     public java.util.Map<java.lang.String, java.lang.Object> extra() {
+237|         return this.extraVar;
+238|     }
+239| }
 
 > class: testbuild.Test
  1| 

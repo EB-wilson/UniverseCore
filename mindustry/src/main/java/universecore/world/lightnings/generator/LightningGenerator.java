@@ -4,6 +4,7 @@ import arc.func.Cons;
 import arc.func.Func2;
 import arc.math.Angles;
 import arc.math.Mathf;
+import arc.math.Rand;
 import arc.util.pooling.Pool;
 import arc.util.pooling.Pools;
 import universecore.util.funcs.Floatp2;
@@ -20,6 +21,8 @@ import java.util.Iterator;
  * @author EBwilson
  * */
 public abstract class LightningGenerator implements Iterable<LightningVertex>, Iterator<LightningVertex>{
+  public Rand seed = new Rand();
+
   /**顶点基准间距最小值*/
   public float minInterval = 10;
   /**顶点基准位置最大值*/
@@ -77,9 +80,11 @@ public abstract class LightningGenerator implements Iterable<LightningVertex>, I
         gen,
         curr.width*strength,
         curr.lifeTime,
+        curr.fadeTime,
         curr.lerp,
         curr.time,
-        curr.speed,
+        curr.fade,
+        curr.backFade,
         curr.trigger
     );
     gen.blockNow = old;

@@ -1,8 +1,6 @@
 package universecore.world.consumers;
 
-import arc.Core;
 import arc.func.*;
-import arc.graphics.g2d.TextureRegion;
 import arc.scene.event.Touchable;
 import arc.struct.ObjectMap;
 import arc.struct.ObjectSet;
@@ -13,18 +11,19 @@ import mindustry.gen.Building;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
 import mindustry.type.Liquid;
+import mindustry.type.LiquidStack;
 import mindustry.world.meta.Stat;
 import mindustry.world.meta.StatUnit;
 import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ConsumerBuildComp;
 import universecore.util.Empties;
-import universecore.util.UncLiquidStack;
 
 /**消耗列表，记录一个消耗的包含生产时间，可选等在内的所有信息
  * @author EBwilson */
 @SuppressWarnings("unchecked")
 public class BaseConsumers{
   protected final ObjectMap<ConsumeType<?>, BaseConsume<?>> cons = new ObjectMap<>();
+  protected static final Seq<BaseConsume<?>> tmpCons = new Seq<>();
   
   /**该值控制生产消耗的时间*/
   public float craftTime = 60;
@@ -34,9 +33,7 @@ public class BaseConsumers{
   /**是否为可选*/
   public final boolean optional;
   public boolean optionalAlwaysValid = true;
-  
-  /**图标，在选择消耗列表时显示，默认为首个消耗项*/
-  public Prov<TextureRegion> icon;
+
   /**可选列表可用时将随更新执行的目标函数*/
   public Cons2<ConsumerBuildComp, BaseConsumers> optionalDef = (entity, cons) -> {};
   /**在统计信息显示自定义内容的函数*/
@@ -75,11 +72,6 @@ public class BaseConsumers{
 
   public void addSelfAccess(ConsumeType<?> type, Content content){
     selfAccess.get(type, ObjectSet::new).add(content);
-  }
-
-  public BaseConsumers setIcon(TextureRegion icon){
-    this.icon = () -> icon;
-    return this;
   }
   
   public BaseConsumers time(float time){
@@ -123,10 +115,10 @@ public class BaseConsumers{
   }
 
   public ConsumeLiquids<? extends ConsumerBuildComp> liquid(Liquid liquid, float amount){
-    return liquids(new UncLiquidStack(liquid, amount));
+    return liquids(new LiquidStack(liquid, amount));
   }
   
-  public ConsumeLiquids<? extends ConsumerBuildComp> liquids(UncLiquidStack... liquids){
+  public ConsumeLiquids<? extends ConsumerBuildComp> liquids(LiquidStack... liquids){
     return add(new ConsumeLiquids<>(liquids));
   }
   
@@ -173,17 +165,10 @@ public class BaseConsumers{
     if(c == null){
       cons.put(consume.type(), consume);
       consume.parent = this;
-      if(icon == null && consume.icon() != BaseConsume.EMP){
-        icon = consume::icon;
-      }
       return consume;
     }
     else c.merge(consume);
     return (T) c;
-  }
-
-  public TextureRegion icon(){
-    return icon == null? Core.atlas.find("error"): icon.get();
   }
 
   @SuppressWarnings("unchecked")
@@ -192,7 +177,14 @@ public class BaseConsumers{
   }
 
   public Iterable<BaseConsume<? extends ConsumerBuildComp>> all(){
-    return cons.values();
+    tmpCons.clear();
+
+    for (ConsumeType<?> type : ConsumeType.all()) {
+      BaseConsume<?> c = cons.get(type);
+      if (c != null) tmpCons.add(c);
+    }
+
+    return tmpCons;
   }
 
   public void remove(ConsumeType<?> type){
@@ -202,8 +194,7 @@ public class BaseConsumers{
   public void display(Stats stats){
     if(cons.size > 0){
       if(showTime) stats.add(Stat.productionTime, craftTime / 60f, StatUnit.seconds);
-      for(BaseConsume<?> c: cons.values().toSeq().sort((a, b) -> a.type().id() - b.type().id())){
-        if(c == null) return;
+      for(BaseConsume<?> c: all()){
         c.display(stats);
       }
       display.get(stats, this);

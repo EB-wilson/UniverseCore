@@ -21,7 +21,7 @@ public class ShrinkGenerator extends LightningGenerator{
   @Override
   public void reset(){
     super.reset();
-    vec.rnd(distance = Mathf.random(minRange, maxRange));
+    vec.rnd(distance = seed.random(minRange, maxRange));
     currentDistance = distance;
     first = true;
   }
@@ -33,14 +33,14 @@ public class ShrinkGenerator extends LightningGenerator{
 
   @Override
   protected void handleVertex(LightningVertex vertex){
-    currentDistance -= Mathf.random(minInterval, maxInterval);
+    currentDistance -= seed.random(minInterval, maxInterval);
 
     if(currentDistance > minInterval){
       if(first){
         Tmp.v2.setZero();
       }
       else{
-        float offset = Mathf.random(-maxSpread, maxSpread);
+        float offset = seed.random(-maxSpread, maxSpread);
         Tmp.v2.set(vec).setLength(currentDistance).add(Tmp.v1.set(vec).rotate90(1).setLength(offset).scl(offset < 0? -1: 1));
       }
     }

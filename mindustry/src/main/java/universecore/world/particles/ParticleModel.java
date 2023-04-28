@@ -51,6 +51,10 @@ public class ParticleModel{
 
   }
 
+  public void init(Particle particle) {
+
+  }
+
   public boolean isFinal(Particle p){
     return p.speed.len() <= 0.03f;
   }
@@ -66,4 +70,5 @@ public class ParticleModel{
   public boolean isFaded(Particle p, Particle.Cloud cloud){
     return cloud.size < 0.03f;
   }
+
 }

@@ -32,14 +32,14 @@ public class VectorLightningGenerator extends LightningGenerator{
 
   @Override
   protected void handleVertex(LightningVertex vertex){
-    currentDistance += Mathf.random(minInterval, maxInterval);
+    currentDistance += seed.random(minInterval, maxInterval);
 
     if(currentDistance < distance - minInterval){
       if(first){
         Tmp.v2.setZero();
       }
       else{
-        float offset = Mathf.random(-maxSpread, maxSpread);
+        float offset = seed.random(-maxSpread, maxSpread);
         Tmp.v2.set(vector).setLength(currentDistance).add(Tmp.v1.set(vector).rotate90(1).setLength(offset).scl(offset < 0? -1: 1));
       }
     }

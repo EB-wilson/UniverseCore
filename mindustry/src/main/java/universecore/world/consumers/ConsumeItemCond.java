@@ -61,6 +61,11 @@ public class ConsumeItemCond<T extends Building & ConsumerBuildComp> extends Con
     return consItems;
   }
 
+  @Override
+  public void buildIcons(Table table) {
+    buildItemIcons(table, getCons(), true, displayLim);
+  }
+
   @SuppressWarnings({"rawtypes"})
   @Override
   public void merge(BaseConsume<T> other){

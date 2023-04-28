@@ -10,13 +10,13 @@ import mindustry.Vars;
 import mindustry.ctype.Content;
 import mindustry.gen.Building;
 import mindustry.type.Liquid;
+import mindustry.type.LiquidStack;
 import mindustry.ui.LiquidDisplay;
 import mindustry.ui.MultiReqImage;
 import mindustry.ui.ReqImage;
 import mindustry.world.meta.Stat;
 import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ConsumerBuildComp;
-import universecore.util.UncLiquidStack;
 
 import static mindustry.Vars.content;
 
@@ -35,15 +35,15 @@ public class ConsumeLiquidCond<T extends Building & ConsumerBuildComp> extends C
   public Floatf<Liquid> liquidEfficiency = l -> 1;
 
   public Liquid getCurrCons(T entity){
-    for(UncLiquidStack liquid: consLiquids){
+    for(LiquidStack liquid: consLiquids){
       if(entity.liquids.get(liquid.liquid) > 0.001f) return liquid.liquid;
     }
     return null;
   }
 
-  public UncLiquidStack[] getCons(){
+  public LiquidStack[] getCons(){
     if(consLiquids == null){
-      Seq<UncLiquidStack> seq = new Seq<>();
+      Seq<LiquidStack> seq = new Seq<>();
       for(Liquid liquid: Vars.content.liquids()){
         if(filter != null && !filter.get(liquid)) continue;
 
@@ -67,13 +67,18 @@ public class ConsumeLiquidCond<T extends Building & ConsumerBuildComp> extends C
 
         if((consGas == 1 && !liquid.gas) || (consGas == 0 && liquid.gas)) continue;
 
-        seq.add(new UncLiquidStack(liquid, usage*usageMultiplier.get(liquid)));
+        seq.add(new LiquidStack(liquid, usage*usageMultiplier.get(liquid)));
       }
 
-      consLiquids = seq.toArray(UncLiquidStack.class);
+      consLiquids = seq.toArray(LiquidStack.class);
     }
 
     return consLiquids;
+  }
+
+  @Override
+  public void buildIcons(Table table) {
+    buildLiquidIcons(table, getCons(), true, displayLim);
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
@@ -107,13 +112,13 @@ public class ConsumeLiquidCond<T extends Building & ConsumerBuildComp> extends C
 
   @Override
   public void update(T entity){
-    UncLiquidStack[] cons = getCons();
+    LiquidStack[] cons = getCons();
     if(cons.length == 0) return;
 
     Liquid curr = getCurrCons(entity);
     if(curr == null) return;
 
-    for(UncLiquidStack con: cons){
+    for(LiquidStack con: cons){
       if(con.liquid == curr){
         entity.liquids.remove(con.liquid, con.amount*parent.delta(entity)*multiple(entity));
         return;
@@ -130,7 +135,7 @@ public class ConsumeLiquidCond<T extends Building & ConsumerBuildComp> extends C
         t.add(Core.bundle.get("misc.liquid") + ":");
 
         int count = 0;
-        for(UncLiquidStack stack: getCons()){
+        for(LiquidStack stack: getCons()){
           if(count != 0) t.add("[gray]/[]");
           if(count != 0 && count % 6 == 0) t.row();
           t.add(new LiquidDisplay(stack.liquid, stack.amount*60, true));
@@ -152,13 +157,13 @@ public class ConsumeLiquidCond<T extends Building & ConsumerBuildComp> extends C
 
   @Override
   public float efficiency(T entity){
-    UncLiquidStack[] cons = getCons();
+    LiquidStack[] cons = getCons();
     if(cons.length == 0) return 1;
 
     Liquid curr = getCurrCons(entity);
     if(curr == null) return 0;
 
-    for(UncLiquidStack stack: cons){
+    for(LiquidStack stack: cons){
       if(curr == stack.liquid){
         return liquidEfficiency.get(stack.liquid)*Mathf.clamp(entity.liquids.get(stack.liquid)/stack.amount);
       }

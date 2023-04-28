@@ -5,6 +5,7 @@ import arc.func.FloatFloatf;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Fill;
 import arc.math.Angles;
+import arc.math.Interp;
 import arc.math.Mathf;
 import arc.math.geom.Vec2;
 import arc.struct.Seq;
@@ -28,6 +29,12 @@ public class Lightning implements Pool.Poolable{
   public final Seq<LightningVertex> vertices = new Seq<>();
   /**闪电的持续时间*/
   public float lifeTime;
+  /**闪电消逝的过渡时间*/
+  public float fadeTime;
+  /**闪电是否随淡出过程从起点开始消失*/
+  public boolean backFade = false;
+  /**闪电整体的宽度是否随闪电的持续时间淡出*/
+  public boolean fade = true;
   /**闪电被创建时的时间*/
   public float startTime;
   /**这道闪电的剪切尺寸，用于绘制时的画面裁切*/
@@ -35,12 +42,13 @@ public class Lightning implements Pool.Poolable{
   /**闪电的宽度*/
   public float width;
 
-  /**闪电的宽度插值函数，参数由1-0*/
-  public FloatFloatf lerp;
+  /**闪电的宽度插值函数*/
+  public Interp lerp = Interp.linear;
   /**闪电的每一段的触发器，在任意一段闪电的部分生成完成时会各自调用一次，传入当前顶点和前一个顶点*/
   public Cons2<LightningVertex, LightningVertex> trigger;
 
-  /**闪电的蔓延速度，若不设置将使用{@link Lightning#time}确定闪电完全出现的时间*/
+  /**闪电的蔓延速度，若不设置将使用{@link Lightning#time}确定闪电完全出现的时间
+   * @deprecated  规范化，此API将不再有效*/
   public float speed;
   /**闪电由产生到完全显现的时间，在{@link Lightning#speed}未设置的情况下有效*/
   public float time;
@@ -52,18 +60,24 @@ public class Lightning implements Pool.Poolable{
 
   boolean enclosed;
 
-  public static Lightning create(LightningGenerator generator, float width, float lifeTime, FloatFloatf lerp, float time, Cons2<LightningVertex, LightningVertex> trigger){
+  public static Lightning create(LightningGenerator generator, float width, float lifeTime, Interp lerp, float time, Cons2<LightningVertex, LightningVertex> trigger){
     return create(generator, width, lifeTime, lerp, time, 0, trigger);
   }
 
-  public static Lightning create(LightningGenerator generator, float width, float lifeTime, FloatFloatf lerp, float time, float speed, Cons2<LightningVertex, LightningVertex> trigger){
+  public static Lightning create(LightningGenerator generator, float width, float lifeTime, Interp lerp, float time, float speed, Cons2<LightningVertex, LightningVertex> trigger){
+    return create(generator, width, lifeTime, lifeTime, lerp, time, true, false, trigger);
+  }
+
+  public static Lightning create(LightningGenerator generator, float width, float lifeTime, float fadeTime, Interp lerp, float time, boolean fade, boolean backFade, Cons2<LightningVertex, LightningVertex> trigger){
     Lightning result = Pools.obtain(Lightning.class, Lightning::new);
     result.width = width;
-    result.speed = speed;
     result.time = time;
     result.startTime = Time.time;
     result.lifeTime = lifeTime;
+    result.fadeTime = fadeTime;
     result.lerp = lerp;
+    result.fade = fade;
+    result.backFade = backFade;
     result.trigger = trigger;
 
     generator.setCurrentGen(result);
@@ -86,7 +100,7 @@ public class Lightning implements Pool.Poolable{
 
   /**更新一次闪电状态*/
   public void update(){
-    if(speed == 0 && time == 0 && cursor < vertices.size){
+    if(time == 0 && cursor < vertices.size){
       LightningVertex per = null;
       for(LightningVertex vertex: vertices){
         if(per != null){
@@ -99,7 +113,7 @@ public class Lightning implements Pool.Poolable{
       cursor = vertices.size;
     }
     else{
-      float increase = (speed == 0? vertices.size/time: speed/totalLength)*Time.delta;
+      float increase = vertices.size/time*Time.delta;
 
       while(increase > 0){
         if(cursor == 0){
@@ -133,7 +147,10 @@ public class Lightning implements Pool.Poolable{
    * */
   @SuppressWarnings("DuplicatedCode")
   public void draw(float x, float y){
-    float lerp = this.lerp.get((Time.time - startTime)/lifeTime);
+    float lerp = Mathf.clamp(this.lerp.apply(Mathf.clamp((lifeTime - (Time.time - startTime))/fadeTime)));
+    float del = backFade? (1 - lerp)*vertices.size: 0;
+
+    if (!fade) lerp = 1;
 
     for(int i = 2; i <= vertices.size; i++){
       LightningVertex v1 = i - 3 >= 0? vertices.get(i - 3): enclosed? vertices.get(Mathf.mod(i - 3, vertices.size)): null,
@@ -144,6 +161,8 @@ public class Lightning implements Pool.Poolable{
       float lastOffX, lastOffY;
       float nextOffX, nextOffY;
 
+      float fade = Math.min(del, 1);
+      del -= fade;
       if(!v2.valid) break;
 
       self.set(v3.x, v3.y).sub(v2.x, v2.y);
@@ -183,25 +202,17 @@ public class Lightning implements Pool.Poolable{
       nextOffY *= lerp;
 
       float orgX = x + v2.x, orgY = y + v2.y;
+      float fadX = Tmp.v1.x*fade, fadY = Tmp.v1.y*fade;
 
       Tmp.v1.set(self).scl(v2.progress);
-      if(v2.isStart){
-        float l = v2.progress;
-        Fill.tri(
-            orgX, orgY,
-            orgX + Tmp.v1.x + nextOffX*l,
-            orgY + Tmp.v1.y + nextOffY*l,
-            orgX + Tmp.v1.x - nextOffX*l,
-            orgY + Tmp.v1.y - nextOffY*l
-        );
-      }
-      else if(v3.isEnd){
-        float l = 1 - v2.progress;
+      if(v2.isStart || v3.isEnd){
+        float l = v2.isStart? v2.progress: 1 - v2.progress;
+        float f = v2.isStart? fade: 1 - fade;
         Fill.quad(
-            orgX + lastOffX,
-            orgY + lastOffY,
-            orgX - lastOffX,
-            orgY - lastOffY,
+            orgX + fadX + lastOffX*f,
+            orgY + fadY + lastOffY*f,
+            orgX + fadX - lastOffX*f,
+            orgY + fadY - lastOffY*f,
             orgX + Tmp.v1.x - nextOffX*l,
             orgY + Tmp.v1.y - nextOffY*l,
             orgX + Tmp.v1.x + nextOffX*l,
@@ -210,10 +221,10 @@ public class Lightning implements Pool.Poolable{
       }
       else{
         Fill.quad(
-            orgX + lastOffX,
-            orgY + lastOffY,
-            orgX - lastOffX,
-            orgY - lastOffY,
+            orgX + fadX + lastOffX,
+            orgY + fadY + lastOffY,
+            orgX + fadX - lastOffX,
+            orgY + fadY - lastOffY,
             orgX + Tmp.v1.x - nextOffX,
             orgY + Tmp.v1.y - nextOffY,
             orgX + Tmp.v1.x + nextOffX,
@@ -241,7 +252,6 @@ public class Lightning implements Pool.Poolable{
     vertices.clear();
     counter = 0;
     width = 0;
-    speed = 0;
     time = 0;
     cursor = 0;
     lifeTime = 0;
