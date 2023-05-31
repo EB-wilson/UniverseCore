@@ -798,7 +798,7 @@ public abstract class DynamicMaker{
         ClassInfo<?> returnType = asType(method.getReturnType());
 
         if(OVERRIDES.computeIfAbsent(methodName, e -> new HashSet<>()).add(FunctionType.from(method))){
-          superMethod = !Modifier.isAbstract(method.getModifiers()) && !(curr.isInterface() && method.isDefault())? typeClass.getMethod(
+          superMethod = !Modifier.isAbstract(method.getModifiers()) || (curr.isInterface() && method.isDefault())? typeClass.getMethod(
               returnType,
               methodName,
               Arrays.stream(method.getParameterTypes()).map(ClassInfo::asType).toArray(ClassInfo[]::new)
