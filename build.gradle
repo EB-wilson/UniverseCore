@@ -11,11 +11,11 @@ ext{
   uncVersion = '1.8.0'
 
   //the build number that this mod is made for
-  mindustryVersion = 'v143'
+  mindustryVersion = 'v144'
   //version of SDK you will be using
   minSdkAPI = 30
   //version of JavaDynamilizer
-  JDERVersion = 'V1.5-A1'
+  JDERVersion = 'V1.5-B1'
   sdkRoot = System.getenv("ANDROID_HOME")
 }
 
