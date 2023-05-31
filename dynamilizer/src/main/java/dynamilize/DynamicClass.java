@@ -16,7 +16,7 @@ import java.util.Map;
  * <li><strong>当动态类的超类的方法行为发生变更时，若类的行为中引用了超类方法，则类的行为会随之改变</strong>
  * <p><strong>仅在动态对象的方法来自动态类描述的行为时，上述变更才会生效</strong>
  * </ul>
- * <p>描述动态类的行为需要{@linkplain DynamicClass#visitClass(Class) 行为样版}或者函数表达式，以增量模式编辑类型行为，方法和默认变量只能新增/变更，不可删除
+ * <p>描述动态类的行为需要{@linkplain DynamicClass#visitClass(Class,JavaHandleHelper) 行为样版}或者函数表达式，以增量模式编辑类型行为，方法和默认变量只能新增/变更，不可删除
  * <pre>{@code
  * 下面是一个简单的样例:
  * public class Template{
@@ -28,24 +28,16 @@ import java.util.Map;
  * }
  *
  * 引用：
+ * DynamicMaker maker = DynamicMaker.getDefault();
  * DynamicClass dyClass = DynamicClass.get("Sample");
- * dyClass.visitClass(Template.class);
- * DynamicObject dyObject = DynamicMaker.getDefault().newInstance(dyClass);
+ * dyClass.visitClass(Template.class, maker.getHelper());
+ * DynamicObject dyObject = maker.newInstance(dyClass);
  * dyObject.invokeFunc("method", "str");
  *
  * >>> string0
  * }</pre>
  *
- * <strong>
- * 注意，动态类型的行为变更是有时效的，这遵循以下规则：
- * <ul>
- * <li> 在一个动态对象被创建之前的所有对动态类型的变更，都对新创建的动态对象有效
- * <li> 对于一个已被创建的动态对象，在动态类型中声明新的函数和变量，以及修改动态类型中的变量初始值都不会对已存在的对象产生直接影响
- * <li> 对于一个已被创建的动态对象，若它的某一函数没有通过对象的{@link DynamicObject#setFunc(String, Function, Class[])}方法变更，则对动态类型的此方法进行变更将会改变这个对象的该函数行为
- * <li> 若一个已存在的动态对象的某一函数已经被{@link DynamicObject#setFunc(String, Function, Class[])}方法变更，则其动态类型的行为变更对该对象的此函数行为没有直接影响
- * <li> 对象的变量初始值只和被创建时有关，比如对于变量的样版，变量初始值或者初始值函数只和被创建时，该字段的值或函数有关；对于函数，变量初始值的函数只在被创建时调用并返回值。
- * </ul>
- * </strong>
+ * <strong>动态类型声明的变量初始值只在对象被创建时有效，任何时候改变类的变量初始值都不会对已有实例造成影响</strong>
  *
  * @see DynamicMaker#newInstance(Class, Class[], DynamicClass, Object...)
  * @see DynamicMaker#newInstance(DynamicClass)
@@ -98,7 +90,7 @@ public class DynamicClass{
   private DynamicClass(String name, DynamicClass superDyClass){
     this.name = name;
     this.superDyClass = superDyClass;
-    this.data = new DataPool(superDyClass == null? null: superDyClass.data, null);
+    this.data = new DataPool(superDyClass == null? null: superDyClass.data);
   }
 
   /**将此类型对象从池中移除并废弃，任何一个动态类不再被使用后，都应当正确的删除。
@@ -132,8 +124,8 @@ public class DynamicClass{
     return varInit;
   }
 
-  public DataPool genPool(DataPool basePool, JavaHandleHelper helper){
-    return new DataPool(data, helper){
+  public DataPool genPool(DataPool basePool){
+    return new DataPool(data){
       @Override
       public IFunctionEntry select(String name1, FunctionType type){
         IFunctionEntry res1 = super.select(name1, type);
@@ -177,7 +169,7 @@ public class DynamicClass{
    * </ul>
    * 如果模板里存在不希望被作为样版的字段或者方法，你可以使用{@link Exclude}注解标记此目标以排除。
    * <p><strong>所有描述动态类行为的方法和变量都必须具有public static修饰符</strong>*/
-  public void visitClass(Class<?> template){
+  public void visitClass(Class<?> template, JavaHandleHelper helper){
     checkFinalized();
 
     for(Method method: template.getDeclaredMethods()){
@@ -185,7 +177,8 @@ public class DynamicClass{
 
       if(!Modifier.isStatic(method.getModifiers()) || !Modifier.isPublic(method.getModifiers())) continue;
 
-      data.setFunction(new JavaMethodEntry(method, data));
+      helper.makeAccess(method);
+      data.setFunction(helper.genJavaMethodRef(method, data));
     }
 
     for(Field field: template.getDeclaredFields()){
@@ -197,19 +190,20 @@ public class DynamicClass{
     }
   }
 
-  /**访问一个方法样版，不同于{@link DynamicClass#visitClass(Class)}，此方法只访问一个单独的方法并创建其行为样版。
-   * <p>关于此方法的具体行为，请参阅访问行为样版类型的{@linkplain  DynamicClass#visitClass(Class) 方法部分}
+  /**访问一个方法样版，不同于{@link DynamicClass#visitClass(Class,JavaHandleHelper)}，此方法只访问一个单独的方法并创建其行为样版。
+   * <p>关于此方法的具体行为，请参阅访问行为样版类型的{@linkplain  DynamicClass#visitClass(Class,JavaHandleHelper) 方法部分}
    *
    * @param method 访问的方法样版*/
-  public void visitMethod(Method method){
+  public void visitMethod(Method method, JavaHandleHelper helper){
     if(!Modifier.isStatic(method.getModifiers()) || !Modifier.isPublic(method.getModifiers()))
       throw new IllegalHandleException("method template must be public and static");
 
-    data.setFunction(new JavaMethodEntry(method, data));
+    helper.makeAccess(method);
+    data.setFunction(helper.genJavaMethodRef(method, data));
   }
 
-  /**访问一个字段样版，不同于{@link DynamicClass#visitClass(Class)}，此方法只访问一个单独的字段并创建其行为样版。
-   * <p>关于此方法的具体行为，请参阅访问行为样版类型的{@linkplain  DynamicClass#visitClass(Class) 字段部分}
+  /**访问一个字段样版，不同于{@link DynamicClass#visitClass(Class,JavaHandleHelper)}，此方法只访问一个单独的字段并创建其行为样版。
+   * <p>关于此方法的具体行为，请参阅访问行为样版类型的{@linkplain  DynamicClass#visitClass(Class,JavaHandleHelper) 字段部分}
    *
    * @param field 访问的字段样版*/
   public void visitField(Field field){
@@ -219,7 +213,7 @@ public class DynamicClass{
     setVariableWithField(field);
   }
 
-  /**以lambda模式设置函数，使用匿名函数描述类型行为，对类型行为变更的效果与{@link DynamicClass#visitClass(Class)}的方法部分相同
+  /**以lambda模式设置函数，使用匿名函数描述类型行为，对类型行为变更的效果与{@link DynamicClass#visitClass(Class,JavaHandleHelper)}的方法部分相同
    *
    * @param name 函数名称
    * @param func 描述函数行为的匿名函数
@@ -248,7 +242,7 @@ public class DynamicClass{
     }, argTypes);
   }
 
-  /**常量模式设置变量初始值，行为与{@link DynamicClass#visitClass(Class)}字段部分相同
+  /**常量模式设置变量初始值，行为与{@link DynamicClass#visitClass(Class,JavaHandleHelper)}字段部分相同
    *
    * @param name 变量名称
    * @param value 常量值
@@ -257,7 +251,7 @@ public class DynamicClass{
     setVariable(name, () -> value, isConst);
   }
 
-  /**函数模式设置变量初始化工厂，行为与{@link DynamicClass#visitClass(Class)}字段部分相同
+  /**函数模式设置变量初始化工厂，行为与{@link DynamicClass#visitClass(Class,JavaHandleHelper)}字段部分相同
    *
    * @param name 变量名称
    * @param prov 生产变量初始值的工厂函数
@@ -286,6 +280,6 @@ public class DynamicClass{
 
   @Override
   public String toString(){
-    return "dyC:" + name;
+    return "dynamic class:" + name;
   }
 }

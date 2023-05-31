@@ -1,6 +1,5 @@
 package dynamilize;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -8,13 +7,10 @@ import java.lang.reflect.Method;
  * <p>实施时应当按方法的功能说明针对运行平台进行实现。
  *
  * @author EBwilson */
-public interface JavaHandleHelper {
+public interface JavaHandleHelper{
+  void makeAccess(Object object);
 
-  <T> T newInstance(Constructor<? extends T> cstr, Object... args);
+  IVariable genJavaVariableRef(Field field, DataPool targetPool);
 
-  <R> R invoke(Method method, Object target, Object... args);
-
-  <T> T get(Field field, Object target);
-
-  void set(Field field, Object target, Object value);
+  IFunctionEntry genJavaMethodRef(Method method, DataPool targetPool);
 }

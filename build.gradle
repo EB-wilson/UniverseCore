@@ -8,14 +8,14 @@ plugins {
 }
 
 ext{
-  uncVersion = '1.7.4'
+  uncVersion = '1.8.0'
 
   //the build number that this mod is made for
   mindustryVersion = 'v143'
   //version of SDK you will be using
   minSdkAPI = 30
   //version of JavaDynamilizer
-  JDERVersion = 'V1.4-A3'
+  JDERVersion = 'V1.5-A1'
   sdkRoot = System.getenv("ANDROID_HOME")
 }
 

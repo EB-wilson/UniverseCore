@@ -1,6 +1,8 @@
 package universecore.world.particles;
 
+import arc.graphics.Color;
 import arc.struct.Seq;
+import arc.util.Tmp;
 
 public class MultiParticleModel extends ParticleModel{
   public Seq<ParticleModel> models = new Seq<>();
@@ -42,6 +44,17 @@ public class MultiParticleModel extends ParticleModel{
     for(ParticleModel model: models){
       model.init(p);
     }
+  }
+
+  @Override
+  public Color trailColor(Particle p) {
+    Tmp.c1.set(p.color);
+    for (ParticleModel model : models) {
+      Color c = model.trailColor(p);
+      if (c == null) continue;
+      Tmp.c1.mul(c);
+    }
+    return Tmp.c1;
   }
 
   @Override

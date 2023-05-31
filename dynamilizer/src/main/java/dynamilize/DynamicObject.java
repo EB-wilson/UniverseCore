@@ -146,7 +146,7 @@ public interface DynamicObject<Self>{
     return r;
   }
   
-  /**指明形式参数列表执行对象的指定成员函数，如果参数中有从类型分配的对象或者null值，使用type明确指定形参类型可以有效提升执行效率
+  /**指明形式参数列表执行对象的指定成员函数，如果参数中有从类型派生的对象或者null值，使用type明确指定形参类型可以有效提升执行效率
    *
    * @param name 函数名称
    * @param args 传递给函数的实参列表
@@ -173,6 +173,7 @@ public interface DynamicObject<Self>{
     return res.invoke( this, args);
   }
 
+  /**将对象自身经过一次强转换并返回，请勿重写此方法的行为，这个方法仅为方便使用而设计，没有规范认为使用动态对象需要此方法获得实例*/
   default <T extends Self> T castGet(){
     return (T) this;
   }

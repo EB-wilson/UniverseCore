@@ -28,6 +28,13 @@ public class Demodulator{
     }
   }
 
+  public static void makeModuleOpen(Module from, Class<?> clazz, Module to){
+    if (clazz.isArray()){
+      makeModuleOpen(from, clazz.getComponentType(), to);
+    }
+    else makeModuleOpen(from, clazz.getPackage(), to);
+  }
+
   @SuppressWarnings("unchecked")
   public static void makeModuleOpen(Module from, Package pac, Module to){
     if(checkModuleOpen(from, pac, to)) return;
@@ -60,6 +67,21 @@ public class Demodulator{
     if(pac == null) return true;
     
     return from.isOpen(pac.getName(), to);
+  }
+
+
+  public static boolean checkAndMakeModuleOpen(Module from, Class<?> clazz, Module to){
+    Package pac;
+    if (clazz.isArray()){
+      return checkAndMakeModuleOpen(from, clazz.getComponentType(), to);
+    }
+    else pac = clazz.getPackage();
+
+    if(!checkModuleOpen(from, pac, to)){
+      makeModuleOpen(from, pac, to);
+      return false;
+    }
+    return true;
   }
 
   public static boolean checkAndMakeModuleOpen(Module from, Package pac, Module to){

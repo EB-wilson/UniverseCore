@@ -13,7 +13,7 @@ public class RandDeflectParticle extends ParticleModel{
   @Override
   public void deflect(Particle p){
     float angle = Tmp.v1.set(p.speed).scl(-1).angle();
-    float scl = Math.max(p.speed.len()/p.defSpeed, 0.1f)*Time.delta*strength;
+    float scl = Mathf.clamp(p.speed.len()/p.defSpeed*Time.delta*strength);
     Tmp.v2.set(p.speed).setAngle(angle + Mathf.random(-deflectAngle, deflectAngle)).scl(scl);
     p.speed.add(Tmp.v2);
   }

@@ -4,9 +4,12 @@ import mindustry.mod.Mod;
 import universecore.androidcore.AndroidFieldAccessHelper;
 import universecore.androidcore.AndroidMethodInvokeHelper;
 import universecore.androidcore.handler.AndroidClassHandler;
+import universecore.util.AccessibleHelper;
 import universecore.util.mods.IllegalModHandleException;
 import universecore.util.mods.ModGetter;
 import universecore.util.mods.ModInfo;
+
+import java.lang.reflect.AccessibleObject;
 
 public class SetPlatformImpl{
   @SuppressWarnings({"unchecked"})
@@ -94,6 +97,17 @@ public class SetPlatformImpl{
         throw new RuntimeException(e);
       }
     }catch(ClassNotFoundException ignored){*/
+      ImpCore.accessibleHelper = new AccessibleHelper() {
+        @Override
+        public void makeAccessible(AccessibleObject object) {
+          object.setAccessible(true);
+        }
+
+        @Override
+        public void makeClassAccessible(Class<?> clazz) {
+          //no action
+        }
+      };
       ImpCore.fieldAccessHelper = new AndroidFieldAccessHelper();
       ImpCore.methodInvokeHelper = new AndroidMethodInvokeHelper();
     //}

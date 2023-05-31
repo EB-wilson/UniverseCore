@@ -25,7 +25,7 @@ public class DesktopFieldAccessHelper9 extends DesktopFieldAccessHelper{
     Field res = clazz.getDeclaredField(field);
     Demodulator.checkAndMakeModuleOpen(
         clazz.getModule(),
-        clazz.getPackage(),
+        clazz,
         DesktopFieldAccessHelper9.class.getModule()
     );
     res.setAccessible(true);

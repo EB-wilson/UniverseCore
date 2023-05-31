@@ -2,7 +2,6 @@ package universecore.world.lightnings;
 
 import arc.func.Cons;
 import arc.func.Cons2;
-import arc.func.FloatFloatf;
 import arc.math.Interp;
 import arc.math.Mathf;
 import arc.struct.Seq;
@@ -27,6 +26,7 @@ public class LightningContainer implements Iterable<Lightning>{
   public float time = 0;
   /**闪电的扩散速度，小于或等于0时默认使用time提供的路径扩散计算方式，否则使用给出的速度来处理闪电的扩散（单位：/tick）
    * @deprecated 规范化，此API不再可用*/
+  @Deprecated
   public float speed = 0;
   /**闪电的存在时间*/
   public float lifeTime = 30;

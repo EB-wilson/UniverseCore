@@ -11,9 +11,6 @@ public interface IFunctionEntry{
    */
   boolean modifiable();
 
-  /**获取此入口所在的池*/
-  DataPool owner();
-
   /**
    * 获取此方法入口定义的引用匿名函数
    */

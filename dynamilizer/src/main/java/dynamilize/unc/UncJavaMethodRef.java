@@ -1,39 +1,32 @@
-package dynamilize;
+package dynamilize.unc;
 
+import dynamilize.*;
 import dynamilize.annotation.Super;
 import dynamilize.annotation.This;
+import universecore.ImpCore;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 
-/**对{@linkplain DynamicClass#visitClass(Class) 行为样版}中方法描述的入口，在动态类中描述子实例的某一函数行为。
- * <p>方法入口的运行实际上是对样版方法的引用，因此需要确保样版方法所在的类始终有效，方法入口会生成这个方法的入口函数提供给动态对象使用
- *
- * @author EBwilson */
-@SuppressWarnings("unchecked")
-public class JavaMethodEntry implements IFunctionEntry{
+public class UncJavaMethodRef implements IFunctionEntry {
   private final String name;
-  private final FunctionType type;
+  private final Class<?> declared;
   private final Function<?, ?> defFunc;
-
   private final boolean isFinal;
-  private final DataPool owner;
+  private final FunctionType type;
 
-  /**直接通过目标方法创建方法入口，并生成对方法引用的句柄提供给匿名函数以描述此函数行为
-   *
-   * @param invokeMethod 样版方法*/
-  public JavaMethodEntry(Method invokeMethod, DataPool owner){
+  public UncJavaMethodRef(Method invokeMethod, DataPool owner){
     this.name = invokeMethod.getName();
+    this.declared = invokeMethod.getDeclaringClass();
     this.isFinal = Modifier.isFinal(invokeMethod.getModifiers());
-    this.owner = owner;
 
     if(!Modifier.isStatic(invokeMethod.getModifiers()))
       throw new IllegalHandleException("cannot assign a non-static method to function");
 
     Parameter[] parameters = invokeMethod.getParameters();
-    ArrayList<Parameter> arg = new ArrayList<>();
+    ArrayList<Class<?>> arg = new ArrayList<>();
 
     boolean thisPointer = false, superPointer = false;
     for(int i = 0; i < parameters.length; i++){
@@ -54,10 +47,10 @@ public class JavaMethodEntry implements IFunctionEntry{
 
         superPointer = true;
       }
-      else arg.add(param);
+      else arg.add(param.getType());
     }
 
-    type = FunctionType.inst(FunctionType.toTypes(arg));
+    type = FunctionType.inst(arg);
 
     boolean thisP = thisPointer;
     boolean superP = superPointer;
@@ -74,9 +67,9 @@ public class JavaMethodEntry implements IFunctionEntry{
       if(thisP && superP) realArgArr[1] = owner.getSuper(self, superPool = self.baseSuperPointer());
       else if(!thisP && superP) realArgArr[0] = owner.getSuper(self, superPool = self.baseSuperPointer());
 
-      if(argsArray.length != 0) System.arraycopy(argsArray, 0, realArgArr, offset, realArgArr.length);
+      if(argsArray.length != 0) System.arraycopy(argsArray, 0, realArgArr, offset, argsArray.length);
 
-      Object res = owner.helper.invoke(invokeMethod, realArgArr);
+      Object res = ImpCore.methodInvokeHelper.invokeStatic(declared, name, realArgArr);
       ArgumentList.recycleList(realArgArr);
       if(superPool != null) superPool.recycle();
       return res;
@@ -84,27 +77,23 @@ public class JavaMethodEntry implements IFunctionEntry{
   }
 
   @Override
-  public String getName(){
+  public String getName() {
     return name;
   }
 
   @Override
-  public boolean modifiable(){
+  public boolean modifiable() {
     return !isFinal;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public DataPool owner(){
-    return owner;
-  }
-
-  @Override
-  public <S, R> Function<S, R> getFunction(){
+  public <S, R> Function<S, R> getFunction() {
     return (Function<S, R>) defFunc;
   }
 
   @Override
-  public FunctionType getType(){
+  public FunctionType getType() {
     return type;
   }
 }

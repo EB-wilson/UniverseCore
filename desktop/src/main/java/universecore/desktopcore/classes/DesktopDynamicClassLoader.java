@@ -58,11 +58,6 @@ public class DesktopDynamicClassLoader extends BaseDynamicClassLoader{
   }
 
   @Override
-  public void setAccessor(Class<?> accessor){
-    currAccessor = accessor;
-  }
-
-  @Override
   public void declareClass(String name, byte[] byteCode){
     classes.put(name, byteCode);
   }

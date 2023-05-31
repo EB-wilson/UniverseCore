@@ -5,6 +5,7 @@ import dynamilize.classmaker.code.IClass;
 import dynamilize.classmaker.code.annotation.AnnotatedElement;
 import dynamilize.classmaker.code.annotation.AnnotationType;
 import dynamilize.classmaker.code.annotation.IAnnotation;
+import universecore.ImpCore;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -31,8 +32,7 @@ public class AnnotationDef<A extends Annotation> implements IAnnotation<A>{
     try{
       HashMap<String, Object> temp = new HashMap<>(annoType.defaultValues());
       for(Method method: anno.annotationType().getDeclaredMethods()){
-        method.setAccessible(true);
-        temp.put(method.getName(), method.invoke(anno));
+        temp.put(method.getName(), ImpCore.methodInvokeHelper.invoke(anno, method.getName()));
       }
       pairs = new HashMap<>(temp);
     }catch(Throwable e){

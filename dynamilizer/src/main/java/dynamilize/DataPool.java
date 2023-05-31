@@ -22,18 +22,12 @@ public class DataPool{
   private final Map<String, Map<FunctionType, IFunctionEntry>> funcPool = new HashMap<>();
   private final Map<String, IVariable> varPool = new HashMap<>();
 
-  final JavaHandleHelper helper;
-
-  /**
-   * 创建一个池对象并绑定到父池，父池可为null，这种情况下此池应当为被委托类型的方法/字段引用。
+  /**创建一个池对象并绑定到父池，父池可为null，这种情况下此池应当为被委托类型的方法/字段引用。
    * <p><strong>你不应该在外部使用时调用此类型</strong>
    *
-   * @param superPool 此池的父池
-   * @param helper java层的操作向导，在数据池中用于调用方法
-   */
-  public DataPool(DataPool superPool, JavaHandleHelper helper){
+   * @param superPool 此池的父池*/
+  public DataPool(DataPool superPool){
     this.superPool = superPool;
-    this.helper = helper;
   }
 
   public void init(DynamicObject<?> self, Object... args){
@@ -85,7 +79,7 @@ public class DataPool{
   public void setFunction(String name, Function<?, ?> function, Class<?>... argsType){
     FunctionType type = FunctionType.inst(argsType);
     funcPool.computeIfAbsent(name, n -> new HashMap<>())
-        .put(type, new FunctionEntry<>(name, true, function, type, this));
+        .put(type, new FunctionEntry<>(name, true, function, type));
   }
 
   public <R, S> void setFunction(String name, Function.SuperGetFunction<S,R> func, Class<?>[] argTypes){
@@ -95,9 +89,6 @@ public class DataPool{
   }
 
   public void setFunction(IFunctionEntry functionEntry){
-    if(functionEntry.owner() != this)
-      throw new IllegalHandleException("function owner pool must equal added pool");
-
     funcPool.computeIfAbsent(functionEntry.getName(), e -> new HashMap<>()).put(functionEntry.getType(), functionEntry);
   }
 

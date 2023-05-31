@@ -3,11 +3,15 @@ package dynamilize;
 import dynamilize.classmaker.*;
 import dynamilize.classmaker.code.*;
 import dynamilize.classmaker.code.annotation.AnnotationType;
+import dynamilize.unc.UncDefaultHandleHelper;
+import org.objectweb.asm.Opcodes;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -18,6 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static dynamilize.classmaker.ClassInfo.*;
 
 /**动态类型运作的核心工厂类型，用于将传入的动态类型与委托基类等构造出动态委托类型以及其实例。
+ * <p>定义了基于{@link ASMGenerator}的默认生成器实现，通过{@link DynamicMaker#getDefault()}获取该实例以使用
  * <p>若需要特殊的实现，则需要重写/实现此类的方法，主要的方法：
  * <ul>
  * <li><strong>{@link DynamicMaker#makeClassInfo(Class, Class[])}</strong>：决定此工厂如何构造委托类的描述信息
@@ -82,6 +87,7 @@ public abstract class DynamicMaker{
   public static final IMethod<ArgumentList, Object[]> GET_LIST = ARG_LIST_TYPE.getMethod(OBJECT_TYPE.asArray(), "getList", INT_TYPE);
   public static final IMethod<ArgumentList, Void> RECYCLE_LIST = ARG_LIST_TYPE.getMethod(VOID_TYPE, "recycleList", OBJECT_TYPE.asArray());
 
+  private static final MethodHandles.Lookup LOOKUP_INST = MethodHandles.lookup();
   private static final Map<String, Set<FunctionType>> OVERRIDES = new HashMap<>();
   private static final Set<Class<?>> INTERFACE_TEMP = new HashSet<>();
   private static final Class[] EMPTY_CLASSES = new Class[0];
@@ -91,54 +97,32 @@ public abstract class DynamicMaker{
 
   private final HashMap<ClassImplements<?>, Class<?>> classPool = new HashMap<>();
   private final HashMap<Class<?>, DataPool> classPoolsMap = new HashMap<>();
-  private final HashMap<Class<?>, HashMap<FunctionType, Constructor<?>>> constructors = new HashMap<>();
+  private final HashMap<Class<?>, HashMap<FunctionType, MethodHandle>> constructors = new HashMap<>();
 
   /**创建一个实例，并传入其要使用的{@linkplain JavaHandleHelper java行为支持器}，子类引用此构造器可能直接设置默认的行为支持器而无需外部传入*/
   protected DynamicMaker(JavaHandleHelper helper){
     this.helper = helper;
   }
 
-  /*获取默认的动态类型工厂，工厂具备基于{@link ASMGenerator}与适用于<i>HotSpot JVM</i>运行时的{@link JavaHandleHelper}进行的实现。
-    适用于：
-    <ul>
-    <li>java运行时版本1.8的所有jvm
-    <li>java运行时版本大于等于1.9的<i>甲骨文HotSpot JVM</i>
-    <li><strong><i>IBM OpenJ9</i>运行时尚未支持</strong>
-    </ul>
-    若有范围外的需求，可按需要进行实现*/
-  /*
+  /**获取默认的动态类型工厂，工厂具备基于{@link ASMGenerator}与适用于<i>HotSpot JVM</i>运行时的{@link JavaHandleHelper}进行的实现。
+   * 适用于：
+   * <ul>
+   * <li>java运行时版本1.8的所有jvm
+   * <li>java运行时版本大于等于1.9的<i>甲骨文HotSpot JVM</i>
+   * <li><strong><i>IBM OpenJ9</i>运行时尚未支持</strong>
+   * </ul>
+   * 若有范围外的需求，可按需要进行实现*/
   public static DynamicMaker getDefault(){
     BaseClassLoader loader = new BaseClassLoader(DynamicMaker.class.getClassLoader());
     ASMGenerator generator = new ASMGenerator(loader, Opcodes.V1_8);
 
-    return new DynamicMaker(new JavaHandleHelper() {
-      @Override
-      public <T> T newInstance(Constructor<? extends T> cstr, Object... args) {
-        return null;
-      }
-
-      @Override
-      public <R> R invoke(Method method, Object target, Object... args) {
-        return null;
-      }
-
-      @Override
-      public <T> T get(Field field, Object target) {
-        return null;
-      }
-
-      @Override
-      public void set(Field field, Object target, Object value) {
-
-      }
-    }){
+    return new DynamicMaker(new UncDefaultHandleHelper()){
       @Override
       protected <T> Class<? extends T> generateClass(Class<T> baseClass, Class<?>[] interfaces){
         return makeClassInfo(baseClass, interfaces).generate(generator);
       }
     };
   }
-  */
 
   /**使用默认构造函数构造没有实现额外接口的动态类的实例，实例的java类型委托类为{@link Object}
    *
@@ -208,7 +192,14 @@ public abstract class DynamicMaker{
 
       FunctionType type = FunctionType.inst(cstr.getParameterTypes());
       Constructor<?> c = cstr;
-      DynamicObject<T> inst = (DynamicObject<T>) helper.newInstance(constructors.computeIfAbsent(clazz, e -> new HashMap<>()).computeIfAbsent(type, i -> c), argsLis.toArray());
+      DynamicObject<T> inst = (DynamicObject<T>) constructors.computeIfAbsent(clazz, e -> new HashMap<>())
+                                                             .computeIfAbsent(type, t -> {
+        try{
+          return LOOKUP_INST.unreflectConstructor(c);
+        }catch(IllegalAccessException e){
+          throw new RuntimeException(e);
+        }
+      }).invokeWithArguments(argsLis.toArray());
       type.recycle();
 
       return inst;
@@ -238,7 +229,7 @@ public abstract class DynamicMaker{
   protected <T> DataPool genPool(Class<? extends T> base, DynamicClass dynamicClass){
     DataPool basePool = classPoolsMap.computeIfAbsent(base, clazz -> {
       AtomicBoolean immutable = new AtomicBoolean();
-      DataPool res = new DataPool(null, helper){
+      DataPool res = new DataPool(null){
         @Override
         public void setFunction(String name, Function<?, ?> function, Class<?>... argsType){
           if(immutable.get())
@@ -277,7 +268,8 @@ public abstract class DynamicMaker{
         for(Field field: curr.getDeclaredFields()){
           if(Modifier.isStatic(field.getModifiers()) || isInternalField(field.getName())) continue;
 
-          res.setVariable(new JavaVariable(field, helper));
+          helper.makeAccess(field);
+          res.setVariable(helper.genJavaVariableRef(field, res));
         }
         curr = curr.getSuperclass();
       }
@@ -287,7 +279,7 @@ public abstract class DynamicMaker{
       return res;
     });
 
-    return dynamicClass.genPool(basePool, helper);
+    return dynamicClass.genPool(basePool);
   }
 
   private static boolean isInternalField(String name){
@@ -300,7 +292,16 @@ public abstract class DynamicMaker{
    * @param interfaces 需要实现的接口列表*/
   @SuppressWarnings("unchecked")
   protected <T> Class<? extends T> getDynamicBase(Class<T> base, Class<?>[] interfaces){
-    return (Class<? extends T>) classPool.computeIfAbsent(new ClassImplements<>(base, interfaces), e -> generateClass(base, interfaces));
+    return (Class<? extends T>) classPool.computeIfAbsent(new ClassImplements<>(base, interfaces), e -> {
+      Class<?> c = base;
+
+      while (c != null){
+        helper.makeAccess(c);
+        c = c.getSuperclass();
+      }
+
+      return generateClass(base, interfaces);
+    });
   }
 
   /**由基类与接口列表建立动态类的打包名称，打包名称具有唯一性（或者足够高的离散性，不应出现频繁的碰撞）和不变性
@@ -322,7 +323,7 @@ public abstract class DynamicMaker{
   /**对动态委托产生的类型进行继续委托创建代码的方法，应当将首要处理过程向上传递给超类。
    * 与{@link DynamicMaker#makeClassInfo(Class, Class[])}的行为相似，但需要将部分行为适应到已经具备委托行为的超类*/
   @SuppressWarnings({"unchecked"})
-  protected <T> ClassInfo<? extends T> makeClassInfoOnDyamic(Class<T> baseClass, Class<?>[] interfaces){
+  protected <T> ClassInfo<? extends T> makeClassInfoOnDynmaic(Class<T> baseClass, Class<?>[] interfaces){
     ArrayList<ClassInfo<?>> inter = new ArrayList<>(interfaces.length);
     for(Class<?> i: interfaces){
       inter.add(asType(i));
@@ -647,7 +648,7 @@ public abstract class DynamicMaker{
   @SuppressWarnings({"unchecked", "rawtypes"})
   protected <T> ClassInfo<? extends T> makeClassInfo(Class<T> baseClass, Class<?>[] interfaces){
     if(baseClass.getAnnotation(DynamicType.class) != null)
-      return makeClassInfoOnDyamic(baseClass, interfaces);
+      return makeClassInfoOnDynmaic(baseClass, interfaces);
 
     ArrayList<ClassInfo<?>> inter = new ArrayList<>(interfaces.length + 1);
     inter.add(asType(DynamicObject.class));
@@ -719,7 +720,7 @@ public abstract class DynamicMaker{
     //   super(*parameters*);
     //   this.$superbasepointer$ = $datapool$.getReader(this);
     //
-    //   this.$datapool$.init(*parameters*);
+    //   this.$datapool$.init(this, *parameters*);
     // }
     for(Constructor<?> cstr: baseClass.getDeclaredConstructors()){
       if((cstr.getModifiers() & (Modifier.PUBLIC | Modifier.PROTECTED)) == 0) continue;
@@ -791,23 +792,13 @@ public abstract class DynamicMaker{
 
       typeClass = asType(curr);
       for(Method method: curr.getDeclaredMethods()){
-        // 如果方法是静态的，或者方法不对子类可见则不重写此方法
-        if(Modifier.isStatic(method.getModifiers())) continue;
-        if((method.getModifiers() & (Modifier.PUBLIC | Modifier.PROTECTED)) == 0) continue;
-
-        if(Modifier.isFinal(method.getModifiers())){
-          finalMethods.computeIfAbsent(method.getName(), e -> new HashSet<>()).add(FunctionType.from(method));
-          continue;
-        }
-
-        if(!overrideMethods.computeIfAbsent(method.getName(), e -> new HashSet<>()).add(FunctionType.from(method))
-        || finalMethods.getOrDefault(method.getName(), EMP_MAP).contains(FunctionType.from(method))) continue;
+        if (!filterMethod(overrideMethods, finalMethods, method)) continue;
 
         String methodName = method.getName();
         ClassInfo<?> returnType = asType(method.getReturnType());
 
         if(OVERRIDES.computeIfAbsent(methodName, e -> new HashSet<>()).add(FunctionType.from(method))){
-          superMethod = !Modifier.isAbstract(method.getModifiers()) && !curr.isInterface() || method.isDefault()? typeClass.getMethod(
+          superMethod = !Modifier.isAbstract(method.getModifiers()) && !(curr.isInterface() && method.isDefault())? typeClass.getMethod(
               returnType,
               methodName,
               Arrays.stream(method.getParameterTypes()).map(ClassInfo::asType).toArray(ClassInfo[]::new)
@@ -1184,6 +1175,21 @@ public abstract class DynamicMaker{
     dycAnno.annotateTo(classInfo, null);
 
     return classInfo;
+  }
+
+  private static boolean filterMethod(HashMap<String, HashSet<FunctionType>> overrideMethods, HashMap<String, HashSet<FunctionType>> finalMethods, Method method) {
+    //对于已经被声明为final的方法将被添加到排除列表
+    if (Modifier.isFinal(method.getModifiers())){
+      finalMethods.computeIfAbsent(method.getName(), e -> new HashSet<>()).add(FunctionType.from(method));
+      return false;
+    }
+
+    // 如果方法是静态的，或者方法不对子类可见则不重写此方法
+    if(Modifier.isStatic(method.getModifiers())) return false;
+    if((method.getModifiers() & (Modifier.PUBLIC | Modifier.PROTECTED)) == 0) return false;
+
+    return !finalMethods.computeIfAbsent(method.getName(), e -> new HashSet<>()).contains(FunctionType.from(method))
+        && overrideMethods.computeIfAbsent(method.getName(), e -> new HashSet<>()).add(FunctionType.from(method));
   }
 
   @SuppressWarnings("unchecked")

@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.Stack;
 
 public class FunctionType{
-  public static int MAX_RECYCLE = 2048;
+  /**复用回收区容量，改数值通常不需要设置，但如果您可能需要大规模的递归或大量的并发调用，那么您可能需要将这个限制设置为一个更高的数值*/
+  public static int MAX_RECYCLE = 4096;
 
   private static final Class<?>[] EMPTY = new Class[0];
   private static final Stack<FunctionType> RECYCLE_POOL = new Stack<>();

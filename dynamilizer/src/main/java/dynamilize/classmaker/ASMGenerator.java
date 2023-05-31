@@ -438,7 +438,7 @@ public class ASMGenerator extends AbstractClassGenerator implements Opcodes{
     if(block.owner().returnType() == ClassInfo.VOID_TYPE){
       methodVisitor.visitInsn(RETURN);
     }
-    else throw new IllegalHandleException("method return a non-primitive value, but the method is not returning correctly");
+    else throw new IllegalHandleException("method return a non-null value, but the method is not returning correctly");
   }
 
   @Override

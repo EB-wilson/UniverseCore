@@ -9,6 +9,7 @@ import mindustry.type.LiquidStack;
  * @since 1.0
  * @author EBwilson
  * @deprecated 无用类型，将废弃*/
+@Deprecated
 public class UncLiquidStack extends LiquidStack{
   public static final UncLiquidStack[] empty = {};
 

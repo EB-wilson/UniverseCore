@@ -7,9 +7,7 @@ import arc.graphics.g2d.Fill;
 import arc.math.Angles;
 import arc.math.geom.Vec2;
 import arc.struct.ObjectSet;
-import arc.struct.OrderedSet;
 import arc.struct.Seq;
-import arc.util.Log;
 import arc.util.Time;
 import arc.util.Tmp;
 import arc.util.pooling.Pool;
@@ -214,7 +212,7 @@ public class Particle extends Decal implements ExtraVariableComp, Iterable<Parti
 
     model = null;
 
-    color = null;
+    color.set(Color.white);
   }
 
   @Override

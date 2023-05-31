@@ -31,7 +31,7 @@ public class DesktopMethodInvokeHelper9 extends DesktopMethodInvokeHelper{
       try{
         Method met = curr.getDeclaredMethod(name, argTypes.getTypes());
 
-        Demodulator.checkAndMakeModuleOpen(curr.getModule(), curr.getPackage(), DesktopFieldAccessHelper9.class.getModule());
+        Demodulator.checkAndMakeModuleOpen(curr.getModule(), curr, DesktopFieldAccessHelper9.class.getModule());
         met.setAccessible(true);
         res = lookup.unreflect(met);
       }
@@ -55,7 +55,7 @@ public class DesktopMethodInvokeHelper9 extends DesktopMethodInvokeHelper{
 
         FunctionType t;
         if((t = FunctionType.from(method)).match(methodArgs)){
-          Demodulator.checkAndMakeModuleOpen(curr.getModule(), curr.getPackage(), DesktopFieldAccessHelper9.class.getModule());
+          Demodulator.checkAndMakeModuleOpen(curr.getModule(), curr, DesktopFieldAccessHelper9.class.getModule());
           method.setAccessible(true);
 
           try{
@@ -91,7 +91,7 @@ public class DesktopMethodInvokeHelper9 extends DesktopMethodInvokeHelper{
     try{
       Constructor<?> met = type.getConstructor(argsType.getTypes());
 
-      Demodulator.checkAndMakeModuleOpen(type.getModule(), type.getPackage(), DesktopFieldAccessHelper9.class.getModule());
+      Demodulator.checkAndMakeModuleOpen(type.getModule(), type, DesktopFieldAccessHelper9.class.getModule());
       met.setAccessible(true);
 
       res = lookup.unreflectConstructor(met);
@@ -103,7 +103,7 @@ public class DesktopMethodInvokeHelper9 extends DesktopMethodInvokeHelper{
       FunctionType functionType;
       if((functionType = FunctionType.from(constructor)).match(argsType.getTypes())){
         try{
-          Demodulator.checkAndMakeModuleOpen(type.getModule(), type.getPackage(), DesktopFieldAccessHelper9.class.getModule());
+          Demodulator.checkAndMakeModuleOpen(type.getModule(), type, DesktopFieldAccessHelper9.class.getModule());
           constructor.setAccessible(true);
 
           res = lookup.unreflectConstructor(constructor);

@@ -410,7 +410,7 @@ public class ClassInfo<T> extends AnnotatedMember implements IClass<T>{
   public <R> MethodInfo<T, R> getMethod(IClass<R> returnType, String name, IClass<?>... args){
     return (MethodInfo<T, R>) methodMap.computeIfAbsent(pack(name, args), e -> {
       if(!isExistedClass())
-        throw new IllegalHandleException("this class info is not a existed type mark, you have to declare method then get it");
+        throw new IllegalHandleException("no such method with " + returnType + " " + name + "(" + Arrays.toString(args) + ") this class info is not a existed type mark, you have to declare method then get it");
 
       Class<?>[] paramClass = new Class[args.length];
       boolean stat = true;

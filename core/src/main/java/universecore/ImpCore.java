@@ -1,5 +1,6 @@
 package universecore;
 
+import universecore.util.AccessibleHelper;
 import universecore.util.FieldAccessHelper;
 import universecore.util.MethodInvokeHelper;
 import universecore.util.handler.ClassHandlerFactory;
@@ -31,6 +32,7 @@ public class ImpCore{
     }
   }
 
+  public static AccessibleHelper accessibleHelper;
   public static ClassHandlerFactory classes;
   public static FieldAccessHelper fieldAccessHelper;
   public static MethodInvokeHelper methodInvokeHelper;

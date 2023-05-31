@@ -36,11 +36,6 @@ public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
   }
 
   @Override
-  public void setAccessor(Class<?> accessor){
-    currAccessor = accessor;
-  }
-
-  @Override
   public void declareClass(String name, byte[] byteCode){
     if(classMap.containsKey(name)) return;
 

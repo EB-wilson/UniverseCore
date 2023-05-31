@@ -1,5 +1,5 @@
 processor: EntryProcessor (full class name: universecore.annotations.EntryProcessor)
-time: Fri Apr 28 19:58:37 CST 2023
+time: Tue May 30 10:45:44 CST 2023
 
 -----------------------------------------
 annotation: universecore.annotations.Annotations.ImplEntries
@@ -211,7 +211,7 @@ annotation: universecore.annotations.Annotations.ImplEntries
 154|         size = 0;
 155|         extra().clear();
 156|         model = null;
-157|         color = null;
+157|         color.set(Color.white);
 158|     }
 159|     
 160|     @Override

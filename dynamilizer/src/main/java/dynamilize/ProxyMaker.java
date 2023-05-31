@@ -1,16 +1,17 @@
 package dynamilize;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 
 /**代理创建工具，用于生成类似{@linkplain  java.lang.reflect.Proxy java代理工具}的面向切面代理实例，但不同的是这允许从类型进行委托，类似于<i>cglib</i>。
- * <p>通过此工具创建的代理实例会将所有可用（非static/final/private/package private）方法调用转入代理调用处理器，在此工具中被声明为了{@link ProxyMaker#invoke(DynamicObject, Caller, ArgumentList)}])}。
+ * <p>通过此工具创建的代理实例会将所有可用（非static/final/private/package private）方法调用转入代理调用处理器，在此工具中被声明为了{@link ProxyMaker#invoke(DynamicObject, FuncMarker, ArgumentList)}])}。
  * <p>使用此工具时需要给出一个{@link DynamicMaker}用于构建动态代理实例，尽管可能你需要的只是具备代理行为的{@linkplain DynamicClass 动态类型}。
  * <p>另外，动态类型中声明的函数也会被代理拦截，作用时机与动态类实例化的行为影响是一致的，请参阅{@link DynamicClass 动态类型函数变更的作用时机}
  * <p>你可以使用lambda表达式引用{@link ProxyMaker#getDefault(DynamicMaker, ProxyHandler)}获取默认的lambda实现，
- * 或者实现此类的抽象方法{@link ProxyMaker#invoke(DynamicObject, Caller, ArgumentList)}。
+ * 或者实现此类的抽象方法{@link ProxyMaker#invoke(DynamicObject, FuncMarker, ArgumentList)}。
  * <pre>{@code
  * 一个简单的用例：
  * ArrayList list = ProxyMaker.getDefault(DynamicMaker.getDefault(), (self, method, args) -> {
@@ -38,13 +39,13 @@ public abstract class ProxyMaker{
   /**获取代理生成器的默认实现实例，需要提供一个{@linkplain DynamicMaker 动态生成器}以构建实例
    *
    * @param maker 创建动态对象使用的生成器
-   * @param proxyHandler 用于代理处理的{@link ProxyMaker#invoke(DynamicObject, Caller, ArgumentList)}方法拦截，所有有效方法调用都会被拦截并传入此方法
+   * @param proxyHandler 用于代理处理的{@link ProxyMaker#invoke(DynamicObject, FuncMarker, ArgumentList)}方法拦截，所有有效方法调用都会被拦截并传入此方法
    *
    * @return 默认实例*/
   public static ProxyMaker getDefault(DynamicMaker maker, ProxyHandler proxyHandler){
     return new ProxyMaker(maker){
       @Override
-      public Object invoke(DynamicObject<?> proxy, Caller method, ArgumentList args){
+      public Object invoke(DynamicObject<?> proxy, FuncMarker method, ArgumentList args){
         return proxyHandler.invoke(proxy, method, args);
       }
     };
@@ -58,8 +59,8 @@ public abstract class ProxyMaker{
     return newProxyInstance(base, EMPTY_CLASSES, null, args);
   }
 
-  public <T> DynamicObject<T> newProxyInstance(Class<T> base, DynamicClass dynamicClass, Object... args){
-    return newProxyInstance(base, EMPTY_CLASSES, dynamicClass, args);
+  public <T> DynamicObject<T> newProxyInstance(Class<T> base, DynamicClass superDyClass, Object... args){
+    return newProxyInstance(base, EMPTY_CLASSES, superDyClass, args);
   }
 
   public <T> DynamicObject<T> newProxyInstance(Class<T> base, Class<?>[] interfaces, Object... args){
@@ -77,24 +78,7 @@ public abstract class ProxyMaker{
   public <T> DynamicObject<T> newProxyInstance(Class<T> base, Class<?>[] interfaces, DynamicClass dynamicClass, Object... args){
     DynamicClass dyClass = getProxyDyClass(dynamicClass, base, interfaces);
 
-    DynamicObject<T> inst = maker.newInstance(base, interfaces, dyClass, args);
-
-    if(dynamicClass != null){
-      for(IFunctionEntry function: dynamicClass.getFunctions()){
-        FunctionCaller caller = new FunctionCaller(function);
-        inst.setFunc(function.getName(), (s, a) -> {
-              try{
-                return invoke(s, caller, a);
-              }catch(Throwable e){
-                throwException(e);
-                return null;
-              }
-            },
-            function.getType().getTypes());
-      }
-    }
-
-    return inst;
+    return maker.newInstance(base, interfaces, dyClass, args);
   }
 
   /**从类和接口实现获取声明为代理的动态类型，参数给出的动态类型会作为该类型的直接超类，可以为空
@@ -109,19 +93,23 @@ public abstract class ProxyMaker{
     DynamicClass dyc = dynamicClass == null? nonSuperProxy.get(impl): proxyMap.computeIfAbsent(dynamicClass, e -> new HashMap<>()).get(impl);
 
     if(dyc == null){
-      dyc = dynamicClass == null? DynamicClass.get("defProxy$" + impl): DynamicClass.declare(dynamicClass + "$proxy$" + impl, dynamicClass);
+      dyc = dynamicClass == null? DynamicClass.get("defProxy$" + impl): DynamicClass.declare(dynamicClass.getName() + "$proxy$" + impl, dynamicClass);
 
       Class<?> dyBase = maker.getDynamicBase(base, interfaces);
       for(Method method: dyBase.getDeclaredMethods()){
         DynamicMaker.CallSuperMethod callSuper;
-        if((callSuper = method.getAnnotation(DynamicMaker.CallSuperMethod.class)) != null){
-          MethodCaller caller = new MethodCaller(method);
+        if((callSuper = method.getAnnotation(DynamicMaker.CallSuperMethod.class)) != null && filterMethods(callSuper.srcMethod(), method.getParameterTypes())){
+          FunctionType type = FunctionType.from(method);
           dyc.setFunction(
               callSuper.srcMethod(),
-              (s, a) -> {
+              (s, su, a) -> {
+                FunctionMarker caller = FunctionMarker.make(su.getFunc(callSuper.srcMethod(), type));
                 try{
-                  return invoke(s, caller, a);
+                  Object res = invoke(s, caller, a);
+                  caller.recycle();
+                  return res;
                 }catch(Throwable e){
+                  caller.recycle();
                   throwException(e);
                   return null;
                 }
@@ -137,6 +125,10 @@ public abstract class ProxyMaker{
     return dyc;
   }
 
+  protected boolean filterMethods(String methodName, Class<?>... argTypes) {
+    return true;
+  }
+
   /**代理处理器，所有被代理的方法执行被拦截都会转入该方法，方法/函数都会以一个匿名函数的形式传递给这个方法
    * <p>默认实现调用会传入给出的匿名函数，否则子类应当按需要的代理处理方式实现此方法
    *
@@ -145,7 +137,7 @@ public abstract class ProxyMaker{
    * @param args 实参列表
    *
    * @return 返回值*/
-  protected abstract Object invoke(DynamicObject<?> proxy, Caller method, ArgumentList args) throws Throwable;
+  protected abstract Object invoke(DynamicObject<?> proxy, FuncMarker method, ArgumentList args) throws Throwable;
 
   /**异常处理器，当代理运行中发生任何异常都会转入此方法进行处理，默认直接封装为RuntimeException抛出
    *
@@ -154,67 +146,24 @@ public abstract class ProxyMaker{
     throw new RuntimeException(thr);
   }
 
-  public class MethodCaller implements Caller{
-    private static final Object[][] argLis = new Object[32][];
+  public static class FunctionMarker implements FuncMarker{
+    public static int maxPoolSize = 4096;
 
-    static {
-      for(int i = 0; i < argLis.length; i++){
-        argLis[i] = new Object[i + 1];
-      }
-    }
+    private static FunctionMarker[] pool = new FunctionMarker[128];
+    private static int cursor = -1;
 
-    private final String signature;
+    private String signature;
+    private IFunctionEntry entry;
+    private Function<?, Object> function;
 
-    private final Method method;
-    private final FunctionType type;
+    private static FunctionMarker make(IFunctionEntry functionEntry){
+      FunctionMarker res = cursor < 0? new FunctionMarker(): pool[cursor];
 
-    private MethodCaller(Method method){
-      this.method = method;
-      this.type = FunctionType.from(method);
-      signature = method.getDeclaringClass().getName() + "." + FunctionType.signature(method);
-    }
+      res.entry = functionEntry;
+      res.function = functionEntry.getFunction();
+      res.signature = functionEntry.getName() + functionEntry.getType();
 
-    @Override
-    public String getName(){
-      return method.getName();
-    }
-
-    @Override
-    public FunctionType getType(){
-      return type;
-    }
-
-    public Object invoke(DynamicObject<?> proxy, ArgumentList args){
-      Object[] arg = argLis[args.args().length];
-      arg[0] = proxy;
-
-      if(args.args().length != 0) System.arraycopy(args.args(), 0, arg, 1, args.args().length);
-
-      try{
-        return maker.getHelper().invoke(method, proxy, args);
-      }catch(Throwable e){
-        throwException(e);
-        return null;
-      }
-    }
-
-    @Override
-    public String toString(){
-      return "method: " + signature;
-    }
-  }
-
-  public static class FunctionCaller implements Caller{
-    private final String signature;
-
-    private final IFunctionEntry entry;
-
-    private final Function<?, Object> function;
-
-    private FunctionCaller(IFunctionEntry functionEntry){
-      this.entry = functionEntry;
-      this.function = functionEntry.getFunction();
-      this.signature = functionEntry.getName() + functionEntry.getType();
+      return res;
     }
 
     @Override
@@ -237,10 +186,25 @@ public abstract class ProxyMaker{
     public String toString(){
       return "function: " + signature;
     }
+
+    private void recycle(){
+      signature = null;
+      function = null;
+      entry = null;
+
+      if (cursor >= maxPoolSize) return;
+
+      cursor++;
+      if (cursor >= pool.length){
+        pool = Arrays.copyOf(pool, pool.length*2);
+      }
+
+      pool[cursor] = this;
+    }
   }
 
-  /**调用封装器，提供了一个方法{@link Caller#invoke(DynamicObject, ArgumentList)}方法来直接调用这个对象封装的方法或者函数*/
-  public interface Caller{
+  /**调用封装器，提供了一个方法{@link FuncMarker#invoke(DynamicObject, ArgumentList)}方法来直接调用这个对象封装的方法或者函数*/
+  public interface FuncMarker {
     String getName();
 
     FunctionType getType();
@@ -264,6 +228,6 @@ public abstract class ProxyMaker{
   }
 
   public interface ProxyHandler{
-    Object invoke(DynamicObject<?> proxy, Caller superFunction, ArgumentList args);
+    Object invoke(DynamicObject<?> proxy, FuncMarker superFunction, ArgumentList args);
   }
 }

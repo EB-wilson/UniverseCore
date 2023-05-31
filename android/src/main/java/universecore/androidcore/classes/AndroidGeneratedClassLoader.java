@@ -4,14 +4,12 @@ import com.android.dex.Dex;
 import com.android.dx.command.dexer.DxContext;
 import com.android.dx.merge.DexMerger;
 import universecore.util.classes.BaseGeneratedClassLoader;
-import universecore.util.handler.FieldHandler;
 import universecore.util.handler.MethodHandler;
 import universecore.util.mods.ModInfo;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
 
 @SuppressWarnings("unchecked")
 public class AndroidGeneratedClassLoader extends BaseGeneratedClassLoader{
@@ -33,12 +31,6 @@ public class AndroidGeneratedClassLoader extends BaseGeneratedClassLoader{
   public AndroidGeneratedClassLoader(ModInfo mod, ClassLoader parent){
     super(mod, parent);
     updateLoader();
-  }
-
-  @Override
-  public void setAccessor(Class<?> accessor){
-    int mod = FieldHandler.getValueDefault(accessor, "modifiers");
-    FieldHandler.setValueDefault(accessor, "modifiers", mod | Modifier.PUBLIC);
   }
 
   @Override

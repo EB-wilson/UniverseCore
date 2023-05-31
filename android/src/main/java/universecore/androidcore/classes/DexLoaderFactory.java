@@ -6,7 +6,6 @@ import com.android.dx.command.dexer.DxContext;
 import com.android.dx.merge.DexMerger;
 import universecore.util.classes.BaseDynamicClassLoader;
 import universecore.util.classes.JarList;
-import universecore.util.handler.FieldHandler;
 import universecore.util.handler.MethodHandler;
 
 import java.io.BufferedOutputStream;
@@ -15,7 +14,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
 import java.nio.ByteBuffer;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
@@ -60,12 +58,6 @@ public class DexLoaderFactory{
   public static abstract class AsClassDexLoader extends BaseDynamicClassLoader{
     protected AsClassDexLoader(ClassLoader parent){
       super(parent);
-    }
-
-    @Override
-    public void setAccessor(Class<?> accessor){
-      int mod = FieldHandler.getValueDefault(accessor, "modifiers");
-      FieldHandler.setValueDefault(accessor, "modifiers", mod | Modifier.PUBLIC);
     }
 
     public abstract void reset();
