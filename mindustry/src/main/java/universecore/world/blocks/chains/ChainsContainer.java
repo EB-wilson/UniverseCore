@@ -2,16 +2,20 @@ package universecore.world.blocks.chains;
 
 import arc.Core;
 import arc.func.Boolf;
-import arc.struct.*;
+import arc.struct.ObjectSet;
+import arc.struct.OrderedSet;
+import arc.struct.Queue;
+import arc.struct.Seq;
+import universecore.annotations.Annotations;
+import universecore.components.ExtraVariableComp;
 import universecore.components.blockcomp.ChainsBuildComp;
 
 import static mindustry.Vars.tilesize;
 
-public class ChainsContainer{
+@Annotations.ImplEntries
+public class ChainsContainer implements ExtraVariableComp {
   private static final Queue<ChainsBuildComp> findQueue = new Queue<>();
   private static final ObjectSet<ChainsBuildComp> added = new ObjectSet<>();
-  
-  public ObjectMap<String, Object> localVars = new ObjectMap<>();
   
   public final OrderedSet<ChainsBuildComp> all = new OrderedSet<>();
 
@@ -52,19 +56,12 @@ public class ChainsContainer{
   public int height(){
     return maxY - minY + 1;
   }
-  
-  public void putVar(String key, Object obj){
-    localVars.put(key, obj);
-  }
-  
-  @SuppressWarnings("unchecked")
-  public <T> T getVar(String key){
-    return (T)localVars.get(key);
-  }
 
-  @SuppressWarnings("unchecked")
-  public <T> T getVar(String key, T def){
-    return (T)localVars.get(key, def);
+  /**@deprecated 请使用setVar(String, Object)
+   * @see ChainsContainer#setVar(String, Object) */
+  @Deprecated
+  public void putVar(String key, Object obj){
+    setVar(key, obj);
   }
 
   public void add(ChainsContainer other){

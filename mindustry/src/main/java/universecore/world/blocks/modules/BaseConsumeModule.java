@@ -31,7 +31,7 @@ public class BaseConsumeModule extends BlockModule{
   public BaseConsumers optionalCurr;
   public boolean valid;
 
-  public float consEfficiency;
+  public float consEfficiency, powerOtherEff;
 
   private float powerCons;
 
@@ -86,7 +86,7 @@ public class BaseConsumeModule extends BlockModule{
   }
 
   public float getPowerUsage(){
-    return powerCons*((BaseConsume<ConsumerBuildComp>)current.get(ConsumeType.power)).multiple(entity);
+    return powerCons*((BaseConsume<ConsumerBuildComp>)current.get(ConsumeType.power)).multiple(entity)*powerOtherEff;
   }
   
   public void setCurrent(){
@@ -107,10 +107,14 @@ public class BaseConsumeModule extends BlockModule{
       for(Boolf<ConsumerBuildComp> b: current.valid){
         valid &= b.get(entity);
       }
-      consEfficiency = valid? 1: 0;
+      consEfficiency = powerOtherEff = valid? 1: 0;
       for(BaseConsume cons: current.all()){
-        if(cons instanceof ConsumePower) powerCons += ((ConsumePower) cons).requestedPower(entity.getBuild());
         float eff = cons.efficiency(entity.getBuilding(ConsumerBuildComp.class));
+        if(cons instanceof ConsumePower){
+          powerCons += ((ConsumePower) cons).requestedPower(entity.getBuild());
+        }
+        else powerOtherEff *= eff;
+
         consEfficiency *= eff;
         valid &= eff > 0.0001f;
 

@@ -14,7 +14,6 @@ import mindustry.world.Block;
 import universecore.override.dialogs.UncDatabaseDialog;
 import universecore.ui.fragments.SecondaryConfigureFragment;
 import universecore.ui.styles.UncStyles;
-import universecore.util.animate.CellActions;
 import universecore.util.aspect.AspectManager;
 import universecore.util.aspect.EntityAspect;
 import universecore.util.aspect.triggers.EventControl;
@@ -50,9 +49,6 @@ public class UncCore extends Mod{
   /**方块类别处理工具实例*/
   public static CategoryHandler categories = new CategoryHandler();
   
-  /**单元格动画控制器实例*/
-  public static CellActions cellActions = new CellActions();
-  
   /**切面管理器实例*/
   public static AspectManager aspects = AspectManager.getDefault();
 
@@ -69,10 +65,6 @@ public class UncCore extends Mod{
 
     Events.on(EventType.ClientLoadEvent.class, e -> {
       EntityAspect.Group.reset();
-    });
-
-    Events.run(EventType.Trigger.update, () -> {
-      cellActions.update();
     });
 
     Time.run(0f, () -> {

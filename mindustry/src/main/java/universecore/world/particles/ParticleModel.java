@@ -1,7 +1,6 @@
 package universecore.world.particles;
 
 import arc.graphics.Color;
-import arc.math.geom.Vec2;
 import arc.util.pooling.Pools;
 import mindustry.graphics.Layer;
 
@@ -53,7 +52,7 @@ public class ParticleModel{
     ent.color.set(color);
     ent.layer = layer;
     ent.startPos.set(x, y);
-    ent.speed = new Vec2(sx, sy);
+    ent.speed.set(sx, sy);
     ent.defSpeed = ent.speed.len();
     ent.defSize = size;
     ent.size = currSize(ent);

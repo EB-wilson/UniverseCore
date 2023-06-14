@@ -32,6 +32,8 @@ tasks.withType(JavaCompile){
 }
 
 dependencies {
+  compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+
   implementation 'org.ow2.asm:asm:9.4'
 
   implementation project(":core")

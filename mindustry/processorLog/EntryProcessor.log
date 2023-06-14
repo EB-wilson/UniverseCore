@@ -1,5 +1,5 @@
 processor: EntryProcessor (full class name: universecore.annotations.EntryProcessor)
-time: Wed May 31 14:05:08 CST 2023
+time: Thu Jun 08 19:20:58 CST 2023
 
 -----------------------------------------
 annotation: universecore.annotations.Annotations.ImplEntries
@@ -54,6 +54,133 @@ annotation: universecore.annotations.Annotations.ImplEntries
 46|     }
 47| }
 
+> class: universecore.world.blocks.chains.ChainsContainer
+  1| 
+  2| @Annotations.ImplEntries
+  3| public class ChainsContainer implements ExtraVariableComp {
+  4|     
+  5|     public ChainsContainer() {
+  6|         super();
+  7|     }
+  8|     public java.util.Map<java.lang.String, java.lang.Object> extraVar = new universecore.util.colletion.CollectionObjectMap<>();
+  9|     private static final Queue<ChainsBuildComp> findQueue = new Queue<>();
+ 10|     private static final ObjectSet<ChainsBuildComp> added = new ObjectSet<>();
+ 11|     public final OrderedSet<ChainsBuildComp> all = new OrderedSet<>();
+ 12|     private int minX;
+ 13|     private int minY;
+ 14|     private int maxX;
+ 15|     private int maxY;
+ 16|     private long lastFrameUpdated;
+ 17|     private boolean structUpdated = true;
+ 18|     
+ 19|     public boolean inlerp(ChainsBuildComp origin, ChainsBuildComp other) {
+ 20|         if (!all.contains(origin)) return false;
+ 21|         ChainsContainer otherContainer = other.chains().container;
+ 22|         return Math.max(maxX(), otherContainer.maxX()) - Math.min(minX(), otherContainer.minX()) < Math.min(origin.getChainsBlock().maxWidth(), other.getChainsBlock().maxWidth()) && Math.max(maxY(), otherContainer.maxY()) - Math.min(minY(), otherContainer.minY()) < Math.min(origin.getChainsBlock().maxHeight(), other.getChainsBlock().maxHeight());
+ 23|     }
+ 24|     
+ 25|     public int minX() {
+ 26|         return minX;
+ 27|     }
+ 28|     
+ 29|     public int maxX() {
+ 30|         return maxX;
+ 31|     }
+ 32|     
+ 33|     public int minY() {
+ 34|         return minY;
+ 35|     }
+ 36|     
+ 37|     public int maxY() {
+ 38|         return maxY;
+ 39|     }
+ 40|     
+ 41|     public int width() {
+ 42|         return maxX - minX + 1;
+ 43|     }
+ 44|     
+ 45|     public int height() {
+ 46|         return maxY - minY + 1;
+ 47|     }
+ 48|     
+ 49|     @Deprecated
+ 50|     public void putVar(String key, Object obj) {
+ 51|         setVar(key, obj);
+ 52|     }
+ 53|     
+ 54|     public void add(ChainsContainer other) {
+ 55|         for (ChainsBuildComp next : other.all) {
+ 56|             add(next);
+ 57|         }
+ 58|     }
+ 59|     
+ 60|     private void updateEdge(ChainsBuildComp other) {
+ 61|         float offset = other.getBlock().size / 2.0F;
+ 62|         float centOffset = other.getBlock().offset / tilesize;
+ 63|         if (all.isEmpty()) {
+ 64|             minX = (int)Math.ceil(other.tileX() + centOffset - offset);
+ 65|             minY = (int)Math.ceil(other.tileY() + centOffset - offset);
+ 66|             maxX = (int)Math.floor(other.tileX() + centOffset + offset);
+ 67|             maxY = (int)Math.floor(other.tileY() + centOffset + offset);
+ 68|         } else {
+ 69|             minX = Math.min(minX, (int)Math.ceil(other.tileX() + centOffset - offset));
+ 70|             minY = Math.min(minY, (int)Math.ceil(other.tileY() + centOffset - offset));
+ 71|             maxX = Math.max(maxX, (int)Math.floor(other.tileX() + centOffset + offset));
+ 72|             maxY = Math.max(maxY, (int)Math.floor(other.tileY() + centOffset + offset));
+ 73|         }
+ 74|     }
+ 75|     
+ 76|     public void add(ChainsBuildComp other) {
+ 77|         if (all.contains(other)) return;
+ 78|         updateEdge(other);
+ 79|         all.add(other);
+ 80|         ChainsContainer oldContainer = other.chains().container;
+ 81|         other.chains().container = this;
+ 82|         other.chainsAdded(oldContainer);
+ 83|         structUpdated = true;
+ 84|     }
+ 85|     
+ 86|     public void update() {
+ 87|         if (Core.graphics.getFrameId() == lastFrameUpdated) return;
+ 88|         lastFrameUpdated = Core.graphics.getFrameId();
+ 89|         if (structUpdated) {
+ 90|             for (ChainsBuildComp comp : all) {
+ 91|                 comp.onChainsUpdated();
+ 92|             }
+ 93|             structUpdated = false;
+ 94|         }
+ 95|     }
+ 96|     
+ 97|     public void reconstruct(ChainsBuildComp source, Boolf<ChainsBuildComp> filter) {
+ 98|         findQueue.clear();
+ 99|         added.clear();
+100|         findQueue.addFirst(source);
+101|         added.add(source);
+102|         while (!findQueue.isEmpty()) {
+103|             ChainsBuildComp other = findQueue.removeLast();
+104|             for (ChainsBuildComp next : other.chainBuilds()) {
+105|                 if (added.add(next) && filter.get(next)) findQueue.addFirst(next);
+106|             }
+107|             ChainsContainer oldContainer = other.chains().container;
+108|             add(other);
+109|             other.chainsFlowed(oldContainer);
+110|         }
+111|     }
+112|     
+113|     public void remove(ChainsBuildComp target) {
+114|         Seq<ChainsBuildComp> children;
+115|         for (ChainsBuildComp next : children = target.chainBuilds()) {
+116|             if (!all.contains(next) || next.chains().container != this) continue;
+117|             next.chains().newContainer().reconstruct(next, (e)->e != target && all.contains(e));
+118|         }
+119|         target.chainsRemoved(children);
+120|     }
+121|     
+122|     public java.util.Map<java.lang.String, java.lang.Object> extra() {
+123|         return this.extraVar;
+124|     }
+125| }
+
 > class: universecore.world.particles.Particle
   1| 
   2| @Annotations.ImplEntries
@@ -62,7 +189,7 @@ annotation: universecore.annotations.Annotations.ImplEntries
   5|     public Particle() {
   6|         super();
   7|     }
-  8|     public java.util.Map<java.lang.String, java.lang.Object> extraVar = new java.util.HashMap<>();
+  8|     public java.util.Map<java.lang.String, java.lang.Object> extraVar = new universecore.util.colletion.CollectionObjectMap<>();
   9|     private static int counter = 0;
  10|     public static int maxAmount = 1024;
  11|     protected static final ObjectSet<Particle> all = new ObjectSet<>();
@@ -294,46 +421,4 @@ annotation: universecore.annotations.Annotations.ImplEntries
 237|         return this.extraVar;
 238|     }
 239| }
-
-> class: testbuild.Test
- 1| 
- 2| @Annotations.ImplEntries
- 3| public class Test extends A implements I {
- 4|     
- 5|     public Test() {
- 6|         super();
- 7|     }
- 8|     public int value;
- 9|     
-10|     @Override
-11|     public void subTrigger(String arg) {
-12|         I.super.subTrigger(arg);
-13|         System.out.println(arg);
-14|     }
-15|     
-16|     public void set(int i) {
-17|         this.value = i;
-18|     }
-19|     
-20|     public int get() {
-21|         return this.value;
-22|     }
-23|     
-24|     public void run(java.lang.String in) {
-25|         super.run(in);
-26|         this.subTrigger(in);
-27|     }
-28|     
-29|     public int doing() {
-30|         return testbuild.I.super.doing();
-31|     }
-32|     
-33|     public java.lang.String transToUp(java.lang.String in) {
-34|         return testbuild.I.super.transToUp(in);
-35|     }
-36|     
-37|     public java.lang.String transToLow(java.lang.String in) {
-38|         return testbuild.I.super.transToLow(in);
-39|     }
-40| }
 

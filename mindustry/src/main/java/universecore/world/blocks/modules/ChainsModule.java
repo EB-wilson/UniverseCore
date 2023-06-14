@@ -3,10 +3,13 @@ package universecore.world.blocks.modules;
 import arc.func.Cons;
 import arc.util.io.Writes;
 import mindustry.world.modules.BlockModule;
+import universecore.components.ExtraVariableComp;
 import universecore.components.blockcomp.ChainsBuildComp;
 import universecore.world.blocks.chains.ChainsContainer;
 
-public class ChainsModule extends BlockModule{
+import java.util.Map;
+
+public class ChainsModule extends BlockModule implements ExtraVariableComp {
   public ChainsBuildComp entity;
   public ChainsContainer container;
   
@@ -30,13 +33,17 @@ public class ChainsModule extends BlockModule{
       cons.get(other);
     }
   }
-  
-  public void putVar(String key, Object obj){
-    container.putVar(key, obj);
+
+  @Override
+  public Map<String, Object> extra() {
+    return container.extra();
   }
-  
-  public <T> T getVar(String key){
-    return container.getVar(key);
+
+  /**@deprecated 请使用setVar(String, Object)
+   * @see ChainsModule#setVar(String, Object) */
+  @Deprecated
+  public void putVar(String key, Object obj){
+    container.setVar(key, obj);
   }
   
   @Override

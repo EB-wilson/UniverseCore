@@ -1,14 +1,13 @@
 package universecore.world.particles;
 
 import arc.graphics.Color;
-import arc.struct.Seq;
 import arc.util.Tmp;
 
 public class MultiParticleModel extends ParticleModel{
-  public Seq<ParticleModel> models = new Seq<>();
+  public ParticleModel[] models;
 
   public MultiParticleModel(ParticleModel... models){
-    this.models.addAll(models);
+    this.models = models;
   }
 
   @Override
@@ -20,7 +19,7 @@ public class MultiParticleModel extends ParticleModel{
 
   @Override
   public void drawTrail(Particle c) {
-    for (ParticleModel model : models) {
+    for (ParticleModel model: models) {
       model.drawTrail(c);
     }
   }
@@ -35,6 +34,7 @@ public class MultiParticleModel extends ParticleModel{
   @Override
   public void update(Particle p){
     for(ParticleModel model: models){
+      if (model == null) break;
       model.update(p);
     }
   }
@@ -49,7 +49,7 @@ public class MultiParticleModel extends ParticleModel{
   @Override
   public Color trailColor(Particle p) {
     Tmp.c1.set(p.color);
-    for (ParticleModel model : models) {
+    for (ParticleModel model: models) {
       Color c = model.trailColor(p);
       if (c == null) continue;
       Tmp.c1.mul(c);
@@ -84,7 +84,7 @@ public class MultiParticleModel extends ParticleModel{
   public float currSize(Particle p) {
     float res = Float.MAX_VALUE;
 
-    for (ParticleModel model : models) {
+    for (ParticleModel model: models) {
       res = Math.min(model.currSize(p), res);
     }
 

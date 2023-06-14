@@ -38,7 +38,7 @@ public class BaseProductModule extends BlockModule {
 
   public float getPowerProduct(){
     if(current == null) return 0;
-    return current.get(ProduceType.power).powerProduction*(Mathf.num(entity.shouldConsume() && entity.consumeValid())*((BaseProduce<ProducerBuildComp>)current.get(ProduceType.power)).multiple(entity));
+    return current.get(ProduceType.power).powerProduction*entity.consumer().powerOtherEff*(Mathf.num(entity.shouldConsume() && entity.consumeValid())*((BaseProduce<ProducerBuildComp>)current.get(ProduceType.power)).multiple(entity));
   }
   
   public void setCurrent(){
