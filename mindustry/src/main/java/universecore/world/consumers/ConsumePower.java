@@ -54,7 +54,7 @@ public class ConsumePower<T extends Building & ConsumerBuildComp> extends BaseCo
         }),
         new Table(t -> {
           t.left().bottom();
-          t.add(usage *60 >= 1000 ? UI.formatAmount((long) (usage *60))+ "/s" : usage *60 + "/s").style(Styles.outlineLabel);
+          t.add(usage *60 >= 1000 ? UI.formatAmount((long) (usage *60)) + "/s" : (int)(usage*60) + "/s").style(Styles.outlineLabel);
           t.pack();
         })
     );

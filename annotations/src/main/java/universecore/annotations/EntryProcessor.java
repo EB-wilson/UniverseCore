@@ -296,10 +296,13 @@ public class EntryProcessor extends BaseProcessor{
       }
 
       Symbol.ClassSymbol symInter = (Symbol.ClassSymbol) symbol.owner;
+
+      boolean sameName = symbol.getQualifiedName().toString().equals(mName);
+
       JCTree.JCExpression callEntry = maker.at(tree.getPreferredPosition()).Apply(
           List.nil(),
           maker.Select(
-              !containMethod(methods, symbol)? maker.Select(
+              sameName? maker.Select(
                   maker.Type(directImplTree.get(symInter.type.tsym.getQualifiedName().toString())),
                   new Symbol.VarSymbol(16L, names._super, symbol.owner.type, symbol.owner.type.tsym)
               ): maker.This(tree.sym.type),

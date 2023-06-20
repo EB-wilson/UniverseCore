@@ -1,5 +1,5 @@
 processor: EntryProcessor (full class name: universecore.annotations.EntryProcessor)
-time: Thu Jun 08 19:20:58 CST 2023
+time: Sat Jun 17 17:29:56 CST 2023
 
 -----------------------------------------
 annotation: universecore.annotations.Annotations.ImplEntries
@@ -25,7 +25,7 @@ annotation: universecore.annotations.Annotations.ImplEntries
 17|         this.rotation = rotation;
 18|         this.team = team;
 19|         realBuild.init(tile, team, shouldAdd, rotation);
-20|         universecore.components.blockcomp.ReplaceBuildComp.super.buildInitialized();
+20|         this.buildInitialized();
 21|         return realBuild;
 22|     }
 23|     
@@ -50,7 +50,7 @@ annotation: universecore.annotations.Annotations.ImplEntries
 42|     
 43|     public void onRemoved() {
 44|         super.onRemoved();
-45|         universecore.components.blockcomp.ReplaceBuildComp.super.onRemoving();
+45|         this.onRemoving();
 46|     }
 47| }
 
