@@ -4,6 +4,7 @@ import arc.struct.ObjectMap;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**基于{@link ObjectMap}包装的java集合框架Map实现，用于在需要java规范并且需要ObjectMap不创建Node的特点的地方使用
  * @since 1.8.1
@@ -204,6 +205,21 @@ public class CollectionObjectMap<K, V> implements Map<K, V> {
   @Override
   public V getOrDefault(Object key, V defaultValue) {
     return map.get((K) key, defaultValue);
+  }
+
+  @Override
+  public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
+    Objects.requireNonNull(mappingFunction);
+    V v = get(key);
+    if (v == null) {
+      V newValue;
+      if ((newValue = mappingFunction.apply(key)) != null) {
+        put(key, newValue);
+        return newValue;
+      }
+    }
+
+    return v;
   }
 
   @Override
