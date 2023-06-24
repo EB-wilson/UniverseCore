@@ -30,7 +30,7 @@ public class BaseConsumers{
   /**是否在统计栏显示消耗所需时间*/
   public boolean showTime = false;
   
-  /**是否为可选*/
+  /**是否为可选消耗项*/
   public final boolean optional;
   public boolean optionalAlwaysValid = true;
 
@@ -38,6 +38,8 @@ public class BaseConsumers{
   public Cons2<ConsumerBuildComp, BaseConsumers> optionalDef = (entity, cons) -> {};
   /**在统计信息显示自定义内容的函数*/
   public Cons2<Stats, BaseConsumers> display = (stats, cons) -> {};
+  /**是否用自定义的display覆盖默认的条目显示*/
+  public boolean customDisplayOnly;
 
   public Prov<Visibility> selectable = () -> Visibility.usable;
 
@@ -192,13 +194,14 @@ public class BaseConsumers{
   }
 
   public void display(Stats stats){
-    if(cons.size > 0){
+    if(cons.size > 0 && !customDisplayOnly){
       if(showTime) stats.add(Stat.productionTime, craftTime / 60f, StatUnit.seconds);
       for(BaseConsume<?> c: all()){
         c.display(stats);
       }
-      display.get(stats, this);
     }
+
+    display.get(stats, this);
   }
 
   public boolean filter(ConsumeType<?> type, Content content){

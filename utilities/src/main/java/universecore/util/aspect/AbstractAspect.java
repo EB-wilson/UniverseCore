@@ -1,8 +1,6 @@
 package universecore.util.aspect;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**容器切面的基类，一个切面应当具有拦截来源目标容器的add与remove入口的能力，否则则不应对切面分配来源容器，这样做会失去切面的意义
@@ -14,8 +12,11 @@ import java.util.function.Consumer;
  * @since 1.2*/
 @SuppressWarnings("rawtypes")
 public abstract class AbstractAspect<Type, Source> implements Iterable<Type>{
-  protected final ArrayList<BaseTriggerEntry<?>> triggers = new ArrayList<>();
-  protected final HashSet<Type> children = new HashSet<>();
+  protected final List<BaseTriggerEntry<?>> triggers = new ArrayList<>();
+  protected final Set<Type> children = new LinkedHashSet<>();
+
+  private final Cache iterateCache = new Cache();
+  private boolean modified = true;//初始化
   
   protected Consumer<BaseTriggerEntry<?>> apply, remove;
   protected Source source;
@@ -63,6 +64,7 @@ public abstract class AbstractAspect<Type, Source> implements Iterable<Type>{
       if(exit != null) exit.accept(child);
     }
     children.clear();
+    modified = true;
   }
   
   /**设置一个触发器入口，关于触发器入口，请参见{@link BaseTriggerEntry}
@@ -84,7 +86,7 @@ public abstract class AbstractAspect<Type, Source> implements Iterable<Type>{
   /**对切面的所有子元素执行触发器处理
    * @param entry 执行的目标触发器*/
   public void run(BaseTriggerEntry<Type> entry){
-    for(Type child : children){
+    for(Type child: this){
       entry.handle(child);
     }
   }
@@ -93,19 +95,39 @@ public abstract class AbstractAspect<Type, Source> implements Iterable<Type>{
    * @param added 尝试添加的元素*/
   public void add(Type added){
     if(filter(added)){
-      if(children.add(added) && entry != null) entry.accept(added);
+      if(children.add(added) && entry != null){
+        entry.accept(added);
+        modified = true;
+      }
     }
   }
   
   /**从切面中移除一个元素
    * @param removed 从切面移除的元素*/
   public void remove(Type removed){
-    if(children.remove(removed) && exit != null) exit.accept(removed);
+    if(children.remove(removed) && exit != null){
+      exit.accept(removed);
+      modified = true;
+    }
   }
   
+  @SuppressWarnings("unchecked")
   @Override
-  public Iterator<Type> iterator(){
-    return children.iterator();
+  public Iterator<Type> iterator(){//规避并发修改，切面的行为有可能使元素从切面移除，需要一个缓冲区回避此问题
+    if (modified){
+      if (iterateCache.arr== null || iterateCache.arr.length < children.size()){
+        iterateCache.arr = (Type[]) new Object[children.size()];
+      }
+
+      int i = 0;
+      for (Type child : children) {
+        iterateCache.arr[i++] = child;
+      }
+
+      modified = false;
+    }
+
+    return iterateCache.iterator();
   }
   
   public void apply(BaseTriggerEntry entry){
@@ -114,5 +136,28 @@ public abstract class AbstractAspect<Type, Source> implements Iterable<Type>{
   
   public void remove(BaseTriggerEntry entry){
     if(remove != null) remove.accept(entry);
+  }
+
+  private class Cache implements Iterable<Type>{
+    Type[] arr;
+    int index;
+
+    Iterator<Type> itr = new Iterator<Type>() {
+      @Override
+      public boolean hasNext() {
+        return index < arr.length;
+      }
+
+      @Override
+      public Type next() {
+        return arr[index++];
+      }
+    };
+
+    @Override
+    public Iterator<Type> iterator() {
+      index = 0;
+      return itr;
+    }
   }
 }

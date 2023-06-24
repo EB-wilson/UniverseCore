@@ -18,9 +18,9 @@ public class BaseProducers{
 
   protected final ObjectMap<ProduceType<?>, BaseProduce<?>> prod = new ObjectMap<>();
 
-  /**用于显示选择配方的顶部颜色*/
+  /**此生产项的颜色，这通常被用于确定绘制top等目的时快速选择颜色*/
   public Color color = TRANS;
-  
+  /**后初始化的变量，不要手动更改，该变量绑定到与此生产匹配的消耗项*/
   public BaseConsumers cons;
 
   public BaseProducers setColor(Color color){
