@@ -2,10 +2,15 @@ plugins {
   id 'java'
   id 'com.github.johnrengelman.shadow'
 }
-version '1.4-A3'
 
 sourceSets.main.java.srcDirs = ["src/main/java"]
 sourceSets.test.java.srcDirs = ["src/test/java"]
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+  maven{ url 'https://www.jitpack.io' }
+}
 
 publishing {
   publications {
@@ -16,16 +21,10 @@ publishing {
       from components.java
     }
   }
-
-  repositories{
-    mavenLocal()
-  }
 }
 
-repositories {
-  mavenCentral()
-  maven{ url 'https://www.jitpack.io' }
-}
+sourceCompatibility = 17
+targetCompatibility = 8
 
 tasks.withType(JavaCompile){
   options.compilerArgs.addAll(['--release', '8'])
@@ -34,6 +33,8 @@ tasks.withType(JavaCompile){
 dependencies {
   compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
 
+  apiElements "com.github.EB-wilson.JavaDynamilizer:JavaDynamilizer:$JDERVersion"
+  implementation "com.github.EB-wilson.JavaDynamilizer:JavaDynamilizer:$JDERVersion"
   implementation 'org.ow2.asm:asm:9.4'
 
   implementation project(":core")
@@ -45,6 +46,3 @@ dependencies {
 assemble{
   dependsOn(shadowJar)
 }
-
-
-

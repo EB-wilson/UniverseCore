@@ -6,80 +6,86 @@ import arc.input.KeyCode;
 import arc.math.Mathf;
 import arc.scene.event.ClickListener;
 import arc.scene.event.HandCursorListener;
+import arc.scene.event.Touchable;
 import arc.scene.ui.Image;
-import arc.scene.ui.ScrollPane;
+import arc.scene.ui.TextField;
 import arc.scene.ui.Tooltip;
+import arc.scene.ui.layout.Scl;
 import arc.scene.ui.layout.Table;
 import arc.struct.ObjectSet;
 import arc.struct.Seq;
 import arc.util.Scaling;
 import arc.util.Time;
 import dynamilize.DynamicClass;
+import dynamilize.annotation.AspectInterface;
 import mindustry.Vars;
-import mindustry.ctype.Content;
 import mindustry.ctype.ContentType;
 import mindustry.ctype.UnlockableContent;
 import mindustry.gen.Icon;
 import mindustry.gen.Tex;
 import mindustry.graphics.Pal;
+import mindustry.type.UnitType;
 import mindustry.ui.Fonts;
 import mindustry.ui.dialogs.DatabaseDialog;
+import mindustry.world.Block;
 import universecore.UncCore;
 import universecore.util.UncContentType;
+
+import static arc.Core.settings;
+import static mindustry.Vars.*;
 
 /**重写database对话框以重新排序类型（鬼知道臭猫什么时候才能把读写机制改一改）
  * @author EBwilson
  * @since 1.0*/
-@SuppressWarnings("unchecked")
 public class UncDatabaseDialog{
   private static final DynamicClass UncDatabase = DynamicClass.get("UncDatabase");
   private static final ObjectSet<UnlockableContent> hiddenContents = new ObjectSet<>();
 
   static {
-    UncDatabase.setFunction("<init>", (s, su, a) -> {
-      s.<DatabaseDialog>castGet().clearListeners();
-    });
+    UncDatabase.setFunction("rebuild", (s, su, a) -> {
+      Table all = s.getVar("all");
+      TextField search = s.getVar("search");
 
-    UncDatabase.setFunction("show", (s, su, a) -> {
-      su.invokeFunc("show", a);
+      all.clear();
+      var text = search.getText();
 
-      DatabaseDialog self = s.castGet();
-      self.cont.clear();
-
-      Table table = new Table();
-      table.margin(20);
-      ScrollPane pane = new ScrollPane(table);
-
-      Seq<Content>[] allContent = new Seq[UncContentType.displayContentList.length];
-
-      for(int i = 0; i<UncContentType.displayContentList.length; i++){
-        allContent[i] = Vars.content.getBy(UncContentType.displayContentList[i]);
-      }
-
-      for(int j = 0; j < allContent.length; j++){
+      for(int j = 0; j < UncContentType.displayContentList.length; j++){
         ContentType type = UncContentType.displayContentList[j];
 
-        Seq<Content> array = allContent[j].select(c -> c instanceof UnlockableContent uc && !hiddenContents.contains(uc) && (!uc.isHidden() || (uc.techNode != null)));
+        Seq<UnlockableContent> array = content.getBy(type).select(c -> c instanceof UnlockableContent u
+                && !u.isHidden() && !hiddenContents.contains(u)
+                && (text.isEmpty() || u.localizedName.toLowerCase().contains(text.toLowerCase()))).as();
+
         if(array.size == 0) continue;
 
-        table.add("@content." + type.name() + ".name").growX().left().color(Pal.accent);
-        table.row();
-        table.image().growX().pad(5).padLeft(0).padRight(0).height(3).color(Pal.accent);
-        table.row();
-        table.table(list -> {
+        all.add("@content." + type.name() + ".name").growX().left().color(Pal.accent);
+        all.row();
+        all.image().growX().pad(5).padLeft(0).padRight(0).height(3).color(Pal.accent);
+        all.row();
+        all.table(list -> {
           list.left();
 
-          int cols = Mathf.clamp((Core.graphics.getWidth() - 30) / (32 + 10), 1, 18);
+          int cols = (int)Mathf.clamp((Core.graphics.getWidth() - Scl.scl(30)) / Scl.scl(32 + 12), 1, 22);
           int count = 0;
 
           for(int i = 0; i < array.size; i++){
-            UnlockableContent unlock = (UnlockableContent)array.get(i);
+            UnlockableContent unlock = array.get(i);
 
             Image image = unlocked(unlock) ? new Image(unlock.uiIcon).setScaling(Scaling.fit) : new Image(Icon.lock, Pal.gray);
-            list.add(image).size(8 * 4).pad(3);
+
+            //banned cross
+            if(state.isGame() && (unlock instanceof UnitType u && u.isBanned() || unlock instanceof Block b && state.rules.isBanned(b))){
+              list.stack(image, new Image(Icon.cancel){{
+                setColor(Color.scarlet);
+                touchable = Touchable.disabled;
+              }}).size(8 * 4).pad(3);
+            }else{
+              list.add(image).size(8 * 4).pad(3);
+            }
+
             ClickListener listener = new ClickListener();
             image.addListener(listener);
-            if(!Vars.mobile && unlocked(unlock)){
+            if(!mobile && unlocked(unlock)){
               image.addListener(new HandCursorListener());
               image.update(() -> image.color.lerp(!listener.isOver() ? Color.lightGray : Color.white, Mathf.clamp(0.4f * Time.delta)));
             }
@@ -88,12 +94,12 @@ public class UncDatabaseDialog{
               image.clicked(() -> {
                 if(Core.input.keyDown(KeyCode.shiftLeft) && Fonts.getUnicode(unlock.name) != 0){
                   Core.app.setClipboardText((char)Fonts.getUnicode(unlock.name) + "");
-                  Vars.ui.showInfoFade("@copied");
+                  ui.showInfoFade("@copied");
                 }else{
-                  Vars.ui.content.show(unlock);
+                  ui.content.show(unlock);
                 }
               });
-              image.addListener(new Tooltip(t -> t.background(Tex.button).add(unlock.localizedName)));
+              image.addListener(new Tooltip(t -> t.background(Tex.button).add(unlock.localizedName + (settings.getBool("console") ? "\n[gray]" + unlock.name : ""))));
             }
 
             if((++count) % cols == 0){
@@ -101,11 +107,12 @@ public class UncDatabaseDialog{
             }
           }
         }).growX().left().padBottom(10);
-        table.row();
+        all.row();
       }
 
-      self.cont.add(pane);
-      return self;
+      if(all.getChildren().isEmpty()){
+        all.add("@none.found");
+      }
     });
   }
 
@@ -114,10 +121,15 @@ public class UncDatabaseDialog{
   }
 
   public static DatabaseDialog make() {
-    return UncCore.classes.getDynamicMaker().newInstance(DatabaseDialog.class, UncDatabase).castGet();
+    return UncCore.classes.getDynamicMaker().newInstance(DatabaseDialog.class, new Class[]{RebuildAsp.class}, UncDatabase).objSelf();
   }
   
   private static boolean unlocked(UnlockableContent content){
     return (!Vars.state.isCampaign() && !Vars.state.isMenu()) || content.unlocked();
+  }
+
+  @AspectInterface
+  public interface RebuildAsp{
+    void rebuild();
   }
 }

@@ -1,6 +1,7 @@
 package universecore.desktopcore.handler;
 
 import dynamilize.DynamicMaker;
+import dynamilize.PackageAccHandler;
 import dynamilize.classmaker.ASMGenerator;
 import dynamilize.classmaker.AbstractClassGenerator;
 import dynamilize.classmaker.ByteClassLoader;
@@ -19,19 +20,25 @@ import universecore.util.handler.ClassHandler;
 import universecore.util.mods.ModGetter;
 import universecore.util.mods.ModInfo;
 
+@SuppressWarnings("DuplicatedCode")
 public class DesktopClassHandler implements ClassHandler{
-  private final BaseDynamicClassLoader dynamicLoader;
-  private final BaseGeneratedClassLoader generatedLoader;
+  protected BaseDynamicClassLoader dynamicLoader;
+  protected BaseGeneratedClassLoader generatedLoader;
 
   private boolean generateFinished;
 
-  private ASMGenerator generator;
-  private DynamicMaker maker;
+  protected ASMGenerator generator;
+  protected PackageAccHandler accHandler;
+  protected DynamicMaker maker;
 
-  private final ModInfo mod;
+  protected final ModInfo mod;
 
   public DesktopClassHandler(ModInfo mod){
     this.mod = mod;
+    initLoaders();
+  }
+
+  protected void initLoaders(){
     this.generatedLoader = new DesktopGeneratedClassLoader(mod, Vars.mods.mainLoader());
     this.dynamicLoader = new DesktopDynamicClassLoader(this.generatedLoader);
   }
@@ -74,19 +81,57 @@ public class DesktopClassHandler implements ClassHandler{
     });
   }
 
+  public PackageAccHandler getAccHandler(){
+    return accHandler != null? accHandler: (accHandler = new PackageAccHandler() {
+      @SuppressWarnings("unchecked")
+      @Override
+      protected <T> Class<? extends T> loadClass(ClassInfo<?> clazz, Class<T> baseClass) {
+        try {
+          return (Class<? extends T>) new ASMGenerator(new ByteClassLoader() {
+            @Override
+            public void declareClass(String s, byte[] bytes) {
+              currLoader().declareClass(s, bytes);
+            }
+
+            @Override
+            public Class<?> loadClass(String s, boolean b) throws ClassNotFoundException {
+              return currLoader().loadClass(s, baseClass, b);
+            }
+          }, Opcodes.V1_8){
+            @Override
+            protected <Ty> Class<Ty> generateClass(ClassInfo<Ty> classInfo) throws ClassNotFoundException {
+              try{
+                return (Class<Ty>) currLoader().loadClass(classInfo.name(), baseClass, false);
+              }catch(ClassNotFoundException ignored){
+                return super.generateClass(classInfo);
+              }
+            }
+          }.generateClass(clazz);
+        } catch (ClassNotFoundException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    });
+  }
+
   @Override
   public DynamicMaker getDynamicMaker(){
     return maker != null? maker: (maker = new DynamicMaker(new UncDefaultHandleHelper()){
       @Override
       @SuppressWarnings("unchecked")
-      protected <T> Class<? extends T> generateClass(Class<T> baseClass, Class<?>[] interfaces){
+      protected <T> Class<? extends T> generateClass(Class<T> baseClass, Class<?>[] interfaces, Class<?>[] aspects){
         String name = getDynamicName(baseClass, interfaces);
 
         try{
           return (Class<? extends T>) currLoader().loadClass(name);
         }catch(ClassNotFoundException ignored){
-          return makeClassInfo(baseClass, interfaces).generate(getGenerator());
+          return makeClassInfo(baseClass, interfaces, aspects).generate(getGenerator());
         }
+      }
+
+      @Override
+      protected <T> Class<? extends T> handleBaseClass(Class<T> baseClass) {
+        return getAccHandler().handle(baseClass);
       }
     });
   }

@@ -6,14 +6,15 @@ import arc.files.ZipFi;
 import arc.util.ArcRuntimeException;
 import arc.util.Log;
 import universecore.util.classes.BaseGeneratedClassLoader;
-import universecore.util.handler.MethodHandler;
 import universecore.util.mods.ModInfo;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -24,12 +25,28 @@ import java.util.zip.ZipOutputStream;
 
 public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
   private static final Fi jarFileCache = Core.settings.getDataDirectory().child("universecore").child("cache");
+  private static final Object unsafe;
+  private static final Method defineClass;
+
+  static{
+    try{
+      Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
+      defineClass = unsafeClass.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class, ClassLoader.class, ProtectionDomain.class);
+
+      Constructor<?> cstr = unsafeClass.getDeclaredConstructor();
+      cstr.setAccessible(true);
+      unsafe = cstr.newInstance();
+    }catch(NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException |
+           ClassNotFoundException e){
+      throw new RuntimeException(e);
+    }
+  }
+
   public static final Fi TMP_FILE = jarFileCache.child("temp_file.jar");
 
   private final HashMap<String, Class<?>> classMap = new HashMap<>();
 
   private ZipFi zip;
-  private Class<?> currAccessor;
 
   public DesktopGeneratedClassLoader(ModInfo mod, ClassLoader parent){
     super(mod, parent);
@@ -98,74 +115,70 @@ public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
 
   @Override
   protected Class<?> findClass(String name) throws ClassNotFoundException{
-    Class<?> res = classMap.computeIfAbsent(name, n -> {
-      String[] classPath = n.split("\\.");
-      classPath[classPath.length - 1] = classPath[classPath.length - 1] + ".class";
+    return findClass(name, (Class<?>) null);
+  }
 
-      if (zip == null){
-        if (!file.exists())
+  protected Class<?> findClass(String name, Class<?> accessor) throws ClassNotFoundException{
+    try {
+      return super.findClass(name);
+    }catch (ClassNotFoundException ne){
+      Class<?> res = classMap.computeIfAbsent(name, n -> {
+        String[] classPath = n.split("\\.");
+        classPath[classPath.length - 1] = classPath[classPath.length - 1] + ".class";
+
+        if (zip == null){
+          if (!file.exists())
+            return null;
+
+          zip = new ZipFi(new Fi(file));
+        }
+
+        Fi f = zip;
+        for(String path: classPath){
+          f = f.child(path);
+        }
+
+        try(InputStream in = f.read()){
+          ByteArrayOutputStream w = new ByteArrayOutputStream();
+          int i;
+          while((i = in.read()) != -1){
+            w.write(i);
+          }
+          byte[] byteCode = w.toByteArray();
+
+          return accessor != null ? defineClass(name, byteCode, accessor)
+              : defineClass(n, byteCode, 0, byteCode.length);
+        }catch(IOException | ArcRuntimeException ignored1){
           return null;
-
-        zip = new ZipFi(new Fi(file));
-      }
-
-      Fi f = zip;
-      for(String path: classPath){
-        f = f.child(path);
-      }
-
-      try(InputStream in = f.read()){
-        ByteArrayOutputStream w = new ByteArrayOutputStream();
-        int i;
-        while((i = in.read()) != -1){
-          w.write(i);
         }
-        byte[] byteCode = w.toByteArray();
+      });
 
-        Class<?> c;
-        if(currAccessor != null){
-          ClassLoader loader = currAccessor.getClassLoader();
-          ProtectionDomain domain = currAccessor.getProtectionDomain();
+      if (res == null)
+        throw new ClassNotFoundException("no such class: " + name);
 
-          c = MethodHandler.invokeDefault(ClassLoader.class, "defineClass0",
-              loader,
-              currAccessor,
-              n,
-              byteCode, 0, byteCode.length,
-              domain,
-              false,
-              Modifier.PUBLIC,
-              null
-          );
-          currAccessor = null;
-        }
-        else {
-          c = defineClass(n, byteCode, 0, byteCode.length);
-        }
-
-        return c;
-      }catch(IOException | ArcRuntimeException ignored1){
-        return null;
-      }
-    });
-
-    if (res == null)
-      throw new ClassNotFoundException("no such class: " + name);
-
-    return res;
+      return res;
+    }
   }
 
   @Override
-  public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException{
+  public Class<?> loadClass(String name, Class<?> accessor, boolean resolve) throws ClassNotFoundException{
     Class<?> res;
     try {
       res = getParent().loadClass(name);
     }catch (ClassNotFoundException ignored){
-      res = findClass(name);
+      res = findClass(name, accessor);
     }
 
     if(resolve) resolveClass(res);
 
     return res;
+  }
+
+  protected Class<?> defineClass(String name, byte[] bytes, Class<?> accessor){
+    try {
+      return (Class<?>) defineClass.invoke(unsafe, name, bytes, 0, bytes.length, accessor.getClassLoader(), null);
+    } catch (IllegalAccessException | InvocationTargetException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

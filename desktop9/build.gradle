@@ -1,9 +1,16 @@
 plugins {
   id 'java'
+  id 'com.github.johnrengelman.shadow'
 }
 
 sourceSets.main.java.srcDirs = ["src/main/java"]
 sourceSets.test.java.srcDirs = ["src/test/java"]
+
+repositories {
+  mavenCentral()
+  mavenLocal()
+  maven{ url 'https://www.jitpack.io' }
+}
 
 publishing {
   publications {
@@ -14,29 +21,24 @@ publishing {
       from components.java
     }
   }
-
-  repositories{
-    mavenLocal()
-  }
 }
+
+sourceCompatibility = 17
+targetCompatibility = 9
 
 tasks.withType(JavaCompile){
   options.compilerArgs.addAll(['--release', '9'])
 }
 
 dependencies {
-  repositories {
-    mavenCentral()
-    maven{ url 'https://www.jitpack.io' }
-  }
-
-  compileOnly project(":dynamilizer")
   compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
   compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
 
   compileOnly project(":core")
   compileOnly project(":abstract")
-  implementation project(":desktop")
+  compileOnly project(":implabstract")
+  compileOnly project(":dynamilizer")
+  compileOnly project(":desktop")
 
   annotationProcessor project(":annotations")
 }

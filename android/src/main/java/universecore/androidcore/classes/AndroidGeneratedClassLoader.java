@@ -3,29 +3,17 @@ package universecore.androidcore.classes;
 import com.android.dex.Dex;
 import com.android.dx.command.dexer.DxContext;
 import com.android.dx.merge.DexMerger;
+import dalvik.system.BaseDexClassLoader;
+import dalvik.system.DexClassLoader;
 import universecore.util.classes.BaseGeneratedClassLoader;
+import universecore.util.handler.FieldHandler;
 import universecore.util.handler.MethodHandler;
 import universecore.util.mods.ModInfo;
 
+import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 
-@SuppressWarnings("unchecked")
 public class AndroidGeneratedClassLoader extends BaseGeneratedClassLoader{
-  protected static final Class<? extends ClassLoader> dvLoaderClass;
-
-  protected static final Constructor<? extends ClassLoader> loaderCstr;
-
-  static{
-    try{
-      dvLoaderClass = (Class<? extends ClassLoader>) Class.forName("dalvik.system.DexClassLoader");
-      loaderCstr = dvLoaderClass.getConstructor(String.class, String.class, String.class, ClassLoader.class);
-    }catch(ClassNotFoundException|NoSuchMethodException e){
-      throw new RuntimeException(e);
-    }
-  }
-
   private ClassLoader dvLoader;
 
   public AndroidGeneratedClassLoader(ModInfo mod, ClassLoader parent){
@@ -58,16 +46,28 @@ public class AndroidGeneratedClassLoader extends BaseGeneratedClassLoader{
   }
 
   private void updateLoader(){
-    try{
-      dvLoader = loaderCstr.newInstance(file.getPath(), file.getParentFile().getPath() + "/oct", null, getParent());
-    }catch(InstantiationException|InvocationTargetException|IllegalAccessException e){
-      throw new RuntimeException(e);
-    }
+    dvLoader = new DexClassLoader(file.getPath(), file.getParentFile().getPath() + "/oct", null, getParent());
   }
 
   @Override
-  public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException{
-    Class<?> c = dvLoader.loadClass(name);
+  public Class<?> loadClass(String name, Class<?> accessor, boolean resolve) throws ClassNotFoundException{
+    Class<?> c;
+
+    if (accessor != null){
+      if (accessor.getClassLoader() instanceof BaseDexClassLoader loader) {
+        try {
+          return loader.loadClass(name);
+        } catch (ClassNotFoundException cf) {
+          Object pathList = FieldHandler.getValueDefault(loader, "pathList");
+          MethodHandler.invokeDefault(pathList, "addDexPath", file.getPath(), new File(file.getParentFile(), "/oct"));
+
+          return loader.loadClass(name);
+        }
+      }
+      else throw new RuntimeException("unusable access " + accessor + " in loader: " + accessor.getClassLoader());
+    }
+    else c = dvLoader.loadClass(name);
+
     if(resolve) resolveClass(c);
 
     return c;

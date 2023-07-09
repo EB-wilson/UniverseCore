@@ -8,6 +8,7 @@ import universecore.desktopcore.handler.DesktopClassHandler;
 import universecore.util.AccessibleHelper;
 import universecore.util.FieldAccessHelper;
 import universecore.util.MethodInvokeHelper;
+import universecore.util.handler.ClassHandler;
 import universecore.util.mods.IllegalModHandleException;
 import universecore.util.mods.ModGetter;
 import universecore.util.mods.ModInfo;
@@ -16,6 +17,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 public class SetPlatformImpl{
+  private static Constructor<? extends ClassHandler> handlerCstr;
+
   @SuppressWarnings("unchecked")
   public static void setImplements(){
     try{
@@ -27,11 +30,14 @@ public class SetPlatformImpl{
           (Class<? extends FieldAccessHelper>) Class.forName("universecore.desktop9core.DesktopFieldAccessHelper9");
       Class<? extends MethodInvokeHelper> methodInvoke9Type =
           (Class<? extends MethodInvokeHelper>) Class.forName("universecore.desktop9core.DesktopMethodInvokeHelper9");
+      Class<? extends ClassHandler> classHandler =
+          (Class<? extends ClassHandler>) Class.forName("universecore.desktop9core.handler.DesktopClassHandler9");
 
       try{
         Constructor<? extends AccessibleHelper> acCstr = accessible9Type.getConstructor();
         Constructor<? extends FieldAccessHelper> faCstr = fieldAccess9Type.getConstructor();
         Constructor<? extends MethodInvokeHelper> miCstr = methodInvoke9Type.getConstructor();
+        handlerCstr = classHandler.getConstructor(ModInfo.class);
 
         ImpCore.accessibleHelper = acCstr.newInstance();
         ImpCore.fieldAccessHelper = faCstr.newInstance();
@@ -43,6 +49,12 @@ public class SetPlatformImpl{
       ImpCore.accessibleHelper = new DesktopAccessibleHelper();
       ImpCore.fieldAccessHelper = new DesktopFieldAccessHelper();
       ImpCore.methodInvokeHelper = new DesktopMethodInvokeHelper();
+
+      try {
+        handlerCstr = DesktopClassHandler.class.getConstructor(ModInfo.class);
+      } catch (NoSuchMethodException e) {
+        throw new RuntimeException(e);
+      }
     }
 
     ImpCore.classes = modMain -> {
@@ -55,8 +67,9 @@ public class SetPlatformImpl{
           throw new IllegalModHandleException("mod with main class " + modMain + " was not found");
 
         ModGetter.checkModFormat(mod.file);
-        return new DesktopClassHandler(mod);
-      }catch(IllegalModHandleException e){
+
+        return handlerCstr.newInstance(mod);
+      }catch(IllegalModHandleException | InvocationTargetException | InstantiationException | IllegalAccessException e){
         throw new RuntimeException(e);
       }
     };

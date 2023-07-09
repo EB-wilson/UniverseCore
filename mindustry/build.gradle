@@ -5,6 +5,12 @@ plugins {
 sourceSets.main.java.srcDirs = ["src/main/java"]
 sourceSets.test.java.srcDirs = ["src/test/java"]
 
+repositories {
+  mavenCentral()
+  mavenLocal()
+  maven{ url 'https://www.jitpack.io' }
+}
+
 publishing {
   publications {
     maven(MavenPublication) {
@@ -14,18 +20,16 @@ publishing {
       from components.java
     }
   }
+}
 
-  repositories{
-    mavenLocal()
-  }
+sourceCompatibility = 17
+targetCompatibility = 8
+
+tasks.withType(JavaCompile){
+  options.compilerArgs.addAll(['--release', '8'])
 }
 
 dependencies {
-  repositories {
-    mavenCentral()
-    maven{ url 'https://www.jitpack.io' }
-  }
-
   compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
   compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
 
@@ -36,6 +40,5 @@ dependencies {
   implementation project(":implabstract")
 
   compileOnly project(":annotations")
-  annotationProcessor project(":annotations")
   annotationProcessor project(":annotations")
 }

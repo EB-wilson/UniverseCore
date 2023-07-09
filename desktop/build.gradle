@@ -1,10 +1,15 @@
 plugins {
   id 'java'
-  id 'com.github.johnrengelman.shadow'
 }
 
 sourceSets.main.java.srcDirs = ["src/main/java"]
 sourceSets.test.java.srcDirs = ["src/test/java"]
+
+repositories{
+  mavenCentral()
+  mavenLocal()
+  maven{ url 'https://www.jitpack.io' }
+}
 
 publishing {
   publications {
@@ -15,22 +20,16 @@ publishing {
       from components.java
     }
   }
-
-  repositories{
-    mavenLocal()
-  }
 }
+
+sourceCompatibility = 17
+targetCompatibility = 8
 
 tasks.withType(JavaCompile){
   options.compilerArgs.addAll(['--release', '8'])
 }
 
 dependencies {
-  repositories{
-    mavenCentral()
-    maven{ url 'https://www.jitpack.io' }
-  }
-
   compileOnly project(":dynamilizer")
 
   compileOnly 'org.ow2.asm:asm:9.3'
@@ -44,17 +43,4 @@ dependencies {
   compileOnly project(":utilities")
 
   annotationProcessor project(":annotations")
-}
-
-shadowJar {
-  dependencies {
-    exclude dependency("com.github.Anuken.Arc:arc-core:$mindustryVersion")
-    exclude dependency("com.github.Anuken.Mindustry:core:$mindustryVersion")
-    exclude dependency("com.jakewharton.android.repackaged:dalvik-dx:11.0.0_r3")
-
-    exclude project(":core")
-    exclude project(":abstract")
-    exclude project(":implabstract")
-    exclude project(":utilities")
-  }
 }

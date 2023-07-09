@@ -15,7 +15,7 @@ ext{
   //version of SDK you will be using
   minSdkAPI = 30
   //version of JavaDynamilizer
-  JDERVersion = 'V1.5-B1'
+  JDERVersion = 'V1.7-A1'
   sdkRoot = System.getenv("ANDROID_HOME")
 }
 
@@ -28,9 +28,6 @@ configure(allprojects - project(":annotations")){
   tasks.withType(JavaCompile){
     options.encoding = "UTF-8"
 
-    sourceCompatibility = 17
-    targetCompatibility = 8
-
     options.fork = true
     options.forkOptions.jvmArgs.addAll([
         "--add-opens", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
@@ -40,7 +37,6 @@ configure(allprojects - project(":annotations")){
         "--add-opens", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
         "--add-opens", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
     ])
-    options.compilerArgs.addAll(['--release', '8'])
   }
 
   tasks.withType(Jar){
@@ -48,12 +44,13 @@ configure(allprojects - project(":annotations")){
   }
 }
 
-dependencies {
-  repositories{
-    mavenCentral()
-    maven{ url 'https://www.jitpack.io' }
-  }
+repositories{
+  mavenCentral()
+  mavenLocal()
+  maven{ url 'https://www.jitpack.io' }
+}
 
+dependencies {
   implementation project(":core")
   implementation project(":abstract")
   implementation project(":implabstract")
@@ -72,7 +69,7 @@ dependencies {
 
 shadowJar{
   dependsOn project(":android").getTasksByName("shadowJar", true)
-  dependsOn project(":desktop").getTasksByName("shadowJar", true)
+  dependsOn project(":desktop9").getTasksByName("shadowJar", true)
   archiveFileName = "${rootProject.name}-base.jar"
 }
 

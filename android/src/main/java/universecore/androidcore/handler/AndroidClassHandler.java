@@ -3,6 +3,7 @@ package universecore.androidcore.handler;
 import dynamilize.DynamicMaker;
 import dynamilize.DynamicObject;
 import dynamilize.IllegalHandleException;
+import dynamilize.PackageAccHandler;
 import dynamilize.classmaker.*;
 import dynamilize.classmaker.code.IClass;
 import dynamilize.classmaker.code.ILocal;
@@ -26,17 +27,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class AndroidClassHandler implements ClassHandler{
-  private static final BaseDynamicClassLoader dynamicLoader =
+  protected static final BaseDynamicClassLoader dynamicLoader =
       DexLoaderFactory.getClassLoader(AndroidClassHandler.class.getClassLoader());
 
-  private final BaseGeneratedClassLoader generatedLoader;
+  protected final BaseGeneratedClassLoader generatedLoader;
 
-  private boolean generateFinished;
+  protected boolean generateFinished;
 
-  private DexGenerator generator;
-  private DynamicMaker maker;
+  protected DexGenerator generator;
+  protected PackageAccHandler accHandler;
+  protected DynamicMaker maker;
 
-  private final ModInfo mod;
+  protected final ModInfo mod;
 
   public AndroidClassHandler(ModInfo mod){
     this.mod = mod;
@@ -81,67 +83,105 @@ public class AndroidClassHandler implements ClassHandler{
     });
   }
 
+  public PackageAccHandler getAccHandler(){
+    return accHandler != null? accHandler: (accHandler = new PackageAccHandler() {
+      @SuppressWarnings("unchecked")
+      @Override
+      protected <T> Class<? extends T> loadClass(ClassInfo<?> clazz, Class<T> baseClass) {
+        try {
+          return (Class<? extends T>) new DexGenerator(new ByteClassLoader() {
+            @Override
+            public void declareClass(String s, byte[] bytes) {
+              currLoader().declareClass(s, bytes);
+            }
+
+            @Override
+            public Class<?> loadClass(String s, boolean b) throws ClassNotFoundException {
+              return currLoader().loadClass(s, baseClass, b);
+            }
+          }){
+            @Override
+            protected <Ty> Class<Ty> generateClass(ClassInfo<Ty> classInfo) throws ClassNotFoundException {
+              try{
+                return (Class<Ty>) currLoader().loadClass(classInfo.name(), baseClass, false);
+              }catch(ClassNotFoundException ignored){
+                return super.generateClass(classInfo);
+              }
+            }
+          }.generateClass(clazz);
+        } catch (ClassNotFoundException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    });
+  }
+
   @Override
   public DynamicMaker getDynamicMaker(){
     return maker != null? maker: (maker = new DynamicMaker(new UncDefaultHandleHelper()){
       @Override
       @SuppressWarnings("unchecked")
-      protected <T> Class<? extends T> generateClass(Class<T> baseClass, Class<?>[] interfaces){
+      protected <T> Class<? extends T> generateClass(Class<T> baseClass, Class<?>[] interfaces, Class<?>[] aspects){
         String name = getDynamicName(baseClass, interfaces);
 
         try{
           return (Class<? extends T>) currLoader().loadClass(name);
         }catch(ClassNotFoundException ignored){
-          return makeClassInfo(baseClass, interfaces).generate(getGenerator());
+          return makeClassInfo(baseClass, interfaces, aspects).generate(getGenerator());
         }
       }
 
       @SuppressWarnings({"unchecked", "rawtypes"})
       @Override
-      protected <T> ClassInfo<? extends T> makeClassInfo(Class<T> baseClass, Class<?>[] interfaces){
-        ClassInfo<? extends T> classInfo = super.makeClassInfo(baseClass, interfaces);
-          try{
-            Class<?> staticImpl = DynamicObject.class.getClassLoader().loadClass(DynamicObject.class.getName() + "$-CC");
-            ClassInfo<?> interType = ClassInfo.asType(staticImpl);
+      protected <T> ClassInfo<? extends T> makeClassInfo(Class<T> baseClass, Class<?>[] interfaces, Class<?>[] aspects){
+        ClassInfo<? extends T> classInfo = super.makeClassInfo(baseClass, interfaces,aspects);
+        try{
+          Class<?> staticImpl = DynamicObject.class.getClassLoader().loadClass(DynamicObject.class.getName() + "$-CC");
+          ClassInfo<?> interType = ClassInfo.asType(staticImpl);
 
-            for(Method method: DynamicObject.class.getMethods()){
-              if((method.getModifiers() & Modifier.STATIC) != 0) continue;
+          for(Method method: DynamicObject.class.getMethods()){
+            if((method.getModifiers() & Modifier.STATIC) != 0) continue;
 
-              ArrayList<Class<?>> args = new ArrayList<>();
-              args.add(DynamicObject.class);
-              args.addAll(Arrays.asList(method.getParameterTypes()));
+            ArrayList<Class<?>> args = new ArrayList<>();
+            args.add(DynamicObject.class);
+            args.addAll(Arrays.asList(method.getParameterTypes()));
 
-              ClassInfo<?> retType = ClassInfo.asType(method.getReturnType());
-              MethodInfo<?, ?> implMethod;
-              try{
-                implMethod = interType.getMethod(
-                    retType,
-                    "$default$" + method.getName(),
-                    args.stream().map(ClassInfo::asType).toArray(IClass[]::new)
-                );
-              }catch(IllegalHandleException ignored){
-                continue;
-              }
-
-              CodeBlock<?> code = classInfo.declareMethod(
-                  Modifier.PUBLIC,
-                  method.getName(),
+            ClassInfo<?> retType = ClassInfo.asType(method.getReturnType());
+            MethodInfo<?, ?> implMethod;
+            try{
+              implMethod = interType.getMethod(
                   retType,
-                  Parameter.trans(Arrays.stream(method.getParameterTypes()).map(ClassInfo::asType).toArray(IClass[]::new))
+                  "$default$" + method.getName(),
+                  args.stream().map(ClassInfo::asType).toArray(IClass[]::new)
               );
-
-              if(implMethod.returnType() == ClassInfo.VOID_TYPE){
-                code.invoke(null, implMethod, null, code.getParamAll().toArray(new ILocal[0]));
-              }
-              else{
-                ILocal ret = code.local(retType);
-                code.invoke(null, implMethod, ret, code.getParamAll().toArray(new ILocal[0]));
-                code.returnValue(ret);
-              }
+            }catch(IllegalHandleException ignored){
+              continue;
             }
-          }catch(ClassNotFoundException ignored){}
+
+            CodeBlock<?> code = classInfo.declareMethod(
+                Modifier.PUBLIC,
+                method.getName(),
+                retType,
+                Parameter.trans(Arrays.stream(method.getParameterTypes()).map(ClassInfo::asType).toArray(IClass[]::new))
+            );
+
+            if(implMethod.returnType() == ClassInfo.VOID_TYPE){
+              code.invoke(null, implMethod, null, code.getParamAll().toArray(new ILocal[0]));
+            }
+            else{
+              ILocal ret = code.local(retType);
+              code.invoke(null, implMethod, ret, code.getParamAll().toArray(new ILocal[0]));
+              code.returnValue(ret);
+            }
+          }
+        }catch(ClassNotFoundException ignored){}
 
         return classInfo;
+      }
+
+      @Override
+      protected <T> Class<? extends T> handleBaseClass(Class<T> baseClass) {
+        return getAccHandler().handle(baseClass);
       }
     });
   }

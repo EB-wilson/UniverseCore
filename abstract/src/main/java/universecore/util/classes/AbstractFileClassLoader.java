@@ -20,5 +20,9 @@ public abstract class AbstractFileClassLoader extends ClassLoader implements Byt
   public abstract void declareClass(String name, byte[] byteCode);
 
   @Override
-  public abstract Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException;
+  public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException{
+    return loadClass(name, null, resolve);
+  }
+
+  public abstract Class<?> loadClass(String name, Class<?> accessor, boolean resolve) throws ClassNotFoundException;
 }

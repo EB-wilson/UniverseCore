@@ -4,8 +4,11 @@ import com.android.dex.Dex;
 import com.android.dex.DexFormat;
 import com.android.dx.command.dexer.DxContext;
 import com.android.dx.merge.DexMerger;
+import dalvik.system.BaseDexClassLoader;
+import dalvik.system.DexClassLoader;
 import universecore.util.classes.BaseDynamicClassLoader;
 import universecore.util.classes.JarList;
+import universecore.util.handler.FieldHandler;
 import universecore.util.handler.MethodHandler;
 
 import java.io.BufferedOutputStream;
@@ -19,18 +22,12 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 
 public class DexLoaderFactory{
-  public static final String TMP_PATH = JarList.jarFileCache.child("temp").path();
   private static Class<?> inMemoryLoaderClass;
-
-  private static Constructor<?> loaderCstr;
   private static Constructor<?> inMemLoaderCstr;
 
   static{
     try{
       inMemoryLoaderClass = Class.forName("dalvik.system.InMemoryDexClassLoader");
-      Class<?> dexLoaderClass = Class.forName("dalvik.system.DexClassLoader");
-
-      loaderCstr = dexLoaderClass.getConstructor(String.class, String.class, String.class, ClassLoader.class);
       inMemLoaderCstr = inMemoryLoaderClass.getConstructor(ByteBuffer.class, ClassLoader.class);
     }catch(ClassNotFoundException|NoSuchMethodException ignored){}
   }
@@ -94,16 +91,28 @@ public class DexLoaderFactory{
     }
 
     private void updateLoader(){
-      try{
-        dvLoader = (ClassLoader) loaderCstr.newInstance(TMP_PATH, JarList.jarFileCache.path() + "/oct", null, getParent());
-      }catch(InstantiationException|IllegalAccessException|InvocationTargetException e){
-        throw new RuntimeException(e);
-      }
+      dvLoader = new DexClassLoader(file.getPath(), JarList.jarFileCache.path() + "/oct", null, getParent());
     }
 
     @Override
-    public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException{
-      Class<?> c = dvLoader.loadClass(name);
+    public Class<?> loadClass(String name, Class<?> accessor, boolean resolve) throws ClassNotFoundException{
+      Class<?> c;
+
+      if (accessor != null){
+        if (accessor.getClassLoader() instanceof BaseDexClassLoader loader) {
+          try {
+            return loader.loadClass(name);
+          } catch (ClassNotFoundException cf) {
+            Object pathList = FieldHandler.getValueDefault(loader, "pathList");
+            MethodHandler.invokeDefault(pathList, "addDexPath", file.getPath(), new File(JarList.jarFileCache.file(), "/oct"));
+
+            return loader.loadClass(name);
+          }
+        }
+        else throw new RuntimeException("unusable access " + accessor + " in loader: " + accessor.getClassLoader());
+      }
+      else c = dvLoader.loadClass(name);
+
       if(resolve) resolveClass(c);
 
       return c;
@@ -113,7 +122,7 @@ public class DexLoaderFactory{
   public static class MemoryDexClassLoader extends AsClassDexLoader{
     private Dex dex;
 
-    private ClassLoader loader;
+    private ClassLoader dvLoader;
 
     private MemoryDexClassLoader(ClassLoader parent){
       super(parent);
@@ -133,15 +142,31 @@ public class DexLoaderFactory{
             new DxContext()
         ).merge();
 
-        loader = (ClassLoader) inMemLoaderCstr.newInstance(ByteBuffer.wrap(dex.getBytes()), getParent());
+        dvLoader = (ClassLoader) inMemLoaderCstr.newInstance(ByteBuffer.wrap(dex.getBytes()), getParent());
       }catch(InstantiationException|IllegalAccessException|InvocationTargetException|IOException e){
         throw new RuntimeException(e);
       }
     }
 
     @Override
-    public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException{
-      Class<?> c = loader.loadClass(name);
+    public Class<?> loadClass(String name, Class<?> accessor, boolean resolve) throws ClassNotFoundException{
+      Class<?> c;
+
+      if (accessor != null){
+        if (accessor.getClassLoader() instanceof BaseDexClassLoader loader) {
+          try {
+            return loader.loadClass(name);
+          } catch (ClassNotFoundException cf) {
+            Object pathList = FieldHandler.getValueDefault(loader, "pathList");
+            MethodHandler.invokeDefault(pathList, "initByteBufferDexPath", (Object) new ByteBuffer[]{ByteBuffer.wrap(dex.getBytes())});
+
+            return loader.loadClass(name);
+          }
+        }
+        else throw new RuntimeException("unusable access " + accessor + " in loader: " + accessor.getClassLoader());
+      }
+      else c = dvLoader.loadClass(name);
+
       if(resolve) resolveClass(c);
 
       return c;

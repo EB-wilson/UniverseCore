@@ -4,6 +4,7 @@ import arc.Events;
 import arc.func.Boolf;
 import arc.struct.Seq;
 import dynamilize.DynamicClass;
+import dynamilize.annotation.AspectInterface;
 import mindustry.entities.EntityGroup;
 import mindustry.game.EventType;
 import mindustry.gen.*;
@@ -131,7 +132,7 @@ public class EntityAspect<EntityType extends Entityc> extends AbstractAspect<Ent
       GroupAspectType.setFunction(
           "removeByID",
           (self, sup, args) -> {
-            Entityc e = self.<EntityGroup>castGet().getByID(args.get(0));
+            Entityc e = self.<EntityGroup>objSelf().getByID(args.get(0));
             sup.invokeFunc("removeByID", args);
             for(EntityAspect<Entityc> aspect: aspects){
               aspect.remove(e);
@@ -161,11 +162,12 @@ public class EntityAspect<EntityType extends Entityc> extends AbstractAspect<Ent
         makeAspectType();
         aspectGroup = UncCore.classes.getDynamicMaker().newInstance(
             group.getClass(),
+            new Class[]{GroupAsp.class},
             GroupAspectType,
             type,
             false,
             false
-        ).castGet();
+        ).objSelf();
 
         ObjectHandler.copyField(group, aspectGroup);
 
@@ -187,5 +189,13 @@ public class EntityAspect<EntityType extends Entityc> extends AbstractAspect<Ent
     public void removeAspect(EntityAspect<Entityc> aspect){
       aspects.remove(aspect);
     }
+  }
+
+  @AspectInterface
+  public interface GroupAsp{
+    void add(Entityc e);
+    void remove(Entityc e);
+    void removeByID(int id);
+    void removeIndex(Entityc e, int index);
   }
 }

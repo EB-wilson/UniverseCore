@@ -5,6 +5,12 @@ plugins {
 sourceSets.main.java.srcDirs = ["src/main/java"]
 sourceSets.test.java.srcDirs = ["src/test/java"]
 
+repositories{
+  mavenLocal()
+  mavenCentral()
+  maven{ url 'https://www.jitpack.io' }
+}
+
 publishing {
   publications {
     maven(MavenPublication) {
@@ -14,19 +20,17 @@ publishing {
       from components.java
     }
   }
+}
 
-  repositories{
-    mavenLocal()
-  }
+sourceCompatibility = 17
+targetCompatibility = 8
+
+tasks.withType(JavaCompile){
+  options.compilerArgs.addAll(['--release', '8'])
 }
 
 dependencies{
-  repositories{
-    mavenCentral()
-    maven{ url 'https://www.jitpack.io' }
-  }
-
-  compileOnly "com.github.EB-wilson:JavaDynamilizer:V1.4-B1"
+  compileOnly "com.github.EB-wilson.JavaDynamilizer:JavaDynamilizer:$JDERVersion"
 
   annotationProcessor project(":annotations")
 }

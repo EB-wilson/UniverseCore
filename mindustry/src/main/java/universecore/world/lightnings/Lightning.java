@@ -1,7 +1,6 @@
 package universecore.world.lightnings;
 
 import arc.func.Cons2;
-import arc.func.FloatFloatf;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Fill;
 import arc.math.Angles;
@@ -49,6 +48,7 @@ public class Lightning implements Pool.Poolable{
 
   /**闪电的蔓延速度，若不设置将使用{@link Lightning#time}确定闪电完全出现的时间
    * @deprecated  规范化，此API将不再有效*/
+  @Deprecated
   public float speed;
   /**闪电由产生到完全显现的时间，在{@link Lightning#speed}未设置的情况下有效*/
   public float time;
