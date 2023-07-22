@@ -9,6 +9,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
+@SuppressWarnings("DuplicatedCode")
 public class DesktopMethodInvokeHelper implements MethodInvokeHelper{
   protected static final ObjectMap<Class<?>, ObjectMap<String, ObjectMap<FunctionType, MethodHandle>>> methodPool = new ObjectMap<>();
 

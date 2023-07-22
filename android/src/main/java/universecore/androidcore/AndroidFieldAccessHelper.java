@@ -62,6 +62,258 @@ public class AndroidFieldAccessHelper implements FieldAccessHelper{
   }
 
   @Override
+  public void set(Object object, String field, byte value) {
+    try {
+      getField(object.getClass(), field, false).setByte(object, value);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void setStatic(Class<?> clazz, String field, byte value) {
+    try {
+      getField(clazz, field, false).setByte(null, value);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public byte getByte(Object object, String field) {
+    try {
+      return getField(object.getClass(), field, false).getByte(object);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public byte getByteStatic(Class<?> clazz, String field) {
+    try {
+      return getField(clazz, field, false).getByte(null);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void set(Object object, String field, short value) {
+    try {
+      getField(object.getClass(), field, false).setInt(object, value);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void setStatic(Class<?> clazz, String field, short value) {
+    try {
+      getField(clazz, field, false).setShort(null, value);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public short getShort(Object object, String field) {
+    try {
+      return getField(object.getClass(), field, false).getShort(object);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public short getShortStatic(Class<?> clazz, String field) {
+    try {
+      return getField(clazz, field, false).getShort(null);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void set(Object object, String field, int value) {
+    try {
+      getField(object.getClass(), field, false).setInt(object, value);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void setStatic(Class<?> clazz, String field, int value) {
+    try {
+      getField(clazz, field, false).setInt(null, value);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public int getInt(Object object, String field) {
+    try {
+      return getField(object.getClass(), field, false).getInt(object);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public int getIntStatic(Class<?> clazz, String field) {
+    try {
+      return getField(clazz, field, false).getInt(null);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void set(Object object, String field, long value) {
+    try {
+      getField(object.getClass(), field, false).setLong(object, value);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void setStatic(Class<?> clazz, String field, long value) {
+    try {
+      getField(clazz, field, false).setLong(null, value);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public long getLong(Object object, String field) {
+    try {
+      return getField(object.getClass(), field, false).getLong(object);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public long getLongStatic(Class<?> clazz, String field) {
+    try {
+      return getField(clazz, field, false).getLong(null);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void set(Object object, String field, float value) {
+    try {
+      getField(object.getClass(), field, false).setFloat(object, value);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void setStatic(Class<?> clazz, String field, float value) {
+    try {
+      getField(clazz, field, false).setFloat(null, value);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public float getFloat(Object object, String field) {
+    try {
+      return getField(object.getClass(), field, false).getFloat(object);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public float getFloatStatic(Class<?> clazz, String field) {
+    try {
+      return getField(clazz, field, false).getFloat(null);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void set(Object object, String field, double value) {
+    try {
+      getField(object.getClass(), field, false).setDouble(object, value);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void setStatic(Class<?> clazz, String field, double value) {
+    try {
+      getField(clazz, field, false).setDouble(null, value);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public double getDouble(Object object, String field) {
+    try {
+      return getField(object.getClass(), field, false).getDouble(object);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public double getDoubleStatic(Class<?> clazz, String field) {
+    try {
+      return getField(clazz, field, false).getDouble(null);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void set(Object object, String field, boolean value) {
+    try {
+      getField(object.getClass(), field, false).setBoolean(object, value);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void setStatic(Class<?> clazz, String field, boolean value) {
+    try {
+      getField(clazz, field, false).setBoolean(null, value);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public boolean getBoolean(Object object, String field) {
+    try {
+      return getField(object.getClass(), field, false).getBoolean(object);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public boolean getBooleanStatic(Class<?> clazz, String field) {
+    try {
+      return getField(clazz, field, false).getBoolean(null);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
   public void set(Object object, String field, Object value){
     try{
       getField(object.getClass(), field, false).set(object, value);

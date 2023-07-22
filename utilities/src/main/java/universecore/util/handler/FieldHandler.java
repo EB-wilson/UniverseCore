@@ -29,30 +29,6 @@ public class FieldHandler<T>{
     else ImpCore.fieldAccessHelper.set(object, key, value);
   }
 
-  /**使用默认规则构造一个处理器对象并缓存，使用这个默认处理器来执行setValue操作
-   * @see FieldHandler#setValue(Object, String, Object) */
-  public static void setValueDefault(Object obj, String key, Object value){
-    defaultHandlers.computeIfAbsent(obj.getClass(), e -> new FieldHandler(obj.getClass())).setValue(obj, key, value);
-  }
-
-  /**使用默认规则构造一个处理器对象并缓存，使用这个默认处理器来执行静态的getValue操作
-   * @see FieldHandler#setValue(Object, String, Object) */
-  public static void setValueDefault(Class<?> clazz, String key, Object value){
-    defaultHandlers.computeIfAbsent(clazz, e -> new FieldHandler(clazz)).setValue(null, key, value);
-  }
-
-  /**使用默认规则构造一个处理器对象，使用这个默认处理器来执行setValue操作，但这并不会缓存这个处理器
-   * @see FieldHandler#setValue(Object, String, Object) */
-  public static void setValueTemp(Object obj, String key, Object value){
-    new FieldHandler(obj.getClass()).setValue(obj, key, value);
-  }
-
-  /**使用默认规则构造一个处理器对象，使用这个默认处理器来执行静态的setValue操作，但这并不会缓存这个处理器
-   * @see FieldHandler#setValue(Object, String, Object) */
-  public static void setValueTemp(Class<?> clazz, String key, Object value){
-    new FieldHandler(clazz).setValue(null, key, value);
-  }
-  
   /**获取指定的字段值，并返回它，如果字段不存在则会以抛出异常结束，如果目标对象为null，则设置的字段为static
    * 除非字段是静态的，否则不允许传入空目标对象
    *
@@ -64,28 +40,198 @@ public class FieldHandler<T>{
     return object == null? ImpCore.fieldAccessHelper.getStatic(clazz, key): ImpCore.fieldAccessHelper.get(object, key);
   }
 
+  public void setValue(T object, String key, byte value){
+    if (object == null) ImpCore.fieldAccessHelper.setStatic(clazz, key, value);
+    else ImpCore.fieldAccessHelper.set(object, key, value);
+  }
+
+  public byte getByteValue(T object, String key){
+    if (object == null) return ImpCore.fieldAccessHelper.getByteStatic(clazz, key);
+    else return ImpCore.fieldAccessHelper.getByte(object, key);
+  }
+
+  public void setValue(T object, String key, short value){
+    if (object == null) ImpCore.fieldAccessHelper.setStatic(clazz, key, value);
+    else ImpCore.fieldAccessHelper.set(object, key, value);
+  }
+
+  public short getShortValue(T object, String key){
+    if (object == null) return ImpCore.fieldAccessHelper.getShortStatic(clazz, key);
+    else return ImpCore.fieldAccessHelper.getShort(object, key);
+  }
+
+  public void setValue(T object, String key, int value){
+    if (object == null) ImpCore.fieldAccessHelper.setStatic(clazz, key, value);
+    else ImpCore.fieldAccessHelper.set(object, key, value);
+  }
+
+  public int getIntValue(T object, String key){
+    if (object == null) return ImpCore.fieldAccessHelper.getIntStatic(clazz, key);
+    else return ImpCore.fieldAccessHelper.getInt(object, key);
+  }
+
+  public void setValue(T object, String key, long value){
+    if (object == null) ImpCore.fieldAccessHelper.setStatic(clazz, key, value);
+    else ImpCore.fieldAccessHelper.set(object, key, value);
+  }
+
+  public long getLongValue(T object, String key){
+    if (object == null) return ImpCore.fieldAccessHelper.getLongStatic(clazz, key);
+    else return ImpCore.fieldAccessHelper.getLong(object, key);
+  }
+
+  public void setValue(T object, String key, float value){
+    if (object == null) ImpCore.fieldAccessHelper.setStatic(clazz, key, value);
+    else ImpCore.fieldAccessHelper.set(object, key, value);
+  }
+
+  public float getFloatValue(T object, String key){
+    if (object == null) return ImpCore.fieldAccessHelper.getFloatStatic(clazz, key);
+    else return ImpCore.fieldAccessHelper.getFloat(object, key);
+  }
+
+  public void setValue(T object, String key, double value){
+    if (object == null) ImpCore.fieldAccessHelper.setStatic(clazz, key, value);
+    else ImpCore.fieldAccessHelper.set(object, key, value);
+  }
+
+  public double getDoubleValue(T object, String key){
+    if (object == null) return ImpCore.fieldAccessHelper.getDoubleStatic(clazz, key);
+    else return ImpCore.fieldAccessHelper.getDouble(object, key);
+  }
+
+  public void setValue(T object, String key, boolean value){
+    if (object == null) ImpCore.fieldAccessHelper.setStatic(clazz, key, value);
+    else ImpCore.fieldAccessHelper.set(object, key, value);
+  }
+
+  public boolean getBooleanValue(T object, String key){
+    if (object == null) return ImpCore.fieldAccessHelper.getBooleanStatic(clazz, key);
+    else return ImpCore.fieldAccessHelper.getBoolean(object, key);
+  }
+
+  /**使用默认规则构造一个处理器对象并缓存，使用这个默认处理器来执行setValue操作
+   * @see FieldHandler#setValue(Object, String, Object) */
+  public static void setValueDefault(Object obj, String key, Object value){
+    cachedHandler(obj.getClass()).setValue(obj, key, value);
+  }
+
+  /**使用默认规则构造一个处理器对象并缓存，使用这个默认处理器来执行静态的getValue操作
+   * @see FieldHandler#setValue(Object, String, Object) */
+  public static void setValueDefault(Class<?> clazz, String key, Object value){
+    cachedHandler(clazz).setValue(null, key, value);
+  }
+
   /**使用默认规则构造一个处理器对象并缓存，使用这个默认处理器来执行getValue操作
    * @see FieldHandler#getValue(Object, String)*/
   public static <T> T getValueDefault(Object obj, String key){
-    return (T) defaultHandlers.computeIfAbsent(obj.getClass(), e -> new FieldHandler(obj.getClass())).getValue(obj, key);
+    return (T) cachedHandler(obj.getClass()).getValue(obj, key);
   }
 
   /**使用默认规则构造一个处理器对象并缓存，使用这个默认处理器来执行静态的getValue操作
    * @see FieldHandler#getValue(Object, String)*/
   public static <T> T getValueDefault(Class<?> clazz, String key){
-    return (T) defaultHandlers.computeIfAbsent(clazz, e -> new FieldHandler(clazz)).getValue(null, key);
+    return (T) cachedHandler(clazz).getValue(null, key);
   }
 
-  /**使用默认规则构造一个处理器对象，使用这个默认处理器来执行getValue操作，但这并不会缓存这个处理器
-   * @see FieldHandler#getValue(Object, String)*/
-  public static <T> T getValueTemp(Object obj, String key){
-    return (T) new FieldHandler(obj.getClass()).getValue(obj, key);
+  public static void setValueDefault(Object obj, String key, byte value){
+    cachedHandler(obj.getClass()).setValue(obj, key, value);
   }
 
-  /**使用默认规则构造一个处理器对象，使用这个默认处理器来执行静态的getValue操作，但这并不会缓存这个处理器
-   * @see FieldHandler#getValue(Object, String)*/
-  public static <T> T getValueTemp(Class<?> clazz, String key){
-    return (T) new FieldHandler(clazz).getValue(null, key);
+  public static void setValueDefault(Class<?> clazz, String key, byte value){
+    cachedHandler(clazz).setValue(null, key, value);
+  }
+
+  public static byte getByteDefault(Object obj, String key){
+    return cachedHandler(obj.getClass()).getByteValue(obj, key);
+  }
+
+  public static byte getByteDefault(Class<?> clazz, String key){
+    return cachedHandler(clazz).getByteValue(null, key);
+  }
+
+  public static void setValueDefault(Object obj, String key, short value){
+    cachedHandler(obj.getClass()).setValue(obj, key, value);
+  }
+
+  public static void setValueDefault(Class<?> clazz, String key, short value){
+    cachedHandler(clazz).setValue(null, key, value);
+  }
+
+  public static short getShortDefault(Object obj, String key){
+    return cachedHandler(obj.getClass()).getShortValue(obj, key);
+  }
+
+  public static short getShortDefault(Class<?> clazz, String key){
+    return cachedHandler(clazz).getShortValue(null, key);
+  }
+
+  public static void setValueDefault(Object obj, String key, int value){
+    cachedHandler(obj.getClass()).setValue(obj, key, value);
+  }
+
+  public static void setValueDefault(Class<?> clazz, String key, int value){
+    cachedHandler(clazz).setValue(null, key, value);
+  }
+
+  public static int getIntDefault(Object obj, String key){
+    return cachedHandler(obj.getClass()).getIntValue(obj, key);
+  }
+
+  public static int getIntDefault(Class<?> clazz, String key){
+    return cachedHandler(clazz).getIntValue(null, key);
+  }
+
+  public static void setValueDefault(Object obj, String key, float value){
+    cachedHandler(obj.getClass()).setValue(obj, key, value);
+  }
+
+  public static void setValueDefault(Class<?> clazz, String key, float value){
+    cachedHandler(clazz).setValue(null, key, value);
+  }
+
+  public static float getFloatDefault(Object obj, String key){
+    return cachedHandler(obj.getClass()).getFloatValue(obj, key);
+  }
+
+  public static float getFloatDefault(Class<?> clazz, String key){
+    return cachedHandler(clazz).getFloatValue(null, key);
+  }
+
+  public static void setValueDefault(Object obj, String key, double value){
+    cachedHandler(obj.getClass()).setValue(obj, key, value);
+  }
+
+  public static void setValueDefault(Class<?> clazz, String key, double value){
+    cachedHandler(clazz).setValue(null, key, value);
+  }
+
+  public static double getDoubleDefault(Object obj, String key){
+    return cachedHandler(obj.getClass()).getDoubleValue(obj, key);
+  }
+
+  public static double getDoubleDefault(Class<?> clazz, String key){
+    return cachedHandler(clazz).getDoubleValue(null, key);
+  }
+
+  public static void setValueDefault(Object obj, String key, boolean value){
+    cachedHandler(obj.getClass()).setValue(obj, key, value);
+  }
+
+  public static void setValueDefault(Class<?> clazz, String key, boolean value){
+    cachedHandler(clazz).setValue(null, key, value);
+  }
+
+  public static boolean getBooleanDefault(Object obj, String key){
+    return cachedHandler(obj.getClass()).getBooleanValue(obj, key);
+  }
+
+  public static boolean getBooleanDefault(Class<?> clazz, String key){
+    return cachedHandler(clazz).getBooleanValue(null, key);
+  }
+
+  private static FieldHandler cachedHandler(Class<?> clazz) {
+    return defaultHandlers.computeIfAbsent(clazz, e -> new FieldHandler(clazz));
   }
 
   /**清空所有当前缓存的处理器*/

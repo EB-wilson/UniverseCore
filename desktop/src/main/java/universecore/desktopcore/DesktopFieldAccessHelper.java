@@ -9,7 +9,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "DuplicatedCode"})
 public class DesktopFieldAccessHelper implements FieldAccessHelper{
   private static final ObjectMap<Class<?>, ObjectMap<String, Field>> fieldMap = new ObjectMap<>();
   private static final ObjectMap<String, Field> EMP = new ObjectMap<>();
@@ -81,6 +81,398 @@ public class DesktopFieldAccessHelper implements FieldAccessHelper{
         throw new RuntimeException(e);
       }
     });
+  }
+
+  @Override
+  public void set(Object object, String field, byte value) {
+    try{
+      Field f = getField(object.getClass(), field, false);
+
+      if(finalFields.contains(f)){
+        f.set(object, value);
+        return;
+      }
+
+      initField(f);
+      setters.get(f).invoke(object, value);
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void setStatic(Class<?> clazz, String field, byte value) {
+    try{
+      Field f = getField(clazz, field, false);
+
+      if(finalFields.contains(f)){
+        f.set(null, value);
+        return;
+      }
+
+      initField(f);
+      setters.get(f).invoke(value);
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public byte getByte(Object object, String field) {
+    try{
+      Field f = getField(object.getClass(), field, false);
+      initField(f);
+      return (byte) getters.get(f).invoke(object);
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public byte getByteStatic(Class<?> clazz, String field) {
+    try{
+      Field f = getField(clazz, field, true);
+      initField(f);
+      return (byte) getters.get(f).invoke();
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void set(Object object, String field, short value) {
+    try{
+      Field f = getField(object.getClass(), field, false);
+
+      if(finalFields.contains(f)){
+        f.set(object, value);
+        return;
+      }
+
+      initField(f);
+      setters.get(f).invoke(object, value);
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void setStatic(Class<?> clazz, String field, short value) {
+    try{
+      Field f = getField(clazz, field, false);
+
+      if(finalFields.contains(f)){
+        f.set(null, value);
+        return;
+      }
+
+      initField(f);
+      setters.get(f).invoke(value);
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public short getShort(Object object, String field) {
+    try{
+      Field f = getField(object.getClass(), field, false);
+      initField(f);
+      return (short) getters.get(f).invoke(object);
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public short getShortStatic(Class<?> clazz, String field) {
+    try{
+      Field f = getField(clazz, field, true);
+      initField(f);
+      return (short) getters.get(f).invoke();
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void set(Object object, String field, int value) {
+    try{
+      Field f = getField(object.getClass(), field, false);
+
+      if(finalFields.contains(f)){
+        f.set(object, value);
+        return;
+      }
+
+      initField(f);
+      setters.get(f).invoke(object, value);
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void setStatic(Class<?> clazz, String field, int value) {
+    try{
+      Field f = getField(clazz, field, false);
+
+      if(finalFields.contains(f)){
+        f.set(null, value);
+        return;
+      }
+
+      initField(f);
+      setters.get(f).invoke(value);
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public int getInt(Object object, String field) {
+    try{
+      Field f = getField(object.getClass(), field, false);
+      initField(f);
+      return (int) getters.get(f).invoke(object);
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public int getIntStatic(Class<?> clazz, String field) {
+    try{
+      Field f = getField(clazz, field, true);
+      initField(f);
+      return (int) getters.get(f).invoke();
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void set(Object object, String field, long value) {
+    try{
+      Field f = getField(object.getClass(), field, false);
+
+      if(finalFields.contains(f)){
+        f.set(object, value);
+        return;
+      }
+
+      initField(f);
+      setters.get(f).invoke(object, value);
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void setStatic(Class<?> clazz, String field, long value) {
+    try{
+      Field f = getField(clazz, field, false);
+
+      if(finalFields.contains(f)){
+        f.set(null, value);
+        return;
+      }
+
+      initField(f);
+      setters.get(f).invoke(value);
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public long getLong(Object object, String field) {
+    try{
+      Field f = getField(object.getClass(), field, false);
+      initField(f);
+      return (long) getters.get(f).invoke(object);
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public long getLongStatic(Class<?> clazz, String field) {
+    try{
+      Field f = getField(clazz, field, true);
+      initField(f);
+      return (long) getters.get(f).invoke();
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void set(Object object, String field, float value) {
+    try{
+      Field f = getField(object.getClass(), field, false);
+
+      if(finalFields.contains(f)){
+        f.set(object, value);
+        return;
+      }
+
+      initField(f);
+      setters.get(f).invoke(object, value);
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void setStatic(Class<?> clazz, String field, float value) {
+    try{
+      Field f = getField(clazz, field, false);
+
+      if(finalFields.contains(f)){
+        f.set(null, value);
+        return;
+      }
+
+      initField(f);
+      setters.get(f).invoke(value);
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public float getFloat(Object object, String field) {
+    try{
+      Field f = getField(object.getClass(), field, false);
+      initField(f);
+      return (float) getters.get(f).invoke(object);
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public float getFloatStatic(Class<?> clazz, String field) {
+    try{
+      Field f = getField(clazz, field, true);
+      initField(f);
+      return (float) getters.get(f).invoke();
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void set(Object object, String field, double value) {
+    try{
+      Field f = getField(object.getClass(), field, false);
+
+      if(finalFields.contains(f)){
+        f.set(object, value);
+        return;
+      }
+
+      initField(f);
+      setters.get(f).invoke(object, value);
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void setStatic(Class<?> clazz, String field, double value) {
+    try{
+      Field f = getField(clazz, field, false);
+
+      if(finalFields.contains(f)){
+        f.set(null, value);
+        return;
+      }
+
+      initField(f);
+      setters.get(f).invoke(value);
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public double getDouble(Object object, String field) {
+    try{
+      Field f = getField(object.getClass(), field, false);
+      initField(f);
+      return (double) getters.get(f).invoke(object);
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public double getDoubleStatic(Class<?> clazz, String field) {
+    try{
+      Field f = getField(clazz, field, true);
+      initField(f);
+      return (double) getters.get(f).invoke();
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void set(Object object, String field, boolean value) {
+    try{
+      Field f = getField(object.getClass(), field, false);
+
+      if(finalFields.contains(f)){
+        f.set(object, value);
+        return;
+      }
+
+      initField(f);
+      setters.get(f).invoke(object, value);
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void setStatic(Class<?> clazz, String field, boolean value) {
+    try{
+      Field f = getField(clazz, field, false);
+
+      if(finalFields.contains(f)){
+        f.set(null, value);
+        return;
+      }
+
+      initField(f);
+      setters.get(f).invoke(value);
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public boolean getBoolean(Object object, String field) {
+    try{
+      Field f = getField(object.getClass(), field, false);
+      initField(f);
+      return (boolean) getters.get(f).invoke(object);
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public boolean getBooleanStatic(Class<?> clazz, String field) {
+    try{
+      Field f = getField(clazz, field, true);
+      initField(f);
+      return (boolean) getters.get(f).invoke();
+    }catch(Throwable e){
+      throw new RuntimeException(e);
+    }
   }
 
   @Override

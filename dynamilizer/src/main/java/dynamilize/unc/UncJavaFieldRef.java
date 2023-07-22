@@ -38,71 +38,72 @@ public class UncJavaFieldRef implements IVariable {
 
   @Override
   public boolean get(DynamicObject<?> dynamicObject, boolean b) {
-    return false;
+    return ImpCore.fieldAccessHelper.getBoolean(dynamicObject, name);
   }
 
   @Override
   public byte get(DynamicObject<?> dynamicObject, byte b) {
-    return 0;
+    return ImpCore.fieldAccessHelper.getByte(dynamicObject, name);
   }
 
   @Override
   public short get(DynamicObject<?> dynamicObject, short i) {
-    return 0;
+    return ImpCore.fieldAccessHelper.getShort(dynamicObject, name);
   }
 
   @Override
   public int get(DynamicObject<?> dynamicObject, int i) {
-    return 0;
+    return ImpCore.fieldAccessHelper.getInt(dynamicObject, name);
   }
 
   @Override
   public long get(DynamicObject<?> dynamicObject, long l) {
-    return 0;
+    return ImpCore.fieldAccessHelper.getLong(dynamicObject, name);
   }
 
   @Override
   public float get(DynamicObject<?> dynamicObject, float v) {
-    return 0;
+    return ImpCore.fieldAccessHelper.getFloat(dynamicObject, name);
   }
 
   @Override
   public double get(DynamicObject<?> dynamicObject, double v) {
-    return 0;
+    return ImpCore.fieldAccessHelper.getDouble(dynamicObject, name);
   }
 
   @Override
   public void set(DynamicObject<?> dynamicObject, boolean b) {
-
+    ImpCore.fieldAccessHelper.set(dynamicObject, name, b);
   }
 
   @Override
   public void set(DynamicObject<?> dynamicObject, byte b) {
-
+    ImpCore.fieldAccessHelper.set(dynamicObject, name, b);
   }
 
   @Override
-  public void set(DynamicObject<?> dynamicObject, short i) {
-
+  public void set(DynamicObject<?> dynamicObject, short s) {
+    ImpCore.fieldAccessHelper.set(dynamicObject, name, s);
   }
 
   @Override
   public void set(DynamicObject<?> dynamicObject, int i) {
-
+    ImpCore.fieldAccessHelper.set(dynamicObject, name, i);
   }
 
   @Override
   public void set(DynamicObject<?> dynamicObject, long l) {
+    ImpCore.fieldAccessHelper.set(dynamicObject, name, l);
+  }
+
+  @Override
+  public void set(DynamicObject<?> dynamicObject, float f) {
+    ImpCore.fieldAccessHelper.set(dynamicObject, name, f);
 
   }
 
   @Override
-  public void set(DynamicObject<?> dynamicObject, float v) {
-
-  }
-
-  @Override
-  public void set(DynamicObject<?> dynamicObject, double v) {
-
+  public void set(DynamicObject<?> dynamicObject, double d) {
+    ImpCore.fieldAccessHelper.set(dynamicObject, name, d);
   }
 }
