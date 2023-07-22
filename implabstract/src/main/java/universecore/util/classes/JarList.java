@@ -3,7 +3,12 @@ package universecore.util.classes;
 
 import arc.Core;
 import arc.files.Fi;
+import arc.files.ZipFi;
+import arc.util.ArcRuntimeException;
 import arc.util.Log;
+import mindustry.Vars;
+import universecore.util.mods.IllegalModHandleException;
+import universecore.util.mods.ModGetter;
 import universecore.util.mods.ModInfo;
 
 import java.io.*;
@@ -60,9 +65,27 @@ public class JarList{
   }
   
   public Fi getCacheFile(ModInfo mod){
+    boolean selfUpdate = false;
+    if (mod.name.equals("universe-core")){
+      for (Fi fi : Vars.modDirectory.list()) {
+        try {
+          fi = ModGetter.checkModFormat(fi);
+          ModInfo info = new ModInfo(fi);
+
+          if (!info.name.equals("universe-code") && !matched(info)){
+            selfUpdate = true;
+            Log.info("[UniverseCore] exist mod updated, universe core class cache updating");
+            break;
+          }
+        } catch (IllegalModHandleException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    }
+
     InfoEntry entry = list.get(mod.name);
     if(entry == null){
-      Log.info("new mod: " + mod.name + " installed, to generate class cache");
+      Log.info("[UniverseCore] new mod: " + mod.name + " installed, to generate class cache");
       entry = new InfoEntry();
       entry.name = mod.name;
       entry.version = mod.version;
@@ -72,14 +95,14 @@ public class JarList{
       list.put(mod.name, entry);
       writeToList();
     }
-    else if(!entry.version.equals(mod.version) || !getMd5(mod.file).equals(entry.getMd5())){
-      Log.info("source mod: " + mod.name + " is updated, regenerate class cache");
+    else if(selfUpdate || !matched(mod)){
+      Log.info("[UniverseCore] source mod: " + mod.name + " is updated, regenerate class cache");
       entry.version = mod.version;
       entry.file.delete();
       entry.md5 = getMd5(mod.file);
       writeToList();
     }
-    else Log.info("loading mod: " + mod.name + " class cache");
+    else Log.info("[UniverseCore] loading mod: " + mod.name + " class cache");
 
     return entry.file;
   }
@@ -139,9 +162,7 @@ public class JarList{
             if(!inValue) throw new IllegalArgumentException("unexpected \";\"");
             key = keyBuffer.toString();
             value = valueBuffer.toString();
-  
-            System.out.println(key);
-            System.out.println(value);
+
             switch(key){
               case "name" -> result.name = value;
               case "version" -> result.version = value;

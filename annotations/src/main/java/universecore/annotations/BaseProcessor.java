@@ -1,5 +1,6 @@
 package universecore.annotations;
 
+import com.sun.source.tree.Tree;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.parser.ParserFactory;
@@ -15,17 +16,24 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.util.Elements;
+import javax.tools.JavaCompiler;
 import javax.tools.StandardLocation;
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
-@SuppressWarnings({"unchecked", "Since15"})
+@SuppressWarnings({"unchecked"})
 public abstract class BaseProcessor extends AbstractProcessor{
   private static final long fieldFilterOffset = 112L;
+
+  private static final Field opensField;
+  private static final Field exportField;
+
+  private static final Method exportNative;
 
   final HashMap<TypeElement, ArrayList<JCTree.JCClassDecl>> processedMap = new HashMap<>();
 
@@ -43,6 +51,15 @@ public abstract class BaseProcessor extends AbstractProcessor{
 
   static final Unsafe unsafe;
 
+  private static final String[] opensModule = {
+      "com.sun.tools.javac.api",
+      "com.sun.tools.javac.code",
+      "com.sun.tools.javac.parser",
+      "com.sun.tools.javac.processing",
+      "com.sun.tools.javac.tree",
+      "com.sun.tools.javac.util",
+  };
+
   //使用此模块可替代jabel，使程序进行降级编译（编译到JDK8）
   static{
     try{
@@ -53,6 +70,19 @@ public abstract class BaseProcessor extends AbstractProcessor{
       Class<?> clazz = Class.forName("jdk.internal.reflect.Reflection");
       Map<Class<?>, Set<String>> map = (Map<Class<?>, Set<String>>) unsafe.getObject(clazz, fieldFilterOffset);
       map.clear();
+
+      opensField = Module.class.getDeclaredField("openPackages");
+      exportField = Module.class.getDeclaredField("exportedPackages");
+
+      makeModuleOpen(Module.class.getModule(), "java.lang", BaseProcessor.class.getModule());
+
+      exportNative = Module.class.getDeclaredMethod("addExports0", Module.class, String.class, Module.class);
+      exportNative.setAccessible(true);
+      exportNative.invoke(null, Module.class.getModule(), "java.lang", BaseProcessor.class.getModule());
+
+      for (String pack : opensModule) {
+        makeModuleOpen(Tree.class.getModule(), pack, BaseProcessor.class.getModule());
+      }
 
       Field minLevel = Source.Feature.class.getDeclaredField("minLevel");
       long off = unsafe.objectFieldOffset(minLevel);
@@ -65,6 +95,46 @@ public abstract class BaseProcessor extends AbstractProcessor{
     } catch (NoSuchFieldException | ClassNotFoundException | InvocationTargetException | NoSuchMethodException |
              InstantiationException | IllegalAccessException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private static void makeModuleOpen(Module from, String pac, Module to){
+    try {
+      if (exportNative != null) exportNative.invoke(null, from, pac, to);
+    } catch (IllegalAccessException | InvocationTargetException e) {
+      throw new RuntimeException(e);
+    }
+
+    Map<String, Set<Module>> opensMap = (Map<String, Set<Module>>) unsafe.getObjectVolatile(from, unsafe.objectFieldOffset(opensField));
+    if(opensMap == null){
+      opensMap = new HashMap<>();
+      unsafe.putObjectVolatile(from, unsafe.objectFieldOffset(opensField), opensMap);
+    }
+
+    Map<String, Set<Module>> exportsMap = (Map<String, Set<Module>>) unsafe.getObjectVolatile(from, unsafe.objectFieldOffset(exportField));
+    if(exportsMap == null){
+      exportsMap = new HashMap<>();
+      unsafe.putObjectVolatile(from, unsafe.objectFieldOffset(exportField), exportsMap);
+    }
+
+    Set<Module> opens = opensMap.computeIfAbsent(pac, e -> new HashSet<>());
+    Set<Module> exports = exportsMap.computeIfAbsent(pac, e -> new HashSet<>());
+
+    try{
+      opens.add(to);
+    }catch(UnsupportedOperationException e){
+      ArrayList<Module> lis = new ArrayList<>(opens);
+      lis.add(to);
+      opensMap.put(pac, new HashSet<>(lis));
+    }
+
+    try{
+      exports.add(to);
+    }catch(UnsupportedOperationException e){
+      ArrayList<Module> lis = new ArrayList<>(exports);
+      lis.add(to);
+      exportsMap.put(pac, new HashSet<>(lis));
     }
   }
   

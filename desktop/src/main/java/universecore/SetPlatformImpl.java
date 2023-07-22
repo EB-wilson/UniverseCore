@@ -15,6 +15,7 @@ import universecore.util.mods.ModInfo;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class SetPlatformImpl{
   private static Constructor<? extends ClassHandler> handlerCstr;
@@ -23,6 +24,7 @@ public class SetPlatformImpl{
   public static void setImplements(){
     try{
       Class.forName("java.lang.Module");
+      Class.forName("dynamilize.Demodulator");
 
       Class<? extends AccessibleHelper> accessible9Type =
           (Class<? extends AccessibleHelper>) Class.forName("universecore.desktop9core.DesktopAccessibleHelper9");

@@ -34,6 +34,8 @@ dependencies {
   compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
   compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
 
+  implementation "com.github.EB-wilson.JavaDynamilizer:baseimpl:$JDERVersion"
+
   compileOnly project(":core")
   compileOnly project(":abstract")
   compileOnly project(":implabstract")

@@ -4,6 +4,6 @@
   author: "EBwilson",
   main: "universecore.UncCore",
   description: "testbuild.A advance library of mod, contains so many tools and method, please see the usage doc on github.\n\n一个高级的mod开发前置库，提供了很多有用的工具和方法，用法内容请参见github使用文档。",
-  version: "1.8.2",
+  version: "1.8.3",
   minGameVersion: 141
 }

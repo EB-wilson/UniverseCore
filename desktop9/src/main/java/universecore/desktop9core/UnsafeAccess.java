@@ -1,4 +1,4 @@
-package universecore.desktopcore;
+package universecore.desktop9core;
 
 import dynamilize.IllegalHandleException;
 import sun.misc.Unsafe;
@@ -9,7 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
 public class UnsafeAccess{
-  private static final Unsafe unsafe;
+  protected static final Unsafe unsafe;
 
   static{
     try{
@@ -51,7 +51,7 @@ public class UnsafeAccess{
     doPut(value, base, fieldOff, clazz);
   }
 
-  private static void doPut(Object value, Object base, long fieldOff, Class<?> clazz){
+  protected static void doPut(Object value, Object base, long fieldOff, Class<?> clazz){
     if(clazz.isPrimitive()){
       if(clazz == int.class) unsafe.putInt(base, fieldOff, (int) value);
       else if(clazz == float.class) unsafe.putFloat(base, fieldOff, (float) value);
@@ -89,7 +89,7 @@ public class UnsafeAccess{
     }
   }
 
-  private static Object doGet(Object object, long fieldOff, Class<?> clazz){
+  protected static Object doGet(Object object, long fieldOff, Class<?> clazz){
     if(clazz.isPrimitive()){
       if(clazz == int.class) return unsafe.getInt(object, fieldOff);
       else if(clazz == float.class) return unsafe.getFloat(object, fieldOff);

@@ -15,8 +15,13 @@ public class DesktopDynamicClassLoader extends BaseDynamicClassLoader{
   static{
     try{
       Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
-      defineClass = unsafeClass.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class, ClassLoader.class, ProtectionDomain.class);
-
+      Method def;
+      try {
+        def = unsafeClass.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class, ClassLoader.class, ProtectionDomain.class);
+      } catch (NoSuchMethodException e){
+        def = null;
+      }
+      defineClass = def;
       Constructor<?> cstr = unsafeClass.getDeclaredConstructor();
       cstr.setAccessible(true);
       unsafe = cstr.newInstance();

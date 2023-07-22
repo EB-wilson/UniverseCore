@@ -9,8 +9,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 public class DesktopAccessibleHelper9 implements AccessibleHelper {
-
-
   @Override
   public void makeAccessible(AccessibleObject object) {
     if (object instanceof Method method){
