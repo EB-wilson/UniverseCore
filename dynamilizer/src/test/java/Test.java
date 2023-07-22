@@ -1,5 +1,5 @@
 public class Test{
-  public static void main(final String[] args) throws NoSuchMethodException{
+  public static void main(final String[] args) {
     for(int i = 0; i < 20; i++){
       System.out.println("origin: " + i + ", result: " + test(i));
     }

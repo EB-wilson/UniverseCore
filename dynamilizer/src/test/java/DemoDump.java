@@ -2,7 +2,7 @@ import org.objectweb.asm.*;
 
 public class DemoDump implements Opcodes{
 
-  public static byte[] dump() throws Exception{
+  public static byte[] dump() {
       ClassWriter classWriter = new ClassWriter(0);
       FieldVisitor fieldVisitor;
       RecordComponentVisitor recordComponentVisitor;
