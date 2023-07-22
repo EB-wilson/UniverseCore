@@ -69,7 +69,7 @@ public class JarList{
     if (mod.name.equals("universe-core")){
       for (Fi fi : Vars.modDirectory.list()) {
         try {
-          fi = ModGetter.checkModFormat(fi);
+          ModGetter.checkModFormat(fi);
           ModInfo info = new ModInfo(fi);
 
           if (!info.name.equals("universe-code") && !matched(info)){
