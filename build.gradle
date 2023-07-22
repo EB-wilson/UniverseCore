@@ -76,7 +76,7 @@ task buildAndroid(type: Jar){
 
   doLast {
     try {
-      def platformRoot = new File("$sdkRoot/platforms/").listFiles().sort().reverse().find { f -> new File(f, "android.jar").exists() }
+      def platformRoot = new File("$sdkRoot/platforms").listFiles().sort().reverse().find { f -> new File(f, "android.jar").exists() }
 
       //collect dependencies needed for desugaring
       def dependencies = (configurations.compileClasspath.asList() + configurations.runtimeClasspath.asList() + [new File(platformRoot, "android.jar")]).collect { "--classpath $it.path" }.join(" ")
