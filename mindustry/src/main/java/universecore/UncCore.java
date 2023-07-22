@@ -90,7 +90,8 @@ public class UncCore extends Mod{
   public void init(){
     if(!Vars.net.server()) {
       Vars.ui.database = UncDatabaseDialog.make();
-      Group overlay = FieldHandler.getValueTemp(Vars.control.input, "group");
+      Group overlay = FieldHandler.getValueDefault(Vars.control.input, "group");
+      FieldHandler.decache(Vars.control.input.getClass());
       secConfig = new SecondaryConfigureFragment();
       secConfig.build(overlay);
     }

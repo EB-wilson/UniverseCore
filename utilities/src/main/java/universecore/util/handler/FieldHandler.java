@@ -16,7 +16,7 @@ public class FieldHandler<T>{
   public FieldHandler(Class<T> clazz){
     this.clazz = clazz;
   }
-  
+
   /**设定指定对象的选中属性值，将无视该属性的访问修饰符和final修饰符，如果目标对象为null，则设置的字段为static。
    * <n>除非字段是静态的，否则不允许传入空目标对象
    *
@@ -232,6 +232,10 @@ public class FieldHandler<T>{
 
   private static FieldHandler cachedHandler(Class<?> clazz) {
     return defaultHandlers.computeIfAbsent(clazz, e -> new FieldHandler(clazz));
+  }
+
+  public static void decache(Class<?> clazz) {
+    defaultHandlers.remove(clazz);
   }
 
   /**清空所有当前缓存的处理器*/
