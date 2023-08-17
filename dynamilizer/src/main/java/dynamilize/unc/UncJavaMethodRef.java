@@ -1,8 +1,8 @@
 package dynamilize.unc;
 
 import dynamilize.*;
-import dynamilize.annotation.Super;
-import dynamilize.annotation.This;
+import dynamilize.runtimeannos.Super;
+import dynamilize.runtimeannos.This;
 import universecore.ImpCore;
 
 import java.lang.reflect.Method;

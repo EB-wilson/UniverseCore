@@ -77,9 +77,7 @@ public class JarList{
             Log.info("[UniverseCore] exist mod updated, universe core class cache updating");
             break;
           }
-        } catch (IllegalModHandleException e) {
-          throw new RuntimeException(e);
-        }
+        } catch (IllegalModHandleException ignored) {}
       }
     }
 

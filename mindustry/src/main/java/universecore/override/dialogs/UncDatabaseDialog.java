@@ -17,7 +17,7 @@ import arc.struct.Seq;
 import arc.util.Scaling;
 import arc.util.Time;
 import dynamilize.DynamicClass;
-import dynamilize.annotation.AspectInterface;
+import dynamilize.runtimeannos.AspectInterface;
 import mindustry.Vars;
 import mindustry.ctype.ContentType;
 import mindustry.ctype.UnlockableContent;
@@ -121,7 +121,7 @@ public class UncDatabaseDialog{
   }
 
   public static DatabaseDialog make() {
-    return UncCore.classes.getDynamicMaker().newInstance(DatabaseDialog.class, new Class[]{RebuildAsp.class}, UncDatabase).objSelf();
+    return UncCore.classes.getDynamicMaker().newInstance(Vars.ui.database.getClass(), new Class[]{RebuildAsp.class}, UncDatabase).objSelf();
   }
   
   private static boolean unlocked(UnlockableContent content){

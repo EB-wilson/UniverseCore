@@ -21,6 +21,9 @@ public class UncJavaFieldRef implements IVariable {
   }
 
   @Override
+  public void init(DynamicObject<?> object) { /*no action*/ }
+
+  @Override
   public <T> T get(DynamicObject<?> obj) {
     if (!owner.isAssignableFrom(obj.getClass()))
       throw new ClassCastException(obj.getClass() + " can not be cast to " + owner);

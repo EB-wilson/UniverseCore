@@ -16,7 +16,6 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.util.Elements;
-import javax.tools.JavaCompiler;
 import javax.tools.StandardLocation;
 import java.io.*;
 import java.lang.annotation.Annotation;
@@ -58,6 +57,7 @@ public abstract class BaseProcessor extends AbstractProcessor{
       "com.sun.tools.javac.processing",
       "com.sun.tools.javac.tree",
       "com.sun.tools.javac.util",
+      "com.sun.tools.javac.comp"
   };
 
   //使用此模块可替代jabel，使程序进行降级编译（编译到JDK8）

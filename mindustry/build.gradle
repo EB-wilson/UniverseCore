@@ -33,12 +33,20 @@ dependencies {
   compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
   compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
 
+  compileOnly "com.github.EB-wilson.JavaDynamilizer:annotations:$JDERVersion"
+
   implementation project(":dynamilizer")
   implementation project(":core")
   implementation project(":utilities")
   implementation project(":abstract")
   implementation project(":implabstract")
 
+  implementation 'org.commonmark:commonmark:0.20.0'
+  implementation 'org.commonmark:commonmark-ext-gfm-tables:0.20.0'
+  implementation 'org.commonmark:commonmark-ext-gfm-strikethrough:0.20.0'
+  implementation 'org.commonmark:commonmark-ext-ins:0.20.0'
+
   compileOnly project(":annotations")
   annotationProcessor project(":annotations")
+  annotationProcessor "com.github.EB-wilson.JavaDynamilizer:apt:$JDERVersion"
 }

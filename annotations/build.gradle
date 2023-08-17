@@ -21,13 +21,16 @@ publishing {
   }
 }
 
+sourceCompatibility = JavaVersion.VERSION_1_9
+targetCompatibility = JavaVersion.VERSION_1_9
+
 tasks.withType(JavaCompile){
   options.encoding = "UTF-8"
 
   sourceCompatibility = 8
   targetCompatibility = 8
 
-  options.fork = true;
+  options.fork = true
   options.forkOptions.jvmArgs.addAll([
       "--add-exports", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
       "--add-exports", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
@@ -43,10 +46,7 @@ tasks.withType(Jar){
 }
 
 dependencies{
-  //compileOnly files("libs/tools.jar")
   compileOnly 'com.google.auto.service:auto-service:1.0.1'
 
   annotationProcessor 'com.google.auto.service:auto-service:1.0.1'
 }
-sourceCompatibility = JavaVersion.VERSION_1_9
-targetCompatibility = JavaVersion.VERSION_1_9
