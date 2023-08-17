@@ -14,13 +14,11 @@ public class UncJavaMethodRef implements IFunctionEntry {
   private final String name;
   private final Class<?> declared;
   private final Function<?, ?> defFunc;
-  private final boolean isFinal;
   private final FunctionType type;
 
   public UncJavaMethodRef(Method invokeMethod, DataPool owner){
     this.name = invokeMethod.getName();
     this.declared = invokeMethod.getDeclaringClass();
-    this.isFinal = Modifier.isFinal(invokeMethod.getModifiers());
 
     if(!Modifier.isStatic(invokeMethod.getModifiers()))
       throw new IllegalHandleException("cannot assign a non-static method to function");
@@ -79,11 +77,6 @@ public class UncJavaMethodRef implements IFunctionEntry {
   @Override
   public String getName() {
     return name;
-  }
-
-  @Override
-  public boolean modifiable() {
-    return !isFinal;
   }
 
   @SuppressWarnings("unchecked")

@@ -15,7 +15,7 @@ ext{
   //version of SDK you will be using
   minSdkAPI = 30
   //version of JavaDynamilizer
-  JDERVersion = 'V1.8-A1'
+  JDERVersion = 'V1.8-A3'
   sdkRoot = System.getenv("ANDROID_HOME")
 }
 
