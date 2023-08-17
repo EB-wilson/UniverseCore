@@ -11,7 +11,7 @@ ext{
   uncVersion = '1.8.5'
 
   //the build number that this mod is made for
-  mindustryVersion = 'v145'
+  mindustryVersion = 'v145.1'
   //version of SDK you will be using
   minSdkAPI = 30
   //version of JavaDynamilizer
@@ -37,6 +37,7 @@ configure(allprojects - project(":annotations")){
 repositories{
   mavenCentral()
   mavenLocal()
+  maven { url 'https://raw.githubusercontent.com/Zelaux/MindustryRepo/master/repository' }
   maven{ url 'https://www.jitpack.io' }
 }
 
