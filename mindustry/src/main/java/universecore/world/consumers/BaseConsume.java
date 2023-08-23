@@ -28,6 +28,7 @@ public abstract class BaseConsume<T extends ConsumerBuildComp>{
   public abstract void update(T entity);
   public abstract void display(Stats stats);
   public abstract void build(T entity, Table table);
+  public void buildBars(T entity, Table bars){}
   public abstract float efficiency(T entity);
 
   public abstract Seq<Content> filter();

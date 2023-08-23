@@ -1,5 +1,9 @@
 package universecore.world.consumers;
 
+import arc.Core;
+import arc.func.Boolp;
+import arc.func.Floatp;
+import arc.math.Mathf;
 import arc.scene.ui.Image;
 import arc.scene.ui.layout.Table;
 import arc.struct.Seq;
@@ -8,6 +12,8 @@ import mindustry.core.UI;
 import mindustry.ctype.Content;
 import mindustry.gen.Building;
 import mindustry.gen.Icon;
+import mindustry.graphics.Pal;
+import mindustry.ui.Bar;
 import mindustry.ui.Styles;
 import mindustry.world.meta.Stat;
 import mindustry.world.meta.StatUnit;
@@ -80,7 +86,19 @@ public class ConsumePower<T extends Building & ConsumerBuildComp> extends BaseCo
     }
     return res;
   }
-  
+
+  @Override
+  public void buildBars(T entity, Table bars) {
+    Boolp buffered = () -> entity.block.consPower.buffered;
+    Floatp capacity = () -> entity.block.consPower.capacity;
+    bars.add(new Bar(
+        () -> buffered.get() ? Core.bundle.format("bar.poweramount", Float.isNaN(entity.power.status*capacity.get())?
+            "<ERROR>": (int)(entity.power.status*capacity.get())): Core.bundle.get("bar.power"),
+        () -> Pal.powerBar,
+        () -> Mathf.zero(entity.block.consPower.requestedPower(entity)) && entity.power.graph.getPowerProduced() + entity.power.graph.getBatteryStored() > 0f? 1f: entity.power.status)).growX();
+    bars.row();
+  }
+
   @Override
   public void build(T tile, Table table){}
 

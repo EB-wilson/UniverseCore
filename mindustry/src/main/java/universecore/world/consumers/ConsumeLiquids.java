@@ -9,6 +9,7 @@ import mindustry.ctype.Content;
 import mindustry.gen.Building;
 import mindustry.type.Liquid;
 import mindustry.type.LiquidStack;
+import mindustry.ui.Bar;
 import mindustry.ui.LiquidDisplay;
 import mindustry.ui.ReqImage;
 import mindustry.world.meta.Stat;

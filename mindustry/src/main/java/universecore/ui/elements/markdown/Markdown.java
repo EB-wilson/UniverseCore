@@ -1,18 +1,22 @@
 package universecore.ui.elements.markdown;
 
 import arc.Core;
+import arc.func.Floatp;
 import arc.graphics.Color;
 import arc.graphics.Pixmap;
 import arc.graphics.Texture;
 import arc.graphics.g2d.*;
+import arc.math.Mathf;
 import arc.scene.Element;
 import arc.scene.Group;
 import arc.scene.actions.Actions;
 import arc.scene.event.Touchable;
 import arc.scene.style.Drawable;
+import arc.scene.ui.Label;
 import arc.scene.ui.ScrollPane;
 import arc.scene.ui.Tooltip;
 import arc.scene.ui.layout.Table;
+import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import arc.util.Align;
 import arc.util.pooling.Pool;
@@ -32,6 +36,7 @@ import universecore.util.UrlDownloader;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class Markdown extends Group {
   public static final String IMAGE_PNG_BASE_64 = "data:image/png;base64,";
@@ -39,8 +44,11 @@ public class Markdown extends Group {
   private final MarkdownStyle style;
 
   private final Seq<DrawObj> drawObjs = new Seq<>();
+  private final ObjectMap<Node, TextureRegion> imgCache = new ObjectMap<>();
 
   float prefWidth, prefHeight;
+  boolean prefInvalid = true;
+  float lastPrefHeight;
 
   protected static Parser parser;
 
@@ -57,22 +65,15 @@ public class Markdown extends Group {
         .build();
   }
 
-  public Markdown(String md, MarkdownStyle style, boolean sizeWithParent){
+  public Markdown(String md, MarkdownStyle style){
     node = parser.parse(md);
     touchable = Touchable.childrenOnly;
 
     this.style = style;
-
-    if (sizeWithParent) update(() -> {
-      if (parent != null && parent.getWidth() != getWidth()){
-        setWidth(parent.getWidth());
-        parent.invalidateHierarchy();
-      }
-    });
   }
 
   /**internal usage*/
-  private Markdown(Node node, MarkdownStyle style){
+  private Markdown(Markdown parent, Node node, MarkdownStyle style){
     this.node = node;
     touchable = Touchable.childrenOnly;
 
@@ -99,7 +100,13 @@ public class Markdown extends Group {
       int padding;
       float currScl = 1;
 
+      int listLayer = 0;
       int boardLayers = 0;
+
+      @Override
+      protected void visitChildren(Node parent) {
+        super.visitChildren(parent);
+      }
 
       @Override
       public void visit(BlockQuote blockQuote) {
@@ -121,7 +128,9 @@ public class Markdown extends Group {
 
       @Override
       public void visit(BulletList bulletList) {
+        row();
         padding += 4;
+        listLayer++;
         bulletList.accept(new AbsExtensionVisitor() {
           @Override
           protected void visitChildren(Node parent) {
@@ -131,16 +140,23 @@ public class Markdown extends Group {
               Node next = node.getNext();
               row();
 
-              float ox = rendOff[0], oy = -lineOff[0];
+              float ox = rendOff[0], oy = -lineOff[0] - currFont.getLineHeight();
+              Drawable drawer = style.listMarks[(listLayer - 1)%style.listMarks.length];
+              float scl = currScl;
+              Font cu = currFont;
               drawObjs.add(new DrawObj() {
                 @Override
                 void draw() {
                   Draw.color(style.textColor);
-                  Fill.circle(x + 9 + ox, y + getHeight() - 9 + oy, 5);
+                  Draw.alpha(color.a*parentAlpha);
+                  drawer.draw(
+                      x + ox + drawer.getLeftWidth()*scl, y + getHeight() + oy,
+                      cu.getLineHeight()*scl, cu.getLineHeight()*scl
+                  );
                 }
               });
-              rendOff[0] += 18;
-              updateTmpHeight(18);
+              rendOff[0] += (currFont.getLineHeight() + drawer.getLeftWidth() + drawer.getRightWidth())*currScl;
+              updateTmpHeight((currFont.getLineHeight() + drawer.getBottomHeight() + drawer.getTopHeight())*currScl);
 
               node.accept(outer);
               row();
@@ -148,7 +164,9 @@ public class Markdown extends Group {
             }
           }
         });
+        listLayer--;
         padding -= 4;
+        row();
       }
 
       @Override
@@ -231,10 +249,10 @@ public class Markdown extends Group {
 
         TextureRegion region = Core.atlas.find(image.getDestination());
         if (image.getDestination().startsWith(IMAGE_PNG_BASE_64)){
-          region = new TextureRegion(new Texture(new Pixmap(Base64Coder.decode(image.getDestination().replace(IMAGE_PNG_BASE_64, "")))));
+          region = imgCache.get(image, () -> new TextureRegion(new Texture(new Pixmap(Base64Coder.decode(image.getDestination().replace(IMAGE_PNG_BASE_64, ""))))));
         }
         else if (!Core.atlas.isFound(region)){
-          region = UrlDownloader.downloadImg(image.getDestination(), Core.atlas.find("nomap"));
+          region = imgCache.get(image, () -> UrlDownloader.downloadImg(image.getDestination(), Core.atlas.find("nomap")));
         }
 
         float w = Math.min(width, region.width), h = region.height*(w/region.width);
@@ -287,6 +305,7 @@ public class Markdown extends Group {
 
       @Override
       public void visit(OrderedList orderedList) {
+        row();
         padding += 4;
         orderedList.accept(new AbsExtensionVisitor() {
           @Override
@@ -305,6 +324,7 @@ public class Markdown extends Group {
           }
         });
         padding -= 4;
+        row();
       }
 
       @Override
@@ -406,7 +426,7 @@ public class Markdown extends Group {
             int align = cell.getAlignment() == TableCell.Alignment.LEFT ? Align.left :
                 cell.getAlignment() == TableCell.Alignment.RIGHT ? Align.right : Align.center;
             columns[currCol].table(r? style.tableBack1: style.tableBack2,
-                t -> t.align(align).add(new Markdown(cell, style)).align(align)
+                t -> t.align(align).add(new Markdown(Markdown.this, cell, style)).align(align)
                 .pad(style.tablePadVert, style.tablePadHor, style.tablePadVert, style.tablePadHor))
                 .grow().pad(0);
 
@@ -439,7 +459,7 @@ public class Markdown extends Group {
       }
 
       private TextMirror makeStr(String str, Font font, String openUrl, Drawable background, Color color) {
-        float maxWidth = getWidth() <= 0? Float.MAX_VALUE: getWidth() - rendOff[0];
+        float maxWidth = getWidth() <= font.getSpaceXadvance()*3? Float.MAX_VALUE: getWidth() - rendOff[0];
         float tmp = 0;
         int index = 0;
 
@@ -477,7 +497,9 @@ public class Markdown extends Group {
         else if (res == null) res = new TextMirror("", font, color, rendOff[0], -lineOff[0], 0, tmpHeight[0]);
         else res.sub = new TextMirror("", font, color, rendOff[0], -lineOff[0], 0, tmpHeight[0]);
 
-        if (index < str.length() - 1){
+        lastText = res;
+
+        if (index < str.length()){
           row();
           res.sub = makeStr(str.substring(index), font, openUrl, background, color);
         }
@@ -525,6 +547,13 @@ public class Markdown extends Group {
     prefWidth = Math.max(prefWidth, rendOff[0]);
     prefHeight += tmpHeight[0];
 
+    prefInvalid = false;
+
+    if(prefHeight != lastPrefHeight){
+      lastPrefHeight = prefHeight;
+      invalidateHierarchy();
+    }
+
     drawObjs.sort((a, b) -> a.priority() - b.priority());
     clearChildren();
     for (DrawObj obj : drawObjs) {
@@ -545,13 +574,13 @@ public class Markdown extends Group {
 
   @Override
   public float getPrefWidth() {
-    validate();
+    if (prefInvalid) layout();
     return prefWidth;
   }
 
   @Override
   public float getPrefHeight() {
-    validate();
+    if (prefInvalid) layout();
     return prefHeight;
   }
 
@@ -572,6 +601,7 @@ public class Markdown extends Group {
     public float linesPadding, maxCodeBoxHeight, tablePadHor, tablePadVert;
     public Drawable board, codeBack, codeBlockBack, tableBack1, tableBack2, curtain;
     public ScrollPane.ScrollPaneStyle codeBlockStyle;
+    public Drawable[] listMarks;
   }
 
   public abstract static class DrawObj implements Pool.Poolable {

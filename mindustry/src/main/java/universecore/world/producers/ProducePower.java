@@ -1,17 +1,25 @@
 package universecore.world.producers;
 
+import arc.Core;
+import arc.func.Boolp;
+import arc.func.Floatp;
+import arc.math.Mathf;
 import arc.scene.ui.Image;
 import arc.scene.ui.layout.Table;
 import arc.util.Scaling;
+import arc.util.Strings;
 import mindustry.core.UI;
 import mindustry.gen.Building;
 import mindustry.gen.Icon;
+import mindustry.graphics.Pal;
+import mindustry.ui.Bar;
 import mindustry.ui.Styles;
 import mindustry.world.meta.Stat;
 import mindustry.world.meta.StatUnit;
 import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ProducerBuildComp;
 import universecore.world.consumers.ConsumePower;
+import universecore.world.consumers.ConsumeType;
 
 public class ProducePower<T extends Building & ProducerBuildComp> extends BaseProduce<T>{
   public float powerProduction;
@@ -56,7 +64,25 @@ public class ProducePower<T extends Building & ProducerBuildComp> extends BasePr
   public void update(Building entity) {
     /*此处不进行能量更新*/
   }
-  
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  @Override
+  public void buildBars(T entity, Table bars) {
+    Floatp prod = () -> entity.powerProdEfficiency()*entity.producer().current.get(ProduceType.power).powerProduction;
+    Floatp cons = () -> {
+      ConsumePower cp;
+      return entity.block.consumesPower && entity.consumer().current != null
+          && (cp = entity.consumer().current.get(ConsumeType.power)) != null?
+              cp.usage*cp.multiple(entity): 0;
+    };
+    bars.add(new Bar(
+        () -> Core.bundle.format("bar.poweroutput", Strings.fixed(Math.max(prod.get() - cons.get(), 0)*60*entity.timeScale(), 1)),
+        () -> Pal.powerBar,
+        entity::powerProdEfficiency
+    )).growX();
+    bars.row();
+  }
+
   @Override
   public void display(Stats stats) {
     stats.add(Stat.basePowerGeneration, powerProduction * 60.0f, StatUnit.powerSecond);

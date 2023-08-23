@@ -34,6 +34,7 @@ public abstract class BaseProduce<T extends ProducerBuildComp>{
   public abstract void produce(T entity);
   public abstract void update(T entity);
   public abstract void display(Stats stats);
+  public void buildBars(T entity, Table bars){}
   public abstract boolean valid(T entity);
   
   public void dump(T entity){}

@@ -7,6 +7,7 @@ import arc.struct.ObjectMap;
 import mindustry.gen.Building;
 import mindustry.type.Liquid;
 import mindustry.type.LiquidStack;
+import mindustry.ui.Bar;
 import mindustry.ui.LiquidDisplay;
 import mindustry.world.meta.Stat;
 import mindustry.world.meta.Stats;
@@ -24,8 +25,20 @@ public class ProduceLiquids<T extends Building & ProducerBuildComp> extends Base
     this.liquids = liquids;
   }
   
-  public void Portion(){
+  public void portion(){
     this.portion = true;
+  }
+
+  @Override
+  public void buildBars(T entity, Table bars) {
+    for (LiquidStack stack : liquids) {
+      bars.add(new Bar(
+          () -> stack.liquid.localizedName,
+          () -> stack.liquid.barColor != null? stack.liquid.barColor: stack.liquid.color,
+          () -> Math.min(entity.liquids.get(stack.liquid) / entity.block.liquidCapacity, 1f)
+      ));
+      bars.row();
+    }
   }
   
   @Override

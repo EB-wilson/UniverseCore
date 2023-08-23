@@ -1,8 +1,14 @@
 package universecore.components.blockcomp;
 
 
+import arc.math.Mathf;
+import arc.scene.ui.layout.Table;
 import universecore.annotations.Annotations;
 import universecore.world.blocks.modules.BaseProductModule;
+import universecore.world.consumers.BaseConsume;
+import universecore.world.producers.BaseProduce;
+import universecore.world.producers.ProducePower;
+import universecore.world.producers.ProduceType;
 
 /**生产者组件，令方块具有按需进行资源生产输出的能力
  *
@@ -13,6 +19,14 @@ public interface ProducerBuildComp extends BuildCompBase, ConsumerBuildComp{
   default int produceCurrent(){
     return consumeCurrent();
   }
+
+  @Annotations.BindField("powerProdEfficiency")
+  default float powerProdEfficiency(){
+    return 0;
+  }
+
+  @Annotations.BindField("powerProdEfficiency")
+  default void powerProdEfficiency(float powerProdEfficiency){}
 
   /**生产组件*/
   @Annotations.BindField("producer")
@@ -43,5 +57,22 @@ public interface ProducerBuildComp extends BuildCompBase, ConsumerBuildComp{
   /**当前是否应当执行生产项更新*/
   default boolean shouldProduct(){
     return producer() != null && produceCurrent() != -1;
+  }
+
+  @SuppressWarnings("unchecked")
+  default void buildProducerBars(Table bars){
+    if (consumer().current != null){
+      for (BaseProduce<? extends ProducerBuildComp> consume : producer().current.all()) {
+        ((BaseProduce<ProducerBuildComp>) consume).buildBars(this, bars);
+      }
+    }
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  @Annotations.MethodEntry(entryMethod = "getPowerProduction", override = true)
+  default float getPowerProduction(){
+    if(!getBlock().outputsPower || producer().current == null || producer().current.get(ProduceType.power) == null) return 0;
+    powerProdEfficiency(Mathf.num(shouldConsume() && consumeValid())*consEfficiency()*((ProducePower)(producer().current.get(ProduceType.power))).multiple(this));
+    return producer().getPowerProduct()*powerProdEfficiency();
   }
 }

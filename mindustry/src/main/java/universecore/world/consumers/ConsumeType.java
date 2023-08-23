@@ -38,9 +38,9 @@ public class ConsumeType<T extends BaseConsume<?>>{
   public static <Type extends BaseConsume<?>> ConsumeType<? extends Type> add(Class<Type> type, ContentType cType){
     return new ConsumeType<>(type, cType);
   }
-  
+
+  public static final ConsumeType<ConsumePower<?>> power = (ConsumeType<ConsumePower<?>>) add(ConsumePower.class, null);
   public static final ConsumeType<ConsumeItems<?>> item = (ConsumeType<ConsumeItems<?>>) add(ConsumeItems.class, ContentType.item);
   public static final ConsumeType<ConsumeLiquidBase<?>> liquid = (ConsumeType<ConsumeLiquidBase<?>>) add(ConsumeLiquidBase.class, ContentType.liquid);
-  public static final ConsumeType<ConsumePower<?>> power = (ConsumeType<ConsumePower<?>>) add(ConsumePower.class, null);
   public static final ConsumeType<ConsumePayload<?>> payload = (ConsumeType<ConsumePayload<?>>) add(ConsumePayload.class, null);
 }

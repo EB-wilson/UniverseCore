@@ -24,7 +24,7 @@ public abstract class LightningGenerator implements Iterable<LightningVertex>, I
   public Rand seed = new Rand();
 
   /**顶点基准间距最小值*/
-  public float minInterval = 10;
+  public float minInterval = 6;
   /**顶点基准位置最大值*/
   public float maxInterval = 18;
 
