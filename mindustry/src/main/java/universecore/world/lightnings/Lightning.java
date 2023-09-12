@@ -54,6 +54,8 @@ public class Lightning implements Pool.Poolable{
   public float time;
   public float counter, lengthMargin;
 
+  public boolean headClose, endClose;
+
   float totalLength;
 
   int cursor;
@@ -205,7 +207,7 @@ public class Lightning implements Pool.Poolable{
       float fadX = Tmp.v1.x*fade, fadY = Tmp.v1.y*fade;
 
       Tmp.v1.set(self).scl(v2.progress);
-      if(v2.isStart || v3.isEnd){
+      if((v2.isStart && !headClose) || (v3.isEnd && !endClose)){
         float l = v2.isStart? v2.progress: 1 - v2.progress;
         float f = v2.isStart? fade: 1 - fade;
         Fill.quad(

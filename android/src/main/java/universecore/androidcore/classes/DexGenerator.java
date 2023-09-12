@@ -9,6 +9,8 @@ import com.android.dx.dex.file.DexFile;
 import dynamilize.classmaker.ASMGenerator;
 import dynamilize.classmaker.ByteClassLoader;
 import dynamilize.classmaker.ClassInfo;
+import dynamilize.classmaker.CodeBlock;
+import dynamilize.classmaker.code.ILocal;
 import dynamilize.classmaker.code.IMethod;
 import dynamilize.classmaker.code.IOperate;
 import org.objectweb.asm.Opcodes;
@@ -54,6 +56,27 @@ public class DexGenerator extends ASMGenerator{
   @Override
   public void visitOperate(IOperate<?> operate){
     if(operate.leftOpNumber().type() == STRING_TYPE || operate.rightOpNumber().type() == STRING_TYPE){
+      int leftInd = operate.leftOpNumber() instanceof CodeBlock.StackElem?
+          localIndex.computeIfAbsent("$leftCache$", e -> localIndex.size()):
+          localIndex.get(operate.leftOpNumber().name());
+
+      int rightInd = operate.rightOpNumber() instanceof CodeBlock.StackElem?
+          localIndex.computeIfAbsent("$rightCache$", e -> localIndex.size()):
+          localIndex.get(operate.rightOpNumber().name());
+
+      if (operate.leftOpNumber() instanceof CodeBlock.StackElem<?>){
+        methodVisitor.visitVarInsn(
+            getStoreType(STRING_TYPE),
+            leftInd
+        );
+      }
+      if (operate.rightOpNumber() instanceof CodeBlock.StackElem<?>){
+        methodVisitor.visitVarInsn(
+            getStoreType(STRING_TYPE),
+            rightInd
+        );
+      }
+
       IMethod<StringBuilder, StringBuilder> left, right;
       left = BUILDER_TYPE.getMethod(BUILDER_TYPE, "append", operate.leftOpNumber().type());
       right = BUILDER_TYPE.getMethod(BUILDER_TYPE, "append", operate.rightOpNumber().type());
@@ -70,7 +93,7 @@ public class DexGenerator extends ASMGenerator{
 
       methodVisitor.visitVarInsn(
           getLoadType(operate.leftOpNumber().type()),
-          localIndex.get(operate.leftOpNumber().name())
+          leftInd
       );
       methodVisitor.visitMethodInsn(
           INVOKEVIRTUAL,
@@ -81,7 +104,7 @@ public class DexGenerator extends ASMGenerator{
       );
       methodVisitor.visitVarInsn(
           getLoadType(operate.rightOpNumber().type()),
-          localIndex.get(operate.rightOpNumber().name())
+          rightInd
       );
       methodVisitor.visitMethodInsn(
           INVOKEVIRTUAL,

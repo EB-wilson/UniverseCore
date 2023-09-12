@@ -113,16 +113,14 @@ public class Markdown extends Group {
         boardLayers++;
         padding += 4;
         float begRend = rendOff[0];
-        lineOff[0] += style.linesPadding;
         row();
         float begin = lineOff[0];
-        lineOff[0] += style.linesPadding*2;
+        lineOff[0] += style.paragraphPadding + style.linesPadding;
         super.visit(blockQuote);
         padding -= 4;
         row();
-        lineOff[0] += style.linesPadding;
         drawObjs.add(DrawBoard.get(Markdown.this, style.board, boardLayers, lineOff[0] - begin, begRend, -begin));
-        lineOff[0] += style.linesPadding*2;
+        lineOff[0] += style.paragraphPadding;
         boardLayers--;
       }
 
@@ -370,6 +368,7 @@ public class Markdown extends Group {
       public void visit(Paragraph paragraph) {
         lastText = null;
         super.visit(paragraph);
+        if (!(paragraph.getParent() instanceof ListItem)) tmpHeight[0] += style.paragraphPadding;
         row();
       }
 
@@ -598,7 +597,7 @@ public class Markdown extends Group {
   public static class MarkdownStyle {
     public Font font, codeFont, emFont, strongFont, subFont;
     public Color textColor, emColor, subTextColor, lineColor, linkColor;
-    public float linesPadding, maxCodeBoxHeight, tablePadHor, tablePadVert;
+    public float linesPadding, maxCodeBoxHeight, tablePadHor, tablePadVert, paragraphPadding;
     public Drawable board, codeBack, codeBlockBack, tableBack1, tableBack2, curtain;
     public ScrollPane.ScrollPaneStyle codeBlockStyle;
     public Drawable[] listMarks;

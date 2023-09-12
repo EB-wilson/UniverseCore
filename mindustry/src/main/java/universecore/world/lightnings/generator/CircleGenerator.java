@@ -46,6 +46,11 @@ public class CircleGenerator extends LightningGenerator{
     float rotated = step/(Mathf.pi*radius/180)*(directory >= 0? 1: -1);
 
     if(rotated + currentRotated >= 360){
+      if (firstOne == null){
+        currentRotated = 361;
+        return;
+      }
+
       vertex.isEnd = !enclosed;
       if(enclosed){
         vertex.x = firstOne.x;

@@ -18,9 +18,6 @@ import java.util.Iterator;
  * @author EBwilson
  * */
 public class LightningContainer implements Iterable<Lightning>{
-  /**当前创建闪电使用的闪电生成器，可随时变更，但通常来说不应该在不同线程里面调用同一个生成器，这是危险的*/
-  public LightningGenerator generator;
-
   /**闪电从产生到完全出现需要的时间，这会平摊给每一段闪电，fps为当前帧率
    * 但如果这个值为0,那么闪电会立即出现*/
   public float time = 0;
@@ -46,25 +43,29 @@ public class LightningContainer implements Iterable<Lightning>{
 
   /**闪电顶点触发器，当一个闪电节点已到达后触发，传入前一个顶点和这一个顶点*/
   public Cons2<LightningVertex, LightningVertex> trigger;
+  public boolean headClose, endClose;
 
   protected float clipSize;
 
   protected final Seq<Lightning> lightnings = new Seq<>();
 
-  /**使用当前的闪电生成器在容器中创建一道新的闪电*/
-  public void create(){
+  /**使用给出的闪电生成器在容器中创建一道新的闪电*/
+  public void create(LightningGenerator generator){
     generator.branched(branchCreated);
-    lightnings.add(Lightning.create(
+    Lightning lightning = Lightning.create(
         generator,
         Mathf.random(minWidth, maxWidth),
         lifeTime,
-        fadeTime > 0? fadeTime: lifeTime,
+        fadeTime > 0 ? fadeTime : lifeTime,
         lerp,
         time,
         fade,
         backFade,
         trigger
-    ));
+    );
+    lightning.headClose = headClose;
+    lightning.endClose = endClose;
+    lightnings.add(lightning);
   }
 
   @Override
@@ -108,9 +109,8 @@ public class LightningContainer implements Iterable<Lightning>{
 
   /**闪电分支容器，用于绘制分支闪电，会递归绘制所有的子分支*/
   public static class PoolLightningContainer extends LightningContainer implements Pool.Poolable{
-    public static PoolLightningContainer create(LightningGenerator generator, float lifeTime, float minWidth, float maxWidth){
+    public static PoolLightningContainer create(float lifeTime, float minWidth, float maxWidth){
       PoolLightningContainer result = Pools.obtain(PoolLightningContainer.class, PoolLightningContainer::new);
-      result.generator = generator;
       result.lifeTime = lifeTime;
       result.minWidth = minWidth;
       result.maxWidth = maxWidth;
@@ -121,7 +121,6 @@ public class LightningContainer implements Iterable<Lightning>{
     @Override
     public void reset(){
       time = 0;
-      generator = null;
       lifeTime = 0;
       clipSize = 0;
       maxWidth = 0;

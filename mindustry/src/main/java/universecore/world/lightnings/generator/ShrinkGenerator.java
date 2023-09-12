@@ -37,7 +37,7 @@ public class ShrinkGenerator extends LightningGenerator{
 
     if(currentDistance > minInterval){
       if(first){
-        Tmp.v2.setZero();
+        Tmp.v2.set(vec);
       }
       else{
         float offset = seed.random(-maxSpread, maxSpread);
