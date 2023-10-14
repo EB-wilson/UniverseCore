@@ -38,6 +38,8 @@ public class Particle extends Decal implements ExtraVariableComp, Iterable<Parti
 
   Cloud currentCloud, firstCloud;
   int cloudCount;
+
+  public int maxCloudCounts = -1;
   
   /**粒子的速度，矢量*/
   public Vec2 speed = new Vec2();
@@ -53,6 +55,10 @@ public class Particle extends Decal implements ExtraVariableComp, Iterable<Parti
 
   public static int count(){
     return all.size;
+  }
+
+  public float cloudCount() {
+    return cloudCount;
   }
 
   public static Seq<Particle> get(Boolf<Particle> filter){
@@ -132,10 +138,9 @@ public class Particle extends Decal implements ExtraVariableComp, Iterable<Parti
 
     boolean mark = false;
     while(firstCloud.nextCloud != null){
-      if(model.isFaded(this, firstCloud)){
+      if(maxCloudCounts > 0 && cloudCount > maxCloudCounts || model.isFaded(this, firstCloud)){
+        mark = !(maxCloudCounts > 0 && cloudCount > maxCloudCounts);
         popFirst();
-
-        mark = true;
       }
       else break;
     }
@@ -192,6 +197,8 @@ public class Particle extends Decal implements ExtraVariableComp, Iterable<Parti
     x = 0;
     y = 0;
 
+    maxCloudCounts = -1;
+
     speed.setZero();
     startPos.setZero();
 
@@ -227,17 +234,21 @@ public class Particle extends Decal implements ExtraVariableComp, Iterable<Parti
     public Cloud perCloud, nextCloud;
 
     Itr itr = new Itr();
-    
+
     public void draw(){
+      draw(1, 1);
+    }
+
+    public void draw(float modulate, float modulateNext){
       Draw.color(color);
 
       if(perCloud != null && nextCloud != null){
         float angle = Angles.angle(x - perCloud.x, y - perCloud.y);
-        float dx1 = Angles.trnsx(angle + 90, size);
-        float dy1 = Angles.trnsy(angle + 90, size);
+        float dx1 = Angles.trnsx(angle + 90, size*modulate);
+        float dy1 = Angles.trnsy(angle + 90, size*modulate);
         angle = Angles.angle(nextCloud.x - x, nextCloud.y - y);
-        float dx2 = Angles.trnsx(angle + 90, nextCloud.size);
-        float dy2 = Angles.trnsy(angle + 90, nextCloud.size);
+        float dx2 = Angles.trnsx(angle + 90, nextCloud.size*modulateNext);
+        float dy2 = Angles.trnsy(angle + 90, nextCloud.size*modulateNext);
 
         Fill.quad(
             x + dx1, y + dy1,
@@ -248,8 +259,8 @@ public class Particle extends Decal implements ExtraVariableComp, Iterable<Parti
       }
       else if(perCloud == null && nextCloud != null){
         float angle = Angles.angle(nextCloud.x - x, nextCloud.y - y);
-        float dx2 = Angles.trnsx(angle + 90, nextCloud.size);
-        float dy2 = Angles.trnsy(angle + 90, nextCloud.size);
+        float dx2 = Angles.trnsx(angle + 90, nextCloud.size*modulate);
+        float dy2 = Angles.trnsy(angle + 90, nextCloud.size*modulate);
 
         Fill.quad(
             x, y,

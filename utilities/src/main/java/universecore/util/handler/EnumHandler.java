@@ -18,6 +18,9 @@ import java.util.Map;
  * @since 1.0*/
 @SuppressWarnings("unchecked")
 public class EnumHandler<T extends Enum<?>>{
+  @SuppressWarnings("rawtypes")
+  private static final FieldHandler<Enum> enumSetter = new FieldHandler<>(Enum.class);
+
   private final FieldHandler<T> fieldHandler;
   private final HashMap<MethodType, MethodHandle> handleMap = new HashMap<>();
   private final Class<T> clazz;
@@ -136,6 +139,10 @@ public class EnumHandler<T extends Enum<?>>{
       values.remove(instance);
       
       values.add(ordinal, instance);
+
+      for (int i = 0; i < values.size(); i++) {
+        enumSetter.setValue(values.get(i), "ordinal", i);
+      }
 
       fieldHandler.setValue(null, valuesField.getName(), values.toArray((T[]) Array.newInstance(clazz, 0)));
     }
