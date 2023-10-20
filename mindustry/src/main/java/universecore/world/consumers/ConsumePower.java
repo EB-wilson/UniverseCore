@@ -28,7 +28,7 @@ public class ConsumePower<T extends Building & ConsumerBuildComp> extends BaseCo
 
   public boolean showIcon;
 
-  Seq<ConsumePower<T>> others = new Seq<>();
+  Seq<ConsumePower<T>> others = new Seq<>(ConsumePower.class);
 
   public ConsumePower(float usage, float capacity){
     this.usage = usage;
@@ -81,7 +81,8 @@ public class ConsumePower<T extends Building & ConsumerBuildComp> extends BaseCo
 
   public float requestedPower(T entity){
     float res = usage;
-    for(ConsumePower<T> other: others){
+    for(ConsumePower<T> other: others.items){
+      if (other == null) continue;
       res += other.requestedPower(entity);
     }
     return res;
