@@ -18,7 +18,6 @@ import java.io.StringReader;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
-@SuppressWarnings({"PatternVariableCanBeUsed", "EnhancedSwitchMigration", "TextBlockMigration"})
 @AutoService(Processor.class)
 public class ImportUNCProcessor extends BaseProcessor{
   private static final String STATUS_FIELD = "$status$";
@@ -63,12 +62,15 @@ public class ImportUNCProcessor extends BaseProcessor{
                                      "      String[] $lib = v.split(\"\\\\.\");\n" +
                                      "      String[] $req = \"$requireVersion\".split(\"\\\\.\");\n" +
                                      "\n" +
-                                     "      if (Integer.parseInt($lib[0]) > Integer.parseInt($req[0])) return 2;\n" +
+                                     "      if ($req.length != $lib.length || $lib.length != 3)\n" +
+                                     "        throw new RuntimeException(\"Invalid version format, requested 3 parts, got \" + $lib.length);\n" +
+                                     "\n" +
+                                     "      if (Integer.parseInt($lib[0]) > Integer.parseInt($req[0])\n" +
+                                     "      || Integer.parseInt($lib[1]) > Integer.parseInt($req[1])) return 2;//newer，update using mod\n" +
                                      "      for (int i = 1; i < $lib.length; i++) {\n" +
-                                     "        if (Integer.parseInt($lib[i]) > Integer.parseInt($req[i])) return 0;\n" +
-                                     "        if (Integer.parseInt($lib[i]) < Integer.parseInt($req[i])) return 1;\n" +
+                                     "        if (Integer.parseInt($lib[i]) < Integer.parseInt($req[i])) return 1;//older, update this librarian mod\n" +
                                      "      }\n" +
-                                     "      return 0;\n" +
+                                     "      return 0;//accept\n" +
                                      "    };\n" +
                                      "    arc.Events.on(mindustry.game.EventType.ClientLoadEvent.class, e -> {\n" +
                                      "      arc.util.Time.run(1, () -> {\n" +
@@ -536,7 +538,7 @@ public class ImportUNCProcessor extends BaseProcessor{
           }
           if(def instanceof JCTree.JCMethodDecl){
             JCTree.JCMethodDecl method = (JCTree.JCMethodDecl) def;
-            if(method.sym.isConstructor() && method.params.size() == 0){
+            if(method.sym.isConstructor() && method.params.isEmpty()){
               JCTree.JCClassDecl internalClass = maker.ClassDef(
                   maker.Modifiers(Modifier.PRIVATE),
                   names.fromString("INIT_INTERNAL"),

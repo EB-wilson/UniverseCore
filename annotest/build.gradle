@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven { url 'https://raw.githubusercontent.com/Zelaux/MindustryRepo/master/repository' }
+    maven{ url 'https://www.jitpack.io' }
+}
+
+dependencies {
+    compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+    compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+
+    compileOnly project(":core")
+    compileOnly project(":mindustry")
+    compileOnly project(":abstract")
+    compileOnly project(":implabstract")
+    compileOnly project(":utilities")
+
+    compileOnly project(":annotations")
+    annotationProcessor project(":annotations")
+}
+
+test {
+    useJUnitPlatform()
+}
