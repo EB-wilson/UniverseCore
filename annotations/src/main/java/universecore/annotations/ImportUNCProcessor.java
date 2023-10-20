@@ -243,7 +243,7 @@ public class ImportUNCProcessor extends BaseProcessor{
                                      "                        cont.table(mindustry.gen.Tex.pane, (t) -> {\n" +
                                      "                          t.add(arc.Core.bundle.get(\"warn.downloading\")).top().padTop(10).get();\n" +
                                      "                          t.row();\n" +
-                                     "                          t.add(new mindustry.ui.Bar(() -> arc.util.Strings.autoFixed($downloadProgress[0], 1) + \"%\", () -> mindustry.graphics.Pal.accent, () -> $downloadProgress[0])).growX().height(30).pad(4);\n" +
+                                     "                          t.add(new mindustry.ui.Bar(() -> arc.util.Strings.autoFixed($downloadProgress[0]*100, 1) + \"%\", () -> mindustry.graphics.Pal.accent, () -> $downloadProgress[0])).growX().height(30).pad(4);\n" +
                                      "                        }).size(320, 175);\n" +
                                      "                        cont.row();\n" +
                                      "                        cont.button(arc.Core.bundle.get(\"warn.cancel\"), () -> {\n" +
