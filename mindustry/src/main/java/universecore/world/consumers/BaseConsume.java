@@ -1,7 +1,6 @@
 package universecore.world.consumers;
 
 import arc.func.Floatf;
-import arc.graphics.g2d.TextureRegion;
 import arc.scene.ui.layout.Table;
 import arc.struct.Seq;
 import mindustry.ctype.Content;
@@ -34,7 +33,7 @@ public abstract class BaseConsume<T extends ConsumerBuildComp>{
   public abstract Seq<Content> filter();
 
   public float multiple(T entity){
-    return consMultiplier == null? 1: consMultiplier.get(entity);
+    return (consMultiplier == null? 1: consMultiplier.get(entity))*entity.consMultiplier();
   }
 
   @SuppressWarnings("unchecked")

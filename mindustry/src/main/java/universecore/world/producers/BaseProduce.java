@@ -2,27 +2,21 @@ package universecore.world.producers;
 
 import arc.func.Floatf;
 import arc.graphics.Color;
-import arc.graphics.g2d.TextureRegion;
 import arc.scene.ui.layout.Table;
 import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ProducerBuildComp;
-import universecore.world.consumers.BaseConsume;
 
 public abstract class BaseProduce<T extends ProducerBuildComp>{
   public Floatf<T> prodMultiplier;
   
   public BaseProducers parent;
-  public boolean blockWhenFull;
+  public boolean blockWhenFull = true;
 
   /**产出资源类型*/
   public abstract ProduceType<?> type();
 
   public Color color(){
     return null;
-  }
-
-  public boolean shouldBlockWhenFull(){
-    return blockWhenFull;
   }
 
   public boolean hasIcons(){
@@ -40,7 +34,7 @@ public abstract class BaseProduce<T extends ProducerBuildComp>{
   public void dump(T entity){}
 
   public float multiple(T entity){
-    return prodMultiplier == null? 1: prodMultiplier.get(entity);
+    return (prodMultiplier == null? 1: prodMultiplier.get(entity))*entity.prodMultiplier();
   }
 
   @SuppressWarnings("unchecked")

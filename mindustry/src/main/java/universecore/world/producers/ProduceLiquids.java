@@ -25,8 +25,9 @@ public class ProduceLiquids<T extends Building & ProducerBuildComp> extends Base
     this.liquids = liquids;
   }
   
-  public void portion(){
+  public ProduceLiquids<T> portion(){
     this.portion = true;
+    return this;
   }
 
   @Override

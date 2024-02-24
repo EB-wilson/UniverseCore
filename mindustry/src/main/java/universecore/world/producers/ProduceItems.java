@@ -30,8 +30,9 @@ public class ProduceItems<T extends Building & ProducerBuildComp> extends BasePr
     this.items = items;
   }
 
-  public void random(){
+  public ProduceItems<T> random(){
     this.random = true;
+    return this;
   }
   
   @Override
@@ -57,6 +58,7 @@ public class ProduceItems<T extends Building & ProducerBuildComp> extends BasePr
     else buildItemIcons(table, items, false, displayLim);
   }
 
+  @SuppressWarnings("rawtypes")
   @Override
   public void merge(BaseProduce<T> other){
     if(other instanceof ProduceItems cons){

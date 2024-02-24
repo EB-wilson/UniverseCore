@@ -28,6 +28,10 @@ public interface ConsumerBuildComp extends BuildCompBase{
     consumer().update();
   }
 
+  default float consMultiplier(){
+    return 1;
+  }
+
   /**当前的消耗执行效率，从0-1*/
   default float consEfficiency(){
     return consumer().consEfficiency;

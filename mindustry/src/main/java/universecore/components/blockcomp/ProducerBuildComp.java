@@ -5,7 +5,6 @@ import arc.math.Mathf;
 import arc.scene.ui.layout.Table;
 import universecore.annotations.Annotations;
 import universecore.world.blocks.modules.BaseProductModule;
-import universecore.world.consumers.BaseConsume;
 import universecore.world.producers.BaseProduce;
 import universecore.world.producers.ProducePower;
 import universecore.world.producers.ProduceType;
@@ -27,6 +26,10 @@ public interface ProducerBuildComp extends BuildCompBase, ConsumerBuildComp{
 
   @Annotations.BindField("powerProdEfficiency")
   default void powerProdEfficiency(float powerProdEfficiency){}
+
+  default float prodMultiplier(){
+    return consMultiplier();
+  }
 
   /**生产组件*/
   @Annotations.BindField("producer")

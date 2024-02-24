@@ -1,13 +1,11 @@
 package universecore.util.handler;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-import java.lang.reflect.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 /**枚举处理器，提供了一些对enum的操作方法，可以创建枚举实例并将其放入枚举的values
  * <p>这个处理器是一个实例工厂，你需要对目标枚举类构造一个枚举处理器实例才可以进行操作
@@ -19,7 +17,7 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public class EnumHandler<T extends Enum<?>>{
   private final FieldHandler<T> fieldHandler;
-  private final HashMap<MethodType, MethodHandle> handleMap = new HashMap<>();
+  private final MethodHandler<T> methodHandler;
   private final Class<T> clazz;
   
   /**用目标枚举的类型构造一个没有构造函数实现的枚举处理器，如果枚举具有构造器实现，那么你必须提供构造函数的外部实现，否则可能会产生意想不到的错误
@@ -27,16 +25,7 @@ public class EnumHandler<T extends Enum<?>>{
   public EnumHandler(Class<T> clazz){
     this.clazz = clazz;
     fieldHandler = new FieldHandler<>(clazz);
-    try{
-      MethodHandles.Lookup lookup = MethodHandles.lookup();
-      for(Constructor<?> constructor: clazz.getDeclaredConstructors()){
-        constructor.setAccessible(true);
-        MethodHandle handle = lookup.unreflectConstructor(constructor);
-        handleMap.put(handle.type().unwrap(), handle);
-      }
-    }catch(IllegalAccessException e){
-      throw new RuntimeException(e);
-    }
+    methodHandler = new MethodHandler<>(clazz);
   }
   
   /**用指定的名称，枚举序数以及构造器参数来实例化一个枚举对象，
@@ -48,38 +37,13 @@ public class EnumHandler<T extends Enum<?>>{
   public T newEnumInstance(String name, int ordinal, Object... param){
     try{
       Object[] params = new Object[param.length + 2];
-      Class<?>[] paramType = new Class[param.length + 2];
 
       params[0] = name;
       params[1] = ordinal;
-      paramType[0] = String.class;
-      paramType[1] = int.class;
 
-      for(int i = 0; i < param.length; i++){
-        params[i + 2] = param[i];
-        paramType[i + 2] = param[i] == null? Void.class: param[i].getClass();
-      }
+      System.arraycopy(param, 0, params, 2, param.length);
 
-      MethodHandle handle = handleMap.get(MethodType.methodType(clazz, paramType).unwrap());
-      if (handle == null){
-        l: for (Map.Entry<MethodType, MethodHandle> entry : handleMap.entrySet()) {
-          Class<?>[] arr = entry.getKey().parameterArray();
-          if (arr.length != paramType.length) continue;
-
-          for (int i = 0; i < paramType.length; i++) {
-            if (paramType[i] == Void.class) continue;
-            if (!arr[i].isAssignableFrom(paramType[i])) continue l;
-          }
-
-          handle = entry.getValue();
-          break;
-        }
-
-        if (handle == null)
-          throw new NoSuchMethodError("can not find constructor in " + clazz + " with parameter " + Arrays.toString(paramType));
-      }
-
-      return (T) handle.invokeWithArguments(params);
+      return methodHandler.newInstance(params);
     }catch(Throwable e){
       throw new RuntimeException(e);
     }

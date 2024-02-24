@@ -76,6 +76,7 @@ public class TreeSeq<Type> implements Iterable<Type>{
 
   public void clear(){
     set.clear();
+    size = 0;
   }
 
   public boolean isEmpty(){

@@ -59,7 +59,7 @@ public class BaseProductModule extends BlockModule {
       for(BaseProduce prod : current.all()){
         boolean v = prod.valid(entity.getBuilding(ProducerBuildComp.class));
         anyValid |= v;
-        valid &= !prod.shouldBlockWhenFull() || v;
+        valid &= !prod.blockWhenFull || v;
         if(doprod && preValid && v){
           prod.update(entity.getBuilding(ProducerBuildComp.class));
         }

@@ -3,8 +3,6 @@ package universecore.world.consumers;
 import arc.struct.Seq;
 import mindustry.ctype.ContentType;
 
-import java.util.ArrayList;
-
 @SuppressWarnings("unchecked")
 public class ConsumeType<T extends BaseConsume<?>>{
   private static final Seq<ConsumeType<?>> allType = new Seq<>();
@@ -40,7 +38,7 @@ public class ConsumeType<T extends BaseConsume<?>>{
   }
 
   public static final ConsumeType<ConsumePower<?>> power = (ConsumeType<ConsumePower<?>>) add(ConsumePower.class, null);
-  public static final ConsumeType<ConsumeItems<?>> item = (ConsumeType<ConsumeItems<?>>) add(ConsumeItems.class, ContentType.item);
+  public static final ConsumeType<ConsumeItemBase<?>> item = (ConsumeType<ConsumeItemBase<?>>) add(ConsumeItemBase.class, ContentType.item);
   public static final ConsumeType<ConsumeLiquidBase<?>> liquid = (ConsumeType<ConsumeLiquidBase<?>>) add(ConsumeLiquidBase.class, ContentType.liquid);
   public static final ConsumeType<ConsumePayload<?>> payload = (ConsumeType<ConsumePayload<?>>) add(ConsumePayload.class, null);
 }

@@ -1,5 +1,5 @@
 processor: ImportUNCProcessor (full class name: universecore.annotations.ImportUNCProcessor)
-time: Fri Oct 20 23:50:00 CST 2023
+time: Fri Oct 20 23:52:18 CST 2023
 
 -----------------------------------------
 annotation: universecore.annotations.Annotations.ImportUNC
@@ -197,7 +197,7 @@ annotation: universecore.annotations.Annotations.ImportUNC
 189|                                                             cont.table(mindustry.gen.Tex.pane, (t)->{
 190|                                                                 t.add(arc.Core.bundle.get("warn.downloading")).top().padTop(10).get();
 191|                                                                 t.row();
-192|                                                                 t.add(new mindustry.ui.Bar(()->arc.util.Strings.autoFixed($downloadProgress[0], 1) + "%", ()->mindustry.graphics.Pal.accent, ()->$downloadProgress[0])).growX().height(30).pad(4);
+192|                                                                 t.add(new mindustry.ui.Bar(()->arc.util.Strings.autoFixed($downloadProgress[0] * 100, 1) + "%", ()->mindustry.graphics.Pal.accent, ()->$downloadProgress[0])).growX().height(30).pad(4);
 193|                                                             }).size(320, 175);
 194|                                                             cont.row();
 195|                                                             cont.button(arc.Core.bundle.get("warn.cancel"), ()->{

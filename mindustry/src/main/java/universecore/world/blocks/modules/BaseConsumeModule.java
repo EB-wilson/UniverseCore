@@ -7,10 +7,8 @@ import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
-import mindustry.ctype.Content;
 import mindustry.world.meta.BlockStatus;
 import mindustry.world.modules.BlockModule;
-import universecore.components.blockcomp.ConsumerBlockComp;
 import universecore.components.blockcomp.ConsumerBuildComp;
 import universecore.world.consumers.BaseConsume;
 import universecore.world.consumers.BaseConsumers;
@@ -75,12 +73,6 @@ public class BaseConsumeModule extends BlockModule{
     return !getOptional().isEmpty();
   }
 
-  /**@deprecated 1.6.2 不再使用，保留API避免异常*/
-  @Deprecated
-  public void applyFilter(){
-    //noaction
-  }
-
   public float getOptionalEff(BaseConsumers consumers){
     return optEfficiency.get(consumers, ZERO)[0];
   }
@@ -128,14 +120,17 @@ public class BaseConsumeModule extends BlockModule{
         }
       }
     }
-    
-    //更新可选消耗列表
+
+    updateOptional();
+  }
+
+  public void updateOptional() {
     if(getOptional() != null){
       BaseConsumers cons;
       boolean onlyOne = entity.getConsumerBlock().oneOfOptionCons();
       for(int id=0; id<getOptional().size; id++){
         cons = getOptional().get(id);
-        
+
         float optionalEff = 1;
         for(Boolf<ConsumerBuildComp> b: cons.valid){
           optionalEff *= b.get(entity)? 1: 0;
@@ -238,20 +233,6 @@ public class BaseConsumeModule extends BlockModule{
     }
     
     return true;
-  }
-
-  /**过滤器，将判断对当前选中的区域指定type下对输入的对象是否接受
-   * 若可选过滤器已添加目标对象同样返回true
-   * @param type 过滤器种类
-   * @param target 通过过滤器的目标对象
-   * @param acceptAll 是否接受所有清单的需求
-   * @return 布尔值，是否接受此对象
-   *
-   * @deprecated 1.6.2 过滤器已重新优化以减少内存占用，此方法已废弃，请参阅{@link universecore.world.consumers.ConsFilter}
-   **/
-  @Deprecated
-  public boolean filter(ConsumeType<?> type, Content target, boolean acceptAll){
-    return entity.getBlock(ConsumerBlockComp.class).filter().filter(entity, type, target, acceptAll);
   }
 
   @Override
