@@ -5,7 +5,6 @@ import arc.files.Fi;
 import arc.files.ZipFi;
 import arc.func.Boolf2;
 import arc.struct.Seq;
-import arc.util.ArcRuntimeException;
 import arc.util.serialization.Jval;
 import mindustry.mod.Mod;
 
@@ -21,7 +20,7 @@ public class ModGetter{
     try {
       if (!(modFile instanceof ZipFi) && !modFile.isDirectory()) modFile = new ZipFi(modFile);
     }
-    catch(ArcRuntimeException e){
+    catch (Throwable e){
       throw new IllegalModHandleException("file was not a valid zipped file");
     }
 
@@ -55,8 +54,7 @@ public class ModGetter{
         if(filter.get(file, info)){
           result.add(new ModInfo(file));
         }
-      }catch(IllegalModHandleException ignored){
-      }
+      }catch(IllegalModHandleException ignored){}
     }
 
     return result;
