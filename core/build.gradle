@@ -29,7 +29,13 @@ tasks.withType(JavaCompile){
 }
 
 dependencies {
-  implementation project(":abstract")
+  compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+  compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
 
+  compileOnly "com.github.EB-wilson.JavaDynamilizer:core:$JDERVersion"
+
+  implementation project(":markdown")
+
+  compileOnly project(":annotations")
   annotationProcessor project(":annotations")
 }

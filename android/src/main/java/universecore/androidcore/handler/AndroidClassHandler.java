@@ -13,10 +13,7 @@ import mindustry.mod.Mod;
 import universecore.androidcore.classes.AndroidGeneratedClassLoader;
 import universecore.androidcore.classes.DexGenerator;
 import universecore.androidcore.classes.DexLoaderFactory;
-import universecore.util.classes.AbstractFileClassLoader;
-import universecore.util.classes.BaseDynamicClassLoader;
-import universecore.util.classes.BaseGeneratedClassLoader;
-import universecore.util.classes.JarList;
+import universecore.util.classes.*;
 import universecore.util.handler.ClassHandler;
 import universecore.util.mods.ModGetter;
 import universecore.util.mods.ModInfo;
@@ -27,10 +24,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class AndroidClassHandler implements ClassHandler{
-  protected static final BaseDynamicClassLoader dynamicLoader =
+  protected static final AbstractDynamicClassLoader dynamicLoader =
       DexLoaderFactory.getClassLoader(AndroidClassHandler.class.getClassLoader());
 
-  protected final BaseGeneratedClassLoader generatedLoader;
+  protected final AbstractGeneratedClassLoader generatedLoader;
 
   protected boolean generateFinished;
 

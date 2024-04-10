@@ -38,8 +38,6 @@ dependencies {
   implementation "com.github.EB-wilson.JavaDynamilizer:baseimpl:$JDERVersion"
 
   compileOnly project(":core")
-  compileOnly project(":abstract")
-  compileOnly project(":implabstract")
   compileOnly project(":dynamilizer")
   compileOnly project(":desktop")
 

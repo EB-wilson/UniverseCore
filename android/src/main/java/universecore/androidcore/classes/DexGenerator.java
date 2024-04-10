@@ -10,7 +10,6 @@ import dynamilize.classmaker.ASMGenerator;
 import dynamilize.classmaker.ByteClassLoader;
 import dynamilize.classmaker.ClassInfo;
 import dynamilize.classmaker.CodeBlock;
-import dynamilize.classmaker.code.ILocal;
 import dynamilize.classmaker.code.IMethod;
 import dynamilize.classmaker.code.IOperate;
 import org.objectweb.asm.Opcodes;

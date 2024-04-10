@@ -32,41 +32,22 @@ tasks.withType(JavaCompile){
 }
 
 dependencies {
-  compileOnly project(":dynamilizer")
 
   compileOnly 'org.ow2.asm:asm:9.4'
 
   compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
   compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
-  implementation 'com.jakewharton.android.repackaged:dalvik-dx:11.0.0_r3'
+  compileOnly 'com.jakewharton.android.repackaged:dalvik-dx:11.0.0_r3'
 
   compileOnly files("libs/android.jar")
 
   compileOnly project(":core")
-  compileOnly project(":abstract")
-  compileOnly project(":implabstract")
-  compileOnly project(":utilities")
+  compileOnly project(":dynamilizer")
 
   annotationProcessor project(":annotations")
 
   testCompileOnly "com.jakewharton.android.repackaged:dalvik-dx:11.0.0_r3"
   testCompileOnly project(":core")
-  testCompileOnly project(":abstract")
-  testCompileOnly project(":implabstract")
-  testCompileOnly project(":utilities")
-}
-
-shadowJar {
-  dependencies {
-    exclude dependency("com.github.Anuken.Arc:arc-core:$mindustryVersion")
-    exclude dependency("com.github.Anuken.Mindustry:core:$mindustryVersion")
-    exclude dependency("com.jakewharton.android.repackaged:dalvik-dx:11.0.0_r3")
-
-    exclude project(":core")
-    exclude project(":abstract")
-    exclude project(":implabstract")
-    exclude project(":utilities")
-  }
 }
 
 repositories {

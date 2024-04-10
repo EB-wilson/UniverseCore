@@ -31,17 +31,13 @@ tasks.withType(JavaCompile){
 }
 
 dependencies {
-  compileOnly project(":dynamilizer")
-
   compileOnly 'org.ow2.asm:asm:9.3'
 
   compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
   compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
 
   compileOnly project(":core")
-  compileOnly project(":abstract")
-  compileOnly project(":implabstract")
-  compileOnly project(":utilities")
+  compileOnly project(":dynamilizer")
 
   annotationProcessor project(":annotations")
 }

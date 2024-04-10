@@ -5,7 +5,8 @@ import com.android.dx.command.dexer.DxContext;
 import com.android.dx.merge.DexMerger;
 import dalvik.system.BaseDexClassLoader;
 import dalvik.system.DexClassLoader;
-import universecore.util.classes.BaseGeneratedClassLoader;
+import universecore.util.classes.AbstractGeneratedClassLoader;
+import universecore.util.classes.JarList;
 import universecore.util.handler.FieldHandler;
 import universecore.util.handler.MethodHandler;
 import universecore.util.mods.ModInfo;
@@ -13,11 +14,14 @@ import universecore.util.mods.ModInfo;
 import java.io.File;
 import java.io.IOException;
 
-public class AndroidGeneratedClassLoader extends BaseGeneratedClassLoader{
+public class AndroidGeneratedClassLoader extends AbstractGeneratedClassLoader {
   private ClassLoader dvLoader;
+  protected final ModInfo mod;
 
   public AndroidGeneratedClassLoader(ModInfo mod, ClassLoader parent){
-    super(mod, parent);
+    super(JarList.inst().getCacheFile(mod).file(), parent);
+    this.mod = mod;
+
     updateLoader();
   }
 

@@ -14,10 +14,6 @@ dependencies {
     compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
 
     compileOnly project(":core")
-    compileOnly project(":mindustry")
-    compileOnly project(":abstract")
-    compileOnly project(":implabstract")
-    compileOnly project(":utilities")
 
     compileOnly project(":annotations")
     annotationProcessor project(":annotations")

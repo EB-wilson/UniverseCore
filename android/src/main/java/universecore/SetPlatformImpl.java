@@ -5,7 +5,7 @@ import universecore.androidcore.AndroidFieldAccessHelper;
 import universecore.androidcore.AndroidMethodInvokeHelper;
 import universecore.androidcore.handler.AndroidClassHandler;
 import universecore.util.AccessibleHelper;
-import universecore.util.mods.IllegalModHandleException;
+import universecore.util.IllegalModHandleException;
 import universecore.util.mods.ModGetter;
 import universecore.util.mods.ModInfo;
 
@@ -91,13 +91,13 @@ public class SetPlatformImpl{
         Constructor<? extends FieldAccessHelper> faCstr = fieldAccess26Type.getConstructor();
         Constructor<? extends MethodInvokeHelper> miCstr = methodInvoke26Type.getConstructor();
 
-        ImpCore.fieldAccessHelper = faCstr.newInstance();
-        ImpCore.methodInvokeHelper = miCstr.newInstance();
+        UncCore.fieldAccessHelper = faCstr.newInstance();
+        UncCore.methodInvokeHelper = miCstr.newInstance();
       }catch(ClassNotFoundException|NoSuchMethodException|InstantiationException|IllegalAccessException|InvocationTargetException|IOException e){
         throw new RuntimeException(e);
       }
     }catch(ClassNotFoundException ignored){*/
-      ImpCore.accessibleHelper = new AccessibleHelper() {
+      UncCore.accessibleHelper = new AccessibleHelper() {
         @Override
         public void makeAccessible(AccessibleObject object) {
           object.setAccessible(true);
@@ -108,11 +108,11 @@ public class SetPlatformImpl{
           //no action
         }
       };
-      ImpCore.fieldAccessHelper = new AndroidFieldAccessHelper();
-      ImpCore.methodInvokeHelper = new AndroidMethodInvokeHelper();
+      UncCore.fieldAccessHelper = new AndroidFieldAccessHelper();
+      UncCore.methodInvokeHelper = new AndroidMethodInvokeHelper();
     //}
 
-    ImpCore.classes = modMain -> {
+    UncCore.classesFactory = modMain -> {
       try{
         if(!Mod.class.isAssignableFrom(modMain))
           throw new IllegalModHandleException("class was not a mod main class");
