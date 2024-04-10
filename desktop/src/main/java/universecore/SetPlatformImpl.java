@@ -9,13 +9,12 @@ import universecore.util.AccessibleHelper;
 import universecore.util.FieldAccessHelper;
 import universecore.util.MethodInvokeHelper;
 import universecore.util.handler.ClassHandler;
-import universecore.util.mods.IllegalModHandleException;
+import universecore.util.IllegalModHandleException;
 import universecore.util.mods.ModGetter;
 import universecore.util.mods.ModInfo;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 public class SetPlatformImpl{
   private static Constructor<? extends ClassHandler> handlerCstr;
@@ -41,16 +40,16 @@ public class SetPlatformImpl{
         Constructor<? extends MethodInvokeHelper> miCstr = methodInvoke9Type.getConstructor();
         handlerCstr = classHandler.getConstructor(ModInfo.class);
 
-        ImpCore.accessibleHelper = acCstr.newInstance();
-        ImpCore.fieldAccessHelper = faCstr.newInstance();
-        ImpCore.methodInvokeHelper = miCstr.newInstance();
+        UncCore.accessibleHelper = acCstr.newInstance();
+        UncCore.fieldAccessHelper = faCstr.newInstance();
+        UncCore.methodInvokeHelper = miCstr.newInstance();
       }catch(NoSuchMethodException|InstantiationException|IllegalAccessException|InvocationTargetException e){
         throw new RuntimeException(e);
       }
     }catch(ClassNotFoundException ignored){
-      ImpCore.accessibleHelper = new DesktopAccessibleHelper();
-      ImpCore.fieldAccessHelper = new DesktopFieldAccessHelper();
-      ImpCore.methodInvokeHelper = new DesktopMethodInvokeHelper();
+      UncCore.accessibleHelper = new DesktopAccessibleHelper();
+      UncCore.fieldAccessHelper = new DesktopFieldAccessHelper();
+      UncCore.methodInvokeHelper = new DesktopMethodInvokeHelper();
 
       try {
         handlerCstr = DesktopClassHandler.class.getConstructor(ModInfo.class);
@@ -59,7 +58,7 @@ public class SetPlatformImpl{
       }
     }
 
-    ImpCore.classes = modMain -> {
+    UncCore.classesFactory = modMain -> {
       try{
         if(!Mod.class.isAssignableFrom(modMain))
           throw new IllegalModHandleException("class was not a mod main class");

@@ -39,7 +39,6 @@ dependencies {
   implementation 'org.ow2.asm:asm:9.4'
 
   implementation project(":core")
-  implementation project(":abstract")
 
   annotationProcessor project(":annotations")
 }

@@ -12,9 +12,9 @@ import mindustry.mod.Mod;
 import org.objectweb.asm.Opcodes;
 import universecore.desktopcore.classes.DesktopDynamicClassLoader;
 import universecore.desktopcore.classes.DesktopGeneratedClassLoader;
+import universecore.util.classes.AbstractDynamicClassLoader;
 import universecore.util.classes.AbstractFileClassLoader;
-import universecore.util.classes.BaseDynamicClassLoader;
-import universecore.util.classes.BaseGeneratedClassLoader;
+import universecore.util.classes.AbstractGeneratedClassLoader;
 import universecore.util.classes.JarList;
 import universecore.util.handler.ClassHandler;
 import universecore.util.mods.ModGetter;
@@ -22,8 +22,8 @@ import universecore.util.mods.ModInfo;
 
 @SuppressWarnings("DuplicatedCode")
 public class DesktopClassHandler implements ClassHandler{
-  protected BaseDynamicClassLoader dynamicLoader;
-  protected BaseGeneratedClassLoader generatedLoader;
+  protected AbstractDynamicClassLoader dynamicLoader;
+  protected AbstractGeneratedClassLoader generatedLoader;
 
   private boolean generateFinished;
 

@@ -1,0 +1,434 @@
+processor: EntryProcessor (full class name: universecore.annotations.EntryProcessor)
+time: Tue Apr 09 19:36:05 CST 2024
+
+-----------------------------------------
+annotation: universecore.annotations.Annotations.ImplEntries
+-----------------------------------------
+
+> class: universecore.world.blocks.chains.ChainsContainer
+  1| 
+  2| @Annotations.ImplEntries
+  3| public class ChainsContainer implements ExtraVariableComp {
+  4|     
+  5|     public ChainsContainer() {
+  6|         super();
+  7|     }
+  8|     public java.util.Map<java.lang.String, java.lang.Object> extraVar = new universecore.util.colletion.CollectionObjectMap<>();
+  9|     private static final Queue<ChainsBuildComp> findQueue = new Queue<>();
+ 10|     private static final ObjectSet<ChainsBuildComp> added = new ObjectSet<>();
+ 11|     public final OrderedSet<ChainsBuildComp> all = new OrderedSet<>();
+ 12|     private int minX;
+ 13|     private int minY;
+ 14|     private int maxX;
+ 15|     private int maxY;
+ 16|     private long lastFrameUpdated;
+ 17|     private boolean structUpdated = true;
+ 18|     
+ 19|     public boolean inlerp(ChainsBuildComp origin, ChainsBuildComp other) {
+ 20|         if (!all.contains(origin)) return false;
+ 21|         ChainsContainer otherContainer = other.chains().container;
+ 22|         return Math.max(maxX(), otherContainer.maxX()) - Math.min(minX(), otherContainer.minX()) < Math.min(origin.getChainsBlock().maxWidth(), other.getChainsBlock().maxWidth()) && Math.max(maxY(), otherContainer.maxY()) - Math.min(minY(), otherContainer.minY()) < Math.min(origin.getChainsBlock().maxHeight(), other.getChainsBlock().maxHeight());
+ 23|     }
+ 24|     
+ 25|     public int minX() {
+ 26|         return minX;
+ 27|     }
+ 28|     
+ 29|     public int maxX() {
+ 30|         return maxX;
+ 31|     }
+ 32|     
+ 33|     public int minY() {
+ 34|         return minY;
+ 35|     }
+ 36|     
+ 37|     public int maxY() {
+ 38|         return maxY;
+ 39|     }
+ 40|     
+ 41|     public int width() {
+ 42|         return maxX - minX + 1;
+ 43|     }
+ 44|     
+ 45|     public int height() {
+ 46|         return maxY - minY + 1;
+ 47|     }
+ 48|     
+ 49|     @Deprecated
+ 50|     public void putVar(String key, Object obj) {
+ 51|         setVar(key, obj);
+ 52|     }
+ 53|     
+ 54|     public void add(ChainsContainer other) {
+ 55|         for (ChainsBuildComp next : other.all) {
+ 56|             add(next);
+ 57|         }
+ 58|     }
+ 59|     
+ 60|     private void updateEdge(ChainsBuildComp other) {
+ 61|         float offset = other.getBlock().size / 2.0F;
+ 62|         float centOffset = other.getBlock().offset / tilesize;
+ 63|         if (all.isEmpty()) {
+ 64|             minX = (int)Math.ceil(other.tileX() + centOffset - offset);
+ 65|             minY = (int)Math.ceil(other.tileY() + centOffset - offset);
+ 66|             maxX = (int)Math.floor(other.tileX() + centOffset + offset);
+ 67|             maxY = (int)Math.floor(other.tileY() + centOffset + offset);
+ 68|         } else {
+ 69|             minX = Math.min(minX, (int)Math.ceil(other.tileX() + centOffset - offset));
+ 70|             minY = Math.min(minY, (int)Math.ceil(other.tileY() + centOffset - offset));
+ 71|             maxX = Math.max(maxX, (int)Math.floor(other.tileX() + centOffset + offset));
+ 72|             maxY = Math.max(maxY, (int)Math.floor(other.tileY() + centOffset + offset));
+ 73|         }
+ 74|     }
+ 75|     
+ 76|     public void add(ChainsBuildComp other) {
+ 77|         if (all.contains(other)) return;
+ 78|         updateEdge(other);
+ 79|         all.add(other);
+ 80|         ChainsContainer oldContainer = other.chains().container;
+ 81|         other.chains().container = this;
+ 82|         other.chainsAdded(oldContainer);
+ 83|         structUpdated = true;
+ 84|     }
+ 85|     
+ 86|     public void update() {
+ 87|         if (Core.graphics.getFrameId() == lastFrameUpdated) return;
+ 88|         lastFrameUpdated = Core.graphics.getFrameId();
+ 89|         if (structUpdated) {
+ 90|             for (ChainsBuildComp comp : all) {
+ 91|                 comp.onChainsUpdated();
+ 92|             }
+ 93|             structUpdated = false;
+ 94|         }
+ 95|     }
+ 96|     
+ 97|     public void reconstruct(ChainsBuildComp source, Boolf<ChainsBuildComp> filter) {
+ 98|         findQueue.clear();
+ 99|         added.clear();
+100|         findQueue.addFirst(source);
+101|         added.add(source);
+102|         while (!findQueue.isEmpty()) {
+103|             ChainsBuildComp other = findQueue.removeLast();
+104|             for (ChainsBuildComp next : other.chainBuilds()) {
+105|                 if (added.add(next) && filter.get(next)) findQueue.addFirst(next);
+106|             }
+107|             ChainsContainer oldContainer = other.chains().container;
+108|             add(other);
+109|             other.chainsFlowed(oldContainer);
+110|         }
+111|     }
+112|     
+113|     public void remove(ChainsBuildComp target) {
+114|         Seq<ChainsBuildComp> children;
+115|         for (ChainsBuildComp next : children = target.chainBuilds()) {
+116|             if (!all.contains(next) || next.chains().container != this) continue;
+117|             next.chains().newContainer().reconstruct(next, (e)->e != target && all.contains(e));
+118|         }
+119|         target.chainsRemoved(children);
+120|     }
+121|     
+122|     public java.util.Map<java.lang.String, java.lang.Object> extra() {
+123|         return this.extraVar;
+124|     }
+125| }
+
+> class: universecore.world.blocks.FakeBlock.FakeBuild
+ 1| 
+ 2| @Annotations.ImplEntries
+ 3| public class FakeBuild extends Building implements ReplaceBuildComp {
+ 4|     
+ 5|     public FakeBuild() {
+ 6|         super();
+ 7|     }
+ 8|     Building realBuild;
+ 9|     
+10|     @Override
+11|     public Building init(Tile tile, Team team, boolean shouldAdd, int rotation) {
+12|         FieldHandler.setValueDefault(tile, "block", maskedBlock);
+13|         realBuild = maskedBlock.newBuilding();
+14|         this.tile = tile;
+15|         this.x = tile.drawx();
+16|         this.y = tile.drawy();
+17|         this.rotation = rotation;
+18|         this.team = team;
+19|         realBuild.init(tile, team, shouldAdd, rotation);
+20|         this.buildInitialized();
+21|         return realBuild;
+22|     }
+23|     
+24|     @Override
+25|     public void onReplaced(ReplaceBuildComp old) {
+26|         if (realBuild instanceof ReplaceBuildComp re) {
+27|             re.onReplaced(old);
+28|         }
+29|     }
+30|     
+31|     public mindustry.world.Tile getTile() {
+32|         return super.tile;
+33|     }
+34|     
+35|     public mindustry.world.modules.ItemModule items() {
+36|         return super.items;
+37|     }
+38|     
+39|     public mindustry.world.modules.LiquidModule liquids() {
+40|         return super.liquids;
+41|     }
+42|     
+43|     public void onRemoved() {
+44|         super.onRemoved();
+45|         this.onRemoving();
+46|     }
+47| }
+
+> class: universecore.world.particles.Particle
+  1| 
+  2| @Annotations.ImplEntries
+  3| public class Particle extends Decal implements ExtraVariableComp, Iterable<Particle.Cloud> {
+  4|     
+  5|     public Particle() {
+  6|         super();
+  7|     }
+  8|     public java.util.Map<java.lang.String, java.lang.Object> extraVar = new universecore.util.colletion.CollectionObjectMap<>();
+  9|     private static int counter = 0;
+ 10|     public static int maxAmount = 1024;
+ 11|     protected static final ObjectSet<Particle> all = new ObjectSet<>();
+ 12|     protected static final Seq<Particle> temp = new Seq<>();
+ 13|     protected Vec2 startPos = new Vec2();
+ 14|     protected float clipSize;
+ 15|     Cloud currentCloud;
+ 16|     Cloud firstCloud;
+ 17|     int cloudCount;
+ 18|     public int maxCloudCounts = -1;
+ 19|     public Vec2 speed = new Vec2();
+ 20|     public float size;
+ 21|     public float defSpeed;
+ 22|     public float defSize;
+ 23|     public ParticleModel model;
+ 24|     public float layer;
+ 25|     
+ 26|     public static int count() {
+ 27|         return all.size;
+ 28|     }
+ 29|     
+ 30|     public float cloudCount() {
+ 31|         return cloudCount;
+ 32|     }
+ 33|     
+ 34|     public static Seq<Particle> get(Boolf<Particle> filter) {
+ 35|         temp.clear();
+ 36|         for (Particle particle : all) {
+ 37|             if (filter.get(particle)) temp.add(particle);
+ 38|         }
+ 39|         return temp;
+ 40|     }
+ 41|     
+ 42|     @Override
+ 43|     public void add() {
+ 44|         index__all = Groups.all.addIndex(this);
+ 45|         index__draw = Groups.draw.addIndex(this);
+ 46|         all.add(this);
+ 47|         counter++;
+ 48|         currentCloud = Pools.get(Cloud.class, Cloud::new, 65536).obtain();
+ 49|         currentCloud.x = x;
+ 50|         currentCloud.y = y;
+ 51|         currentCloud.size = 0;
+ 52|         currentCloud.color.set(model.trailColor(this));
+ 53|         firstCloud = currentCloud;
+ 54|         added = true;
+ 55|         model.init(this);
+ 56|         if (counter >= maxAmount) {
+ 57|             remove();
+ 58|         }
+ 59|     }
+ 60|     
+ 61|     @Override
+ 62|     public void draw() {
+ 63|         float l = Draw.z();
+ 64|         Draw.z(layer);
+ 65|         model.draw(this);
+ 66|         if (currentCloud != null) {
+ 67|             model.drawTrail(this);
+ 68|         }
+ 69|         Draw.z(l);
+ 70|         Draw.reset();
+ 71|     }
+ 72|     
+ 73|     @Override
+ 74|     public void update() {
+ 75|         model.deflect(this);
+ 76|         x += speed.x * Time.delta;
+ 77|         y += speed.y * Time.delta;
+ 78|         size = model.currSize(this);
+ 79|         model.update(this);
+ 80|         Cloud c = Pools.get(Cloud.class, Cloud::new, 65536).obtain();
+ 81|         c.x = x;
+ 82|         c.y = y;
+ 83|         c.size = size;
+ 84|         c.color.set(model.trailColor(this));
+ 85|         c.perCloud = currentCloud;
+ 86|         currentCloud.nextCloud = c;
+ 87|         currentCloud = c;
+ 88|         cloudCount++;
+ 89|         for (Cloud cloud : currentCloud) {
+ 90|             model.updateTrail(this, cloud);
+ 91|         }
+ 92|         boolean mark = false;
+ 93|         while (firstCloud.nextCloud != null) {
+ 94|             if (maxCloudCounts > 0 && cloudCount > maxCloudCounts || model.isFaded(this, firstCloud)) {
+ 95|                 mark = !(maxCloudCounts > 0 && cloudCount > maxCloudCounts);
+ 96|                 popFirst();
+ 97|             } else break;
+ 98|         }
+ 99|         if (!mark && model.isFinal(this)) {
+100|             popFirst();
+101|             if (cloudCount > 4) popFirst();
+102|         }
+103|         if (cloudCount <= 4 && model.isFinal(this)) remove();
+104|     }
+105|     
+106|     private void popFirst() {
+107|         Cloud n = firstCloud.nextCloud;
+108|         n.perCloud = null;
+109|         Pools.free(firstCloud);
+110|         firstCloud = n;
+111|         cloudCount--;
+112|     }
+113|     
+114|     @Override
+115|     public void remove() {
+116|         if (added) {
+117|             Groups.all.removeIndex(this, this.index__all);
+118|             index__all = -1;
+119|             Groups.draw.removeIndex(this, this.index__draw);
+120|             index__draw = -1;
+121|             Groups.queueFree(this);
+122|             all.remove(this);
+123|             counter--;
+124|             added = false;
+125|         }
+126|     }
+127|     
+128|     @Override
+129|     public int classId() {
+130|         return 102;
+131|     }
+132|     
+133|     @Override
+134|     public float clipSize() {
+135|         return clipSize = Math.max(Tmp.v1.set(x, y).sub(startPos).len(), clipSize);
+136|     }
+137|     
+138|     @Override
+139|     public void reset() {
+140|         added = false;
+141|         id = EntityGroup.nextId();
+142|         lifetime = 0;
+143|         region = null;
+144|         rotation = 0;
+145|         time = 0;
+146|         x = 0;
+147|         y = 0;
+148|         maxCloudCounts = -1;
+149|         speed.setZero();
+150|         startPos.setZero();
+151|         layer = 0;
+152|         clipSize = 0;
+153|         while (firstCloud.nextCloud != null) {
+154|             popFirst();
+155|         }
+156|         Pools.free(firstCloud);
+157|         currentCloud = null;
+158|         firstCloud = null;
+159|         cloudCount = 0;
+160|         size = 0;
+161|         extra().clear();
+162|         model = null;
+163|         color.set(Color.white);
+164|     }
+165|     
+166|     @Override
+167|     public Iterator<Cloud> iterator() {
+168|         return currentCloud.iterator();
+169|     }
+170|     
+171|     public static class Cloud implements Pool.Poolable, Iterable<Cloud> {
+172|         
+173|         public Cloud() {
+174|             super();
+175|         }
+176|         public final Color color = new Color();
+177|         public float x;
+178|         public float y;
+179|         public float size;
+180|         public Cloud perCloud;
+181|         public Cloud nextCloud;
+182|         Itr itr = new Itr();
+183|         
+184|         public void draw() {
+185|             draw(1, 1);
+186|         }
+187|         
+188|         public void draw(float modulate, float modulateNext) {
+189|             Draw.color(color);
+190|             if (perCloud != null && nextCloud != null) {
+191|                 float angle = Angles.angle(x - perCloud.x, y - perCloud.y);
+192|                 float dx1 = Angles.trnsx(angle + 90, size * modulate);
+193|                 float dy1 = Angles.trnsy(angle + 90, size * modulate);
+194|                 angle = Angles.angle(nextCloud.x - x, nextCloud.y - y);
+195|                 float dx2 = Angles.trnsx(angle + 90, nextCloud.size * modulateNext);
+196|                 float dy2 = Angles.trnsy(angle + 90, nextCloud.size * modulateNext);
+197|                 Fill.quad(x + dx1, y + dy1, x - dx1, y - dy1, nextCloud.x - dx2, nextCloud.y - dy2, nextCloud.x + dx2, nextCloud.y + dy2);
+198|             } else if (perCloud == null && nextCloud != null) {
+199|                 float angle = Angles.angle(nextCloud.x - x, nextCloud.y - y);
+200|                 float dx2 = Angles.trnsx(angle + 90, nextCloud.size * modulate);
+201|                 float dy2 = Angles.trnsy(angle + 90, nextCloud.size * modulate);
+202|                 Fill.quad(x, y, x, y, nextCloud.x - dx2, nextCloud.y - dy2, nextCloud.x + dx2, nextCloud.y + dy2);
+203|             }
+204|         }
+205|         
+206|         @Override
+207|         public void reset() {
+208|             x = 0;
+209|             y = 0;
+210|             size = 0;
+211|             color.set(Color.clear);
+212|             perCloud = null;
+213|             nextCloud = null;
+214|         }
+215|         
+216|         @SuppressWarnings(value = "ReturnOfInnerClass")
+217|         @Override
+218|         public Iterator<Cloud> iterator() {
+219|             itr.reset();
+220|             return itr;
+221|         }
+222|         
+223|         class Itr implements Iterator<Cloud> {
+224|             
+225|             Itr() {
+226|                 super();
+227|             }
+228|             Cloud curr = Cloud.this;
+229|             
+230|             public void reset() {
+231|                 curr = Cloud.this;
+232|             }
+233|             
+234|             @Override
+235|             public boolean hasNext() {
+236|                 return curr.perCloud != null;
+237|             }
+238|             
+239|             @Override
+240|             public Cloud next() {
+241|                 return curr = curr.perCloud;
+242|             }
+243|         }
+244|     }
+245|     
+246|     public java.util.Map<java.lang.String, java.lang.Object> extra() {
+247|         return this.extraVar;
+248|     }
+249| }
+

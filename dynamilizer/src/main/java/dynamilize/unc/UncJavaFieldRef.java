@@ -2,7 +2,7 @@ package dynamilize.unc;
 
 import dynamilize.DynamicObject;
 import dynamilize.IVariable;
-import universecore.ImpCore;
+import universecore.UncCore;
 
 import java.lang.reflect.Field;
 
@@ -28,7 +28,7 @@ public class UncJavaFieldRef implements IVariable {
     if (!owner.isAssignableFrom(obj.getClass()))
       throw new ClassCastException(obj.getClass() + " can not be cast to " + owner);
 
-    return ImpCore.fieldAccessHelper.get(obj, name);
+    return UncCore.fieldAccessHelper.get(obj, name);
   }
 
   @Override
@@ -36,77 +36,77 @@ public class UncJavaFieldRef implements IVariable {
     if (!owner.isAssignableFrom(obj.getClass()))
       throw new ClassCastException(obj.getClass() + " can not be cast to " + owner);
 
-    ImpCore.fieldAccessHelper.set(obj, name, value);
+    UncCore.fieldAccessHelper.set(obj, name, value);
   }
 
   @Override
   public boolean get(DynamicObject<?> dynamicObject, boolean b) {
-    return ImpCore.fieldAccessHelper.getBoolean(dynamicObject, name);
+    return UncCore.fieldAccessHelper.getBoolean(dynamicObject, name);
   }
 
   @Override
   public byte get(DynamicObject<?> dynamicObject, byte b) {
-    return ImpCore.fieldAccessHelper.getByte(dynamicObject, name);
+    return UncCore.fieldAccessHelper.getByte(dynamicObject, name);
   }
 
   @Override
   public short get(DynamicObject<?> dynamicObject, short i) {
-    return ImpCore.fieldAccessHelper.getShort(dynamicObject, name);
+    return UncCore.fieldAccessHelper.getShort(dynamicObject, name);
   }
 
   @Override
   public int get(DynamicObject<?> dynamicObject, int i) {
-    return ImpCore.fieldAccessHelper.getInt(dynamicObject, name);
+    return UncCore.fieldAccessHelper.getInt(dynamicObject, name);
   }
 
   @Override
   public long get(DynamicObject<?> dynamicObject, long l) {
-    return ImpCore.fieldAccessHelper.getLong(dynamicObject, name);
+    return UncCore.fieldAccessHelper.getLong(dynamicObject, name);
   }
 
   @Override
   public float get(DynamicObject<?> dynamicObject, float v) {
-    return ImpCore.fieldAccessHelper.getFloat(dynamicObject, name);
+    return UncCore.fieldAccessHelper.getFloat(dynamicObject, name);
   }
 
   @Override
   public double get(DynamicObject<?> dynamicObject, double v) {
-    return ImpCore.fieldAccessHelper.getDouble(dynamicObject, name);
+    return UncCore.fieldAccessHelper.getDouble(dynamicObject, name);
   }
 
   @Override
   public void set(DynamicObject<?> dynamicObject, boolean b) {
-    ImpCore.fieldAccessHelper.set(dynamicObject, name, b);
+    UncCore.fieldAccessHelper.set(dynamicObject, name, b);
   }
 
   @Override
   public void set(DynamicObject<?> dynamicObject, byte b) {
-    ImpCore.fieldAccessHelper.set(dynamicObject, name, b);
+    UncCore.fieldAccessHelper.set(dynamicObject, name, b);
   }
 
   @Override
   public void set(DynamicObject<?> dynamicObject, short s) {
-    ImpCore.fieldAccessHelper.set(dynamicObject, name, s);
+    UncCore.fieldAccessHelper.set(dynamicObject, name, s);
   }
 
   @Override
   public void set(DynamicObject<?> dynamicObject, int i) {
-    ImpCore.fieldAccessHelper.set(dynamicObject, name, i);
+    UncCore.fieldAccessHelper.set(dynamicObject, name, i);
   }
 
   @Override
   public void set(DynamicObject<?> dynamicObject, long l) {
-    ImpCore.fieldAccessHelper.set(dynamicObject, name, l);
+    UncCore.fieldAccessHelper.set(dynamicObject, name, l);
   }
 
   @Override
   public void set(DynamicObject<?> dynamicObject, float f) {
-    ImpCore.fieldAccessHelper.set(dynamicObject, name, f);
+    UncCore.fieldAccessHelper.set(dynamicObject, name, f);
 
   }
 
   @Override
   public void set(DynamicObject<?> dynamicObject, double d) {
-    ImpCore.fieldAccessHelper.set(dynamicObject, name, d);
+    UncCore.fieldAccessHelper.set(dynamicObject, name, d);
   }
 }

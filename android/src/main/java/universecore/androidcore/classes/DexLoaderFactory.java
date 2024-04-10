@@ -1,12 +1,14 @@
 package universecore.androidcore.classes;
 
+import arc.Core;
+import arc.files.Fi;
 import com.android.dex.Dex;
 import com.android.dex.DexFormat;
 import com.android.dx.command.dexer.DxContext;
 import com.android.dx.merge.DexMerger;
 import dalvik.system.BaseDexClassLoader;
 import dalvik.system.DexClassLoader;
-import universecore.util.classes.BaseDynamicClassLoader;
+import universecore.util.classes.AbstractDynamicClassLoader;
 import universecore.util.classes.JarList;
 import universecore.util.handler.FieldHandler;
 import universecore.util.handler.MethodHandler;
@@ -22,6 +24,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 
 public class DexLoaderFactory{
+  public static Fi jarFileCache = Core.files.cache("tempGenerate.jar");
+
   private static Class<?> inMemoryLoaderClass;
   private static Constructor<?> inMemLoaderCstr;
 
@@ -52,9 +56,9 @@ public class DexLoaderFactory{
     }
   }
 
-  public static abstract class AsClassDexLoader extends BaseDynamicClassLoader{
+  public static abstract class AsClassDexLoader extends AbstractDynamicClassLoader {
     protected AsClassDexLoader(ClassLoader parent){
-      super(parent);
+      super(jarFileCache.file(), parent);
     }
 
     public abstract void reset();

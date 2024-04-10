@@ -29,7 +29,16 @@ tasks.withType(JavaCompile){
 }
 
 dependencies {
-  implementation project(":abstract")
+  implementation 'org.commonmark:commonmark:0.20.0'
+  implementation 'org.commonmark:commonmark-ext-gfm-tables:0.20.0'
+  implementation 'org.commonmark:commonmark-ext-gfm-strikethrough:0.20.0'
+  implementation 'org.commonmark:commonmark-ext-ins:0.20.0'
 
+  compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+  compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+
+  compileOnly "com.github.EB-wilson.JavaDynamilizer:core:$JDERVersion"
+
+  compileOnly project(":annotations")
   annotationProcessor project(":annotations")
 }

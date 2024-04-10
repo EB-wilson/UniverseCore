@@ -5,7 +5,8 @@ import arc.files.Fi;
 import arc.files.ZipFi;
 import arc.util.ArcRuntimeException;
 import arc.util.Log;
-import universecore.util.classes.BaseGeneratedClassLoader;
+import universecore.util.classes.AbstractGeneratedClassLoader;
+import universecore.util.classes.JarList;
 import universecore.util.mods.ModInfo;
 
 import java.io.ByteArrayOutputStream;
@@ -23,7 +24,7 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
+public class DesktopGeneratedClassLoader extends AbstractGeneratedClassLoader {
   private static final Fi jarFileCache = Core.settings.getDataDirectory().child("universecore").child("cache");
   private static final Object unsafe;
   private static final Method defineClass;
@@ -53,9 +54,11 @@ public class DesktopGeneratedClassLoader extends BaseGeneratedClassLoader{
   private final HashMap<String, Class<?>> classMap = new HashMap<>();
 
   private ZipFi zip;
+  protected ModInfo mod;
 
   public DesktopGeneratedClassLoader(ModInfo mod, ClassLoader parent){
-    super(mod, parent);
+    super(JarList.inst().getCacheFile(mod).file(), parent);
+    this.mod = mod;
   }
 
   @Override

@@ -1,6 +1,8 @@
 package universecore.desktopcore.classes;
 
-import universecore.util.classes.BaseDynamicClassLoader;
+import arc.Core;
+import arc.files.Fi;
+import universecore.util.classes.AbstractDynamicClassLoader;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -8,7 +10,9 @@ import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
 import java.util.HashMap;
 
-public class DesktopDynamicClassLoader extends BaseDynamicClassLoader{
+public class DesktopDynamicClassLoader extends AbstractDynamicClassLoader {
+  public static Fi jarFileCache = Core.files.cache("tempGenerate.jar");
+
   private static final Object unsafe;
   private static final Method defineClass;
 
@@ -35,7 +39,7 @@ public class DesktopDynamicClassLoader extends BaseDynamicClassLoader{
   private final HashMap<String, Class<?>> loadedClass = new HashMap<>();
 
   public DesktopDynamicClassLoader(ClassLoader parent){
-    super(parent);
+    super(jarFileCache.file(), parent);
     reset();
   }
 
