@@ -6,7 +6,9 @@ import arc.func.ConsT;
 import arc.graphics.Color;
 import arc.graphics.Pixmap;
 import arc.graphics.Texture;
-import arc.graphics.g2d.*;
+import arc.graphics.g2d.Draw;
+import arc.graphics.g2d.Font;
+import arc.graphics.g2d.TextureRegion;
 import arc.math.geom.Rect;
 import arc.scene.Element;
 import arc.scene.Group;
@@ -40,7 +42,11 @@ import java.util.List;
 
 public class Markdown extends Group {
 
-  public static final String IMAGE_PNG_BASE_64 = "data:image/png;base64,";
+  public static final String[] IMAGE_BASE_64_List = {
+      "data:image/png;base64,",
+      "data:image/jpg;base64,",
+      "data:image/jpeg;base64,"
+  };
   private final Node node;
   private final MarkdownStyle style;
 
@@ -256,10 +262,16 @@ public class Markdown extends Group {
         row();
 
         TextureRegion region = Core.atlas.find(image.getDestination());
-        if (image.getDestination().startsWith(IMAGE_PNG_BASE_64)){
-          region = imgCache.get(image, () -> new TextureRegion(new Texture(new Pixmap(Base64Coder.decode(image.getDestination().replace(IMAGE_PNG_BASE_64, ""))))));
+        boolean isBase64 = false;
+        for (String s : IMAGE_BASE_64_List) {
+          if (image.getDestination().startsWith(s)){
+            region = imgCache.get(image, () -> new TextureRegion(new Texture(new Pixmap(Base64Coder.decode(image.getDestination().replace(s, ""))))));
+            isBase64 = true;
+            break;
+          }
         }
-        else if (!Core.atlas.isFound(region)){
+
+        if (!isBase64 && !Core.atlas.isFound(region)){
           region = imgCache.get(image, () -> downloadImg(image.getDestination(), Core.atlas.find("nomap")));
         }
 
