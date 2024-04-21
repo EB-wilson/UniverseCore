@@ -46,7 +46,6 @@ public class Markdown extends Group {
 
   private final Seq<DrawObj> drawObjs = new Seq<>();
   private final ObjectMap<Node, TextureRegion> imgCache = new ObjectMap<>();
-
   private Rect clipRect;
 
   float prefWidth, prefHeight;
