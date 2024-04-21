@@ -9,6 +9,7 @@ import arc.graphics.g2d.Lines;
 import arc.scene.style.BaseDrawable;
 import arc.scene.style.Drawable;
 import arc.scene.style.TextureRegionDrawable;
+import arc.scene.ui.layout.Scl;
 import arc.util.Tmp;
 import mindustry.graphics.Pal;
 import mindustry.ui.Fonts;
@@ -24,8 +25,8 @@ public class MarkdownStyles {
       codeFont = mono;
       FreeTypeFontGenerator gen = new FreeTypeFontGenerator(Core.files.internal("fonts/font.woff"));
       strongFont = gen.generateFont(new FreeTypeFontGenerator.FreeTypeFontParameter(){{
-        size = 19;
-        borderWidth = 0.3f;
+        size = (int) Scl.scl(19);
+        borderWidth = Scl.scl(0.3f);
         shadowOffsetY = 2;
         incremental = true;
         borderColor = color;

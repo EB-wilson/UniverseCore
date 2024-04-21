@@ -14,7 +14,7 @@ publishing {
     publications {
         maven(MavenPublication) {
             groupId = 'com.github.EB-wilson.UniverseCore'
-            artifactId = 'core'
+            artifactId = 'markdown'
             version = "$uncVersion"
             from components.java
         }
