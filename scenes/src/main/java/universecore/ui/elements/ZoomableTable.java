@@ -9,11 +9,12 @@ import arc.scene.ui.layout.Cell;
 import arc.scene.ui.layout.Table;
 import arc.util.Align;
 
+/**一个可缩放的列表视图，可直接对此布局的子元素进行缩放操作*/
 public class ZoomableTable extends Table{
   public float maxZoom = 1.5f, minZoom = 0.5f;
   public float defX, defY;
   public boolean zoomable = true, movable = true;
-  boolean defSeted = false;
+  boolean defSetted = false;
   protected float lastZoom = 1;
   protected Table zoomCont = new Table(), elementChild;
   
@@ -21,6 +22,7 @@ public class ZoomableTable extends Table{
     super();
     defaults().center();
     elementChild = cont == null? new Table(): cont;
+    zoomCont.setTransform(true);
     zoomCont.add(elementChild);
     super.add(zoomCont);
     
@@ -31,7 +33,6 @@ public class ZoomableTable extends Table{
         if(zoomable){
           zoomCont.setScale(Mathf.clamp(zoomCont.scaleX - amountY/10f*zoomCont.scaleX, minZoom, maxZoom));
           zoomCont.setOrigin(Align.center);
-          zoomCont.setTransform(true);
         }
         return true;
       }
@@ -40,10 +41,10 @@ public class ZoomableTable extends Table{
       public boolean mouseMoved(InputEvent event, float x, float y){
         if(movable){
           elementChild.requestScroll();
-          if(!defSeted){
+          if(!defSetted){
             defX = elementChild.x;
             defY = elementChild.y;
-            defSeted = true;
+            defSetted = true;
           }
         }
         return super.mouseMoved(event, x, y);
@@ -58,7 +59,6 @@ public class ZoomableTable extends Table{
         if(zoomable){
           zoomCont.setScale(Mathf.clamp(distance/initialDistance*lastZoom, minZoom, maxZoom));
           zoomCont.setOrigin(Align.center);
-          zoomCont.setTransform(true);
         }
       }
     
@@ -70,10 +70,10 @@ public class ZoomableTable extends Table{
       @Override
       public void pan(InputEvent event, float x, float y, float deltaX, float deltaY){
         if(movable){
-          if(! defSeted){
+          if(!defSetted){
             defX = elementChild.x;
             defY = elementChild.y;
-            defSeted = true;
+            defSetted = true;
           }
           elementChild.moveBy(deltaX/lastZoom, deltaY/lastZoom);
         }
