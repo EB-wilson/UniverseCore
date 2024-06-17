@@ -1,6 +1,7 @@
 package universecore.ui.elements.markdown;
 
 import arc.Core;
+import arc.files.Fi;
 import arc.freetype.FreeTypeFontGenerator;
 import arc.graphics.Color;
 import arc.graphics.g2d.Fill;
@@ -10,16 +11,54 @@ import arc.scene.style.BaseDrawable;
 import arc.scene.style.Drawable;
 import arc.scene.style.TextureRegionDrawable;
 import arc.scene.ui.layout.Scl;
+import arc.util.Log;
 import arc.util.Tmp;
+import mindustry.Vars;
 import mindustry.graphics.Pal;
 import mindustry.ui.Fonts;
 import mindustry.ui.Styles;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 import static mindustry.gen.Tex.paneLeft;
 import static mindustry.gen.Tex.whiteui;
 
 public class MarkdownStyles {
-  public static Markdown.MarkdownStyle defaultMD(Font mono){
+  /**默认Markdown文档风格记录对象，等宽字体来自JetBrains IDEs的Mono字体，十分感谢*/
+  public static final Markdown.MarkdownStyle defaultMD;
+
+  static {
+    Markdown.MarkdownStyle temp;
+    try (InputStream stream = MarkdownStyles.class.getClassLoader().getResourceAsStream("fonts/JetBrainsMono.ttf")) {
+      Fi f = Vars.modDirectory.child("JetBrainsMono.ttf");
+      f.write(stream, false);
+
+      FreeTypeFontGenerator gen = new FreeTypeFontGenerator(f);
+      temp = makeDefault(gen.generateFont(new FreeTypeFontGenerator.FreeTypeFontParameter() {{
+        size = (int) Scl.scl(19);
+        borderWidth = Scl.scl(0.3f);
+        shadowOffsetY = 2;
+        incremental = true;
+        borderColor = color;
+      }}));
+
+      f.delete();
+    } catch (IOException e) {
+      Log.err(e);
+      temp = makeDefault(Fonts.def);
+    }
+
+    defaultMD = temp;
+  }
+
+  /**@deprecated 请使用makeDefault*/
+  @Deprecated
+  public static Markdown.MarkdownStyle defaultMD(Font mono) {
+    return makeDefault(mono);
+  }
+
+  public static Markdown.MarkdownStyle makeDefault(Font mono){
     return new Markdown.MarkdownStyle(){{
       font = subFont = Fonts.def;
       codeFont = mono;

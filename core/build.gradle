@@ -35,6 +35,7 @@ dependencies {
   compileOnly "com.github.EB-wilson.JavaDynamilizer:core:$JDERVersion"
 
   implementation project(":markdown")
+  implementation project(":scenes")
 
   compileOnly project(":annotations")
   annotationProcessor project(":annotations")

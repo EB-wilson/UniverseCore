@@ -12,4 +12,6 @@ include 'annotations'
 include 'dynamilizer'
 include 'annotest'
 include 'markdown'
+include 'scenes'
+include 'bindingtree'
 

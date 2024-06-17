@@ -97,13 +97,15 @@ public class UncContentType{
   }
 
   protected static void reloadDisplay(){
-    Seq<ContentType> list = new Seq<>();
+    Seq<ContentType> list = new Seq<>(ContentType.values().length);
 
     for(ContentType type: ContentType.values()){
       UncContentType t = allUncContentType.get(type);
       if(!t.display) continue;
-      list.insert(t.ordinal, t.value);
+      list.add(t.value);
     }
+
+    list.sort((a, b) -> a.ordinal() - b.ordinal());
 
     displayContentList = list.toArray(ContentType.class);
   }

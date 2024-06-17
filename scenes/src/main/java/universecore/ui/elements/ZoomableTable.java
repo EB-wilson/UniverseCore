@@ -1,4 +1,4 @@
-package universecore.ui.table;
+package universecore.ui.elements;
 
 import arc.input.KeyCode;
 import arc.math.Mathf;

@@ -1,0 +1,60 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "com.github.EB-wilson.UniverseCore",
+    "module": "scenes",
+    "version": "2.1.1",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "7.4"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "files": [
+        {
+          "name": "scenes-2.1.1.jar",
+          "url": "scenes-2.1.1.jar",
+          "size": 114466,
+          "sha512": "9a676fed975f9bc981c783a3bf137aa65e00b4f991ecbf1571365490a82d9e344d9d257ce97c586a472e44540262e90d8c35219660a77551baa26bb062e79eb0",
+          "sha256": "2b2a4dcec6d3b3a626e518cb27e0f368580691ac09be706fccfa2ba696d45b29",
+          "sha1": "576200160b5382b8bd966dbffe01e380a5573970",
+          "md5": "0ba3ea2e47a11a7e358dd2a179da34a6"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "scenes-2.1.1.jar",
+          "url": "scenes-2.1.1.jar",
+          "size": 114466,
+          "sha512": "9a676fed975f9bc981c783a3bf137aa65e00b4f991ecbf1571365490a82d9e344d9d257ce97c586a472e44540262e90d8c35219660a77551baa26bb062e79eb0",
+          "sha256": "2b2a4dcec6d3b3a626e518cb27e0f368580691ac09be706fccfa2ba696d45b29",
+          "sha1": "576200160b5382b8bd966dbffe01e380a5573970",
+          "md5": "0ba3ea2e47a11a7e358dd2a179da34a6"
+        }
+      ]
+    }
+  ]
+}

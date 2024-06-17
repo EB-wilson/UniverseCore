@@ -76,9 +76,9 @@ public abstract class BaseProcessor extends AbstractProcessor{
 
       makeModuleOpen(Module.class.getModule(), "java.lang", BaseProcessor.class.getModule());
 
-      exportNative = Module.class.getDeclaredMethod("addExports0", Module.class, String.class, Module.class);
+      exportNative = Module.class.getDeclaredMethod("addExportsToAll0", Module.class, String.class);
       exportNative.setAccessible(true);
-      exportNative.invoke(null, Module.class.getModule(), "java.lang", BaseProcessor.class.getModule());
+      exportNative.invoke(null, Module.class.getModule(), "java.lang");
 
       for (String pack : opensModule) {
         makeModuleOpen(Tree.class.getModule(), pack, BaseProcessor.class.getModule());
@@ -101,7 +101,7 @@ public abstract class BaseProcessor extends AbstractProcessor{
   @SuppressWarnings("unchecked")
   private static void makeModuleOpen(Module from, String pac, Module to){
     try {
-      if (exportNative != null) exportNative.invoke(null, from, pac, to);
+      if (exportNative != null) exportNative.invoke(null, from, pac);
     } catch (IllegalAccessException | InvocationTargetException e) {
       throw new RuntimeException(e);
     }

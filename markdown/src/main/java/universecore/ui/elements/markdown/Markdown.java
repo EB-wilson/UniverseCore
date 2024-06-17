@@ -40,6 +40,7 @@ import org.commonmark.parser.Parser;
 import java.util.Arrays;
 import java.util.List;
 
+/**Markdown文档渲染元素，*/
 public class Markdown extends Group {
 
   public static final String[] IMAGE_BASE_64_List = {
@@ -47,11 +48,12 @@ public class Markdown extends Group {
       "data:image/jpg;base64,",
       "data:image/jpeg;base64,"
   };
-  private final Node node;
-  private final MarkdownStyle style;
 
   private final Seq<DrawObj> drawObjs = new Seq<>();
   private final ObjectMap<Node, TextureRegion> imgCache = new ObjectMap<>();
+
+  private Node node;
+  private MarkdownStyle style;
   private Rect clipRect;
 
   float prefWidth, prefHeight;
@@ -73,6 +75,7 @@ public class Markdown extends Group {
         .build();
   }
 
+  @Deprecated
   public Markdown(String md, Font mono){
     this(md, MarkdownStyles.defaultMD(mono));
   }
@@ -90,6 +93,20 @@ public class Markdown extends Group {
     touchable = Touchable.childrenOnly;
 
     this.style = style;
+  }
+
+  public void setDocument(String string){
+    node = parser.parse(string);
+    invalidate();
+  }
+
+  public void setStyle(MarkdownStyle style){
+    this.style = style;
+    invalidate();
+  }
+
+  public MarkdownStyle getStyle(){
+    return style;
   }
 
   public void setClipRect(Rect rect){
@@ -493,7 +510,7 @@ public class Markdown extends Group {
             continue;
           }
 
-          tmp += glyph.xadvance*currScl*font.getData().scaleX;
+          tmp += glyph.xadvance*currScl*font.getScaleX();
           if (tmp > maxWidth){
             break;
           }
@@ -513,7 +530,7 @@ public class Markdown extends Group {
                   color, rendOff[0], -lineOff[0], currScl
               ):
               DrawStr.get(Markdown.this, str.substring(0, index), font, color, rendOff[0], -lineOff[0], currScl, background));
-          rendOff[0] += width + (background != null? background.getRightWidth(): 0);
+          rendOff[0] += width + (background != null? background.getRightWidth(): 0) + font.getSpaceXadvance()*font.getScaleX();
         }
         else if (res == null) res = new TextMirror("", font, color, rendOff[0], -lineOff[0], 0, tmpHeight[0]);
         else res.sub = new TextMirror("", font, color, rendOff[0], -lineOff[0], 0, tmpHeight[0]);
