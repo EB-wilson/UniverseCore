@@ -11,6 +11,8 @@
     dependencies {
       ...
       compileOnly "com.github.EB-wilson.UniverseCore:core:$uncVersion"//涵盖了大部分mod制作相关的工具
+      compileOnly "com.github.EB-wilson.UniverseCore:markdown:$uncVersion"//markdown工具支持
+      compileOnly "com.github.EB-wilson.UniverseCore:dynamilizer:$uncVersion"//动态化仓库，实现自JavaDynamilizer
       compileOnly "com.github.EB-wilson.UniverseCore:annotations:$uncVersion"//包括组件化接口在内的注解处理器
       
       annotationProcessor "com.github.EB-wilson.UniverseCore:annotations:$uncVersion"//使用注解处理器
@@ -31,5 +33,19 @@
     }
 
 这么做之后，当你的mod启动时会检查该前置是否正确安装，如果前置缺失，游戏会弹出提示，指导玩家安装该前置。关于导入语句当中的`requireVersion`，这表示的是你的mod当前版本要求的最低UniverseCore版本号
+
+----
+
+#### 无依赖模块
+
+部分模块无耦合，可直接使用`implementation`使用模块的功能并不需要添加mod依赖，所有无耦合的工具模块利用如下：
+
+    dependencies {
+      ...
+      implementation "com.github.EB-wilson.UniverseCore:markdown:$uncVersion"//markdown工具支持
+      ...
+    }
+
+此类模块使用将会把使用的模块打包到你的mod当中，不需要添加mod依赖，但是仅上给出的模块可以如此操作，其余核心模块大多具有平台相关的实现，模块结构不允许进行置入（未来可能会进行解构取消所有模块的平台依赖）
 
 （待施工）
