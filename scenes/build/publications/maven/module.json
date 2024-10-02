@@ -3,7 +3,7 @@
   "component": {
     "group": "com.github.EB-wilson.UniverseCore",
     "module": "scenes",
-    "version": "2.1.1",
+    "version": "2.2.0",
     "attributes": {
       "org.gradle.status": "release"
     }
@@ -25,13 +25,13 @@
       },
       "files": [
         {
-          "name": "scenes-2.1.1.jar",
-          "url": "scenes-2.1.1.jar",
-          "size": 114651,
-          "sha512": "b77b858baa0be859fe46bb3f29b95f4aef6c4427d6a1bf72e00c49cf16c8baa084cd941902ab461f9dc7b39734b9d6f1a731f8ff8fd6dd3dcf8348baf9bc7129",
-          "sha256": "6265835eb952f4fd5366fabd29413d9a5e9ba2e53aa226aa4c8cc7be815a8e6a",
-          "sha1": "f18a7ba0e2c4cc6d425c3bdf26bd3d13c3f5be08",
-          "md5": "4eac311a754e7acbc25e9b4e2a862c2c"
+          "name": "scenes-2.2.0.jar",
+          "url": "scenes-2.2.0.jar",
+          "size": 124412,
+          "sha512": "f6525bfcf465e8188871c98c637887108711f6591db1ecdc7d12aa0dd510ef6747c88f5d4f8da52982166b529dc1d4973075da3562e53f360c9d753003519d1e",
+          "sha256": "0b5367821cc72d6fe2fef5d5390be121e2214175b510b01ad162a2561e19f813",
+          "sha1": "bd2bece6eaf6e99d54414a04cbf9c0a52f9ec0b7",
+          "md5": "2de226c774fb7553286c69d674890e7a"
         }
       ]
     },
@@ -46,13 +46,13 @@
       },
       "files": [
         {
-          "name": "scenes-2.1.1.jar",
-          "url": "scenes-2.1.1.jar",
-          "size": 114651,
-          "sha512": "b77b858baa0be859fe46bb3f29b95f4aef6c4427d6a1bf72e00c49cf16c8baa084cd941902ab461f9dc7b39734b9d6f1a731f8ff8fd6dd3dcf8348baf9bc7129",
-          "sha256": "6265835eb952f4fd5366fabd29413d9a5e9ba2e53aa226aa4c8cc7be815a8e6a",
-          "sha1": "f18a7ba0e2c4cc6d425c3bdf26bd3d13c3f5be08",
-          "md5": "4eac311a754e7acbc25e9b4e2a862c2c"
+          "name": "scenes-2.2.0.jar",
+          "url": "scenes-2.2.0.jar",
+          "size": 124412,
+          "sha512": "f6525bfcf465e8188871c98c637887108711f6591db1ecdc7d12aa0dd510ef6747c88f5d4f8da52982166b529dc1d4973075da3562e53f360c9d753003519d1e",
+          "sha256": "0b5367821cc72d6fe2fef5d5390be121e2214175b510b01ad162a2561e19f813",
+          "sha1": "bd2bece6eaf6e99d54414a04cbf9c0a52f9ec0b7",
+          "md5": "2de226c774fb7553286c69d674890e7a"
         }
       ]
     }

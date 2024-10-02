@@ -3,7 +3,7 @@ package universecore.ui.elements.markdown.elemdraw;
 import arc.graphics.Color;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Font;
-import arc.graphics.g2d.GlyphLayout;
+import arc.graphics.g2d.FontCache;
 import arc.scene.style.Drawable;
 import arc.util.Align;
 import arc.util.pooling.Pools;
@@ -15,6 +15,8 @@ public class DrawStr extends Markdown.DrawObj {
   float scl;
   Color color;
   Drawable drawable;
+
+  private FontCache cache;
 
   //use get
   DrawStr(){}
@@ -30,6 +32,18 @@ public class DrawStr extends Markdown.DrawObj {
     res.color = color;
     res.drawable = background;
 
+    Font.FontData data = font.getData();
+    float lastScl = data.scaleX;
+    data.setScale(scl);
+    res.cache = font.newFontCache();
+    res.cache.setText(str,
+        0, 0,
+        0,
+        Align.topLeft,
+        false
+    );
+    data.setScale(lastScl);
+
     return res;
   }
 
@@ -37,20 +51,26 @@ public class DrawStr extends Markdown.DrawObj {
   protected void draw() {
     //调试用文本锚点
     //Fill.square(parent.x + offsetX, parent.y + parent.getHeight() + offsetY, 4, 45);
+    cache.tint(tmp1.set(color).mul(Draw.getColor()));
+    cache.setPosition(
+        parent.x + offsetX,
+        parent.y + parent.getHeight() + offsetY
+    );
+
     if (drawable != null) {
       tmp2.set(Draw.getColor());
-      GlyphLayout layout = GlyphLayout.obtain();
-      layout.setText(font, text, tmp1.set(color).mul(Draw.getColor()), 0, Align.topLeft, false);
 
-      drawable.draw(parent.x + offsetX - drawable.getLeftWidth(), parent.y + parent.getHeight() + offsetY - font.getLineHeight() - 2, layout.width + drawable.getLeftWidth() + drawable.getRightWidth(), font.getLineHeight() + 5);
-      layout.free();
+      drawable.draw(
+          parent.x + offsetX - drawable.getLeftWidth(),
+          parent.y + parent.getHeight() + offsetY - font.getLineHeight() - 2,
+          cache.getLayouts().first().width + drawable.getLeftWidth() + drawable.getRightWidth(),
+          font.getLineHeight() + 5
+      );
 
       Draw.color(tmp2);
-      font.draw(text, parent.x + offsetX, parent.y + parent.getHeight() + offsetY, tmp1.set(color).mul(Draw.getColor()), scl, true, Align.topLeft);
     }
-    else {
-      font.draw(text, parent.x + offsetX, parent.y + parent.getHeight() + offsetY, tmp1.set(color).mul(Draw.getColor()), scl, true, Align.topLeft);
-    }
+
+    cache.draw();
   }
 
   @Override
