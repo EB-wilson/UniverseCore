@@ -1,4 +1,4 @@
-package universecore.ui.elements.markdown;
+package universecore.ui.elements.markdown.elemdraw;
 
 import arc.graphics.Color;
 import arc.graphics.g2d.Font;
@@ -6,6 +6,7 @@ import arc.scene.Element;
 import arc.scene.ui.Label;
 import arc.scene.ui.ScrollPane;
 import arc.util.pooling.Pools;
+import universecore.ui.elements.markdown.Markdown;
 
 public class DrawPane extends Markdown.DrawObj implements Markdown.ActivityDrawer {
   ScrollPane pane;
@@ -15,7 +16,7 @@ public class DrawPane extends Markdown.DrawObj implements Markdown.ActivityDrawe
   //use get
   DrawPane(){}
 
-  static DrawPane get(Markdown owner, String str, Font textFont, Color color, float ox, float oy, float maxHeight, ScrollPane.ScrollPaneStyle paneStyle) {
+  public static DrawPane get(Markdown owner, String str, Font textFont, Color color, float ox, float oy, float maxHeight, ScrollPane.ScrollPaneStyle paneStyle) {
     DrawPane res = Pools.obtain(DrawPane.class, DrawPane::new);
     res.parent = owner;
     res.offsetX = ox;
@@ -33,7 +34,7 @@ public class DrawPane extends Markdown.DrawObj implements Markdown.ActivityDrawe
   }
 
   @Override
-  void draw() {
+  protected void draw() {
   }
 
   @Override

@@ -6,6 +6,7 @@ import org.commonmark.ext.ins.Ins;
 import org.commonmark.node.AbstractVisitor;
 import org.commonmark.node.CustomBlock;
 import org.commonmark.node.CustomNode;
+import universecore.ui.elements.markdown.extensions.Curtain;
 
 public abstract class AbsExtensionVisitor extends AbstractVisitor {
   @Override

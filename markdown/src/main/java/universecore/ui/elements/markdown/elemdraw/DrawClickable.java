@@ -1,4 +1,4 @@
-package universecore.ui.elements.markdown;
+package universecore.ui.elements.markdown.elemdraw;
 
 import arc.graphics.Color;
 import arc.graphics.g2d.Font;
@@ -7,6 +7,7 @@ import arc.scene.ui.TextButton;
 import arc.scene.ui.Tooltip;
 import arc.util.pooling.Pools;
 import mindustry.ui.Styles;
+import universecore.ui.elements.markdown.Markdown;
 
 public class DrawClickable extends DrawStr implements Markdown.ActivityDrawer {
   TextButton openUrl;
@@ -16,7 +17,7 @@ public class DrawClickable extends DrawStr implements Markdown.ActivityDrawer {
     super();
   }
 
-  static DrawClickable get(Markdown owner, String str, Font strFont, Runnable clicked, Tooltip tooltip, Color color, float ox, float oy, float scl) {
+  public static DrawClickable get(Markdown owner, String str, Font strFont, Runnable clicked, Tooltip tooltip, Color color, float ox, float oy, float scl) {
     DrawClickable res = Pools.obtain(DrawClickable.class, DrawClickable::new);
     res.parent = owner;
     res.text = str;
@@ -39,7 +40,7 @@ public class DrawClickable extends DrawStr implements Markdown.ActivityDrawer {
   }
 
   @Override
-  void draw() {
+  protected void draw() {
   }
 
   @Override

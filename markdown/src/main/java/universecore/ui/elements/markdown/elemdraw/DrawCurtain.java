@@ -1,10 +1,11 @@
-package universecore.ui.elements.markdown;
+package universecore.ui.elements.markdown.elemdraw;
 
 import arc.scene.Element;
 import arc.scene.actions.Actions;
 import arc.scene.style.Drawable;
 import arc.scene.ui.Image;
 import arc.util.pooling.Pools;
+import universecore.ui.elements.markdown.Markdown;
 
 public class DrawCurtain extends Markdown.DrawObj implements Markdown.ActivityDrawer {
   float width, height;
@@ -15,7 +16,7 @@ public class DrawCurtain extends Markdown.DrawObj implements Markdown.ActivityDr
   //use get
   DrawCurtain(){}
 
-  static DrawCurtain get(Markdown owner, Drawable drawable, float offX, float offY, float width, float height) {
+  public static DrawCurtain get(Markdown owner, Drawable drawable, float offX, float offY, float width, float height) {
     DrawCurtain res = Pools.obtain(DrawCurtain.class, DrawCurtain::new);
     res.parent = owner;
     res.drawable = drawable;
@@ -56,7 +57,7 @@ public class DrawCurtain extends Markdown.DrawObj implements Markdown.ActivityDr
   }
 
   @Override
-  void draw() {}
+  protected void draw() {}
 
   @Override
   public Element getElem() {

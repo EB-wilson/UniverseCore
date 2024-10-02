@@ -1,10 +1,11 @@
-package universecore.ui.elements.markdown;
+package universecore.ui.elements.markdown.elemdraw;
 
 import arc.scene.Element;
 import arc.scene.ui.ScrollPane;
 import arc.scene.ui.layout.Table;
 import arc.util.pooling.Pools;
 import mindustry.ui.Styles;
+import universecore.ui.elements.markdown.Markdown;
 
 public class DrawTable extends Markdown.DrawObj implements Markdown.ActivityDrawer {
   Table table;
@@ -13,7 +14,7 @@ public class DrawTable extends Markdown.DrawObj implements Markdown.ActivityDraw
   //use get
   DrawTable(){}
 
-  static DrawTable get(Markdown owner, Table table, float ox, float oy) {
+  public static DrawTable get(Markdown owner, Table table, float ox, float oy) {
     DrawTable res = Pools.obtain(DrawTable.class, DrawTable::new);
     res.parent = owner;
     res.table = table;
@@ -25,7 +26,7 @@ public class DrawTable extends Markdown.DrawObj implements Markdown.ActivityDraw
   }
 
   @Override
-  void draw() {
+  protected void draw() {
   }
 
   @Override

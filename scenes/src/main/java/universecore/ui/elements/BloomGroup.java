@@ -39,9 +39,11 @@ public class BloomGroup extends Group {
 
       bloom.capture();
     }
+
     if (clip) clipBegin();
     super.drawChildren();
     if (clip) clipEnd();
+
     if (bloomEnabled) bloom.render();
   }
 }

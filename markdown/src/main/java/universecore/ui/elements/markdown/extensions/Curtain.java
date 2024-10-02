@@ -1,4 +1,4 @@
-package universecore.ui.elements.markdown;
+package universecore.ui.elements.markdown.extensions;
 
 import org.commonmark.node.CustomNode;
 

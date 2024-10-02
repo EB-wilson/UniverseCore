@@ -8,7 +8,7 @@ plugins {
 }
 
 ext{
-  uncVersion = '2.1.1'
+  uncVersion = '2.2.0'
 
   //the build number that this mod is made for
   mindustryVersion = 'v146'

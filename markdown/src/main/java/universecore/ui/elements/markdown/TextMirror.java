@@ -4,13 +4,13 @@ import arc.graphics.Color;
 import arc.graphics.g2d.Font;
 
 public class TextMirror {
-  final String text;
-  final Font font;
-  final Color fontColor;
-  final float offx, offy;
-  final float width, height;
+  public final String text;
+  public final Font font;
+  public final Color fontColor;
+  public final float offx, offy;
+  public final float width, height;
 
-  TextMirror sub;
+  public TextMirror sub;
 
   TextMirror(String text, Font font, Color fontColor, float offx, float offy, float width, float height) {
     this.text = text;

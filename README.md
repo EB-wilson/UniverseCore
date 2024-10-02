@@ -12,6 +12,7 @@
       ...
       compileOnly "com.github.EB-wilson.UniverseCore:core:$uncVersion"//涵盖了大部分mod制作相关的工具
       compileOnly "com.github.EB-wilson.UniverseCore:markdown:$uncVersion"//markdown工具支持
+      compileOnly "com.github.EB-wilson.UniverseCore:scenes:$uncVersion"//ui相关工具类型
       compileOnly "com.github.EB-wilson.UniverseCore:dynamilizer:$uncVersion"//动态化仓库，实现自JavaDynamilizer
       compileOnly "com.github.EB-wilson.UniverseCore:annotations:$uncVersion"//包括组件化接口在内的注解处理器
       
@@ -43,6 +44,7 @@
     dependencies {
       ...
       implementation "com.github.EB-wilson.UniverseCore:markdown:$uncVersion"//markdown工具支持
+      implementation "com.github.EB-wilson.UniverseCore:scenes:$uncVersion"//ui相关工具类型
       ...
     }
 

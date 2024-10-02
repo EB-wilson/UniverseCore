@@ -1,4 +1,4 @@
-package universecore.ui.elements.markdown;
+package universecore.ui.elements.markdown.elemdraw;
 
 import arc.graphics.Color;
 import arc.graphics.g2d.Draw;
@@ -7,6 +7,7 @@ import arc.graphics.g2d.GlyphLayout;
 import arc.scene.style.Drawable;
 import arc.util.Align;
 import arc.util.pooling.Pools;
+import universecore.ui.elements.markdown.Markdown;
 
 public class DrawStr extends Markdown.DrawObj {
   String text;
@@ -18,7 +19,7 @@ public class DrawStr extends Markdown.DrawObj {
   //use get
   DrawStr(){}
 
-  static DrawStr get(Markdown owner, String str, Font font, Color color, float ox, float oy, float scl, Drawable background) {
+  public static DrawStr get(Markdown owner, String str, Font font, Color color, float ox, float oy, float scl, Drawable background) {
     DrawStr res = Pools.obtain(DrawStr.class, DrawStr::new);
     res.parent = owner;
     res.text = str;
@@ -33,7 +34,7 @@ public class DrawStr extends Markdown.DrawObj {
   }
 
   @Override
-  void draw() {
+  protected void draw() {
     //调试用文本锚点
     //Fill.square(parent.x + offsetX, parent.y + parent.getHeight() + offsetY, 4, 45);
     if (drawable != null) {

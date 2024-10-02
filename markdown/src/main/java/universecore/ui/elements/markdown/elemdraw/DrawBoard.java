@@ -1,7 +1,8 @@
-package universecore.ui.elements.markdown;
+package universecore.ui.elements.markdown.elemdraw;
 
 import arc.scene.style.Drawable;
 import arc.util.pooling.Pools;
+import universecore.ui.elements.markdown.Markdown;
 
 public class DrawBoard extends Markdown.DrawObj {
   float height;
@@ -11,7 +12,7 @@ public class DrawBoard extends Markdown.DrawObj {
   //use get
   DrawBoard(){}
 
-  static DrawBoard get(Markdown owner, Drawable drawable, int layer, float height, float offX, float offY) {
+  public static DrawBoard get(Markdown owner, Drawable drawable, int layer, float height, float offX, float offY) {
     DrawBoard res = Pools.obtain(DrawBoard.class, DrawBoard::new);
     res.parent = owner;
     res.drawable = drawable;
@@ -38,7 +39,7 @@ public class DrawBoard extends Markdown.DrawObj {
   }
 
   @Override
-  void draw() {
+  protected void draw() {
     drawable.draw(parent.x + offsetX, parent.y + parent.getHeight() + offsetY - height, parent.getWidth() - offsetX, height);
   }
 }
