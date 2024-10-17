@@ -17,7 +17,7 @@ import org.commonmark.node.Image;
 import org.commonmark.node.Node;
 import universecore.ui.elements.markdown.elemdraw.DrawBoard;
 import universecore.ui.elements.markdown.elemdraw.DrawClickable;
-import universecore.ui.elements.markdown.elemdraw.DrawPane;
+import universecore.ui.elements.markdown.elemdraw.DrawCode;
 import universecore.ui.elements.markdown.elemdraw.DrawStr;
 
 public abstract class DrawRendererContext {
@@ -142,7 +142,7 @@ public abstract class DrawRendererContext {
     return res;
   }
 
-  public void makeCodeBox(String code) {
+  public void makeCodeBox(String lang, String code) {
     Markdown.MarkdownStyle style = element.getStyle();
 
     padding += 4;
@@ -150,7 +150,7 @@ public abstract class DrawRendererContext {
     row();
     float begin = lineOff;
     lineOff += style.linesPadding*2;
-    DrawPane pane = DrawPane.get(element, code, style.codeFont, style.subTextColor, rendOff, -lineOff, style.maxCodeBoxHeight, style.codeBlockStyle);
+    DrawCode pane = DrawCode.get(element, lang, code, style.codeFont, rendOff, -lineOff, style.codeBlockStyle);
     updateTmpHeight(pane.height() + style.linesPadding);
     draw(pane);
     padding -= 4;
@@ -162,7 +162,8 @@ public abstract class DrawRendererContext {
           Core.app.setClipboardText(code);
           Vars.ui.showInfoFade(Core.bundle.get("infos.copyToClip"));
         },
-        null, style.subTextColor, pane.width() - 64, -begin - style.linesPadding*2 - 8, 1);
+        null, style.subTextColor, pane.width() - 64, -begin - style.linesPadding*2 - 8, 1
+    );
     draw(c);
     Element e = c.getElem();
     e.color.a = 0.4f;

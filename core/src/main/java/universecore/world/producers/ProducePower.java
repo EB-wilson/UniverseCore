@@ -1,19 +1,12 @@
 package universecore.world.producers;
 
 import arc.Core;
-import arc.func.Boolp;
 import arc.func.Floatp;
-import arc.math.Mathf;
-import arc.scene.ui.Image;
 import arc.scene.ui.layout.Table;
-import arc.util.Scaling;
 import arc.util.Strings;
-import mindustry.core.UI;
 import mindustry.gen.Building;
-import mindustry.gen.Icon;
 import mindustry.graphics.Pal;
 import mindustry.ui.Bar;
-import mindustry.ui.Styles;
 import mindustry.world.meta.Stat;
 import mindustry.world.meta.StatUnit;
 import mindustry.world.meta.Stats;

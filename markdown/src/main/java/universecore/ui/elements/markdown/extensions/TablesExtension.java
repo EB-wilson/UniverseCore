@@ -101,13 +101,13 @@ public class TablesExtension implements Parser.ParserExtension, MDLayoutRenderer
       Markdown.MarkdownStyle style = context.element.getStyle();
       currentTable.table(currentTable.getRows()%2 == 0? style.tableBack1: style.tableBack2, t -> {
         t.image().color(style.lineColor).width(1.5f).growY();
-        t.table(ce -> {
-          ce.add(new Markdown(context.element, node.getFirstChild()));
-        }).grow().pad(style.linesPadding*2).get().align(switch (node.getAlignment()) {
-          case LEFT -> Align.left;
-          case RIGHT -> Align.right;
-          default -> Align.center;
-        });
+        t.table(ce -> ce.add(new Markdown(context.element, node.getFirstChild())))
+            .grow().pad(style.linesPadding*2).get()
+            .align(switch (node.getAlignment()) {
+                case LEFT -> Align.left;
+                case RIGHT -> Align.right;
+                default -> Align.center;
+            });
         t.image().color(style.lineColor).width(1.5f).growY();
       }).grow();
     }

@@ -37,6 +37,11 @@ dependencies {
     compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
     compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
 
+    testRuntimeOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+    testRuntimeOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+
+    compileOnly("org.jetbrains:annotations:24.0.0")
+
     annotationProcessor project(":annotations")
 }
 

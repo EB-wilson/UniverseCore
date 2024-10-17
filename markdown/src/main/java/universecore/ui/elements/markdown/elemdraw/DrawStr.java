@@ -4,6 +4,7 @@ import arc.graphics.Color;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Font;
 import arc.graphics.g2d.FontCache;
+import arc.graphics.g2d.GlyphLayout;
 import arc.scene.style.Drawable;
 import arc.util.Align;
 import arc.util.pooling.Pools;
@@ -17,6 +18,7 @@ public class DrawStr extends Markdown.DrawObj {
   Drawable drawable;
 
   private FontCache cache;
+  private GlyphLayout layout;
 
   //use get
   DrawStr(){}
@@ -36,7 +38,7 @@ public class DrawStr extends Markdown.DrawObj {
     float lastScl = data.scaleX;
     data.setScale(scl);
     res.cache = font.newFontCache();
-    res.cache.setText(str,
+    res.layout = res.cache.setText(str,
         0, 0,
         0,
         Align.topLeft,
@@ -63,7 +65,7 @@ public class DrawStr extends Markdown.DrawObj {
       drawable.draw(
           parent.x + offsetX - drawable.getLeftWidth(),
           parent.y + parent.getHeight() + offsetY - font.getLineHeight() - 2,
-          cache.getLayouts().first().width + drawable.getLeftWidth() + drawable.getRightWidth(),
+          layout.width + drawable.getLeftWidth() + drawable.getRightWidth(),
           font.getLineHeight() + 5
       );
 

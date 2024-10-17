@@ -40,9 +40,12 @@ public class BloomGroup extends Group {
       bloom.capture();
     }
 
-    if (clip) clipBegin();
-    super.drawChildren();
-    if (clip) clipEnd();
+    if (clip){
+      boolean applied = clipBegin();
+      super.drawChildren();
+      if (applied) clipEnd();
+    }
+    else super.drawChildren();
 
     if (bloomEnabled) bloom.render();
   }

@@ -18,6 +18,7 @@ import universecore.ui.elements.markdown.extensions.CurtainExtension;
 import universecore.ui.elements.markdown.extensions.InsExtension;
 import universecore.ui.elements.markdown.extensions.StrikethroughExtension;
 import universecore.ui.elements.markdown.extensions.TablesExtension;
+import universecore.ui.elements.markdown.highlighter.Highlighter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -188,10 +189,12 @@ public class Markdown extends Group {
   public static class MarkdownStyle {
     public Font font, codeFont, emFont, strongFont, subFont;
     public Color textColor, emColor, subTextColor, lineColor, linkColor;
-    public float linesPadding, maxCodeBoxHeight, tablePadHor, tablePadVert, paragraphPadding;
+    public float linesPadding, tablePadHor, tablePadVert, paragraphPadding;
     public Drawable board, codeBack, codeBlockBack, tableBack1, tableBack2, curtain;
     public ScrollPane.ScrollPaneStyle codeBlockStyle;
     public Drawable[] listMarks;
+    public Highlighter highlighter;
+    public ColorProvider codeColorProvider;
   }
 
   public abstract static class DrawObj implements Pool.Poolable {

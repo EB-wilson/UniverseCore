@@ -185,7 +185,7 @@ public class BaseDrawRenderer extends AbstractVisitor implements NodeRenderer {
   @Override
   public void visit(FencedCodeBlock fencedCodeBlock) {
     context.lastText = null;
-    context.makeCodeBox(fencedCodeBlock.getLiteral());
+    context.makeCodeBox(fencedCodeBlock.getInfo(), fencedCodeBlock.getLiteral());
   }
 
   @Override
@@ -256,7 +256,7 @@ public class BaseDrawRenderer extends AbstractVisitor implements NodeRenderer {
   @Override
   public void visit(IndentedCodeBlock indentedCodeBlock) {
     context.lastText = null;
-    context.makeCodeBox(indentedCodeBlock.getLiteral());
+    context.makeCodeBox(null, indentedCodeBlock.getLiteral());
   }
 
   @Override

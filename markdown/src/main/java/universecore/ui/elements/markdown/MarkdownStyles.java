@@ -17,12 +17,15 @@ import mindustry.Vars;
 import mindustry.graphics.Pal;
 import mindustry.ui.Fonts;
 import mindustry.ui.Styles;
+import universecore.ui.elements.markdown.highlighter.Highlighter;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 import static mindustry.gen.Tex.paneLeft;
 import static mindustry.gen.Tex.whiteui;
+import static universecore.ui.elements.markdown.highlighter.Scope.Default.*;
+import static universecore.ui.elements.markdown.highlighter.StandardLanguages.JAVA;
 
 public class MarkdownStyles {
   /**默认Markdown文档风格记录对象，等宽字体来自JetBrains IDEs的Mono字体，十分感谢*/
@@ -79,7 +82,6 @@ public class MarkdownStyles {
       linkColor = Pal.place;
 
       linesPadding = 5;
-      maxCodeBoxHeight = 400;
       tablePadHor = 14;
       tablePadVert = 10;
       paragraphPadding = 14;
@@ -117,6 +119,23 @@ public class MarkdownStyles {
             }
           }
       };
+
+      highlighter = new Highlighter().addLanguage(JAVA);
+      codeColorProvider = new ColorProvider();
+      codeColorProvider.defaultColor = Color.lightGray;
+      codeColorProvider.createMap("java")
+          .put(Color.valueOf("#ffffff00"),    SPACE)
+          .put(Color.valueOf("#7f7f7fff"),    COMMENT)
+          .put(Color.valueOf("#CC7832ff"),    KEYWORD, CONTROL, SEPARATOR)
+          .put(Color.valueOf("#6897bbff"),    NUMBER)
+          .put(Color.valueOf("#be7032ff"),    TYPE)
+          .put(Color.valueOf("#507874ff"),    TYPE_ARG)
+          .put(Color.valueOf("#6a8759ff"),    STRING)
+          .put(Color.valueOf("#bbb529ff"),    ANNOTATION)
+          .put(Color.valueOf("#629755ff"),    DOCS, DOC_MARK)
+          .put(Color.valueOf("#ffc66dff"),    FUNCTION)
+          .put(Color.valueOf("#3c7893ff"),    CONSTRUCTOR)
+          .put(Color.valueOf("#bfbfbfff"),    NONE, FUNCTION_INVOKE, ARGUMENT, VARIABLE, OPERATOR);
     }};
   }
 }
