@@ -9,8 +9,8 @@ public class SelectionCapture extends Capture {
   private final int maxMatch;
   private final List<Capture> captures;
 
-  private List<Capture> hits = new ArrayList<>();
-  private List<Integer> hitLens = new ArrayList<>();
+  private final List<Capture> hits = new ArrayList<>();
+  private final List<Integer> hitLens = new ArrayList<>();
 
   public SelectionCapture(Capture... captures) {
     this(1, captures);
@@ -32,8 +32,9 @@ public class SelectionCapture extends Capture {
     hits.clear();
 
     int off = 0;
+    int max = context.getTokensCountInContext();
     for (int i = 0; i < maxMatch; i++) {
-      if (token.index + off >= context.getTokenCount()) {
+      if (token.getIndexInContext(context) + off >= max) {
         if (i < minMatch) throw TokenMatcher.MatchFailed.INSTANCE;
         else break;
       }
@@ -41,7 +42,7 @@ public class SelectionCapture extends Capture {
       Capture hit = null;
       for (Capture capture : captures) {
         Capture capt = capture.create();
-        Token curr = context.getToken(token.index + off);
+        Token curr = context.getTokenInContext(token.getIndexInContext(context) + off);
 
         try {
           int len = capt.match(context, curr);
@@ -69,7 +70,7 @@ public class SelectionCapture extends Capture {
     int off = 0;
     new Object();
     for (int i = 0; i < hits.size(); i++) {
-      Token curr = context.getToken(token.index + off);
+      Token curr = context.getTokenInContext(token.getIndexInContext(context) + off);
       hits.get(i).applyScope(context, curr, hitLens.get(i));
       off += hitLens.get(i);
     }

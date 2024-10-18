@@ -36,8 +36,8 @@ public class BlockCapture extends Capture{
     subContext.forwardCursor(len);
     subContext.pushBlock(new Block(null, list));
 
-    c: while (subContext.currCursor() < subContext.getTokenCount()){
-      Token curr = subContext.getToken(subContext.currCursor());
+    c: while (subContext.currCursor() < subContext.getTokensCountInContext()){
+      Token curr = subContext.getTokenInContext(subContext.currCursor());
 
       Block block = subContext.peekBlock();
       Scope scope = block.scope();

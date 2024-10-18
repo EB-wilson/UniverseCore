@@ -23,10 +23,10 @@ public class LinesCapture extends Capture{
 
   @Override
   public int match(MatcherContext context, Token token) throws TokenMatcher.MatchFailed {
-    if (token.rawIndex >= context.getTokenCountRaw() - 1)
+    if (token.rawIndex >= context.getTokensRaw().size() - 1)
       return 1;
 
-    if (!lineSep.matcher(context.getTokenRaw(token.rawIndex + 1).text).find())
+    if (!lineSep.matcher(context.getTokensRaw().get(token.rawIndex + (context.inRawContext? 0: 1)).text).find())
       throw TokenMatcher.MatchFailed.INSTANCE;
 
     return 1;

@@ -1,27 +1,69 @@
 package universecore.ui.elements.markdown.highlighter;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public interface TokensContext {
-  List<Token> getTokens();
-  List<Token> getTokensRaw();
+public abstract class TokensContext {
+  protected final List<Token> tokens = new ArrayList<>();
+  protected final List<Token> rawTokens = new ArrayList<>();
 
-  Token getToken(int index);
-  Token getTokenRaw(int index);
+  public boolean inRawContext;
 
-  void putToken(Token tokens);
-  void putTokenRaw(Token tokens);
+  private int cursor;
 
-  int getTokenCount();
-  int getTokenCountRaw();
+  public Token getTokenInContext(int index){
+    return inRawContext ? getTokenRaw(index) : getToken(index);
+  }
+  public int getTokensCountInContext(){
+    return inRawContext ? getTokenCountRaw() : getTokenCount();
+  }
 
-  default void applyScopes(ScopeHandler handler){
+  public List<Token> getTokens(){
+    return Collections.unmodifiableList(tokens);
+  }
+  public List<Token> getTokensRaw(){
+    return Collections.unmodifiableList(rawTokens);
+  }
+  public void putToken(Token tokens){
+    tokens.index = this.tokens.size();
+    tokens.rawIndex = this.rawTokens.size();
+
+    this.tokens.add(tokens);
+    this.rawTokens.add(tokens);
+  }
+  public void putTokenRaw(Token tokens){
+    tokens.rawIndex = rawTokens.size();
+    rawTokens.add(tokens);
+  }
+
+  protected Token getToken(int index){
+    return tokens.get(index);
+  }
+  protected int getTokenCount(){
+    return tokens.size();
+  }
+
+  protected Token getTokenRaw(int index){
+    return rawTokens.get(index);
+  }
+  protected int getTokenCountRaw(){
+    return rawTokens.size();
+  }
+
+  public void applyScopes(ScopeHandler handler){
     for (Token token : getTokensRaw()) {
       if (token.scope != null) token.scope.apply(token, handler);
     }
   }
 
-  int currCursor();
-  void resetCursor();
-  void forwardCursor(int step);
+  public int currCursor(){
+    return cursor;
+  }
+  public void resetCursor(){
+    cursor = 0;
+  }
+  public void forwardCursor(int step){
+    cursor += step;
+  }
 }

@@ -1,7 +1,6 @@
 package universecore.ui.elements.markdown.highlighter;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Highlighter {
@@ -22,16 +21,19 @@ public class Highlighter {
     TokensContext context = highlight.initContext();
     highlight.splitTokens(context, text);
 
-    List<Token> tokens = context.getTokens();
+    for (int inRaw = 0; inRaw < 2; inRaw++) {
+      context.inRawContext = inRaw != 0;
 
-    context.resetCursor();
-    while(context.currCursor() < tokens.size()){
-      Token token = tokens.get(context.currCursor());
+      context.resetCursor();
+      int max = context.getTokensCountInContext();
+      while (context.currCursor() < max) {
+        Token token = context.getTokenInContext(context.currCursor());
 
-      int step = highlight.flowScope(context, token);
+        int step = highlight.flowScope(context, token);
 
-      if (step <= 0) context.forwardCursor(1);
-      else context.forwardCursor(step);
+        if (step <= 0) context.forwardCursor(1);
+        else context.forwardCursor(step);
+      }
     }
 
     context.getTokensRaw().forEach(e -> {

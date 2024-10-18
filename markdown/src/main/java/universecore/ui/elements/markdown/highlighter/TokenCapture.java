@@ -40,9 +40,9 @@ public class TokenCapture extends Capture {
   public int match(MatcherContext context, Token token) throws MatchFailed {
     int off = 0;
 
-    int max = Math.min(maxMatch, context.getTokenCount());
+    int max = Math.min(maxMatch, context.getTokensCountInContext());
     while (off < max) {
-      Token curr = context.getToken(token.index + off);
+      Token curr = context.getTokenInContext(token.getIndexInContext(context) + off);
       if (!tokens.contains(curr.text)) {
         if (off < minMatch) throw MatchFailed.INSTANCE;
         else break;
@@ -59,7 +59,7 @@ public class TokenCapture extends Capture {
     if (scope == null) return;
 
     for (int i = 0; i < matchedLen; i++) {
-      context.getToken(token.index + i).scope = scope;
+      context.getTokenInContext(token.getIndexInContext(context) + i).scope = scope;
     }
   }
 

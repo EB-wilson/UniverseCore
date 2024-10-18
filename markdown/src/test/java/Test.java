@@ -247,8 +247,10 @@ public class Test {
             lastPrefHeight = prefHeight;
             invalidateHierarchy();
           }
-            
-          drawObjs.addAll(rendererContext.renderResult());
+            /*shduhduhsuds*/
+          drawObjs./*shduhduhsu
+          
+          ds*/addAll(rendererContext.renderResult());
           drawObjs.sort((a, b) -> a.priority() - b.priority());
             
           clearChildren();
@@ -275,7 +277,11 @@ public class Test {
             
         @Override
         public float getPrefHeight() {
-          if (prefInvalid) layout();
+          if (prefInvalid) ;
+          
+          if (obj instanceof ActivityDrawer act && cullingArea != null){
+            Draw.reset();
+          }
           return prefHeight;
         }
             
@@ -293,10 +299,10 @@ public class Test {
           super.draw();
         }
             
-        private static void checkExtensions(List<Extension> extensions) {
+        private static <T, F extends T> void checkExtensions(List<Extension<T>> extensions) throws Exception{
           for (Extension extension : extensions) {
             if (!(extension instanceof MDLayoutRenderer.DrawRendererExtension)
-                || !(extension instanceof Parser.ParserExtension))
+            || !(extension instanceof Parser.ParserExtension))
               throw new IllegalArgumentException("extension must be a DrawRendererExtension and a ParserExtension");
           }
         }
@@ -314,12 +320,17 @@ public class Test {
 
     System.out.println("Time: " + delta + "ms");
 
+    tokens.getTokens().forEach(token -> {
+      System.out.println(token.text + " " + token.scope);
+    });
+
     tokens.applyScopes((token, scope) -> {
       if (scope instanceof Scope.Default def){
         String color = switch (def) {
           case NONE, FUNCTION_INVOKE, VARIABLE, OPERATOR, SPACE, ARGUMENT, CODE_BLOCK -> "\033[0m";
           case KEYWORD, CONTROL, SEPARATOR -> "\u001b[38;2;204;120;50m";
           case NUMBER -> "\u001b[38;2;104;151;187m";
+          case MEMBER_VAR -> "\u001b[38;2;152;118;170m";
           case FUNCTION, CONSTRUCTOR -> "\u001b[38;2;255;198;109m";
           case TYPE -> "\u001b[38;2;190;112;50m";
           case TYPE_ARG -> "\u001b[38;2;80;120;116m";

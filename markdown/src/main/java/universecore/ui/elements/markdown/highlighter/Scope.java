@@ -20,6 +20,7 @@ public interface Scope {
     DOC_MARK,
     SEPARATOR,
     VARIABLE,
+    MEMBER_VAR,
     FUNCTION,
     CONSTRUCTOR,
     FUNCTION_INVOKE,

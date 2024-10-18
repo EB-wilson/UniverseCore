@@ -17,4 +17,8 @@ public class Token {
   public String toString() {
     return "{\"" + text + "\": " + scope + "}";
   }
+
+  public int getIndexInContext(TokensContext context){
+    return context.inRawContext? rawIndex : index;
+  }
 }

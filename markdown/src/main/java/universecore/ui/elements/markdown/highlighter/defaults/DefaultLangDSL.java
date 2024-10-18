@@ -1,5 +1,6 @@
 package universecore.ui.elements.markdown.highlighter.defaults;
 
+import arc.func.Prov;
 import org.intellij.lang.annotations.RegExp;
 import universecore.ui.elements.markdown.highlighter.*;
 
@@ -43,6 +44,13 @@ public abstract class DefaultLangDSL {
     return new MatcherReference(priority, map, patternNames);
   }
 
+  protected static Capture lazy(Prov<Capture> captureProv){
+    return new LazyCapture(captureProv);
+  }
+  protected static Capture lazy(Capture captureProv){
+    return new LazyCapture(captureProv::create);
+  }
+
   protected static Capture makeJoin(Capture capture, Capture join){
     return makeJoin(Integer.MAX_VALUE, capture, join);
   }
@@ -66,6 +74,16 @@ public abstract class DefaultLangDSL {
   }
   protected static CompoundCapture compound(int minMatch, int maxMatch, Capture... captures){
     return new CompoundCapture(minMatch, maxMatch, captures);
+  }
+
+  protected static SelectionCapture forks(Capture... captures){
+    return new SelectionCapture(captures);
+  }
+  protected static SelectionCapture forks(int matches, Capture... captures){
+    return new SelectionCapture(matches, captures);
+  }
+  protected static SelectionCapture forks(int minMatch, int maxMatch, Capture... captures){
+    return new SelectionCapture(minMatch, maxMatch, captures);
   }
 
   protected static LinesCapture line(){

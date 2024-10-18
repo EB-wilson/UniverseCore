@@ -54,11 +54,12 @@ public class SerialMatcher implements TokenMatcher {
     Arrays.fill(lens, 0);
 
     int off = 0;
+    int max = context.getTokensCountInContext();
     for (int i = 0, capturesSize = captures.size(); i < capturesSize; i++) {
-      if (token.index + off >= context.getTokenCount()) break;
+      if (token.getIndexInContext(context) + off >= max) break;
 
       Capture capture = captures.get(i);
-      Token curr = context.getToken(token.index + off);
+      Token curr = context.getTokenInContext(token.getIndexInContext(context) + off);
 
       try {
         int len = capture.match(context, curr);
@@ -79,11 +80,12 @@ public class SerialMatcher implements TokenMatcher {
     Arrays.fill(lens, 0);
 
     int off = 0;
+    int max = context.getTokensCountInContext();
     for (int i = 0, capturesSize = captures.size(); i < capturesSize; i++) {
-      if (token.index + off >= context.getTokenCount()) break;
+      if (token.getIndexInContext(context) + off >= max) break;
 
       Capture capture = captures.get(i);
-      Token curr = context.getToken(token.index + off);
+      Token curr = context.getTokenInContext(token.getIndexInContext(context) + off);
 
       if (endCapture != null) try{
         int len = endCapture.match(context, curr);
@@ -117,13 +119,13 @@ public class SerialMatcher implements TokenMatcher {
     for (int i = 0; i < captures.size(); i++) {
       if (altScope != null) {
         for (int l = 0; l < lens[i]; l++) {
-          context.getToken(token.index + off + l).scope = altScope;
+          context.getTokenInContext(token.getIndexInContext(context) + off + l).scope = altScope;
         }
       }
 
       if (captures.get(i).matchOnly || lens[i] <= 0) continue;
 
-      captures.get(i).applyScope(context, context.getToken(token.index + off), lens[i]);
+      captures.get(i).applyScope(context, context.getTokenInContext(token.getIndexInContext(context) + off), lens[i]);
 
       off += lens[i];
     }

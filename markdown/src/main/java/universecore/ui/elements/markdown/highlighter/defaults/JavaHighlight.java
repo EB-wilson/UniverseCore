@@ -1,7 +1,6 @@
 package universecore.ui.elements.markdown.highlighter.defaults;
 
 import universecore.ui.elements.markdown.highlighter.Capture;
-import universecore.ui.elements.markdown.highlighter.LazyCapture;
 import universecore.ui.elements.markdown.highlighter.PatternsHighlight;
 import universecore.ui.elements.markdown.highlighter.SelectionCapture;
 
@@ -20,7 +19,7 @@ public class JavaHighlight extends DefaultLangDSL{
         compound(
             token("("),
             makeJoin(
-                new LazyCapture(JavaHighlight::expressionCapture),
+                lazy(JavaHighlight::expressionCapture),
                 token(SEPARATOR, ",")
             ),
             token(")")
@@ -31,11 +30,12 @@ public class JavaHighlight extends DefaultLangDSL{
   static Capture typeCapture(){
     return makeJoin(
         compound(
+            annotationCapture().setOptional(true),
             regex(TYPE, "((?!class)\\w)+"),
             compound(
                 token("<"),
                 makeJoin(
-                    new LazyCapture(JavaHighlight::typeCapture).setOptional(true),
+                    lazy(JavaHighlight::typeCapture).setOptional(true),
                     token(SEPARATOR, ",")
                 ),
                 token(">")
@@ -56,7 +56,7 @@ public class JavaHighlight extends DefaultLangDSL{
             compound(
                 token("<"),
                 makeJoin(
-                    new LazyCapture(JavaHighlight::typeCapture).setOptional(true),
+                    lazy(JavaHighlight::typeCapture).setOptional(true),
                     token(SEPARATOR, ",")
                 ),
                 token(">")
@@ -81,22 +81,22 @@ public class JavaHighlight extends DefaultLangDSL{
     );
   }
 
-  static SelectionCapture statementBlockCapture() {
+  static Capture statementBlockCapture() {
     return new SelectionCapture(
         compound(
             token("{"),
-            new LazyCapture(JavaHighlight::statementsCapture),
+            lazy(JavaHighlight::statementsCapture),
             token("}")
         ),
-        new LazyCapture(JavaHighlight::statementCapture)
-    );
+        lazy(JavaHighlight::statementCapture)
+    ).setOptional(true);
   }
 
   static Capture arrayLiteralCapture(){
     return compound(
         token("{"),
         makeJoin(
-            new LazyCapture(JavaHighlight::expressionCapture),
+            lazy(JavaHighlight::expressionCapture),
             regex(SEPARATOR, ",")
         ),
         token("}")
@@ -145,14 +145,14 @@ public class JavaHighlight extends DefaultLangDSL{
             //OPERATE
             compound(
                 token("("),
-                new LazyCapture(JavaHighlight::expressionCapture),
+                lazy(JavaHighlight::expressionCapture),
                 token(")")
             ),
             //SWITCH EXPRESSION
             compound(
                 token(KEYWORD, "switch"),
                 token("("),
-                new LazyCapture(JavaHighlight::expressionCapture),
+                lazy(JavaHighlight::expressionCapture),
                 token(")"),
                 token("{"),
                 compound(0, Integer.MAX_VALUE,
@@ -165,7 +165,7 @@ public class JavaHighlight extends DefaultLangDSL{
                         token(SEPARATOR, ",")
                     ),
                     token("->"),
-                    new LazyCapture(JavaHighlight::statementBlockCapture),
+                    lazy(JavaHighlight::statementBlockCapture),
                     token(SEPARATOR, ";").setOptional(true)
                 ),
                 token("}")
@@ -188,11 +188,14 @@ public class JavaHighlight extends DefaultLangDSL{
             ),
             //INVOKE
             compound(
-                regex(FUNCTION_INVOKE, "\\w+"),
+                new SelectionCapture(
+                    regex(KEYWORD, "this|super"),
+                    regex(FUNCTION_INVOKE, "\\w+")
+                ),
                 compound(
                     token("("),
                     makeJoin(
-                        new LazyCapture(JavaHighlight::expressionCapture).setOptional(true),
+                        lazy(JavaHighlight::expressionCapture).setOptional(true),
                         token(SEPARATOR, ",")
                     ),
                     token(")")
@@ -204,13 +207,13 @@ public class JavaHighlight extends DefaultLangDSL{
                 typeCaptureNonArray(),
                 token("("),
                 makeJoin(
-                    new LazyCapture(JavaHighlight::expressionCapture).setOptional(true),
+                    lazy(JavaHighlight::expressionCapture).setOptional(true),
                     token(SEPARATOR, ",")
                 ),
                 token(")"),
                 compound(
                     token("{"),
-                    new LazyCapture(JavaHighlight::statementsCapture),
+                    lazy(JavaHighlight::statementsCapture),
                     token("}")
                 ).setOptional(true)
             ),
@@ -220,7 +223,7 @@ public class JavaHighlight extends DefaultLangDSL{
                 typeCaptureNonArray(),
                 compound(1, Integer.MAX_VALUE,
                     token("["),
-                    new LazyCapture(JavaHighlight::expressionCapture),
+                    lazy(JavaHighlight::expressionCapture),
                     token("]")
                 ),
                 compound(0, Integer.MAX_VALUE,
@@ -243,7 +246,7 @@ public class JavaHighlight extends DefaultLangDSL{
                 regex(VARIABLE, "\\w+"),
                 compound(1, Integer.MAX_VALUE,
                     token("["),
-                    new LazyCapture(JavaHighlight::expressionCapture),
+                    lazy(JavaHighlight::expressionCapture),
                     token("]")
                 )
             ),
@@ -265,12 +268,15 @@ public class JavaHighlight extends DefaultLangDSL{
             //SINGLE OPERATOR
             compound(
                 regex(OPERATOR, "[!+\\-~]"),
-                new LazyCapture(JavaHighlight::expressionCapture)
+                lazy(JavaHighlight::expressionCapture)
             ),
             constantLiteralCapture(),
+            //THIS_SUPER
+            regex(KEYWORD, "this|super"),
             //REF
             regex(VARIABLE, "\\w+")
         ),
+        //INSTANCEOF
         compound(
             token(KEYWORD, "instanceof"),
             typeCapture(),
@@ -285,28 +291,12 @@ public class JavaHighlight extends DefaultLangDSL{
             metaExpCapture(),
             regex(OPERATOR, "\\+\\+|--").setOptional(true)
         ),
-        regex(OPERATOR, "(!=|==|<=|>=|&&|\\+=|-=|\\*=|/=|%=|&=|\\|=|\\^=|<<=|>>=|>>>=)|[=.+\\-*/%&|<>^]")
+        regex(OPERATOR, "(->|!=|==|<=|>=|&&|\\|\\||\\+=|-=|\\*=|/=|%=|&=|\\|=|\\^=|<<=|>>=|>>>=)|[=.+\\-*/%&|<>^]")
     );
   }
 
   static Capture statementCapture(){
     return new SelectionCapture(
-        //LINE_COMMENT
-        compound(
-            token(2, COMMENT, "/"),
-            compound(0, Integer.MAX_VALUE, regex(COMMENT, ".+"))
-                .setEndCapture(line(COMMENT))
-        ),
-        //BLOCK_COMMENT
-        compound(
-            token(COMMENT, "/"),
-            token(COMMENT, "*"),
-            compound(0, Integer.MAX_VALUE, regex(COMMENT, ".+"))
-                .setEndCapture(compound(
-                    token(COMMENT, "*"),
-                    token(COMMENT, "/")
-                ).setMatchOnly(true))
-        ),
         //IF
         compound(
             token(KEYWORD, "if"),
@@ -397,7 +387,7 @@ public class JavaHighlight extends DefaultLangDSL{
             token(")"),
             statementBlockCapture()
         ),
-        //FOR-EACH
+        //FOR_EACH
         compound(
             compound(
                 regex("\\w+"),
@@ -411,6 +401,22 @@ public class JavaHighlight extends DefaultLangDSL{
             expressionCapture(),
             token(")"),
             statementBlockCapture()
+        ),
+        //TRY_CATCH
+        compound(
+            token(KEYWORD, "try"),
+            token("{"),
+            lazy(JavaHighlight::statementsCapture),
+            token("}"),
+            token("("),
+            makeJoin(
+                typeCaptureNonArray(),
+                token(SEPARATOR, "|")
+            ),
+            token(")"),
+            token("{"),
+            lazy(JavaHighlight::statementsCapture),
+            token("}")
         ),
         //LOCAL_VARIABLE
         compound(
@@ -439,6 +445,11 @@ public class JavaHighlight extends DefaultLangDSL{
             token(KEYWORD, "return", "yield"),
             expressionCapture().setOptional(true)
         ),
+        //THROW
+        compound(
+            token(KEYWORD, "throw"),
+            expressionCapture()
+        ),
         //EXPRESSION
         expressionCapture(),
         //CODE_BLOCK
@@ -448,7 +459,7 @@ public class JavaHighlight extends DefaultLangDSL{
                 token(":")
             ).setOptional(true),
             token("{"),
-            new LazyCapture(JavaHighlight::statementsCapture),
+            lazy(JavaHighlight::statementsCapture),
             token("}")
         )
     );
@@ -463,8 +474,29 @@ public class JavaHighlight extends DefaultLangDSL{
 
   public static PatternsHighlight create(){
     PatternsHighlight res = new PatternsHighlight("java");
-    res.symbolMatcher = Pattern.compile("(->|!=|==|<=|>=|&&|\\+\\+|--|\\+=|-=|\\*=|/=|%=|&=|\\|=|\\^=|<<=|>>=|>>>=)|(\\\\[0-7]{3})|(\\\\u[0-9a-fA-F]{4})|(\\\\[0abtnvfre\\\\\"'])|[\\\\.+\\-*/%&|!<>~^=,;:(){}\"'\\[\\]]");
-    res.addPattern("keywords", serial(-100, token(
+
+    res.tokensSplit = Pattern.compile("\\s+");
+    res.rawTokenMatcher = Pattern.compile("//.*|/\\*(\\s|.)*?\\*/");
+    res.symbolMatcher = Pattern.compile("(->|!=|==|<=|>=|&&|\\|\\||\\+\\+|--|\\+=|-=|\\*=|/=|%=|&=|\\|=|\\^=|<<=|>>=|>>>=)|(\\\\[0-7]{3})|(\\\\u[0-9a-fA-F]{4})|(\\\\[0abtnvfre\\\\\"'])|[\\\\.+\\-*/%&|!<>~^=,;:(){}\"'\\[\\]]");
+
+    res//RAW CONTEXT
+        .addRawContextPattern("line_comment", block(COMMENT,
+            of(token(2, "/")),
+            of(line(COMMENT))
+        ))
+        .addRawContextPattern("javadoc",
+            block(DOCS,
+                of(token("/"), token(2, "*")),
+                of(token("*"), token(DOCS, "/"))
+            ).addChildPattern("mark", serial(regex(DOC_MARK, "@\\w+")))
+        )
+        .addRawContextPattern("block_comment", block(COMMENT,
+            of(token(COMMENT, "/"), token(COMMENT, "*")),
+            of(token(COMMENT, "*"), token(COMMENT, "/"))
+        ))
+
+        //TOKENS CONTEXT
+        .addPattern("keywords", serial(-100, token(
             KEYWORD,
             "public", "protected", "private",
             "static", "final", "synchronized", "volatile", "transient",
@@ -481,20 +513,6 @@ public class JavaHighlight extends DefaultLangDSL{
             "int", "long", "short", "byte", "char", "boolean", "float", "double", "void",
             "null", "true", "false"
         )))
-        .addPattern("line_comment", block(COMMENT,
-            of(token(2, "/")),
-            of(line(COMMENT))
-        ))
-        .addPattern("javadoc",
-            block(DOCS,
-                of(token("/"), token(2, "*")),
-                of(token("*"), token(DOCS, "/"))
-            ).addChildPattern("mark", serial(regex(DOC_MARK, "@\\w+")))
-        )
-        .addPattern("block_comment", block(COMMENT,
-            of(token(COMMENT, "/"), token(COMMENT, "*")),
-            of(token(COMMENT, "*"), token(COMMENT, "/"))
-        ))
         .addPattern("package", serial(
             token(KEYWORD, "package"),
             typeCaptureNonArray(),
@@ -564,6 +582,7 @@ public class JavaHighlight extends DefaultLangDSL{
             )).addChildPattern("function", serial(
                 annotationCapture(),
                 modifiersCapture(),
+                typeArgCapture().setOptional(true),
                 typeCapture(),
                 regex(FUNCTION, "\\w+"),
                 compound(
@@ -588,6 +607,13 @@ public class JavaHighlight extends DefaultLangDSL{
                     token(")")
                 ),
                 compound(
+                    token(KEYWORD, "throws"),
+                    makeJoin(
+                        typeCaptureNonArray(),
+                        token(SEPARATOR, ",")
+                    )
+                ).setOptional(true),
+                compound(
                     token("{"),
                     statementsCapture(),
                     token("}")
@@ -598,7 +624,7 @@ public class JavaHighlight extends DefaultLangDSL{
                 typeCapture(),
                 makeJoin(
                     compound(
-                        regex(VARIABLE, "\\w+"),
+                        regex(MEMBER_VAR, "\\w+"),
                         compound(
                             token(OPERATOR, "="),
                             expressionCapture()
