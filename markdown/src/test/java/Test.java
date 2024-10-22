@@ -308,6 +308,11 @@ public class Test {
         }
       }
       """;
+  private static final String CODE2 = """
+  public static void main(String...strings){
+    System.out.println("sddeasdaedf  sdjia" + "sdes" + ("sade" + 123L + abs.asString()));
+  }
+  """;
 
   /***/
   public static void main(String...strings){
@@ -315,7 +320,7 @@ public class Test {
     matcher.addLanguage(StandardLanguages.JAVA);
 
     long time = System.currentTimeMillis();
-    TokensContext tokens = matcher.analyze("java", CODE1);
+    TokensContext tokens = matcher.analyze("java", CODE2);
     long delta = System.currentTimeMillis() - time;
 
     System.out.println("Time: " + delta + "ms");
@@ -345,5 +350,6 @@ public class Test {
       }
       else System.out.print(token.text);
     });
+    System.out.print("\033[0m");
   }
 }

@@ -513,6 +513,10 @@ public class JavaHighlight extends DefaultLangDSL{
             "int", "long", "short", "byte", "char", "boolean", "float", "double", "void",
             "null", "true", "false"
         )))
+        //STATEMENT
+        .addPattern("statement", serial(-200, statementCapture()))
+
+        //STRUCT
         .addPattern("package", serial(
             token(KEYWORD, "package"),
             typeCaptureNonArray(),
@@ -579,60 +583,6 @@ public class JavaHighlight extends DefaultLangDSL{
                     statementsCapture(),
                     token("}")
                 )
-            )).addChildPattern("function", serial(
-                annotationCapture(),
-                modifiersCapture(),
-                typeArgCapture().setOptional(true),
-                typeCapture(),
-                regex(FUNCTION, "\\w+"),
-                compound(
-                    token("("),
-                    makeJoin(
-                        compound(
-                            annotationCapture(),
-                            token(KEYWORD, "final").setOptional(true),
-                            typeCapture(),
-                            regex(ARGUMENT, "\\w+")
-                        ),
-                        token(SEPARATOR, ",")
-                    ).setOptional(true),
-                    compound(
-                        token(SEPARATOR, ",").setOptional(true),
-                        token(KEYWORD, "final").setOptional(true),
-                        annotationCapture(),
-                        typeCapture(),
-                        token(3, ARGUMENT, "."),
-                        regex(ARGUMENT, "\\w+")
-                    ).setOptional(true),
-                    token(")")
-                ),
-                compound(
-                    token(KEYWORD, "throws"),
-                    makeJoin(
-                        typeCaptureNonArray(),
-                        token(SEPARATOR, ",")
-                    )
-                ).setOptional(true),
-                compound(
-                    token("{"),
-                    statementsCapture(),
-                    token("}")
-                ).setOptional(true)
-            )).addChildPattern("variable", serial(
-                annotationCapture(),
-                modifiersCapture(),
-                typeCapture(),
-                makeJoin(
-                    compound(
-                        regex(MEMBER_VAR, "\\w+"),
-                        compound(
-                            token(OPERATOR, "="),
-                            expressionCapture()
-                        ).setOptional(true)
-                    ),
-                    token(SEPARATOR, ",")
-                ),
-                token(SEPARATOR, ";")
             )).addChildPattern("inner_class", reference(res))
         )
         .addPattern("annotation_arguments",
@@ -647,6 +597,62 @@ public class JavaHighlight extends DefaultLangDSL{
         )
         .addPattern("annotation", serial(
             regex(ANNOTATION, "@\\w+")
+        ))
+        .addPattern("function", serial(
+            annotationCapture(),
+            modifiersCapture(),
+            typeArgCapture().setOptional(true),
+            typeCapture(),
+            regex(FUNCTION, "\\w+"),
+            compound(
+                token("("),
+                makeJoin(
+                    compound(
+                        annotationCapture(),
+                        token(KEYWORD, "final").setOptional(true),
+                        typeCapture(),
+                        regex(ARGUMENT, "\\w+")
+                    ),
+                    token(SEPARATOR, ",")
+                ).setOptional(true),
+                compound(
+                    token(SEPARATOR, ",").setOptional(true),
+                    token(KEYWORD, "final").setOptional(true),
+                    annotationCapture(),
+                    typeCapture(),
+                    token(3, ARGUMENT, "."),
+                    regex(ARGUMENT, "\\w+")
+                ).setOptional(true),
+                token(")")
+            ),
+            compound(
+                token(KEYWORD, "throws"),
+                makeJoin(
+                    typeCaptureNonArray(),
+                    token(SEPARATOR, ",")
+                )
+            ).setOptional(true),
+            compound(
+                token("{"),
+                statementsCapture(),
+                token("}")
+            ).setOptional(true)
+        ))
+        .addPattern("variable", serial(
+            annotationCapture(),
+            modifiersCapture(),
+            typeCapture(),
+            makeJoin(
+                compound(
+                    regex(MEMBER_VAR, "\\w+"),
+                    compound(
+                        token(OPERATOR, "="),
+                        expressionCapture()
+                    ).setOptional(true)
+                ),
+                token(SEPARATOR, ",")
+            ),
+            token(SEPARATOR, ";")
         ));
 
     return res;

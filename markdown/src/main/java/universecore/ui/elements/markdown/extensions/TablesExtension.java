@@ -77,7 +77,7 @@ public class TablesExtension implements Parser.ParserExtension, MDLayoutRenderer
         t.image().color(style.lineColor).width(1.5f).growY();
       }), context.rendOff, -context.lineOff));
 
-      context.updateTmpHeight(currentTable.getPrefHeight());
+      context.updateHeight(currentTable.getPrefHeight());
       context.row();
       context.lineOff += style.linesPadding;
 

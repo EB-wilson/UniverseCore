@@ -134,7 +134,7 @@ public class BaseDrawRenderer extends AbstractVisitor implements NodeRenderer {
             }
           });
           context.rendOff += (context.currFont.getLineHeight() + drawer.getLeftWidth() + drawer.getRightWidth())*context.currScl;
-          context.updateTmpHeight((context.currFont.getLineHeight() + drawer.getBottomHeight() + drawer.getTopHeight())*context.currScl);
+          context.updateHeight((context.currFont.getLineHeight() + drawer.getBottomHeight() + drawer.getTopHeight())*context.currScl);
 
           context.render(node);
 
