@@ -47,6 +47,7 @@ public class Markdown extends Group {
 
   float prefWidth, prefHeight;
   boolean prefInvalid = true;
+  boolean contentWrap = true;
   float lastPrefHeight;
 
   protected final List<Extension> extensions;
@@ -112,8 +113,13 @@ public class Markdown extends Group {
     return style;
   }
 
-  @Override
-  public void layout() {
+  public void setContentWrap(boolean wrap){
+    contentWrap = wrap;
+  }
+
+  private void calculatePrefSize(boolean layoutStep){
+    rendererContext.prefSizeCalculating = !layoutStep;
+
     prefHeight = prefWidth = 0;
 
     for (DrawObj obj : drawObjs) {
@@ -132,6 +138,13 @@ public class Markdown extends Group {
       lastPrefHeight = prefHeight;
       invalidateHierarchy();
     }
+
+    rendererContext.prefSizeCalculating = false;
+  }
+
+  @Override
+  public void layout() {
+    calculatePrefSize(true);
 
     drawObjs.addAll(rendererContext.renderResult());
     drawObjs.sort((a, b) -> a.priority() - b.priority());
@@ -154,28 +167,27 @@ public class Markdown extends Group {
 
   @Override
   public float getPrefWidth() {
-    if (prefInvalid) layout();
+    if (prefInvalid) calculatePrefSize(false);
     return prefWidth;
   }
 
   @Override
   public float getPrefHeight() {
-    if (prefInvalid) layout();
+    if (prefInvalid) calculatePrefSize(false);
     return prefHeight;
   }
 
   @Override
-  public void draw() {
-    validate();
+  protected void drawChildren() {
     for (DrawObj obj : drawObjs) {
       if (obj instanceof ActivityDrawer act && cullingArea != null
-      && !cullingArea.overlaps(obj.offsetX, height + obj.offsetY, act.width(), act.height())) continue;
+          && !cullingArea.overlaps(obj.offsetX, height + obj.offsetY, act.width(), act.height())) continue;
 
       Draw.reset();
       Draw.alpha(parentAlpha);
       obj.draw();
     }
-    super.draw();
+    super.drawChildren();
   }
 
   private static void checkExtensions(List<Extension> extensions) {

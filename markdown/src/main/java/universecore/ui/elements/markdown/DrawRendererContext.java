@@ -25,6 +25,8 @@ public abstract class DrawRendererContext {
   private final Seq<Markdown.DrawObj> drawObjs = new Seq<>();
   private final ObjectMap<Node, TextureRegion> imgCache = new ObjectMap<>();
 
+  public boolean prefSizeCalculating;
+
   /**面板堆叠计数器，在绘制带有背景面板的对象时记录层序使用，应正确分配其序号*/
   public int boardLayers;
   /**列表堆叠计数器，在绘制带有缩进的列表时记录嵌套次数使用*/
@@ -124,7 +126,7 @@ public abstract class DrawRendererContext {
    * @param background 文本背景，为null则透明
    * @param color 文本颜色*/
   public TextMirror makeStr(String str, Font font, String openUrl, Drawable background, Color color) {
-    float maxWidth = element.getWidth() <= font.getSpaceXadvance()*3? Float.MAX_VALUE: element.getWidth() - rendOff;
+    float maxWidth = prefSizeCalculating || !element.contentWrap || element.getWidth() <= font.getSpaceXadvance()*3? Float.MAX_VALUE: element.getWidth() - rendOff;
     float tmp = 0;
     int index = 0;
 
@@ -190,7 +192,7 @@ public abstract class DrawRendererContext {
     padding -= 4;
     row();
     lineOff += style.linesPadding*2;
-    draw(DrawBoard.get(element, style.codeBlockBack, boardLayers, lineOff - begin, -begin, -begin));
+    draw(DrawBoard.get(element, style.codeBlockBack, boardLayers, lineOff - begin, rendOff, -begin));
 
     DrawClickable c = DrawClickable.get(element, Core.bundle.get("editor.copy"), Fonts.outline,
         () -> Core.app.setClipboardText(code),
