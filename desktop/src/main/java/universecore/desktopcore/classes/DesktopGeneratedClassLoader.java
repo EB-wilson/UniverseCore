@@ -57,7 +57,7 @@ public class DesktopGeneratedClassLoader extends AbstractGeneratedClassLoader {
   protected ModInfo mod;
 
   public DesktopGeneratedClassLoader(ModInfo mod, ClassLoader parent){
-    super(JarList.inst().getCacheFile(mod).file(), parent);
+    super(JarList.inst().loadCacheFile(mod).file(), parent);
     this.mod = mod;
   }
 
@@ -162,8 +162,9 @@ public class DesktopGeneratedClassLoader extends AbstractGeneratedClassLoader {
         }
       });
 
-      if (res == null)
-        throw new ClassNotFoundException("no such class: " + name);
+      if (res == null) {
+        throw new ClassNotFoundException("no such class: " + name + ", try relaunch");
+      }
 
       return res;
     }

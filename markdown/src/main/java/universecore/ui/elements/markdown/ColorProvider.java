@@ -11,6 +11,7 @@ public class ColorProvider {
 
   private final Map<String, ColorMap> languages = new HashMap<>();
 
+  /**获取指定语言为scope分配的颜色*/
   public Color getColor(String language, Scope scope){
     ColorMap map = languages.get(language);
 
@@ -19,11 +20,17 @@ public class ColorProvider {
     return map.colorMap.getOrDefault(scope, defaultColor);
   }
 
+  /**创建一个颜色表，添加并返回它，如果这个语言色表已经存在将被新的表覆盖*/
   public ColorMap createMap(String language){
     ColorMap map = new ColorMap();
     languages.put(language.toLowerCase(), map);
 
     return map;
+  }
+
+  /**获取一个现有的颜色表，如果颜色表不存在会返回null*/
+  public ColorMap getMap(String language){
+    return languages.get(language.toLowerCase());
   }
 
   public static class ColorMap{

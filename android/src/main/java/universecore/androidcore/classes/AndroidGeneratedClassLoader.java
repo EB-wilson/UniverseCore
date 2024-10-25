@@ -19,7 +19,7 @@ public class AndroidGeneratedClassLoader extends AbstractGeneratedClassLoader {
   protected final ModInfo mod;
 
   public AndroidGeneratedClassLoader(ModInfo mod, ClassLoader parent){
-    super(JarList.inst().getCacheFile(mod).file(), parent);
+    super(JarList.inst().loadCacheFile(mod).file(), parent);
     this.mod = mod;
 
     updateLoader();

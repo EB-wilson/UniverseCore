@@ -23,6 +23,7 @@ public class JarList{
   private static final JarList INSTANCE = new JarList();
 
   private final HashMap<String, InfoEntry> list = new HashMap<>();
+  private boolean selfUpdate, recached;
 
   public static JarList inst(){
     return INSTANCE;
@@ -37,19 +38,21 @@ public class JarList{
     try{
       while((line = reader.readLine()) != null){
         line = line.trim();
-        if(line.equals("")) continue;
+        if(line.isEmpty()) continue;
         entry = InfoEntry.infoOf(line);
         list.put(entry.name, entry);
       }
-    }catch(IOException e){
-      throw new RuntimeException(e);
+    }catch(Exception ignored){
+      Log.info("[UniverseCore] failed to load mod generated jars cache, regenerate all generate cache");
+      list.clear();
+      writeToList();
     }
   }
 
   public void update(ModInfo mod){
     InfoEntry entry = list.get(mod.name);
     if(entry == null)
-      throw new RuntimeException("unknown mod " + mod);
+      throw new RuntimeException("unknown mod " + mod.name);
 
     entry.md5 = getMd5(mod.file);
   }
@@ -62,25 +65,34 @@ public class JarList{
     return md5Code.equals(entry.getMd5());
   }
   
-  public Fi getCacheFile(ModInfo mod){
-    boolean selfUpdate = false;
-    if (mod.name.equals("universe-core")){
-      for (Fi fi : Vars.modDirectory.list()) {
-        try {
-          ModGetter.checkModFormat(fi);
-          ModInfo info = new ModInfo(fi);
+  public Fi loadCacheFile(ModInfo mod){
+    if (!selfUpdate && mod.name.equals("universe-core")){
+      if (!matched(mod)){
+        selfUpdate = true;
+        Log.info("[UniverseCore] universe core updated, all cache will be regenerated");
+        list.clear();
+        writeToList();
+      }
+      else {
+        for (Fi fi : Vars.modDirectory.list()) {
+          try {
+            ModGetter.checkModFormat(fi);
+            ModInfo info = new ModInfo(fi);
 
-          if (!info.name.equals("universe-code") && !matched(info)){
-            selfUpdate = true;
-            Log.info("[UniverseCore] exist mod updated, universe core class cache updating");
-            break;
-          }
-        } catch (IllegalModHandleException ignored) {}
+            if (!info.name.equals("universe-code") && !matched(info)) {
+              selfUpdate = true;
+              Log.info("[UniverseCore] exist mod updated, universe core class cache updating");
+              break;
+            }
+          } catch (IllegalModHandleException ignored) {}
+        }
       }
     }
 
     InfoEntry entry = list.get(mod.name);
     if(entry == null){
+      if (mod.name.equals("universe-core")) recached = true;
+
       Log.info("[UniverseCore] new mod: " + mod.name + " installed, to generate class cache");
       entry = new InfoEntry();
       entry.name = mod.name;
@@ -91,7 +103,9 @@ public class JarList{
       list.put(mod.name, entry);
       writeToList();
     }
-    else if(selfUpdate || !matched(mod)){
+    else if((selfUpdate && mod.name.equals("universe-core") && !recached) || !matched(mod)){
+      if (mod.name.equals("universe-core")) recached = true;
+
       Log.info("[UniverseCore] source mod: " + mod.name + " is updated, regenerate class cache");
       entry.version = mod.version;
       entry.file.delete();
@@ -101,6 +115,14 @@ public class JarList{
     else Log.info("[UniverseCore] loading mod: " + mod.name + " class cache");
 
     return entry.file;
+  }
+
+  public void deleteCacheFile(ModInfo mod) {
+    InfoEntry entry = list.get(mod.name);
+    if(entry == null) return;
+    entry.file.delete();
+    list.remove(mod.name);
+    writeToList();
   }
   
   private void writeToList(){
