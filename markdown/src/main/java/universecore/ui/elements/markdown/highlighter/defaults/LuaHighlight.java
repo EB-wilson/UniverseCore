@@ -6,105 +6,223 @@ import universecore.ui.elements.markdown.highlighter.SelectionCapture;
 import java.util.regex.Pattern;
 
 import static universecore.ui.elements.markdown.highlighter.Scope.Default.*;
+import static universecore.ui.elements.markdown.highlighter.Scope.LuaScope.*;
 /**
  * LuaHighlight
  */
 public class LuaHighlight extends DefaultLangDSL{
 
+  static Capture modifiersCapture(){
+    return regex(1, Integer.MAX_VALUE, KEYWORD_CONTROL, "local");
+  }
+  static Capture variableCapture(int depth){
+    return
+	    forks(
+        compound(
+            modifiersCapture(),
+            makeJoin(
+                compound(
+                    regex(LOCAL_VARS, "\\w+"),
+                    compound(
+                        token(OPERATOR, "="),
+                        lazy(()->LuaHighlight.expressionCapture(0))
+                    ).setOptional(true)
+                ),
+                token(SEPARATOR, ",")
+            )
+        ),
+        compound(
+            makeJoin(
+                compound(
+                    //TODD depth
+            	    regex(depth>0?TABLE_VARS:LOCAL_VARS,"^(?!end$|in$|do$|function$|if$|then$|for$)\\w+"),
+                    token(OPERATOR, "="),
+                    lazy(()->LuaHighlight.expressionCapture(depth))
+                ),
+                token(SEPARATOR, ",")
+    		)	    
+        )
+	);
+  }
+  static Capture functionCapture(){
+      return compound(
+                token(KEYWORD_BODY, "function"),
+                makeJoin(
+                    regex(FUNCTION,"\\w+"),
+                    forks(
+                    token(SEPARATOR,":"),
+                    token(SEPARATOR,".")
+                    )
+                    ),
+                token(SEPARATOR,"("),
+                makeJoin(
+                    forks(
+                  regex(ARGUMENT, "\\w+"),
+                  regex(ARGUMENT, "\\.+")
+                        ),
+                  token(SEPARATOR, ",")
+                ).setOptional(true),
+                token(SEPARATOR,")"),
+                functionStatementBlockCapture()
+        );
 
-  static Capture statementCapture(){ 
+  }
+  static Capture statementCapture(int depth){ 
     return forks(
+
         //IF
         compound(
-            token(KEYWORD, "if"),
-            expressionCapture(),
-            token(KEYWORD,"then"),
+            token(KEYWORD_BODY, "if"),
+            expressionCapture(0),
+            token(KEYWORD_BODY,"then"),
             ifStatementBlockCapture() 
         ),
         //WHILE
         compound(
-            token(KEYWORD, "while"),
-            expressionCapture(),
-            token(KEYWORD,"do"),
+            token(KEYWORD_BODY, "while"),
+            expressionCapture(0),
+            token(KEYWORD_BODY,"do"),
             functionStatementBlockCapture() 
         ),
         //REPEAT_UNTIL
         compound(
-            token(KEYWORD,"repeat"),
-            lazy(LuaHighlight::statementsCapture),
-            token(KEYWORD,"until"),
-            expressionCapture()
+            token(KEYWORD_BODY,"repeat"),
+            lazy(()->LuaHighlight.statementsCapture(0)),
+            token(KEYWORD_BODY,"until"),
+            expressionCapture(0)
         ),
+        //FOR
         compound(
-            token(KEYWORD,"for"),
-            expressionCapture(),
+            token(KEYWORD_BODY,"for"),
+            expressionCapture(0),
             token(SEPARATOR,","),
-            expressionCapture(),
+            expressionCapture(0),
             compound(
                 token(SEPARATOR,","),
-                expressionCapture()
+                expressionCapture(0)
                 ).setOptional(true),
-            token(KEYWORD,"do"),
+            token(KEYWORD_BODY,"do"),
             functionStatementBlockCapture() 
         ),
+        //FOR IN
         compound(
-            token(KEYWORD,"for"),
+            token(KEYWORD_BODY,"for"),
             makeJoin(
               regex(ARGUMENT, "\\w+"),
               token(SEPARATOR, ",")
             ),
-            token(KEYWORD,"in"),
-            expressionCapture(),
-            token(KEYWORD,"do"),
+            token(KEYWORD_CONTROL,"in"),
+            expressionCapture(0),
+            token(KEYWORD_BODY,"do"),
             functionStatementBlockCapture() 
+        ),
+
+        //RETURN
+        compound(
+            token(KEYWORD_CONTROL, "return"),
+            expressionCapture(0).setOptional(true)
+        ),
+	    	functionCapture(),
+		    variableCapture(depth),
+        //EXPRESSION
+        expressionCapture(depth),
+        //CODE_BLOCK
+        compound(
+            token(KEYWORD_BODY,"do"),
+            lazy(()->LuaHighlight.statementsCapture(0)),
+            token(KEYWORD_BODY,"end")
         )
     );
   }
-  static Capture metaExpCapture(){
+  static Capture metaExpCapture(int depth){
     return compound(
-
         forks(
-              compound(
-                token("("),
-                lazy(LuaHighlight::expressionCapture),
-                token(")")
-            ),
-              //LAMBDA
+            token(KEYWORD_SELF,"self"),
             compound(
-                token(KEYWORD, "function"),
-                token("("),
+                token(SEPARATOR,"("),
+                lazy(()->LuaHighlight.expressionCapture(depth)),
+                token(SEPARATOR,")")
+            ),
+            compound(
+                token(new RainbowSeparator(depth%7, SEPARATOR),"{"),
                 makeJoin(
+                    lazy(()->LuaHighlight.statementsCapture(depth+1)),
+                    token(SEPARATOR, ",")
+                ),
+                token(new RainbowSeparator(depth%7, SEPARATOR),"}")
+            ),
+            //LAMBDA
+            compound(
+                token(KEYWORD_BODY, "function"),
+                token(SEPARATOR,"("),
+                makeJoin(           
+                    forks(
                   regex(ARGUMENT, "\\w+"),
+                  regex(ARGUMENT, "\\.+")
+                        ),
                   token(SEPARATOR, ",")
                 ).setOptional(true),
-                token(")"),
+                token(SEPARATOR,")"),
                 functionStatementBlockCapture()
             ),
+            //token(KEYWORD,"end").setMatchOnly(true),
+            constantLiteralCapture(),
             //INVOKE
             compound(
                  forks(
-                    regex(KEYWORD, "require"),
-                    regex(FUNCTION_INVOKE, "\\w+")
+                    regex(KEYWORD_FUNCTION, "import"),
+                    regex(FUNCTION_INVOKE, "require"),
+                    regex(FUNCTION_INVOKE, "^(?!end$|do$|in$|function$|then$|if$|for$)\\w+")
                 ),             
                 forks(
                 compound(
                     token("("),
                     makeJoin(
-                        lazy(LuaHighlight::expressionCapture).setOptional(true),
+                        lazy(()->LuaHighlight.expressionCapture(0)).setOptional(true),
                         token(SEPARATOR, ",")
                     ),
                     token(")")
                 ),
                     makeJoin(
-                        lazy(LuaHighlight::expressionCapture).setOptional(true),
+                        lazy(()->LuaHighlight.expressionCapture(0)),
                         token(SEPARATOR, ",")
                     )
                 )
             ),
-            constantLiteralCapture(),
+            //READ ARRAY
+            compound(
+                regex(VARIABLE, "^(?!end$|in$|do$|function$|if$|then$|for$)\\w+"),
+                compound(1, Integer.MAX_VALUE,
+                    token("["),
+                    lazy(()->LuaHighlight.expressionCapture(0)),
+                    token("]")
+                )
+            ),
+            compound(
+                regex(OPERATOR, "[!+\\-~]"),
+                lazy(()->LuaHighlight.expressionCapture(0))
+            ),
             //REF
-            regex(VARIABLE, "\\w+")
+            regex(VARIABLE, "^(?!end$|in$|do$|function$|if$|then$|for$)\\w+")
           )
+        );
+  }
+  static Capture bracketStringCapture(){
+      return compound(
+            compound(
+                token(STRING,"["),
+                token(0, Integer.MAX_VALUE, STRING, "="),
+                token(STRING,"[")
+                ),
+            new SelectionCapture(0, Integer.MAX_VALUE,
+                lazy(LuaHighlight::bracketStringCapture),
+                regex(STRING, "[^\\]]+")
+            ),
+            compound(
+                token(STRING,"]"),
+                token(0, Integer.MAX_VALUE, STRING, "="),
+                token(STRING,"]")
+                )
         );
   }
   static Capture constantLiteralCapture(){
@@ -134,68 +252,58 @@ public class LuaHighlight extends DefaultLangDSL{
             token(STRING, "'")
         ),
         //DOUBLE BRACKETS
-        //TODD I can t finish the nesting like [=[abc [[bcd]] abd]=]
-        compound(
-            token(2, "["),
-            new SelectionCapture(0, Integer.MAX_VALUE,
-                regex(
-                    CONTROL,
-                    "(\\\\[0-7]{3})|(\\\\u[0-9a-fA-F]{4})|(\\\\[0abtnvfre\\\\\"'])"
-                ),
-                regex(STRING, "[^\\]]")
-            ),
-            token(2, "]")
-        ),
+        bracketStringCapture(),
         //NUMBER
+	 regex(NUMBER, "[\\d_]*(\\.[\\d_]+)?[fFdDlL]?"),
         //TODD
         //BOOLEAN
-        regex(KEYWORD, "true|false"),
+        regex(KEYWORD_VAR1, "true|false"),
         //NULL
-        token(KEYWORD, "nil")
+        token(KEYWORD_VAR2, "nil")
     );
   }
-static Capture statementsCapture(){
+static Capture statementsCapture(int depth){
     return compound(0, Integer.MAX_VALUE,
-        statementCapture()
+        statementCapture(depth)
     );
   }
 static Capture functionStatementBlockCapture() {
        return compound(
-            lazy(LuaHighlight::statementsCapture),
-            token(KEYWORD,"end")
+            lazy(()->LuaHighlight.statementsCapture(0)),
+            token(KEYWORD_BODY,"end")
         );
   }
 static Capture ifStatementBlockCapture() {
        return compound(
-            lazy(LuaHighlight::statementsCapture),
+            lazy(()->LuaHighlight.statementsCapture(0)),
             forks(
-                token(KEYWORD,"end"),
+                token(KEYWORD_BODY,"end"),
                 compound(
-                    token(KEYWORD,"else"),
-                    lazy(LuaHighlight::statementsCapture),
-                    token(KEYWORD,"end")
+                    token(KEYWORD_BODY,"else"),
+                    lazy(()->LuaHighlight.statementsCapture(0)),
+                    token(KEYWORD_BODY,"end")
                     )
                 ),
                 compound(
-                    token(KEYWORD,"elseif"),
-                    ifStatementBlockCapture()
+                    token(KEYWORD_BODY,"elseif"),
+                    lazy(LuaHighlight::ifStatementBlockCapture)
                 )
         );
   }
 static Capture statementBlockCapture() {
     return forks(
         compound(
-            token(KEYWORD,"do"),
-            lazy(LuaHighlight::statementsCapture),
-            token(KEYWORD,"end")
+            token(KEYWORD_BODY,"do"),
+            lazy(()->LuaHighlight.statementsCapture(0)),
+            token(KEYWORD_BODY,"end")
         ),
-        lazy(LuaHighlight::statementCapture)
+        lazy(()->LuaHighlight.statementsCapture(0))
     ).setOptional(true);
   }
-  static Capture expressionCapture(){
+  static Capture expressionCapture(int depth){
     return makeJoin(
         compound(
-            metaExpCapture(),
+            metaExpCapture(depth),
             regex(OPERATOR, "\\+\\+|--").setOptional(true)
         ),
         regex(OPERATOR, "(->|!=|==|<=|>=|&&|\\|\\||\\+=|-=|\\*=|/=|%=|&=|\\|=|\\^=|<<=|>>=|>>>=)|[=.+\\-*/%&|<>^]")
@@ -205,7 +313,7 @@ static Capture statementBlockCapture() {
     
     PatternsHighlight res = new PatternsHighlight("lua");
     res.tokensSplit = Pattern.compile("\\s+");
-    res.rawTokenMatcher = Pattern.compile("//.*|/\\*(\\s|.)*?\\*/");
+    res.rawTokenMatcher = Pattern.compile("(--\\[\\[(.|\\n)*?\\]\\]|--.*)");
     res.symbolMatcher = Pattern.compile("(->|!=|==|<=|>=|&&|\\|\\||\\+\\+|--|\\+=|-=|\\*=|/=|%=|&=|\\|=|\\^=|<<=|>>=|>>>=)|(\\\\[0-7]{3})|(\\\\u[0-9a-fA-F]{4})|(\\\\[0abtnvfre\\\\\"'])|[\\\\.+\\-*/%&|!<>~^=,;:(){}\"'\\[\\]]");
     res//RAW CONTEXT
         .addRawContextPattern("line_comment", block(COMMENT,
@@ -213,21 +321,27 @@ static Capture statementBlockCapture() {
             of(line(COMMENT))
         ))
         .addRawContextPattern("block_comment", block(COMMENT,
-            of(token(2,"-"), token(2, "[")),
-            of(token(2,"]"))
+            of(token(COMMENT,"--"), token(COMMENT, "[[")),
+            of(token(COMMENT,"]]"))
         ))
 
         .addPattern("keywords", serial(-100, token(
             KEYWORD,
-            "local", "const",
-            "return", "require", 
-            "do", "then", "while", "for", "in", "break", 
+            "local", 
+            "return", "require", "import",
+            "do", "then", "while", "for", "in", "break","end", 
             "if", "else", "elseif", "goto", "until", "repeat",
             "and", "or", "not",
-            "nil", "true", "false"
+            "nil", "true", "false",
+            "self","function"
         )))
+        .addPattern("statement", serial(-10, statementCapture(0)))
+	/*
+        .addPattern("function", serial(functionCapture()))
+        .addPattern("variable", serial(variableCapture()))
+	*/
         ;
-
     return res;
   }
+  
 }
