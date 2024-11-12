@@ -25,8 +25,9 @@ import java.io.InputStream;
 import static mindustry.gen.Tex.paneLeft;
 import static mindustry.gen.Tex.whiteui;
 import static universecore.ui.elements.markdown.highlighter.Scope.Default.*;
+import static universecore.ui.elements.markdown.highlighter.Scope.LuaScope.*;
 import static universecore.ui.elements.markdown.highlighter.StandardLanguages.JAVA;
-
+import static universecore.ui.elements.markdown.highlighter.StandardLanguages.LUA;
 public class MarkdownStyles {
   /**默认Markdown文档风格记录对象，等宽字体来自JetBrains IDEs的Mono字体，十分感谢*/
   public static final Markdown.MarkdownStyle defaultMD;
@@ -120,12 +121,12 @@ public class MarkdownStyles {
           }
       };
 
-      highlighter = new Highlighter().addLanguage(JAVA);
+      highlighter = new Highlighter().addLanguage(JAVA).addLanguage(LUA);
       codeColorProvider = new ColorProvider();
       codeColorProvider.defaultColor = Color.lightGray;
       codeColorProvider.createMap("java")
           .put(Color.valueOf("#ffffff00"),    SPACE)
-          .put(Color.valueOf("#7f7f7fff"),    COMMENT)
+          .put(Color.valueOf("#676d9dff"),    COMMENT)
           .put(Color.valueOf("#CC7832ff"),    KEYWORD, CONTROL, SEPARATOR)
           .put(Color.valueOf("#6897bbff"),    NUMBER)
           .put(Color.valueOf("#be7032ff"),    TYPE)
@@ -136,6 +137,33 @@ public class MarkdownStyles {
           .put(Color.valueOf("#ffc66dff"),    FUNCTION)
           .put(Color.valueOf("#3c7893ff"),    CONSTRUCTOR)
           .put(Color.valueOf("#bfbfbfff"),    NONE, FUNCTION_INVOKE, ARGUMENT, VARIABLE, OPERATOR);
+      codeColorProvider.createMap("lua")
+          .put(Color.valueOf("#ffffff00"),    SPACE)
+          .put(Color.valueOf("#7f7f7fff"),    COMMENT)
+          .put(Color.valueOf("#c09df6ff"),    KEYWORD)
+          .put(Color.valueOf("#c09df6ff"),    KEYWORD_BODY)
+          .put(Color.valueOf("#dbaad9ff"),    KEYWORD_CONTROL)
+          .put(Color.valueOf("#ff7382ff"),    KEYWORD_SELF)
+          .put(Color.valueOf("#f89876ff"),    KEYWORD_VAR1)
+          .put(Color.valueOf("#6fb8ffff"),    KEYWORD_VAR2)
+          .put(Color.valueOf("#5fd3c0ff"),    TABLE_VARS)
+          .put(Color.valueOf("#9cd7f1ff"),    CONTROL, SEPARATOR, OPERATOR)
+          .put(Color.valueOf("#ee9c7cff"),    NUMBER)
+          .put(Color.valueOf("#e47c8fff"),    SEPARATOR)
+          .put(Color.valueOf("#f4c87cff"),    ARGUMENT)
+          .put(Color.valueOf("#c5e59aff"),    STRING)
+          .put(Color.valueOf("#82a3f2ff"),    FUNCTION)
+          .put(Color.valueOf("#6fb8ffff"),    FUNCTION_INVOKE)
+          .put(Color.valueOf("#82a3f2ff"),    KEYWORD_FUNCTION)
+          .put(Color.valueOf("#ccd4f2ff"),    NONE, VARIABLE, MEMBER_VAR, LOCAL_VARS)
+          .put(Color.valueOf("#fe767cff"),    new RainbowSeparator(0, SEPARATOR))
+          .put(Color.valueOf("#8cdef5ff"),    new RainbowSeparator(1, SEPARATOR))
+          .put(Color.valueOf("#f5a4dfff"),    new RainbowSeparator(2, SEPARATOR))
+          .put(Color.valueOf("#c6e88dff"),    new RainbowSeparator(3, SEPARATOR))
+          .put(Color.valueOf("#fc976aff"),    new RainbowSeparator(4, SEPARATOR))
+          .put(Color.valueOf("#85aaffff"),    new RainbowSeparator(5, SEPARATOR))
+          .put(Color.valueOf("#ffc37aff"),    new RainbowSeparator(6, SEPARATOR))
+          ;
     }};
   }
 }
