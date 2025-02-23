@@ -9,10 +9,9 @@ import mindustry.ctype.Content;
 import mindustry.gen.Building;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
-import mindustry.ui.ItemDisplay;
-import mindustry.ui.ItemImage;
 import mindustry.ui.ReqImage;
 import mindustry.world.meta.Stat;
+import mindustry.world.meta.StatValues;
 import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ConsumerBuildComp;
 
@@ -69,8 +68,9 @@ public class ConsumeItems<T extends Building & ConsumerBuildComp> extends Consum
         t.defaults().left().grow().fill().padLeft(6);
         t.add(Core.bundle.get("misc.item") + ":");
         for(ItemStack stack: consItems){
-          t.add(showPerSecond? new ItemDisplay(stack.item, stack.amount, parent.craftTime, true):
-              new ItemDisplay(stack.item, stack.amount, true));
+          t.add(showPerSecond?
+              StatValues.displayItem(stack.item, stack.amount, parent.craftTime, true):
+              StatValues.displayItem(stack.item, stack.amount, true));
         }
       }).left().padLeft(5);
     });
@@ -83,7 +83,7 @@ public class ConsumeItems<T extends Building & ConsumerBuildComp> extends Consum
       if(amount == 0 && !entity.consumer().valid()) amount = stack.amount;
 
       int n = amount;
-      table.add(new ReqImage(new ItemImage(stack.item.uiIcon, stack.amount),
+      table.add(new ReqImage(StatValues.stack(stack),
       () -> entity.items != null && entity.items.has(stack.item, n))).padRight(8);
     }
     table.row();

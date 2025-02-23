@@ -3,24 +3,20 @@ package universecore.world.producers;
 import arc.Events;
 import arc.func.Boolf2;
 import arc.func.Func2;
-import arc.scene.ui.Image;
 import arc.scene.ui.layout.Table;
 import arc.struct.ObjectMap;
-import arc.util.Scaling;
-import mindustry.core.UI;
 import mindustry.ctype.UnlockableContent;
 import mindustry.game.EventType;
 import mindustry.gen.Building;
 import mindustry.gen.Unit;
 import mindustry.type.PayloadStack;
 import mindustry.type.UnitType;
-import mindustry.ui.ItemImage;
-import mindustry.ui.Styles;
 import mindustry.world.Block;
 import mindustry.world.blocks.payloads.BuildPayload;
 import mindustry.world.blocks.payloads.Payload;
 import mindustry.world.blocks.payloads.UnitPayload;
 import mindustry.world.meta.Stat;
+import mindustry.world.meta.StatValues;
 import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ProducerBuildComp;
 import universecore.world.consumers.ConsumePayload;
@@ -104,7 +100,7 @@ public class ProducePayload<T extends Building & ProducerBuildComp> extends Base
   public void display(Stats stats){
     for(PayloadStack stack : payloads){
       stats.add(Stat.output, t -> {
-        t.add(new ItemImage(stack));
+        t.add(StatValues.stack(stack));
         t.add(stack.item.localizedName).padLeft(4).padRight(4);
       });
     }

@@ -7,6 +7,7 @@ import universecore.ui.elements.markdown.highlighter.SelectionCapture;
 import java.util.regex.Pattern;
 
 import static universecore.ui.elements.markdown.highlighter.Scope.Default.*;
+import static universecore.ui.elements.markdown.highlighter.Scope.JavaScope.*;
 
 public class JavaHighlight extends DefaultLangDSL{
   static Capture modifiersCapture(){
@@ -130,7 +131,20 @@ public class JavaHighlight extends DefaultLangDSL{
             token(STRING, "'")
         ),
         //NUMBER
-        regex(NUMBER, "[\\d_]*(\\.[\\d_]+)?[fFdDlL]?"),
+        // forks(
+        //     compound(
+        //         regex(NUMBER, "[\\d_]+"),
+        //         forks(
+        //             compound(
+        //                 token(NUMBER, "."),
+        //                 regex(NUMBER, "[\\d_]+([eE][+-]?[\\d_]+)?[fFdD]?")
+        //             ),
+        //             regex(NUMBER, "[eE][+-]?[\\d_]+[fFdD]?")
+        //         )
+        //     ),
+        //     regex(NUMBER, "[\\d_]+[lL]?")
+        // ),
+        regex(NUMBER, "[\\d_]+(\\.[\\d_]+)?([eE][\\d_]+)?[fFdDlL]?"),
         //BOOLEAN
         regex(KEYWORD, "true|false"),
         //NULL
@@ -477,7 +491,14 @@ public class JavaHighlight extends DefaultLangDSL{
 
     res.tokensSplit = Pattern.compile("\\s+");
     res.rawTokenMatcher = Pattern.compile("//.*|/\\*(\\s|.)*?\\*/");
-    res.symbolMatcher = Pattern.compile("(->|!=|==|<=|>=|&&|\\|\\||\\+\\+|--|\\+=|-=|\\*=|/=|%=|&=|\\|=|\\^=|<<=|>>=|>>>=)|(\\\\[0-7]{3})|(\\\\u[0-9a-fA-F]{4})|(\\\\[0abtnvfre\\\\\"'])|[\\\\.+\\-*/%&|!<>~^=,;:(){}\"'\\[\\]]");
+    res.symbolMatcher = Pattern.compile(
+        "(->|!=|==|<=|>=|&&|\\|\\||\\+\\+|--|\\+=|-=|\\*=|/=|%=|&=|\\|=|\\^=|<<=|>>=|>>>=)" +
+        "|([\\d_]+(\\.[\\d_]+)?([eE][\\d_]+)?[fFdDlL]?)" +
+        "|(\\\\[0-7]{3})" +
+        "|(\\\\u[0-9a-fA-F]{4})" +
+        "|(\\\\[0abtnvfre\\\\\"'])" +
+        "|[\\\\.+\\-*/%&|!<>~^=,;:(){}\"'\\[\\]]"
+    );
 
     res//RAW CONTEXT
         .addRawContextPattern("line_comment", block(COMMENT,
@@ -644,7 +665,7 @@ public class JavaHighlight extends DefaultLangDSL{
             typeCapture(),
             makeJoin(
                 compound(
-                    regex(MEMBER_VAR, "\\w+"),
+                    regex(FIELD, "\\w+"),
                     compound(
                         token(OPERATOR, "="),
                         expressionCapture()

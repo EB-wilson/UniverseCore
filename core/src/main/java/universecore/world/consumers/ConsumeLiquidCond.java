@@ -11,10 +11,10 @@ import mindustry.ctype.Content;
 import mindustry.gen.Building;
 import mindustry.type.Liquid;
 import mindustry.type.LiquidStack;
-import mindustry.ui.LiquidDisplay;
 import mindustry.ui.MultiReqImage;
 import mindustry.ui.ReqImage;
 import mindustry.world.meta.Stat;
+import mindustry.world.meta.StatValues;
 import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ConsumerBuildComp;
 
@@ -138,7 +138,7 @@ public class ConsumeLiquidCond<T extends Building & ConsumerBuildComp> extends C
         for(LiquidStack stack: getCons()){
           if(count != 0) t.add("[gray]/[]");
           if(count != 0 && count % 6 == 0) t.row();
-          t.add(new LiquidDisplay(stack.liquid, stack.amount*60, true));
+          t.add(StatValues.displayLiquid(stack.liquid, stack.amount*60, true));
           count++;
         }
       }).left().padLeft(5);

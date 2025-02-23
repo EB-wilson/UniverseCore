@@ -9,10 +9,10 @@ import mindustry.ctype.Content;
 import mindustry.gen.Building;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
-import mindustry.ui.ItemDisplay;
 import mindustry.ui.MultiReqImage;
 import mindustry.ui.ReqImage;
 import mindustry.world.meta.Stat;
+import mindustry.world.meta.StatValues;
 import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ConsumerBuildComp;
 
@@ -117,7 +117,7 @@ public class ConsumeItemCond<T extends Building & ConsumerBuildComp> extends Con
         for(ItemStack stack: getCons()){
           if(count != 0) t.add("[gray]/[]");
           if(count != 0 && count % 6 == 0) t.row();
-          t.add(new ItemDisplay(stack.item, stack.amount*60, true));
+          t.add(StatValues.displayItem(stack.item, stack.amount*60, true));
           count++;
         }
       }).left().padLeft(5);
@@ -128,8 +128,10 @@ public class ConsumeItemCond<T extends Building & ConsumerBuildComp> extends Con
   public void build(T entity, Table table){
     Seq<Item> list = content.items().select(l -> !l.isHidden() && filter.get(l));
     MultiReqImage image = new MultiReqImage();
-    list.each(item -> image.add(new ReqImage(item.uiIcon, () ->
-        entity.items != null && entity.items.get(item) > 0)));
+    list.each(item -> {
+      image.add(new ReqImage(item.uiIcon, () ->
+          entity.items != null && entity.items.get(item) > 0));
+    });
 
     table.add(image).size(8 * 4);
   }

@@ -14,7 +14,7 @@ public class EventsHandler {
   private static final ObjectMap<Object, Seq<Cons<?>>> events = FieldHandler.getValueDefault(Events.class, "events");
 
   public static Cons<?>[] getListener(Object event, Class<?> declaringClass, Boolf2<Cons<?>, Field[]> filter){
-    return events.get(event, Empties.nilSeq()).filter(e -> {
+    return events.get(event, Empties.nilSeq()).select(e -> {
       Class<?> c = e.getClass();
       if (c.getName().substring(0, c.getName().indexOf("Lambda")).equals(declaringClass.getName())
       || c.getName().substring(0, c.getName().indexOf("ExternalSyntheticLambda")).equals(declaringClass.getName())){

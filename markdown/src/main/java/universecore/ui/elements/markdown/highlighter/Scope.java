@@ -9,25 +9,31 @@ public interface Scope {
     //internal special
     NONE,
     SPACE,
-
     KEYWORD,
     OPERATOR,
-    NUMBER,
     TYPE,
-    TYPE_ARG,
     STRING,
+    NUMBER,
     CONTROL,
     COMMENT,
-    DOCS,
-    DOC_MARK,
     SEPARATOR,
     VARIABLE,
-    MEMBER_VAR,
     FUNCTION,
-    CONSTRUCTOR,
     FUNCTION_INVOKE,
-    ARGUMENT,
-    CODE_BLOCK,
+    ARGUMENT;
+
+    @Override
+    public void apply(Token token, ScopeHandler handler) {
+      handler.applyScope(token, this);
+    }
+  }
+
+  enum JavaScope implements Scope{
+    TYPE_ARG,
+    FIELD,
+    DOCS,
+    DOC_MARK,
+    CONSTRUCTOR,
     ANNOTATION;
 
     @Override
@@ -44,16 +50,23 @@ public interface Scope {
     KEYWORD_VAR1,
     KEYWORD_VAR2,
     KEYWORD_SELF,
-    KEYWORD_FUNCTION,
-    ;
+    KEYWORD_FUNCTION;
+
     @Override
     public void apply(Token token, ScopeHandler handler) {
       handler.applyScope(token, this);
     }
   }
+
   class RainbowSeparator implements Scope{
     public int depth;
     public Scope type;
+
+    public RainbowSeparator(int depth,Scope type){
+      this.depth = depth;
+      this.type = type;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -61,18 +74,17 @@ public interface Scope {
         RainbowSeparator obj=((RainbowSeparator)o);
         return obj.depth==depth&&Objects.equals(obj.type, type);
     }
+
     @Override
     public int hashCode() {
       return Objects.hash(depth, type);
     }
+
     @Override
     public void apply(Token token, ScopeHandler handler) {
       handler.applyScope(token, this);
     }
-    public RainbowSeparator(int depth,Scope type){
-     this.depth=depth;
-     this.type=type;
-    }
+
     @Override
     public String toString() {
         return "RainbowSeparator{"+"depth="+depth+", type="+type.toString()+"}";

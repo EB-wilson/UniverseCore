@@ -3,6 +3,8 @@ import universecore.ui.elements.markdown.highlighter.Scope;
 import universecore.ui.elements.markdown.highlighter.StandardLanguages;
 import universecore.ui.elements.markdown.highlighter.TokensContext;
 
+import static universecore.ui.elements.markdown.highlighter.Scope.JavaScope.*;
+
 public class Test {
   public static final String CODE = """
       package universecore.ui.elements.markdown.elemdraw;
@@ -310,7 +312,7 @@ public class Test {
       """;
   private static final String CODE2 = """
   public static void main(String...strings){
-    System.out.println("sddeasdaedf  sdjia" + "sdes" + ("sade" + 123L + abs.asString()));
+    System.out.println("sddeasdaedf  sdjia" + "sdes" + (("sade" + 123.6734e2f + abs.asString())));
   }
   """;
 
@@ -332,15 +334,22 @@ public class Test {
     tokens.applyScopes((token, scope) -> {
       if (scope instanceof Scope.Default def){
         String color = switch (def) {
-          case NONE, FUNCTION_INVOKE, VARIABLE, OPERATOR, SPACE, ARGUMENT, CODE_BLOCK -> "\033[0m";
+          case NONE, FUNCTION_INVOKE, VARIABLE, OPERATOR, SPACE, ARGUMENT -> "\033[0m";
           case KEYWORD, CONTROL, SEPARATOR -> "\u001b[38;2;204;120;50m";
           case NUMBER -> "\u001b[38;2;104;151;187m";
-          case MEMBER_VAR -> "\u001b[38;2;152;118;170m";
-          case FUNCTION, CONSTRUCTOR -> "\u001b[38;2;255;198;109m";
+          case FUNCTION -> "\u001b[38;2;255;198;109m";
           case TYPE -> "\u001b[38;2;190;112;50m";
-          case TYPE_ARG -> "\u001b[38;2;80;120;116m";
           case STRING -> "\u001b[38;2;106;135;89m";
           case COMMENT -> "\u001b[38;2;128;128;128m";
+        };
+
+        System.out.print(color + token.text);
+      }
+      else if (scope instanceof JavaScope java){
+        String color = switch (java) {
+          case FIELD -> "\u001b[38;2;152;118;170m";
+          case CONSTRUCTOR -> "\u001b[38;2;255;198;109m";
+          case TYPE_ARG -> "\u001b[38;2;80;120;116m";
           case DOCS -> "\u001b[38;2;98;151;85m";
           case DOC_MARK -> "\u001b[38;2;98;151;85m\033[1m";
           case ANNOTATION -> "\u001b[38;2;187;181;41m";

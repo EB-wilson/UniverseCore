@@ -8,8 +8,8 @@ import arc.struct.ObjectMap;
 import mindustry.gen.Building;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
-import mindustry.ui.ItemDisplay;
 import mindustry.world.meta.Stat;
+import mindustry.world.meta.StatValues;
 import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ProducerBuildComp;
 
@@ -138,8 +138,9 @@ public class ProduceItems<T extends Building & ProducerBuildComp> extends BasePr
         t.add(Core.bundle.get("misc.item") + ":").left();
         if(!random){
           for(ItemStack stack: items){
-            t.add(showPerSecond? new ItemDisplay(stack.item, stack.amount, parent.cons.craftTime, true):
-                new ItemDisplay(stack.item, stack.amount, true));
+            t.add(showPerSecond?
+                StatValues.displayItem(stack.item, stack.amount, parent.cons.craftTime, true):
+                StatValues.displayItem(stack.item, stack.amount, true));
           }
         }
         else{
@@ -147,7 +148,7 @@ public class ProduceItems<T extends Building & ProducerBuildComp> extends BasePr
           int[] n = {items.length, items.length};
           t.table(item -> {
             for(ItemStack stack: items){
-              item.add(new ItemDisplay(stack.item, 0, true));
+              item.add(StatValues.displayItem(stack.item, 0, true));
               total[0] += stack.amount;
               if(--n[0] > 0) item.add("/");
             }

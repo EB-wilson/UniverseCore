@@ -1,14 +1,9 @@
 package universecore.world.consumers;
 
-import arc.scene.ui.Image;
-import arc.scene.ui.Label;
 import arc.scene.ui.layout.Cell;
 import arc.scene.ui.layout.Table;
-import arc.util.Scaling;
 import mindustry.type.ItemStack;
-import mindustry.ui.ItemDisplay;
-import mindustry.ui.ItemImage;
-import mindustry.ui.LiquidDisplay;
+import mindustry.world.meta.StatValues;
 import universecore.components.blockcomp.ConsumerBuildComp;
 
 public abstract class ConsumeItemBase<T extends ConsumerBuildComp> extends BaseConsume<T>{
@@ -30,7 +25,7 @@ public abstract class ConsumeItemBase<T extends ConsumerBuildComp> extends BaseC
         break;
       }
 
-      table.add(new ItemImage(stack));
+      table.add(StatValues.stack(stack));
     }
   }
 }

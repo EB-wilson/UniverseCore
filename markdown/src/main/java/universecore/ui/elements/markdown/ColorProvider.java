@@ -1,5 +1,7 @@
 package universecore.ui.elements.markdown;
 
+import arc.func.Boolf;
+import arc.func.Func;
 import arc.graphics.Color;
 import universecore.ui.elements.markdown.highlighter.Scope;
 
@@ -17,7 +19,7 @@ public class ColorProvider {
 
     if (map == null) return defaultColor;
 
-    return map.colorMap.getOrDefault(scope, defaultColor);
+    return map.dyeing(scope, defaultColor);
   }
 
   /**创建一个颜色表，添加并返回它，如果这个语言色表已经存在将被新的表覆盖*/
@@ -35,12 +37,29 @@ public class ColorProvider {
 
   public static class ColorMap{
     private final Map<Scope, Color> colorMap = new HashMap<>();
+    private final Map<Boolf<Scope>, Func<Scope, Color>> colorMapProvider = new HashMap<>();
 
     public ColorMap put(Color color, Scope... scopes){
       for (Scope scope : scopes) {
         colorMap.put(scope, color);
       }
       return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends Scope> ColorMap putProv(Boolf<Scope> filter, Func<T, Color> color){
+      colorMapProvider.put(filter, (Func<Scope, Color>) color);
+      return this;
+    }
+
+    public Color dyeing(Scope scope, Color defaultColor) {
+      for (Map.Entry<Boolf<Scope>, Func<Scope, Color>> entry : colorMapProvider.entrySet()) {
+        if (entry.getKey().get(scope)) {
+          return entry.getValue().get(scope);
+        }
+      }
+
+      return colorMap.getOrDefault(scope, defaultColor);
     }
   }
 }

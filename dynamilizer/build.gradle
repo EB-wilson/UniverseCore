@@ -7,10 +7,10 @@ sourceSets.main.java.srcDirs = ["src/main/java"]
 sourceSets.test.java.srcDirs = ["src/test/java"]
 
 repositories {
-  mavenLocal()
   mavenCentral()
+  mavenLocal()
   maven { url 'https://raw.githubusercontent.com/Zelaux/MindustryRepo/master/repository' }
-  maven{ url 'https://www.jitpack.io' }
+  maven { url 'https://www.jitpack.io' }
 }
 
 publishing {
@@ -32,11 +32,12 @@ tasks.withType(JavaCompile){
 }
 
 dependencies {
-  compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+  compileOnly "com.github.Anuken.Arc:arc-core:$arcVersion"
+  compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
 
   apiElements "com.github.EB-wilson.JavaDynamilizer:core:$JDERVersion"
   implementation "com.github.EB-wilson.JavaDynamilizer:core:$JDERVersion"
-  implementation 'org.ow2.asm:asm:9.4'
+  implementation 'org.ow2.asm:asm:9.7'
 
   implementation project(":core")
 

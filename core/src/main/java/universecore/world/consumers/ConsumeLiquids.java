@@ -9,10 +9,9 @@ import mindustry.ctype.Content;
 import mindustry.gen.Building;
 import mindustry.type.Liquid;
 import mindustry.type.LiquidStack;
-import mindustry.ui.Bar;
-import mindustry.ui.LiquidDisplay;
 import mindustry.ui.ReqImage;
 import mindustry.world.meta.Stat;
+import mindustry.world.meta.StatValues;
 import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ConsumerBuildComp;
 
@@ -79,7 +78,7 @@ public class ConsumeLiquids<T extends Building & ConsumerBuildComp> extends Cons
         t.defaults().left().fill().padLeft(6);
         t.add(Core.bundle.get("misc.liquid") + ":");
         for(LiquidStack stack: consLiquids){
-          t.add(new LiquidDisplay(stack.liquid, stack.amount*60, true));
+          t.add(StatValues.displayLiquid(stack.liquid, stack.amount*60, true));
         }
       }).left().padLeft(5);
     });

@@ -8,8 +8,8 @@ import mindustry.gen.Building;
 import mindustry.type.Liquid;
 import mindustry.type.LiquidStack;
 import mindustry.ui.Bar;
-import mindustry.ui.LiquidDisplay;
 import mindustry.world.meta.Stat;
+import mindustry.world.meta.StatValues;
 import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ProducerBuildComp;
 import universecore.world.consumers.ConsumeLiquidBase;
@@ -106,7 +106,7 @@ public class ProduceLiquids<T extends Building & ProducerBuildComp> extends Base
         t.defaults().left().fill().padLeft(6);
         t.add(Core.bundle.get("misc.liquid") + ":").left();
         for(LiquidStack stack: liquids){
-          t.add(new LiquidDisplay(stack.liquid, stack.amount*60, true));
+          t.add(StatValues.displayLiquid(stack.liquid, stack.amount*60, true));
         }
       }).left().padLeft(5);
     });

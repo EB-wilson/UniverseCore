@@ -25,6 +25,7 @@ import java.io.InputStream;
 import static mindustry.gen.Tex.paneLeft;
 import static mindustry.gen.Tex.whiteui;
 import static universecore.ui.elements.markdown.highlighter.Scope.Default.*;
+import static universecore.ui.elements.markdown.highlighter.Scope.JavaScope.*;
 import static universecore.ui.elements.markdown.highlighter.Scope.LuaScope.*;
 import static universecore.ui.elements.markdown.highlighter.StandardLanguages.JAVA;
 import static universecore.ui.elements.markdown.highlighter.StandardLanguages.LUA;
@@ -155,15 +156,24 @@ public class MarkdownStyles {
           .put(Color.valueOf("#82a3f2ff"),    FUNCTION)
           .put(Color.valueOf("#6fb8ffff"),    FUNCTION_INVOKE)
           .put(Color.valueOf("#82a3f2ff"),    KEYWORD_FUNCTION)
-          .put(Color.valueOf("#ccd4f2ff"),    NONE, VARIABLE, MEMBER_VAR, LOCAL_VARS)
-          .put(Color.valueOf("#fe767cff"),    new RainbowSeparator(0, SEPARATOR))
-          .put(Color.valueOf("#8cdef5ff"),    new RainbowSeparator(1, SEPARATOR))
-          .put(Color.valueOf("#f5a4dfff"),    new RainbowSeparator(2, SEPARATOR))
-          .put(Color.valueOf("#c6e88dff"),    new RainbowSeparator(3, SEPARATOR))
-          .put(Color.valueOf("#fc976aff"),    new RainbowSeparator(4, SEPARATOR))
-          .put(Color.valueOf("#85aaffff"),    new RainbowSeparator(5, SEPARATOR))
-          .put(Color.valueOf("#ffc37aff"),    new RainbowSeparator(6, SEPARATOR))
-          ;
+          .put(Color.valueOf("#ccd4f2ff"),    NONE, VARIABLE, LOCAL_VARS)
+          .putProv(scope -> scope instanceof RainbowSeparator, (RainbowSeparator scope) -> switch(scope.depth){
+            case 0 -> Color.valueOf("#fe767cff");
+            case 1 -> Color.valueOf("#8cdef5ff");
+            case 2 -> Color.valueOf("#f5a4dfff");
+            case 3 -> Color.valueOf("#c6e88dff");
+            case 4 -> Color.valueOf("#fc976aff");
+            case 5 -> Color.valueOf("#85aaffff");
+            case 6 -> Color.valueOf("#ffc37aff");
+            default -> throw new AssertionError();
+          });
+          //.put(Color.valueOf("#fe767cff"),    new RainbowSeparator(0, SEPARATOR))
+          //.put(Color.valueOf("#8cdef5ff"),    new RainbowSeparator(1, SEPARATOR))
+          //.put(Color.valueOf("#f5a4dfff"),    new RainbowSeparator(2, SEPARATOR))
+          //.put(Color.valueOf("#c6e88dff"),    new RainbowSeparator(3, SEPARATOR))
+          //.put(Color.valueOf("#fc976aff"),    new RainbowSeparator(4, SEPARATOR))
+          //.put(Color.valueOf("#85aaffff"),    new RainbowSeparator(5, SEPARATOR))
+          //.put(Color.valueOf("#ffc37aff"),    new RainbowSeparator(6, SEPARATOR));
     }};
   }
 }

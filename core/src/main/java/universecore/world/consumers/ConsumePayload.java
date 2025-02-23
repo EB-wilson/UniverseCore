@@ -10,10 +10,10 @@ import mindustry.ctype.UnlockableContent;
 import mindustry.gen.Building;
 import mindustry.type.PayloadSeq;
 import mindustry.type.PayloadStack;
-import mindustry.ui.ItemImage;
 import mindustry.ui.ReqImage;
 import mindustry.ui.Styles;
 import mindustry.world.meta.Stat;
+import mindustry.world.meta.StatValues;
 import mindustry.world.meta.Stats;
 import universecore.components.blockcomp.ConsumerBuildComp;
 
@@ -102,7 +102,7 @@ public class ConsumePayload<T extends Building & ConsumerBuildComp> extends Base
   public void display(Stats stats){
     for(PayloadStack stack : payloads){
       stats.add(Stat.input, t -> {
-        t.add(new ItemImage(stack));
+        t.add(StatValues.stack(stack));
         t.add(stack.item.localizedName).padLeft(4).padRight(4);
       });
     }
@@ -115,7 +115,7 @@ public class ConsumePayload<T extends Building & ConsumerBuildComp> extends Base
     table.table(c -> {
       int i = 0;
       for(var stack : payloads){
-        c.add(new ReqImage(new ItemImage(stack.item.uiIcon, stack.amount),
+        c.add(new ReqImage(StatValues.stack(stack),
             () -> inv.contains(stack.item, stack.amount))).padRight(8);
         if(++i % 4 == 0) c.row();
       }
