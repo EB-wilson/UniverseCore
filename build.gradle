@@ -11,7 +11,7 @@ ext{
   uncVersion = '2.2.0'
 
   //the build number that this mod is made for
-  mindustryVersion = 'release'
+  mindustryVersion = '8a326b7bdc'
   arcVersion = 'ed5dd285b7'
   //version of SDK you will be using
   minSdkAPI = 30
