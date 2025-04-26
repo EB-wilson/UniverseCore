@@ -2,15 +2,16 @@ package universecore.util.handler;
 
 import arc.Core;
 import arc.KeyBinds;
+import arc.graphics.g2d.TextureRegion;
 import arc.scene.Element;
 import arc.scene.style.TextureRegionDrawable;
-import arc.scene.ui.ImageButton;
 import arc.scene.ui.layout.Cell;
 import arc.scene.ui.layout.Table;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import arc.util.Nullable;
 import mindustry.Vars;
+import mindustry.gen.Icon;
 import mindustry.input.Binding;
 import mindustry.type.Category;
 import mindustry.ui.Styles;
@@ -47,12 +48,12 @@ public class CategoryHandler{
     Seq<Element> catButtons = new Seq<>(categories.getChildren());
     catButtons.remove(0);
     
-    for(UncCategory cat: newCats.values()){
-      ImageButton button = ((ImageButton)catButtons.find(e -> ("category-" + cat.cat.name()).equals(e.name)));
-      if(button == null) continue;
-      button.getStyle().imageUp = new TextureRegionDrawable(Core.atlas.find(cat.icon));
-      button.resizeImage(32);
-    }
+    //for(UncCategory cat: newCats.values()){
+    //  ImageButton button = ((ImageButton)catButtons.find(e -> ("category-" + cat.cat.name()).equals(e.name)));
+    //  if(button == null) continue;
+    //  button.getStyle().imageUp = new TextureRegionDrawable(Core.atlas.find(cat.icon));
+    //  button.resizeImage(32);
+    //}
     
     categories.clearChildren();
     categories.pane(t -> {
@@ -120,6 +121,17 @@ public class CategoryHandler{
     }
 
     FieldHandler.setValueDefault(Vars.ui.hudfrag.blockfrag, "blockSelect", arr);
+
+    for (ObjectMap.Entry<Category, UncCategory> cat : newCats) {
+      TextureRegion r = Core.atlas.find(cat.value.icon);
+      Core.atlas.addRegion(cat.key.name(), r);
+      Icon.icons.put(cat.key.name(), new TextureRegionDrawable(r){
+        @Override
+        public float imageSize() {
+          return 32f;
+        }
+      });
+    }
   }
   
   protected static class UncCategory{

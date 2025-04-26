@@ -1,15 +1,14 @@
-package universecore.world.lightnings.generator;
+package universecore.graphics.lightnings.generator;
 
 import arc.math.geom.Vec2;
 import arc.util.Tmp;
-import universecore.world.lightnings.LightningVertex;
+import universecore.graphics.lightnings.LightningVertex;
 
 /**收缩闪电的生成器，这会生成一定范围内向中心蔓延的闪电
  *
- * @since 1.5
+ * @since 2.3
  * @author EBwilson
- * @deprecated 移动到图形模块中*/
-@Deprecated
+ * */
 public class ShrinkGenerator extends LightningGenerator{
   public float minRange, maxRange;
 

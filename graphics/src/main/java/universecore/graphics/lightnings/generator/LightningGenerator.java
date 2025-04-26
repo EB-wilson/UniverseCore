@@ -1,4 +1,4 @@
-package universecore.world.lightnings.generator;
+package universecore.graphics.lightnings.generator;
 
 import arc.func.Cons;
 import arc.func.Func2;
@@ -7,9 +7,8 @@ import arc.math.Mathf;
 import arc.math.Rand;
 import arc.util.pooling.Pool;
 import arc.util.pooling.Pools;
-import universecore.util.funcs.Floatp2;
-import universecore.world.lightnings.Lightning;
-import universecore.world.lightnings.LightningVertex;
+import universecore.graphics.lightnings.Lightning;
+import universecore.graphics.lightnings.LightningVertex;
 
 import java.util.Iterator;
 
@@ -17,10 +16,9 @@ import java.util.Iterator;
  * 注意，任何在迭代器运作外的时机变更生成器属性，都会直接影响迭代产生的顶点分布情况，而生成器是可复用的，每次迭代都会产生互不相关的一组顶点
  * <p>警告：这个方法不是线程安全的，任何时候要避免同时迭代此对象
  *
- * @since 1.5
+ * @since 2.3
  * @author EBwilson
- * @deprecated 移动到图形模块中*/
-@Deprecated
+ * */
 public abstract class LightningGenerator implements Iterable<LightningVertex>, Iterator<LightningVertex>{
   public Rand seed = new Rand();
 
@@ -42,7 +40,7 @@ public abstract class LightningGenerator implements Iterable<LightningVertex>, I
   public Func2<LightningVertex, Float, LightningGenerator> branchMaker;
 
   public Cons<Lightning> branchCreated;
-  public Floatp2<LightningVertex, LightningVertex> blockNow;
+  public Func2<LightningVertex, LightningVertex, Float> blockNow;
 
   protected Lightning curr;
 
@@ -75,7 +73,7 @@ public abstract class LightningGenerator implements Iterable<LightningVertex>, I
     float strength = Mathf.clamp(Mathf.random(minBranchStrength, maxBranchStrength));
     LightningGenerator gen = branchMaker.get(vertex, strength);
     gen.setOffset(vertex.x, vertex.y);
-    Floatp2<LightningVertex, LightningVertex> old = gen.blockNow;
+    Func2<LightningVertex, LightningVertex, Float> old = gen.blockNow;
     gen.blockNow = (l, v) -> old != null? old.get(l, v): blockNow != null? blockNow.get(l, v): -1;
     vertex.branchOther = Lightning.create(
         gen,

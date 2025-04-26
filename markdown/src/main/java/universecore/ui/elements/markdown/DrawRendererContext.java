@@ -126,7 +126,7 @@ public abstract class DrawRendererContext {
    * @param background 文本背景，为null则透明
    * @param color 文本颜色*/
   public TextMirror makeStr(String str, Font font, String openUrl, Drawable background, Color color) {
-    float maxWidth = prefSizeCalculating || !element.contentWrap || element.getWidth() <= font.getSpaceXadvance()*3? Float.MAX_VALUE: element.getWidth() - rendOff;
+    float maxWidth = !element.contentWrap || element.getWidth() <= font.getSpaceXadvance()*3? Float.MAX_VALUE: element.getWidth() - rendOff;
     float tmp = 0;
     int index = 0;
 

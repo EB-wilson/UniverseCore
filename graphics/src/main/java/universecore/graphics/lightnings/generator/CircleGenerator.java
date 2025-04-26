@@ -1,17 +1,16 @@
-package universecore.world.lightnings.generator;
+package universecore.graphics.lightnings.generator;
 
 import arc.math.Mathf;
 import arc.math.geom.Vec2;
 import arc.util.Tmp;
-import universecore.world.lightnings.LightningVertex;
+import universecore.graphics.lightnings.LightningVertex;
 
 /**环形闪电的生成器，通过指定的圆心和半径生成闪电顶点
  *
- * @since 1.5
+ * @since 2.3
  * @author EBwilson
- * @deprecated 移动到图形模块中*/
-@Deprecated
-public class CircleGenerator extends LightningGenerator{
+ * */
+public class CircleGenerator extends LightningGenerator {
   /**闪电基于的圆的半径*/
   public float radius = 16;
   /**圆的原始起点角度，这会影响time不为0时生成圆的闪电蔓延起点*/

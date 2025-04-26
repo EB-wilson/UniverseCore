@@ -1,4 +1,4 @@
-package universecore.world.lightnings;
+package universecore.graphics.lightnings;
 
 import arc.func.Cons;
 import arc.func.Cons2;
@@ -8,16 +8,15 @@ import arc.struct.Seq;
 import arc.util.Time;
 import arc.util.pooling.Pool;
 import arc.util.pooling.Pools;
-import universecore.world.lightnings.generator.LightningGenerator;
+import universecore.graphics.lightnings.generator.LightningGenerator;
 
 import java.util.Iterator;
 
 /**闪电容器，使用一个闪电生成器产生闪电，由容器进行处理和绘制，通常用于一类闪电用同一个容器存储
  *
- * @since 1.5
+ * @since 2.3
  * @author EBwilson
- * @deprecated 移动到图形模块中*/
-@Deprecated
+ * */
 public class LightningContainer implements Iterable<Lightning>{
   /**闪电从产生到完全出现需要的时间，这会平摊给每一段闪电，fps为当前帧率
    * 但如果这个值为0,那么闪电会立即出现*/

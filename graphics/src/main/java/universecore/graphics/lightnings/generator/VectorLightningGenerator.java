@@ -1,15 +1,14 @@
-package universecore.world.lightnings.generator;
+package universecore.graphics.lightnings.generator;
 
 import arc.math.geom.Vec2;
 import arc.util.Tmp;
-import universecore.world.lightnings.LightningVertex;
+import universecore.graphics.lightnings.LightningVertex;
 
 /**矢量闪电生成器，生成由将沿着指定的向量创建一条直线蔓延的闪电
  *
- * @since 1.5
+ * @since 2.3
  * @author EBwilson
- * @deprecated 移动到图形模块中*/
-@Deprecated
+ * */
 public class VectorLightningGenerator extends LightningGenerator{
   public Vec2 vector = new Vec2();
 

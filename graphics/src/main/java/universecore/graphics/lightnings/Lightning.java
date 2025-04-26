@@ -1,4 +1,4 @@
-package universecore.world.lightnings;
+package universecore.graphics.lightnings;
 
 import arc.func.Cons2;
 import arc.graphics.g2d.Draw;
@@ -13,16 +13,15 @@ import arc.util.Tmp;
 import arc.util.pooling.Pool;
 import arc.util.pooling.Pools;
 import mindustry.graphics.Drawf;
-import universecore.world.lightnings.generator.LightningGenerator;
+import universecore.graphics.lightnings.generator.LightningGenerator;
 
 /**
  * 单条闪电的存储容器，保存了闪电的起始时间还有闪电的顶点信息
  * 此类实例大量，应当复用
  *
- * @since 1.5
+ * @since 2.3
  * @author EBwilson
- * @deprecated 移动到图形模块中*/
-@Deprecated
+ */
 public class Lightning implements Pool.Poolable{
   private static final Vec2 last = new Vec2(), self = new Vec2(), next = new Vec2();
 

@@ -70,7 +70,7 @@ public interface ConsumerBlockComp{
       block.consumePowerDynamic(e -> {
         ConsumerBuildComp entity = (ConsumerBuildComp) e;
         if(entity.consumer().current == null) return 0f;
-        if(entity.getBuilding().tile().build == null || entity.consumeCurrent() == -1 || !entity.consumer().excludeValid(ConsumeType.power))
+        if(entity.getBuilding().tile.build == null || entity.consumeCurrent() == -1 || !entity.consumer().excludeValid(ConsumeType.power))
           return 0f;
 
         ConsumePower<?> cons = entity.consumer().current.get(ConsumeType.power);

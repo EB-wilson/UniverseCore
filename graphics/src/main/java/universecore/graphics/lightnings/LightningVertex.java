@@ -1,4 +1,4 @@
-package universecore.world.lightnings;
+package universecore.graphics.lightnings;
 
 import arc.util.pooling.Pool;
 import arc.util.pooling.Pools;
@@ -6,10 +6,9 @@ import arc.util.pooling.Pools;
 /**闪电的顶点容器，保存了一个顶点的必要信息和绘制进度计时器
  * 此类实例大量，应当复用
  *
- * @since 1.5
+ * @since 2.3
  * @author EBwilson
- * @deprecated 移动到图形模块中*/
-@Deprecated
+ */
 public class LightningVertex implements Pool.Poolable{
   public float x, y;
   public float angle;

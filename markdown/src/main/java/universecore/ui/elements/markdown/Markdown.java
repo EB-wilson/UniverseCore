@@ -4,10 +4,10 @@ import arc.graphics.Color;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Font;
 import arc.scene.Element;
-import arc.scene.Group;
 import arc.scene.event.Touchable;
 import arc.scene.style.Drawable;
 import arc.scene.ui.ScrollPane;
+import arc.scene.ui.layout.WidgetGroup;
 import arc.struct.Seq;
 import arc.util.pooling.Pool;
 import arc.util.pooling.Pools;
@@ -26,7 +26,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**Markdown文档渲染元素，*/
-public class Markdown extends Group {
+public class Markdown extends WidgetGroup {
   public static final String[] IMAGE_BASE_64_List = {
       "data:image/png;base64,",
       "data:image/jpg;base64,",
@@ -167,6 +167,8 @@ public class Markdown extends Group {
 
   @Override
   public float getPrefWidth() {
+    if (contentWrap) return 0f;
+
     if (prefInvalid) calculatePrefSize(false);
     return prefWidth;
   }

@@ -1,16 +1,15 @@
-package universecore.world.lightnings.generator;
+package universecore.graphics.lightnings.generator;
 
 import arc.math.geom.Vec2;
 import arc.util.Tmp;
-import universecore.world.lightnings.LightningVertex;
+import universecore.graphics.lightnings.LightningVertex;
 
 /**随机路径的闪电生成器，给出起点路径总长度生成随机闪电路径
  *
- * @since 1.5
+ * @since 2.3
  * @author EBwilson
- * @deprecated 移动到图形模块中*/
-@Deprecated
-public class RandomGenerator extends LightningGenerator{
+ * */
+public class RandomGenerator extends LightningGenerator {
   public float maxLength = 80;
   public float maxDeflect = 70;
   public float originAngle = Float.MIN_VALUE;
