@@ -34,7 +34,7 @@ dependencies {
   compileOnly 'org.ow2.asm:asm:9.3'
 
   compileOnly "com.github.Anuken.Arc:arc-core:$arcVersion"
-  compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+  compileOnly "com.github.Anuken.MindustryJitpack:core:$mindustryVersion"
 
   compileOnly project(":core")
   compileOnly project(":dynamilizer")
