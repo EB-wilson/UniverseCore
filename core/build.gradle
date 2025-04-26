@@ -36,6 +36,7 @@ dependencies {
 
   implementation project(":markdown")
   implementation project(":scenes")
+  implementation project(":graphics")
 
   compileOnly project(":annotations")
   annotationProcessor project(":annotations")

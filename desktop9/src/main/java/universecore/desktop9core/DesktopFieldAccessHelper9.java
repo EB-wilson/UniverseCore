@@ -1,6 +1,6 @@
 package universecore.desktop9core;
 
-import dynamilize.Demodulator;
+import universecore.desktop9core.handler.Demodulator;
 import universecore.desktopcore.DesktopFieldAccessHelper;
 
 import java.lang.reflect.Field;

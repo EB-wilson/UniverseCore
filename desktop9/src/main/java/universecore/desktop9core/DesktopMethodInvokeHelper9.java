@@ -1,8 +1,8 @@
 package universecore.desktop9core;
 
 import arc.struct.ObjectMap;
-import dynamilize.Demodulator;
 import dynamilize.FunctionType;
+import universecore.desktop9core.handler.Demodulator;
 import universecore.desktopcore.DesktopMethodInvokeHelper;
 
 import java.lang.invoke.MethodHandle;

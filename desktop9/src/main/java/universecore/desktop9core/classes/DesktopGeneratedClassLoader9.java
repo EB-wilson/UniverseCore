@@ -1,6 +1,6 @@
 package universecore.desktop9core.classes;
 
-import dynamilize.Demodulator;
+import universecore.desktop9core.handler.Demodulator;
 import universecore.desktopcore.classes.DesktopGeneratedClassLoader;
 import universecore.util.mods.ModInfo;
 
