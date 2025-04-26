@@ -43,6 +43,7 @@ dependencies {
 
   compileOnly project(":core")
   compileOnly project(":dynamilizer")
+  compileOnly "com.github.EB-wilson.JavaDynamilizer:core:$JDERVersion"
 
   annotationProcessor project(":annotations")
 

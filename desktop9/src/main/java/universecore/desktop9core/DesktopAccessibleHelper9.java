@@ -1,7 +1,7 @@
 package universecore.desktop9core;
 
-import dynamilize.Demodulator;
 import dynamilize.DynamicMaker;
+import universecore.desktop9core.handler.Demodulator;
 import universecore.util.AccessibleHelper;
 
 import java.lang.reflect.AccessibleObject;

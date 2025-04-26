@@ -1,4 +1,9 @@
-apply plugin: 'java'
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+plugins {
+    id 'java'
+    id 'org.jetbrains.kotlin.jvm' version '2.1.20'
+}
 
 sourceSets.main.java.srcDirs = ["src/main/java"]
 sourceSets.test.java.srcDirs = ["src/test/java"]
@@ -21,7 +26,15 @@ publishing {
     }
 }
 
-sourceCompatibility = 17
+kotlin {
+    jvmToolchain(21)
+
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_1_8)
+    }
+}
+
+sourceCompatibility = 8
 targetCompatibility = 8
 
 tasks.withType(JavaCompile){
@@ -31,6 +44,8 @@ tasks.withType(JavaCompile){
 dependencies {
     compileOnly "com.github.Anuken.Arc:arc-core:$arcVersion"
     compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+
+    annotationProcessor project(":annotations")
 }
 
 tasks.test {

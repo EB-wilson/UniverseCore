@@ -23,7 +23,6 @@ public class SetPlatformImpl{
   public static void setImplements(){
     try{
       Class.forName("java.lang.Module");
-      Class.forName("dynamilize.Demodulator");
 
       Class<? extends AccessibleHelper> accessible9Type =
           (Class<? extends AccessibleHelper>) Class.forName("universecore.desktop9core.DesktopAccessibleHelper9");

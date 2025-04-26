@@ -35,11 +35,10 @@ dependencies {
   compileOnly "com.github.Anuken.Arc:arc-core:$arcVersion"
   compileOnly "com.github.Anuken.MindustryJitpack:core:$mindustryVersion"
 
-  implementation "com.github.EB-wilson.JavaDynamilizer:baseimpl:$JDERVersion"
-
   compileOnly project(":core")
   compileOnly project(":dynamilizer")
   compileOnly project(":desktop")
+  compileOnly "com.github.EB-wilson.JavaDynamilizer:core:$JDERVersion"
 
   annotationProcessor project(":annotations")
 }
